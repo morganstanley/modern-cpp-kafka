@@ -1,0 +1,186 @@
+cmake_minimum_required(VERSION "3.8")
+
+project("Modern C++ based Kafka API" VERSION 1.0.0)
+
+include(CTest)
+include(CheckCXXCompilerFlag)
+include(CMakePushCheckState)
+
+
+#---------------------------
+# Suggest to use C++17
+#---------------------------
+set(CMAKE_CXX_STARNDARD 17)
+set(CMAKE_CXX_STARNDARD_REQUIRED False)
+
+add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow")
+
+#---------------------------
+# Check librdkafka directory
+#---------------------------
+if (DEFINED ENV{LIBRDKAFKA_ROOT})
+    set(LIBRDKAFKA_ROOT $ENV{LIBRDKAFKA_ROOT})
+    message(STATUS "librdkafka root directory: ${LIBRDKAFKA_ROOT}")
+else ()
+    message(FATAL_ERROR "No LIBRDKAFKA_ROOT specified!")
+endif ()
+
+include_directories(SYSTEM ${LIBRDKAFKA_ROOT}/include)
+link_directories(SYSTEM ${LIBRDKAFKA_ROOT}/lib)
+
+
+#---------------------------
+# Build Option: clang-tidy
+#---------------------------
+option(BUILD_OPTION_CLANG_TIDY "Build with clang-tidy enabled" OFF)
+if (BUILD_OPTION_CLANG_TIDY)
+    find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
+
+    if (CLANG_TIDY_EXE)
+        message(STATUS "Use clang-tidy: ${CLANG_TIDY_EXE}")
+        set(CMAKE_CXX_CLANG_TIDY clang-tidy -warnings-as-errors=* -header-filter=.*)
+    else ()
+        message(FATAL_ERROR "The clang-tidy executable not found!")
+    endif ()
+
+else ()
+    message(STATUS "With NO clang-tidy build option")
+endif ()
+
+
+#---------------------------
+# Build Option: ASAN
+#---------------------------
+option(BUILD_OPTION_USE_ASAN "Build with Address Sanitizer (ASAN) enabled" OFF)
+
+if (BUILD_OPTION_USE_ASAN)
+    check_cxx_compiler_flag("-fsanitize=address" HAS_ASAN)
+
+    CMAKE_PUSH_CHECK_STATE(RESET)
+        # Make check_cxx_compiler_flag pass required flags to linker as well:
+        set(CMAKE_REQUIRED_FLAGS "-fsanitize=address -static-libasan")
+        check_cxx_compiler_flag("-fsanitize=address -static-libasan" HAS_ASAN_NEEDS_LIB)
+    CMAKE_POP_CHECK_STATE()
+
+    if (HAS_ASAN)
+        add_compile_options("-fsanitize=address")
+        add_link_options("-fsanitize=address")
+    elseif (HAS_ASAN_NEEDS_LIB)
+        add_compile_options("-fsanitize=address" "-static-libasan")
+        add_link_options("-fsanitize=address" "-static-libasan")
+    else ()
+        message(FATAL_ERROR "Address Sanitizer requested by BUILD_OPTION_USE_ASAN, but appears to be not supported on this platform")
+    endif ()
+
+    set(MEMORYCHECK_TYPE AddressSanitizer)
+
+    message(STATUS "Use Address Sanitizer")
+endif ()
+
+
+#---------------------------
+# Build Option: TSAN
+#---------------------------
+option(BUILD_OPTION_USE_TSAN "Build with Thread Sanitizer (TSAN) enabled" OFF)
+
+if (BUILD_OPTION_USE_TSAN)
+    check_cxx_compiler_flag("-fsanitize=thread" HAS_TSAN)
+
+    CMAKE_PUSH_CHECK_STATE(RESET)
+        # Make check_cxx_compiler_flag pass required flags to linker as well:
+        set(CMAKE_REQUIRED_FLAGS "-fsanitize=thread -static-libtsan")
+        check_cxx_compiler_flag("-fsanitize=thread -static-libtsan" HAS_TSAN_NEEDS_LIB)
+    CMAKE_POP_CHECK_STATE()
+
+    if (HAS_TSAN)
+        add_compile_options("-fsanitize=thread")
+        add_link_options("-fsanitize=thread")
+    elseif (HAS_TSAN_NEEDS_LIB)
+        add_compile_options("-fsanitize=thread" "-static-libtsan")
+        add_link_options("-fsanitize=thread" "-static-libtsan")
+    else ()
+        message(FATAL_ERROR "Thread Sanitizer requested by BINLOG_USE_TSAN, but appears to be not supported on this platform")
+    endif ()
+
+    set(MEMORYCHECK_TYPE ThreadSanitizer)
+
+    message(STATUS "Use Thread Sanitizer")
+endif ()
+
+
+#---------------------------
+# Build Option: UBSAN
+#---------------------------
+option(BUILD_OPTION_USE_UBSAN "Build with Undefined Behavior Sanitizer (UBSAN) enabled" OFF)
+
+if (BUILD_OPTION_USE_UBSAN)
+    check_cxx_compiler_flag("-fsanitize=undefined" HAS_UBSAN)
+
+    CMAKE_PUSH_CHECK_STATE(RESET)
+        # Make check_cxx_compiler_flag pass required flags to linker as well:
+        set(CMAKE_REQUIRED_FLAGS "-fsanitize=undefined -static-libubsan")
+        check_cxx_compiler_flag("-fsanitize=undefined -static-libubsan" HAS_UBSAN_NEEDS_LIB)
+    CMAKE_POP_CHECK_STATE()
+
+    if (HAS_UBSAN_NEEDS_LIB)
+        add_compile_options("-fsanitize=undefined" "-static-libubsan")
+        add_link_options("-fsanitize=undefined" "-static-libubsan")
+    elseif (HAS_UBSAN)
+        add_compile_options("-fsanitize=undefined")
+        add_link_options("-fsanitize=undefined")
+    else ()
+        message(FATAL_ERROR "Undefined Behavior Sanitizer requested by BINLOG_USE_UBSAN, but appears to be not supported on this platform")
+    endif ()
+
+    message(STATUS "Use Undefined Behavior Sanitizer")
+endif ()
+
+
+#---------------------------
+# Build Option: generate doc
+#---------------------------
+option(BUILD_OPTION_GEN_DOC "Generate html files for doxygen/markdown doc" OFF)
+
+
+#---------------------------
+# Build Option: generate coverage report
+#---------------------------
+option(BUILD_OPTION_GEN_COVERAGE "Generate code coverage report" OFF)
+
+if (BUILD_OPTION_GEN_COVERAGE)
+    check_cxx_compiler_flag("-fprofile-instr-generate -fcoverage-mapping" HAS_CLANG_COV)
+
+    if (HAS_CLANG_COV)
+        add_compile_options("-fprofile-instr-generate" "-fcoverage-mapping")
+        add_link_options("-fprofile-instr-generate" "-fcoverage-mapping")
+
+        add_custom_target(coverage_init
+          COMMENT "Initialize coverage counters"
+          COMMAND "rm" "-f" "tests/unit/default.profraw" "tests/default.profdata")
+
+        add_custom_target(coverage
+          COMMENT "Generate coverage report"
+          COMMAND "llvm-profdata" "merge" "-sparse" "tests/unit/default.profraw"
+                                  "-o" "tests/default.profdata"
+          COMMAND "llvm-cov" "show" "-format" "html" "-instr-profile" "tests/default.profdata" "tests/unit/kafka-unit-test"
+                             ">" "coverage_report.html"
+          COMMAND "echo" "Coverage report generated: coverage_report.html"
+        )
+    else ()
+        message(FATAL_ERROR "Coverage report requrested by BUILD_OPTION_GEN_COVERAGE, but only supported with Clang build")
+    endif ()
+
+    message(STATUS "Enable code coverage data generation")
+endif ()
+
+
+#---------------------------
+# Build Sub-directories
+#---------------------------
+add_subdirectory("include")
+add_subdirectory("tests")
+add_subdirectory("tools")
+
+if (BUILD_OPTION_GEN_DOC)
+    add_subdirectory("doc")
+endif ()

@@ -1,0 +1,151 @@
+#pragma once
+
+#include "kafka/AdminClient.h"
+#include "kafka/KafkaConsumer.h"
+#include "kafka/KafkaProducer.h"
+
+#include "gtest/gtest.h"
+
+#include <boost/algorithm/string.hpp>
+#include <cstdlib>
+#include <list>
+#include <vector>
+
+
+#define EXPECT_KAFKA_THROW(expr, err)               \
+    do {                                            \
+        try {                                       \
+            expr;                                   \
+        } catch (const KafkaException& e) {         \
+            EXPECT_EQ(err, e.error().value());      \
+            break;                                  \
+        } catch (...){                              \
+        }                                           \
+        EXPECT_FALSE(true);                         \
+    } while(false)
+
+#define EXPECT_KAFKA_NO_THROW(expr)   \
+    try {                             \
+        expr;                         \
+    } catch (...){                    \
+        EXPECT_FALSE(true);           \
+    }
+
+namespace Kafka = KAFKA_API;
+
+namespace KafkaTestUtility {
+
+inline Kafka::Properties getKafkaClientCommonConfig()
+{
+    Kafka::Properties props;
+    if (!getenv("KAFKA_BROKER_LIST"))
+    {
+        EXPECT_TRUE(false);
+        return props;
+    }
+
+    std::string additionalSettings;
+    if (auto additionalSettingEnv = getenv("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
+    {
+        additionalSettings = additionalSettingEnv;
+    }
+
+    props.put("bootstrap.servers", getenv("KAFKA_BROKER_LIST"));
+    if (!additionalSettings.empty())
+    {
+        std::vector<std::string> keyValuePairs;
+        boost::algorithm::split(keyValuePairs, additionalSettings, boost::is_any_of(";"));
+        for (const auto& keyValue: keyValuePairs)
+        {
+            std::vector<std::string> kv;
+            boost::algorithm::split(kv, keyValue, boost::is_any_of("="));
+            EXPECT_EQ(2, kv.size());
+            if (kv.size() == 2)
+            {
+                props.put(kv[0], kv[1]);
+            }
+            else
+            {
+                std::cout << "Wrong setting: " << keyValue << std::endl;
+            }
+        }
+    }
+
+    return props;
+}
+
+inline std::size_t getNumberOfKafkaBrokers()
+{
+    if (!getenv("KAFKA_BROKER_LIST")) return 0;
+
+    std::string brokers = getenv("KAFKA_BROKER_LIST");
+    return std::count(brokers.cbegin(), brokers.cend(), ',') + 1;
+}
+
+const auto POLL_INTERVAL             = std::chrono::milliseconds(100);
+const auto MAX_POLL_MESSAGES_TIMEOUT = std::chrono::seconds(5);
+const auto MAX_OFFSET_COMMIT_TIMEOUT = std::chrono::seconds(5);
+const auto MAX_DELIVERY_TIMEOUT      = std::chrono::seconds(5);
+
+inline std::vector<Kafka::ConsumerRecord>
+ConsumeMessagesUntilTimeout(Kafka::KafkaConsumer& consumer,
+                            std::chrono::milliseconds timeout = MAX_POLL_MESSAGES_TIMEOUT)
+{
+    std::vector<Kafka::ConsumerRecord> records;
+
+    const auto end = std::chrono::steady_clock::now() + timeout;
+    do
+    {
+        auto polled = consumer.poll(POLL_INTERVAL);
+        records.insert(records.end(), std::make_move_iterator(polled.begin()), std::make_move_iterator(polled.end()));
+    } while (std::chrono::steady_clock::now() < end);
+
+    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << consumer.name() << " polled "  << records.size() << " messages" << std::endl;
+
+    EXPECT_TRUE(std::none_of(records.cbegin(), records.cend(),
+                             [](const auto& record) {
+                                 return record.error() && record.error().value() != RD_KAFKA_RESP_ERR__PARTITION_EOF;
+                             }));
+
+    return records;
+}
+
+inline
+void WaitUntilTimeout(const std::function<bool()>& checkDone, std::chrono::milliseconds timeout)
+{
+    constexpr int CHECK_INTERVAL_MS = 100;
+
+    const auto end = std::chrono::steady_clock::now() + timeout;
+
+    for (; !checkDone() && std::chrono::steady_clock::now() < end; )
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_INTERVAL_MS));
+    }
+}
+
+inline void
+ProduceMessages(const std::string& topic, int partition, const std::vector<std::tuple<Kafka::Headers, std::string, std::string>>& msgs)
+{
+    Kafka::KafkaSyncProducer producer(getKafkaClientCommonConfig());
+    producer.setLogLevel(LOG_CRIT);
+
+    for (const auto& msg: msgs)
+    {
+        auto record = Kafka::ProducerRecord(topic, partition, Kafka::Key(std::get<1>(msg).c_str(), std::get<1>(msg).size()), Kafka::Value(std::get<2>(msg).c_str(), std::get<2>(msg).size()));
+        record.headers() = std::get<0>(msg);
+        producer.send(record);
+    }
+
+    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": " << msgs.size() << " messages have been sent." << std::endl;
+}
+
+inline void
+CreateKafkaTopic(const Kafka::Topic& topic, int numPartitions, int replicationFactor)
+{
+    Kafka::AdminClient adminClient(getKafkaClientCommonConfig());
+    auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
+    ASSERT_FALSE(createResult.error);
+}
+
+} // end of namespace KafkaTestUtility
+
