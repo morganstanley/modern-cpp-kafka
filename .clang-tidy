@@ -1,16 +1,16 @@
 Checks: "*,\
          -llvm-header-guard,\
          -llvm-namespace-comment,\
-         -fuchsia-default-arguments,\
-         -fuchsia-statically-constructed-objects,\
-         -fuchsia-overloaded-operator,\
+         -fuchsia-*,\
          -google-default-arguments,\
          -google-readability-namespace-comments,\
          -google-build-using-namespace,\
          -google-runtime-references,\
+         -google-readability-avoid-underscore-in-googletest-name,\
          -modernize-use-nodiscard,\
          -modernize-deprecated-headers,\
          -modernize-avoid-c-arrays,\
+         -modernize-use-trailing-return-type,\
          -hicpp-special-member-functions,\
          -hicpp-vararg,\
          -hicpp-no-malloc,\

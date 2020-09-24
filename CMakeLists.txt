@@ -20,10 +20,10 @@ add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow")
 #---------------------------
 if (DEFINED ENV{LIBRDKAFKA_ROOT})
     set(LIBRDKAFKA_ROOT $ENV{LIBRDKAFKA_ROOT})
-    message(STATUS "librdkafka root directory: ${LIBRDKAFKA_ROOT}")
 else ()
-    message(FATAL_ERROR "No LIBRDKAFKA_ROOT specified!")
+    set(LIBRDKAFKA_ROOT /usr/local)
 endif ()
+message(STATUS "librdkafka root directory: ${LIBRDKAFKA_ROOT}")
 
 include_directories(SYSTEM ${LIBRDKAFKA_ROOT}/include)
 link_directories(SYSTEM ${LIBRDKAFKA_ROOT}/lib)
@@ -177,10 +177,11 @@ endif ()
 #---------------------------
 # Build Sub-directories
 #---------------------------
-add_subdirectory("include")
-add_subdirectory("tests")
-add_subdirectory("tools")
-
 if (BUILD_OPTION_GEN_DOC)
     add_subdirectory("doc")
+else()
+    add_subdirectory("include")
+    add_subdirectory("tests")
+    add_subdirectory("tools")
 endif ()
+

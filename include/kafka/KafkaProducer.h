@@ -131,7 +131,7 @@ namespace Producer
     private:
         static Timestamp getMsgTimestamp(const rd_kafka_message_t* rkmsg)
         {
-            rd_kafka_timestamp_type_t tstype;
+            rd_kafka_timestamp_type_t tstype{};
             Timestamp::Value tsValue = rd_kafka_message_timestamp(rkmsg, &tstype);
             return {tsValue, tstype};
         }
@@ -394,16 +394,17 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
                            SendOption                 option,
                            ActionWhileQueueIsFull     action)
 {
-    auto rk        = getClientHandle();
-    auto topic     = record.topic().c_str();
-    auto partition = record.partition();
-    auto msgFlags  = (static_cast<unsigned int>(option == SendOption::ToCopyRecordValue ? RD_KAFKA_MSG_F_COPY : 0)
-                      | static_cast<unsigned int>(action == ActionWhileQueueIsFull::Block ? RD_KAFKA_MSG_F_BLOCK : 0));
-    auto keyPtr    = record.key().data();
-    auto keyLen    = record.key().size();
-    auto valuePtr  = record.value().data();
-    auto valueLen  = record.value().size();
-    auto opaquePtr = opaque.get();
+    const auto* topic     = record.topic().c_str();
+    const auto  partition = record.partition();
+    const auto  msgFlags  = (static_cast<unsigned int>(option == SendOption::ToCopyRecordValue ? RD_KAFKA_MSG_F_COPY : 0)
+                            | static_cast<unsigned int>(action == ActionWhileQueueIsFull::Block ? RD_KAFKA_MSG_F_BLOCK : 0));
+    const auto* keyPtr    = record.key().data();
+    const auto  keyLen    = record.key().size();
+    const auto* valuePtr  = record.value().data();
+    const auto  valueLen  = record.value().size();
+
+    auto* rk        = getClientHandle();
+    auto* opaquePtr = opaque.get();
 
     rd_kafka_resp_err_t sendResult = RD_KAFKA_RESP_ERR_NO_ERROR;
 
