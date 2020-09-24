@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 
 #include <boost/algorithm/string.hpp>
+
 #include <cstdlib>
 #include <list>
 #include <vector>
@@ -45,7 +46,7 @@ inline Kafka::Properties getKafkaClientCommonConfig()
     }
 
     std::string additionalSettings;
-    if (auto additionalSettingEnv = getenv("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
+    if (auto* additionalSettingEnv = getenv("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
     {
         additionalSettings = additionalSettingEnv;
     }

@@ -54,13 +54,13 @@ Thus we worked out `Modern C++ based Kafka API`, which makes the development wor
 
     * Specify library locations with environment variables
 
-        * `LIBRDKAFKA_ROOT`   -- `librdkafka` headers and libraries
+        * `LIBRDKAFKA_ROOT`                 -- `librdkafka` headers and libraries
 
-        * `GMOCK_ROOT`        -- `googlemock` headers and libraries
+        * `GTEST_ROOT`                      -- `googletest` headers and libraries
 
-        * `BOOST_ROOT`        -- `boost` libraries
+        * `BOOST_ROOT`                      -- `boost` headers and libraries
 
-        * `SASL2_LIBRARYDIR`  -- if SASL connection support is wanted
+        * `SASL_LIBRARYDIR`/`SASL_LIBRARY`  -- if SASL connection support is wanted
 
     * Create an empty directory for the build, and `cd` to it
 

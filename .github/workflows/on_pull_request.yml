@@ -1,0 +1,353 @@
+name: On Pull Request
+
+on: [pull_request]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  BUILD_DIR: 'build'
+
+jobs:
+  build_gcc:
+    name: Build on Linux with GCC
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/gcc
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install clang
+          sudo apt remove -y --autoremove gcc-7
+          sudo apt install -y g++-8
+          sudo ln -s gcc-8 /usr/bin/gcc
+          sudo ln -s g++-8 /usr/bin/g++
+          # 3. Install googletest
+          sudo apt install -y googletest
+          mkdir -p googletest
+          cd googletest
+          env CC=gcc CXX=g++ cmake /usr/src/googletest/
+          make && sudo make install
+          cd ../
+          # 4. Install boost lib
+          sudo apt install -y libboost-all-dev
+          # 5. Install librdkafka
+          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
+          tar -xvzf v1.4.2.tar.gz
+          cd librdkafka-1.4.2
+          ./configure
+          make && sudo make install
+          cd ../
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=gcc CXX=g++ cmake ../.. -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Test
+        run: |
+          cd $BUILD_SUB_DIR
+          ctest -VV
+
+  build_gcc_asan:
+    name: Build on Linux with GCC (ASAN)
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/gcc-asan
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install clang
+          sudo apt remove -y --autoremove gcc-7
+          sudo apt install -y g++-8
+          sudo ln -s gcc-8 /usr/bin/gcc
+          sudo ln -s g++-8 /usr/bin/g++
+          # 3. Install googletest
+          sudo apt install -y googletest
+          mkdir -p googletest
+          cd googletest
+          env CC=gcc CXX=g++ cmake /usr/src/googletest/
+          make && sudo make install
+          cd ../
+          # 4. Install boost lib
+          sudo apt install -y libboost-all-dev
+          # 5. Install librdkafka
+          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
+          tar -xvzf v1.4.2.tar.gz
+          cd librdkafka-1.4.2
+          ./configure
+          make && sudo make install
+          cd ../
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=gcc CXX=g++ cmake ../.. -DBUILD_OPTION_USE_ASAN=ON -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Test
+        run: |
+          cd $BUILD_SUB_DIR
+          ctest -VV
+
+  build_gcc_tsan:
+    name: Build on Linux with GCC (TSAN)
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/gcc-tsan
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install clang
+          sudo apt remove -y --autoremove gcc-7
+          sudo apt install -y g++-8
+          sudo ln -s gcc-8 /usr/bin/gcc
+          sudo ln -s g++-8 /usr/bin/g++
+          # 3. Install googletest
+          sudo apt install -y googletest
+          mkdir -p googletest
+          cd googletest
+          env CC=gcc CXX=g++ cmake /usr/src/googletest/
+          make && sudo make install
+          cd ../
+          # 4. Install boost lib
+          sudo apt install -y libboost-all-dev
+          # 5. Install librdkafka
+          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
+          tar -xvzf v1.4.2.tar.gz
+          cd librdkafka-1.4.2
+          ./configure
+          make && sudo make install
+          cd ../
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=gcc CXX=g++ cmake ../.. -DBUILD_OPTION_USE_TSAN=ON -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Test
+        run: |
+          cd $BUILD_SUB_DIR
+          ctest -VV
+
+
+  build_gcc_ubsan:
+    name: Build on Linux with GCC (UBSAN)
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/gcc-ubsan
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install clang
+          sudo apt remove -y --autoremove gcc-7
+          sudo apt install -y g++-8
+          sudo ln -s gcc-8 /usr/bin/gcc
+          sudo ln -s g++-8 /usr/bin/g++
+          # 3. Install googletest
+          sudo apt install -y googletest
+          mkdir -p googletest
+          cd googletest
+          env CC=gcc CXX=g++ cmake /usr/src/googletest/
+          make && sudo make install
+          cd ../
+          # 4. Install boost lib
+          sudo apt install -y libboost-all-dev
+          # 5. Install librdkafka
+          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
+          tar -xvzf v1.4.2.tar.gz
+          cd librdkafka-1.4.2
+          ./configure
+          make && sudo make install
+          cd ../
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=gcc CXX=g++ cmake ../.. -DBUILD_OPTION_USE_UBSAN=ON -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Test
+        run: |
+          cd $BUILD_SUB_DIR
+          ctest -VV
+
+  build_clang:
+    name: Build on Linux with Clang
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/clang
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install clang
+          sudo apt install -y clang-10
+          sudo rm /usr/bin/clang /usr/bin/clang++
+          sudo ln -s clang-10 /usr/bin/clang
+          sudo ln -s clang++-10 /usr/bin/clang++
+          # 3. Install googletest
+          sudo apt install -y googletest
+          mkdir -p googletest
+          cd googletest
+          cmake /usr/src/googletest/
+          make && sudo make install
+          cd ../
+          # 4. Install boost lib
+          sudo apt install -y libboost-all-dev
+          # 5. Install librdkafka
+          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
+          tar -xvzf v1.4.2.tar.gz
+          cd librdkafka-1.4.2
+          ./configure
+          make && sudo make install
+          cd ../
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=clang CXX=clang++ cmake ../.. -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Test
+        run: |
+          cd $BUILD_SUB_DIR
+          ctest -VV
+
+  build_clang_tidy:
+    name: Build on Linux with Clang (Tidy)
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/clang-tidy
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install clang & clang-tidy
+          sudo apt remove -y clang
+          sudo apt install -y clang-10 clang-tidy-10
+          sudo rm /usr/bin/clang /usr/bin/clang++
+          sudo ln -s clang-10 /usr/bin/clang
+          sudo ln -s clang++-10 /usr/bin/clang++
+          sudo ln -s clang-tidy-10 /usr/bin/clang-tidy
+          # 3. Install googletest
+          sudo apt install -y googletest
+          mkdir -p googletest
+          cd googletest
+          env CC=clang CXX=clang++ cmake /usr/src/googletest/
+          make && sudo make install
+          cd ../
+          # 4. Install boost lib
+          sudo apt install -y libboost-all-dev
+          # 5. Install librdkafka
+          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
+          tar -xvzf v1.4.2.tar.gz
+          cd librdkafka-1.4.2
+          ./configure
+          make && sudo make install
+          cd ../
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=clang CXX=clang++ cmake ../.. -DBUILD_OPTION_CLANG_TIDY=ON -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Test
+        run: |
+          cd $BUILD_SUB_DIR
+          ctest -VV
+
+  build_doc:
+    name: Generate Documents
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/clang-doc
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install python3-pip
+          sudo apt install -y python3-pip
+          pip3 install markdown
+          # 3. Install doxygen
+          sudo apt install -y doxygen
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=clang CXX=clang++ cmake ../.. -DBUILD_OPTION_GEN_DOC=ON -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Test
+        run: |
+          cd $BUILD_SUB_DIR
+          ls -l doc/README.html
+          ls -l doc/markdown/KafkaClientConfiguration.html
+          ls -l doc/doxygen/annotated.html
+

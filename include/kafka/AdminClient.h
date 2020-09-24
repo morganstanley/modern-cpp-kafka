@@ -75,8 +75,8 @@ public:
     Admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
 private:
-    std::list<ErrorWithDetail> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount) const;
-    ErrorWithDetail            combineErrors(const std::list<ErrorWithDetail>& errors) const;
+    static std::list<ErrorWithDetail> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount);
+    static ErrorWithDetail            combineErrors(const std::list<ErrorWithDetail>& errors);
 
     static constexpr int DEFAULT_COMMAND_TIMEOUT_MS     = 30000;
     static constexpr int EVENT_POLLING_INTERVAL_MS      = 100;
@@ -84,7 +84,7 @@ private:
 
 
 inline std::list<ErrorWithDetail>
-AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount) const
+AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount)
 {
     std::list<ErrorWithDetail> errors;
 
@@ -101,7 +101,7 @@ AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, in
 }
 
 inline ErrorWithDetail
-AdminClient::combineErrors(const std::list<ErrorWithDetail>& errors) const
+AdminClient::combineErrors(const std::list<ErrorWithDetail>& errors)
 {
     if (!errors.empty())
     {
@@ -186,7 +186,7 @@ AdminClient::createTopics(const Topics& topics, int numPartitions, int replicati
 
     // Fetch per-topic results
     const rd_kafka_CreateTopics_result_t* res = rd_kafka_event_CreateTopics_result(rk_ev.get());
-    std::size_t res_topic_cnt;
+    std::size_t res_topic_cnt{};
     const rd_kafka_topic_result_t** res_topics = rd_kafka_CreateTopics_result_topics(res, &res_topic_cnt);
 
     errors.splice(errors.end(), getPerTopicResults(res_topics, res_topic_cnt));
@@ -259,7 +259,7 @@ AdminClient::deleteTopics(const Topics& topics, std::chrono::milliseconds timeou
 
     // Fetch per-topic results
     const rd_kafka_DeleteTopics_result_t* res = rd_kafka_event_DeleteTopics_result(rk_ev.get());
-    std::size_t res_topic_cnt;
+    std::size_t res_topic_cnt{};
     const rd_kafka_topic_result_t** res_topics = rd_kafka_DeleteTopics_result_topics(res, &res_topic_cnt);
 
     errors.splice(errors.end(), getPerTopicResults(res_topics, res_topic_cnt));

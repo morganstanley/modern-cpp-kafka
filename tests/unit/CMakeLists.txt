@@ -1,8 +1,8 @@
 project("kafka-unit-test")
 
 # Directories
-include_directories(SYSTEM ${GMOCK_ROOT}/include)
-link_directories(SYSTEM ${GMOCK_ROOT}/lib)
+include_directories(SYSTEM ${GTEST_ROOT}/include)
+link_directories(SYSTEM ${GTEST_ROOT}/lib)
 
 # Target
 file(GLOB TEST_SRCS *.cc)

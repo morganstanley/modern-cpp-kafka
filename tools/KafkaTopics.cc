@@ -15,21 +15,21 @@ struct Arguments
 {
     enum OpType { Create, Delete, List };
 
-    Arguments(): opType{}, partitions{}, replicationFactor{} {}
-
     std::string broker;
     std::string topic;
-    OpType      opType;
-    int         partitions;
-    int         replicationFactor;
+    OpType      opType{};
+    int         partitions{};
+    int         replicationFactor{};
 
-    std::vector<std::string> adminConfig;
-    std::vector<std::string> topicProps;
+    Kafka::Properties adminConfig;
+    Kafka::Properties topicProps;
 };
 
 std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
 {
     auto args = std::make_unique<Arguments>();
+    std::vector<std::string> adminConfigList;
+    std::vector<std::string> topicPropList;
 
     namespace po = boost::program_options;
     po::options_description desc("Options description");
@@ -42,7 +42,7 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
                 "REQUIRED: One broker from the Kafka cluster.")
 
             ("admin-config",
-                po::value<std::vector<std::string>>(&args->adminConfig)->multitoken(),
+                po::value<std::vector<std::string>>(&adminConfigList)->multitoken(),
                 "Properties for the Admin Client (E.g, would be useful for kerberos connection)")
 
             ("list",
@@ -62,7 +62,7 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
                 po::value<int>(&args->replicationFactor),
                 "Only used (and REQUIRED) for topic creation: replication factor of the topic.")
             ("topic-props",
-                po::value<std::vector<std::string>>(&args->topicProps)->multitoken(),
+                po::value<std::vector<std::string>>(&topicPropList)->multitoken(),
                 "Only used (and REQUIRED) for topic creation: properties for the topic.");
 
     po::variables_map vm;
@@ -78,6 +78,17 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
     }
 
     po::notify(vm);
+
+    for (const auto& prop: adminConfigList)
+    {
+        std::vector<std::string> keyValue;
+        boost::algorithm::split(keyValue, prop, boost::is_any_of("="));
+        if (keyValue.size() != 2)
+        {
+            throw std::invalid_argument("Wrong option for --admin-config! MUST follow with key=value format!");
+        }
+        args->adminConfig.put(keyValue[0], keyValue[1]);
+    }
 
     if (vm.count("list") + vm.count("create") + vm.count("delete") != 1)
     {
@@ -98,6 +109,17 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
             if (!vm.count("topic") || !vm.count("partitions") || !vm.count("replication-factor"))
             {
                 throw std::invalid_argument("The --create operation MUST be with '--topic/--partitions/--replication-factor' options!");
+            }
+
+            for (const auto& prop: topicPropList)
+            {
+                std::vector<std::string> keyValue;
+                boost::algorithm::split(keyValue, prop, boost::is_any_of("="));
+                if (keyValue.size() != 2)
+                {
+                    throw std::invalid_argument("Wrong option for --topic-props! MUST follow with key=value format!");
+                }
+                args->topicProps.put(keyValue[0], keyValue[1]);
             }
 
             break;
@@ -134,19 +156,9 @@ int main (int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    Kafka::AdminClientConfig adminConf;
+    Kafka::Properties adminConf = args->adminConfig;
     adminConf.put(Kafka::AdminClientConfig::BOOTSTRAP_SERVERS, args->broker);
-    for (const auto& item: args->adminConfig)
-    {
-        std::vector<std::string> keyValue;
-        boost::algorithm::split(keyValue, item, boost::is_any_of("="));
-        if (keyValue.size() != 2)
-        {
-            std::cerr << "Wrong option for --admin-config! MUST follow with key=value format!" << std::endl;
-            return EXIT_FAILURE;
-        }
-        adminConf.put(keyValue[0], keyValue[1]);
-    }
+
     Kafka::AdminClient adminClient(adminConf);
 
     if (args->opType == Arguments::OpType::List)
@@ -165,20 +177,7 @@ int main (int argc, char **argv)
     }
     else if (args->opType == Arguments::OpType::Create)
     {
-        Kafka::Properties topicProps;
-        for (const auto& prop: args->topicProps)
-        {
-            std::vector<std::string> keyValue;
-            boost::algorithm::split(keyValue, prop, boost::is_any_of("="));
-            if (keyValue.size() != 2)
-            {
-                std::cerr << "Wrong option for --topic-props! MUST follow with key=value format!" << std::endl;
-                return EXIT_FAILURE;
-            }
-            topicProps.put(keyValue[0], keyValue[1]);
-        }
-
-        auto createResult = adminClient.createTopics({args->topic}, args->partitions, args->replicationFactor, topicProps);
+        auto createResult = adminClient.createTopics({args->topic}, args->partitions, args->replicationFactor, args->topicProps);
         if (createResult.error)
         {
             std::cerr << "Error: " << createResult.detail << std::endl;

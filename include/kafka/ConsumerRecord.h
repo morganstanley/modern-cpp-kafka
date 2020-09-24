@@ -54,7 +54,7 @@ public:
      */
     Timestamp   timestamp() const
     {
-        rd_kafka_timestamp_type_t tstype;
+        rd_kafka_timestamp_type_t tstype{};
         Timestamp::Value tsValue = rd_kafka_message_timestamp(_rk_msg.get(), &tstype);
         return {tsValue, tstype};
     }

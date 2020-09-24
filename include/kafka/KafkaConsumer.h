@@ -473,7 +473,7 @@ KafkaConsumer::seek(const TopicPartition& tp, Offset o, std::chrono::millisecond
 
     const auto end = std::chrono::steady_clock::now() + timeout;
 
-    rd_kafka_resp_err_t err;
+    rd_kafka_resp_err_t err = RD_KAFKA_RESP_ERR_NO_ERROR;
     do
     {
         err = rd_kafka_seek(rkt.get(), tp.second, o, SEEK_RETRY_INTERVAL_MS);
@@ -519,7 +519,7 @@ KafkaConsumer::getOffsets(const TopicPartitions& tps, bool atBeginning) const
 
     for (const auto& tp: tps)
     {
-        Offset beginning, end;
+        Offset beginning{}, end{};
         rd_kafka_resp_err_t err = rd_kafka_query_watermark_offsets(getClientHandle(), tp.first.c_str(), tp.second, &beginning, &end, 0);
         KAFKA_THROW_IF_WITH_ERROR(err);
 
@@ -896,7 +896,6 @@ private:
         rd_kafka_queue_poll_callback(queue, timeoutMs);
     }
 
-private:
     // Validate properties (and fix it if necesary)
     static Properties validateAndReformProperties(const Properties& origProperties)
     {
