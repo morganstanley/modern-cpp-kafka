@@ -13,7 +13,7 @@ include(CMakePushCheckState)
 set(CMAKE_CXX_STARNDARD 17)
 set(CMAKE_CXX_STARNDARD_REQUIRED False)
 
-add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow")
+add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")
 
 #---------------------------
 # Check librdkafka directory

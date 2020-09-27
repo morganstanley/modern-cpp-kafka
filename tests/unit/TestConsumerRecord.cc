@@ -21,12 +21,12 @@ inline rd_kafka_message_t* mockRdKafkaMessage(Kafka::Partition partition, Kafka:
     std::memset(msgBuf, 0, msgSize);
 
     char *keyBuf = msgBuf + sizeof(rd_kafka_message_t) + MSG_PRIVATE_LEN;
-    std::snprintf(keyBuf, key.size() + 1, "%s", key.c_str());
+    std::memcpy(keyBuf, key.c_str(), key.size() + 1);
     rkMsg->key     = keyBuf;
     rkMsg->key_len = key.size();
 
     char *payloadBuf = keyBuf + key.size() + 1;
-    std::snprintf(payloadBuf, value.size() + 1, "%s", value.c_str());
+    std::memcpy(payloadBuf, value.c_str(), value.size() + 1);
     rkMsg->payload = payloadBuf;
     rkMsg->len     = value.size();
 
