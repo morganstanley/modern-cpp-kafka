@@ -7,12 +7,11 @@
 #include <iostream>
 
 using namespace KAFKA_API;
-using namespace KafkaTestUtility;
 
 
 TEST(AdminClient, createListDeleteTopics)
 {
-    AdminClient adminClient(getKafkaClientCommonConfig());
+    AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
     const Topics topics = {Utility::getRandomString(), Utility::getRandomString()};
@@ -83,7 +82,7 @@ TEST(AdminClient, DuplicatedCreateDeleteTopics)
     const int numPartitions = 5;
     const int replicaFactor = 3;
 
-    AdminClient adminClient(getKafkaClientCommonConfig());
+    AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
     constexpr int MAX_REPEAT = 10;

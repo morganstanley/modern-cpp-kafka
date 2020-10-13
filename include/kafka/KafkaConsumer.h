@@ -12,6 +12,7 @@
 #include <cassert>
 #include <chrono>
 #include <functional>
+#include <iterator>
 #include <memory>
 
 
@@ -174,6 +175,17 @@ public:
     std::map<TopicPartition, Offset> endOffsets(const TopicPartitions& tps) const { return getOffsets(tps, false); }
 
     /**
+     * Get the offsets for the given partitions by time-point.
+     * Throws KafkaException with errors:
+     *   - RD_KAFKA_RESP_ERR__TIMED_OUT:            Not all offsets could be fetched in time.
+     *   - RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION:    All partitions are unknown.
+     *   - RD_KAFKA_RESP_ERR__LEADER_NOT_AVAILABLE: Unable to query leaders from the given partitions.
+     */
+    std::map<TopicPartition, Offset> offsetsForTime(const TopicPartitions& tps,
+                                                    std::chrono::time_point<std::chrono::system_clock> timepoint,
+                                                    std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const;
+
+    /**
      * Get the last committed offset for the given partition (whether the commit happened by this process or another).This offset will be used as the position for the consumer in the event of a failure.
      * This call will block to do a remote call to get the latest committed offsets from the server.
      * Throws KafkaException with errors:
@@ -229,8 +241,15 @@ protected:
     static const constexpr char* ENABLE_AUTO_COMMIT       = "enable.auto.commit";
     static const constexpr char* AUTO_COMMIT_INTERVAL_MS  = "auto.commit.interval.ms";
 
-    static constexpr int DEFAULT_SEEK_TIMEOUT_MS = 10000;
-    static constexpr int SEEK_RETRY_INTERVAL_MS  = 5000;
+#if __cplusplus >= 201703L
+    static constexpr int DEFAULT_QUERY_TIMEOUT_MS = 10000;
+    static constexpr int DEFAULT_SEEK_TIMEOUT_MS  = 10000;
+    static constexpr int SEEK_RETRY_INTERVAL_MS   = 5000;
+#else
+    enum { DEFAULT_QUERY_TIMEOUT_MS = 10000 };
+    enum { DEFAULT_SEEK_TIMEOUT_MS  = 10000 };
+    enum { SEEK_RETRY_INTERVAL_MS   = 5000  };
+#endif
 
     const OffsetCommitOption _offsetCommitOption;
 
@@ -510,6 +529,38 @@ KafkaConsumer::position(const TopicPartition& tp) const
     KAFKA_THROW_IF_WITH_ERROR(err);
 
     return rk_tp->elems[0].offset;
+}
+
+inline std::map<TopicPartition, Offset>
+KafkaConsumer::offsetsForTime(const TopicPartitions& tps,
+                              std::chrono::time_point<std::chrono::system_clock> timepoint,
+                              std::chrono::milliseconds timeout) const
+{
+    if (tps.empty()) return TopicPartitionOffsets();
+
+    auto msSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(timepoint.time_since_epoch()).count();
+
+    auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tps));
+
+    for (int i = 0; i < rk_tpos->cnt; ++i)
+    {
+        rd_kafka_topic_partition_t& rk_tp = rk_tpos->elems[i];
+        // Here the `msSinceEpoch` would be overridden by the offset result (after called by `rd_kafka_offsets_for_times`)
+        rk_tp.offset = msSinceEpoch;
+    }
+
+    rd_kafka_resp_err_t err = rd_kafka_offsets_for_times(getClientHandle(), rk_tpos.get(), timeout.count());
+    KAFKA_THROW_IF_WITH_ERROR(err);
+
+    auto results = getTopicPartitionOffsets(rk_tpos.get());
+
+    // Remove invalid results (which are not updated with an valid offset)
+    for (auto it = results.begin(); it != results.end(); )
+    {
+        it = ((it->second == msSinceEpoch) ? results.erase(it) : std::next(it));
+    }
+
+    return results;
 }
 
 inline std::map<TopicPartition, Offset>

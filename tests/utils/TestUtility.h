@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <list>
+#include <regex>
 #include <vector>
 
 
@@ -36,7 +37,8 @@ namespace Kafka = KAFKA_API;
 
 namespace KafkaTestUtility {
 
-inline Kafka::Properties getKafkaClientCommonConfig()
+inline Kafka::Properties
+GetKafkaClientCommonConfig()
 {
     Kafka::Properties props;
     if (!getenv("KAFKA_BROKER_LIST"))
@@ -46,7 +48,7 @@ inline Kafka::Properties getKafkaClientCommonConfig()
     }
 
     std::string additionalSettings;
-    if (auto* additionalSettingEnv = getenv("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
+    if (const auto* additionalSettingEnv = getenv("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
     {
         additionalSettings = additionalSettingEnv;
     }
@@ -75,7 +77,8 @@ inline Kafka::Properties getKafkaClientCommonConfig()
     return props;
 }
 
-inline std::size_t getNumberOfKafkaBrokers()
+inline std::size_t
+GetNumberOfKafkaBrokers()
 {
     if (!getenv("KAFKA_BROKER_LIST")) return 0;
 
@@ -111,8 +114,8 @@ ConsumeMessagesUntilTimeout(Kafka::KafkaConsumer& consumer,
     return records;
 }
 
-inline
-void WaitUntilTimeout(const std::function<bool()>& checkDone, std::chrono::milliseconds timeout)
+inline void
+WaitUntil(const std::function<bool()>& checkDone, std::chrono::milliseconds timeout)
 {
     constexpr int CHECK_INTERVAL_MS = 100;
 
@@ -127,7 +130,7 @@ void WaitUntilTimeout(const std::function<bool()>& checkDone, std::chrono::milli
 inline void
 ProduceMessages(const std::string& topic, int partition, const std::vector<std::tuple<Kafka::Headers, std::string, std::string>>& msgs)
 {
-    Kafka::KafkaSyncProducer producer(getKafkaClientCommonConfig());
+    Kafka::KafkaSyncProducer producer(GetKafkaClientCommonConfig());
     producer.setLogLevel(LOG_CRIT);
 
     for (const auto& msg: msgs)
@@ -143,10 +146,18 @@ ProduceMessages(const std::string& topic, int partition, const std::vector<std::
 inline void
 CreateKafkaTopic(const Kafka::Topic& topic, int numPartitions, int replicationFactor)
 {
-    Kafka::AdminClient adminClient(getKafkaClientCommonConfig());
+    Kafka::AdminClient adminClient(GetKafkaClientCommonConfig());
     auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
     ASSERT_FALSE(createResult.error);
 }
 
+class JoiningThread {
+public:
+    template <typename F, typename... Args>
+    explicit JoiningThread(F&& f, Args&&... args): _t(f, args...) {}
+    ~JoiningThread() { if (_t.joinable()) _t.join(); }
+private:
+   std::thread _t;
+};
 } // end of namespace KafkaTestUtility
 

@@ -10,7 +10,7 @@ namespace Kafka = KAFKA_API;
     do {                                        \
         try {                                   \
             expr;                               \
-        } catch (KafkaException& e) {           \
+        } catch (const KafkaException& e) {     \
             EXPECT_EQ(err, e.error().value());  \
             break;                              \
         } catch (...){                          \

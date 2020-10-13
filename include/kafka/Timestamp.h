@@ -41,6 +41,11 @@ struct Timestamp
                  (tstype == RD_KAFKA_TIMESTAMP_LOG_APPEND_TIME ? Type::LogAppendTime : Type::NotAvailable);
     }
 
+    operator std::chrono::time_point<std::chrono::system_clock>() const // NOLINT
+    {
+        return std::chrono::time_point<std::chrono::system_clock>(std::chrono::milliseconds(msSinceEpoch));
+    }
+
     static std::string toString(Type t)
     {
         switch (t)

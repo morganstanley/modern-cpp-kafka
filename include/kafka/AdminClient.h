@@ -78,8 +78,13 @@ private:
     static std::list<ErrorWithDetail> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount);
     static ErrorWithDetail            combineErrors(const std::list<ErrorWithDetail>& errors);
 
-    static constexpr int DEFAULT_COMMAND_TIMEOUT_MS     = 30000;
-    static constexpr int EVENT_POLLING_INTERVAL_MS      = 100;
+#if __cplusplus >= 201703L
+    static constexpr int DEFAULT_COMMAND_TIMEOUT_MS = 30000;
+    static constexpr int EVENT_POLLING_INTERVAL_MS  = 100;
+#else
+    enum { DEFAULT_COMMAND_TIMEOUT_MS = 30000 };
+    enum { EVENT_POLLING_INTERVAL_MS  = 100   };
+#endif
 };
 
 
