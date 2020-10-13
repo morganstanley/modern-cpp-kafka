@@ -49,12 +49,20 @@ TEST(AdminClient, createListDeleteTopics)
 
         // Check metadata
         auto foundAllMetadatas = std::all_of(topics.cbegin(), topics.cend(),
-                                             [&adminClient](const Topic& topic) {
-                                                 bool ret = static_cast<bool>(adminClient.fetchBrokerMetadata(topic));
-                                                 if (!ret) {
-                                                     std::cout << "[" << Utility::getCurrentTime() << "] can't find metadata for topic " << topic << " by now!" << std::endl;
+                                             [&adminClient, numPartitions, replicaFactor](const Topic& topic) {
+                                                 if (auto metadata = adminClient.fetchBrokerMetadata(topic)) {
+                                                     auto partitions = metadata->partitions();
+                                                     EXPECT_EQ(numPartitions, partitions.size());
+                                                     for (const auto& partitionInfo: partitions) {
+                                                         EXPECT_EQ(replicaFactor, partitionInfo.second.replicas.size());
+                                                     }
+
+                                                     std::cout << "[" << Utility::getCurrentTime() << "] BrokerMetadata: " << metadata->toString() << std::endl;
+                                                     return true;
                                                  }
-                                                 return ret;
+
+                                                 std::cout << "[" << Utility::getCurrentTime() << "] can't find metadata for topic " << topic << " by now!" << std::endl;
+                                                 return false;
                                              });
         if (!foundAllMetadatas) continue;
 
@@ -62,21 +70,6 @@ TEST(AdminClient, createListDeleteTopics)
         break;
     }
     EXPECT_TRUE(areTopicsSuccessfullyCreated);
-
-    // Check whether the topic configuration works
-    for (const auto& topic: topics)
-    {
-        auto metadata = adminClient.fetchBrokerMetadata(topic);
-        ASSERT_TRUE(metadata);
-
-        std::cout << "[" << Utility::getCurrentTime() << "] " << "BrokerMetadata: " << metadata->toString() << std::endl;
-        auto partitions = metadata->partitions();
-        EXPECT_EQ(numPartitions, partitions.size());
-        for (const auto& partitionInfo: partitions)
-        {
-            EXPECT_EQ(replicaFactor, partitionInfo.second.replicas.size());
-        }
-    }
 
     // Delete Topics
     auto deleteResult = adminClient.deleteTopics(topics);

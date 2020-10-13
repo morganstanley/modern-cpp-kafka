@@ -160,7 +160,6 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
             try
             {
                 auto metadata = producer.send(record);
-                std::cout << "[" << Utility::getCurrentTime() << "] record was sent, metadata: " << metadata.toString() << std::endl;
                 // will retry, to see if timeout could occure next time
             }
             catch (const KafkaException& e)

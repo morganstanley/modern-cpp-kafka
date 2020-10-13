@@ -1,13 +1,13 @@
-name: On Pull Request
+name: pull_request
 
-on: [pull_request]
+on: [push, pull_request]
 
 env:
   CPU_CORE_NUM: 2
 
 jobs:
   build_gcc_debug:
-    name: Build on Linux with GCC (Debug)
+    name: Build on Linux (GCC, Debug)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/gcc-debug
@@ -44,6 +44,14 @@ jobs:
           ./configure
           make -j$CPU_CORE_NUM && sudo make install
           cd ../
+          # 6. Install zookeeper
+          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
+          # 7. Install kafka
+          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+          tar xvzf kafka_2.13-2.6.0.tgz
+          # 8. Install kafkacat
+          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -55,10 +63,19 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          ctest -VV
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          # start kafka cluster
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          sleep 10
+          kafkacat -L -b 127.0.0.1:40091
+          # run tests
+          export KAFKA_BROKER_LIST="127.0.0.1:40091,127.0.0.1:40092,127.0.0.1:40093"; ctest -VV
+          # stop kafka cluster
+          kafka-server-stop.sh
+          zookeeper-server-stop.sh
 
   build_gcc_release:
-    name: Build on Linux with GCC (Release)
+    name: Build on Linux (GCC, Release)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/gcc-release
@@ -95,6 +112,14 @@ jobs:
           ./configure
           make -j$CPU_CORE_NUM && sudo make install
           cd ../
+          # 6. Install zookeeper
+          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
+          # 7. Install kafka
+          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+          tar xvzf kafka_2.13-2.6.0.tgz
+          # 8. Install kafkacat
+          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -106,11 +131,19 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          ctest -VV
-
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          # start kafka cluster
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          sleep 10
+          kafkacat -L -b 127.0.0.1:40091
+          # run tests
+          export KAFKA_BROKER_LIST="127.0.0.1:40091,127.0.0.1:40092,127.0.0.1:40093"; ctest -VV
+          # stop kafka cluster
+          kafka-server-stop.sh
+          zookeeper-server-stop.sh
 
   build_gcc_cxx14:
-    name: Build on Linux with GCC (C++14)
+    name: Build on Linux (GCC, C++14)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/gcc
@@ -147,6 +180,14 @@ jobs:
           ./configure
           make && sudo make install
           cd ../
+          # 6. Install zookeeper
+          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
+          # 7. Install kafka
+          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+          tar xvzf kafka_2.13-2.6.0.tgz
+          # 8. Install kafkacat
+          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -158,10 +199,19 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          ctest -VV
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          # start kafka cluster
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          sleep 10
+          kafkacat -L -b 127.0.0.1:40091
+          # run tests
+          export KAFKA_BROKER_LIST="127.0.0.1:40091,127.0.0.1:40092,127.0.0.1:40093"; ctest -VV
+          # stop kafka cluster
+          kafka-server-stop.sh
+          zookeeper-server-stop.sh
 
   build_gcc_asan:
-    name: Build on Linux with GCC (ASAN)
+    name: Build on Linux (GCC, ASAN)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/gcc-asan
@@ -198,6 +248,14 @@ jobs:
           ./configure
           make -j$CPU_CORE_NUM && sudo make install
           cd ../
+          # 6. Install zookeeper
+          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
+          # 7. Install kafka
+          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+          tar xvzf kafka_2.13-2.6.0.tgz
+          # 8. Install kafkacat
+          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -209,10 +267,19 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          ctest -VV
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          # start kafka cluster
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          sleep 10
+          kafkacat -L -b 127.0.0.1:40091
+          # run tests
+          export KAFKA_BROKER_LIST="127.0.0.1:40091,127.0.0.1:40092,127.0.0.1:40093"; ctest -VV
+          # stop kafka cluster
+          kafka-server-stop.sh
+          zookeeper-server-stop.sh
 
   build_gcc_tsan:
-    name: Build on Linux with GCC (TSAN)
+    name: Build on Linux (GCC, TSAN)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/gcc-tsan
@@ -248,6 +315,14 @@ jobs:
           ./configure
           make -j$CPU_CORE_NUM && sudo make install
           cd ../
+          # 6. Install zookeeper
+          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
+          # 7. Install kafka
+          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+          tar xvzf kafka_2.13-2.6.0.tgz
+          # 8. Install kafkacat
+          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -259,11 +334,19 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          ctest -VV
-
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          # start kafka cluster
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          sleep 10
+          kafkacat -L -b 127.0.0.1:40091
+          # run tests
+          export KAFKA_BROKER_LIST="127.0.0.1:40091,127.0.0.1:40092,127.0.0.1:40093"; ctest -VV
+          # stop kafka cluster
+          kafka-server-stop.sh
+          zookeeper-server-stop.sh
 
   build_gcc_ubsan:
-    name: Build on Linux with GCC (UBSAN)
+    name: Build on Linux (GCC, UBSAN)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/gcc-ubsan
@@ -299,6 +382,14 @@ jobs:
           ./configure
           make -j$CPU_CORE_NUM && sudo make install
           cd ../
+          # 6. Install zookeeper
+          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
+          # 7. Install kafka
+          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+          tar xvzf kafka_2.13-2.6.0.tgz
+          # 8. Install kafkacat
+          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -310,10 +401,19 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          ctest -VV
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          # start kafka cluster
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          sleep 10
+          kafkacat -L -b 127.0.0.1:40091
+          # run tests
+          export KAFKA_BROKER_LIST="127.0.0.1:40091,127.0.0.1:40092,127.0.0.1:40093"; ctest -VV
+          # stop kafka cluster
+          kafka-server-stop.sh
+          zookeeper-server-stop.sh
 
   build_clang:
-    name: Build on Linux with Clang
+    name: Build on Linux (Clang)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/clang
@@ -350,6 +450,14 @@ jobs:
           ./configure
           make -j$CPU_CORE_NUM && sudo make install
           cd ../
+          # 6. Install zookeeper
+          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
+          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
+          # 7. Install kafka
+          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+          tar xvzf kafka_2.13-2.6.0.tgz
+          # 8. Install kafkacat
+          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -361,10 +469,19 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          ctest -VV
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          # start kafka cluster
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          sleep 10
+          kafkacat -L -b 127.0.0.1:40091
+          # run tests
+          export KAFKA_BROKER_LIST="127.0.0.1:40091,127.0.0.1:40092,127.0.0.1:40093"; ctest -VV
+          # stop kafka cluster
+          kafka-server-stop.sh
+          zookeeper-server-stop.sh
 
   build_clang_tidy:
-    name: Build on Linux with Clang (Tidy)
+    name: Build on Linux (ClangTidy)
     runs-on: ubuntu-latest
     env:
         BUILD_SUB_DIR: build/clang-tidy
@@ -411,10 +528,6 @@ jobs:
         run: |
           cd $BUILD_SUB_DIR
           make  -j$CPU_CORE_NUM VERBOSE=1
-      - name: Test
-        run: |
-          cd $BUILD_SUB_DIR
-          ctest -VV
 
   build_doc:
     name: Generate Documents
