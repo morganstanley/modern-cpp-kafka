@@ -46,7 +46,7 @@ private:
 
 #define KAFKA_THROW(respErr)                throw KafkaException(__FILE__, __LINE__, ErrorCode(respErr))
 #define KAFKA_THROW_WITH_MSG(respErr, ...)  throw KafkaException(__FILE__, __LINE__, ErrorCode(respErr), __VA_ARGS__)
-#define KAFKA_THROW_IF_WITH_ERROR(respErr)  if ((respErr) != RD_KAFKA_RESP_ERR_NO_ERROR) KAFKA_THROW(respErr)
+#define KAFKA_THROW_IF_WITH_ERROR(respErr)  if (respErr != RD_KAFKA_RESP_ERR_NO_ERROR) KAFKA_THROW(respErr)
 
 } // end of KAFKA_API
 

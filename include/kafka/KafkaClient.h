@@ -116,7 +116,7 @@ public:
         if (level >= LOG_EMERG && level <= _logLevel && logger)
         {
             LogBuffer<LOG_BUFFER_SIZE> logBuffer;
-            logBuffer.print("%s %s", name().c_str(), format, args...);
+            logBuffer.print(name().c_str()).print(format, args...);
             logger(level, filename, lineno, logBuffer.c_str());
         }
     }
@@ -200,7 +200,11 @@ private:
     static const constexpr char* SECURITY_PROTOCOL          = "security.protocol";
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
 
+#if __cplusplus >= 201703L
     static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
+#else
+    enum { DEFAULT_METADATA_TIMEOUT_MS = 10000 };
+#endif
 
 protected:
     class Pollable
@@ -471,7 +475,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
     {
         if (!disableErrorLogging)
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "Failed to get BrokerMetadata! error[%s]", rd_kafka_err2str(err));
+            KAFKA_API_DO_LOG(LOG_ERR, "failed to get BrokerMetadata! error[%s]", rd_kafka_err2str(err));
         }
         return ret;
     }
@@ -480,7 +484,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
     {
         if (!disableErrorLogging)
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "Failed to construct MetaData! topic_cnt[%d]", rk_metadata->topic_cnt);
+            KAFKA_API_DO_LOG(LOG_ERR, "failed to construct MetaData! topic_cnt[%d]", rk_metadata->topic_cnt);
         }
         return ret;
     }
@@ -490,7 +494,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
     {
         if (!disableErrorLogging)
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "Failed to construct MetaData!  topic.err[%s]", rd_kafka_err2str(metadata_topic.err));
+            KAFKA_API_DO_LOG(LOG_ERR, "failed to construct MetaData!  topic.err[%s]", rd_kafka_err2str(metadata_topic.err));
         }
         return ret;
     }
@@ -516,7 +520,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
         {
             if (!disableErrorLogging)
             {
-                KAFKA_API_DO_LOG(LOG_ERR, "Got error[%s] while constructing BrokerMetadata for topic[%s]-partition[%d]", rd_kafka_err2str(metadata_partition.err), topic.c_str(), partition);
+                KAFKA_API_DO_LOG(LOG_ERR, "got error[%s] while constructing BrokerMetadata for topic[%s]-partition[%d]", rd_kafka_err2str(metadata_partition.err), topic.c_str(), partition);
             }
 
             continue;

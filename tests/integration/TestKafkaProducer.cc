@@ -9,7 +9,6 @@
 #include <boost/algorithm/string.hpp>
 
 using namespace KAFKA_API;
-using namespace KafkaTestUtility;
 
 
 TEST(KafkaSyncProducer, SendMessagesWithAcks1)
@@ -25,7 +24,7 @@ TEST(KafkaSyncProducer, SendMessagesWithAcks1)
     const Partition partition = 0;
 
     // Properties for the producer
-    const auto props = getKafkaClientCommonConfig().put(ProducerConfig::ACKS, "1");
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::ACKS, "1");
 
     // Sync-send producer
     KafkaSyncProducer producer(props);
@@ -40,13 +39,12 @@ TEST(KafkaSyncProducer, SendMessagesWithAcks1)
     }
 
     // Prepare a consumer
-    Kafka::KafkaAutoCommitConsumer consumer(getKafkaClientCommonConfig());
+    Kafka::KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
     consumer.setLogLevel(LOG_CRIT);
     consumer.subscribe({topic});
-    consumer.seekToBeginning();
 
     // Poll these messages
-    auto records = ConsumeMessagesUntilTimeout(consumer);
+    auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
 
     // Check the messages
     EXPECT_EQ(messages.size(), records.size());
@@ -70,7 +68,7 @@ TEST(KafkaSyncProducer, SendMessagesWithAcksAll)
     const Partition partition = 0;
 
     // Properties for the producer
-    const auto props = getKafkaClientCommonConfig().put(ProducerConfig::ACKS, "all");
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::ACKS, "all");
 
     // Async-send producer
     KafkaSyncProducer producer(props);
@@ -85,13 +83,13 @@ TEST(KafkaSyncProducer, SendMessagesWithAcksAll)
     }
 
     // Prepare a consumer
-    const auto consumerProps = getKafkaClientCommonConfig().put(Kafka::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
+    const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(Kafka::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
     Kafka::KafkaAutoCommitConsumer consumer(consumerProps);
     consumer.setLogLevel(LOG_CRIT);
     consumer.subscribe({topic});
 
     // Poll these messages
-    auto records = ConsumeMessagesUntilTimeout(consumer);
+    auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
 
     // Check the messages
     EXPECT_EQ(messages.size(), records.size());
@@ -115,10 +113,10 @@ TEST(KafkaSyncProducer, FailToSendMessagesWithAcksAll)
     const Topic topic             = Utility::getRandomString();
     const int   numPartitions     = 5;
     const int   replicationFactor = 1;
-    CreateKafkaTopic(topic, numPartitions, replicationFactor);
+    KafkaTestUtility::CreateKafkaTopic(topic, numPartitions, replicationFactor);
 
     // Properties for the producer
-    const auto props = getKafkaClientCommonConfig().put(ProducerConfig::ACKS, "all");
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::ACKS, "all");
 
     // Async-send producer
     KafkaSyncProducer producer(props);
@@ -148,7 +146,7 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
     const auto record = ProducerRecord(topic, partition, Key(key.c_str(), key.size()), Value(value.c_str(), value.size()));
 
     {
-        const auto props = getKafkaClientCommonConfig()
+        const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                            .put(ProducerConfig::ACKS,               "all")
                            .put(ProducerConfig::REQUEST_TIMEOUT_MS, "1"); // Here it's a short value, more likely to trigger the timeout
 
@@ -174,7 +172,7 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
 
 TEST(KafkaSyncProducer, DefaultPartitioner)
 {
-    KafkaSyncProducer producer(getKafkaClientCommonConfig());
+    KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
     const Topic topic = Utility::getRandomString();
 
@@ -200,7 +198,7 @@ TEST(KafkaSyncProducer, TryOtherPartitioners)
 {
     // Try another "partitioner" instead of the default one
     {
-        auto props = getKafkaClientCommonConfig();
+        auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         // Partitioner "murmur2": if with no available key, all these records would be partitioned to the same partition
         props.put(ProducerConfig::PARTITIONER, "murmur2");
 
@@ -227,7 +225,7 @@ TEST(KafkaSyncProducer, TryOtherPartitioners)
     }
 
     {
-        auto props = getKafkaClientCommonConfig();
+        auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         // An invalid partitioner
         props.put(ProducerConfig::PARTITIONER, "invalid");
 
@@ -239,14 +237,14 @@ TEST(KafkaSyncProducer, TryOtherPartitioners)
 TEST(KafkaSyncProducer, ThreadCount)
 {
     {
-        KafkaSyncProducer producer(getKafkaClientCommonConfig());
+        KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
         std::cout << "[" << Utility::getCurrentTime() << "] " << producer.name() << " started" << std::endl;
         std::cout << "[" << Utility::getCurrentTime() << "] librdkafka thread cnt[" << Utility::getLibRdKafkaThreadCount() << "]" << std::endl;
 
         // Just wait a short while, thus make sure all background threads be started
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
-        EXPECT_EQ(getNumberOfKafkaBrokers() + 2, Utility::getLibRdKafkaThreadCount());
+        EXPECT_EQ(KafkaTestUtility::GetNumberOfKafkaBrokers() + 2, Utility::getLibRdKafkaThreadCount());
     }
 
     EXPECT_EQ(0, Utility::getLibRdKafkaThreadCount());
@@ -279,7 +277,7 @@ TEST(KafkaAsyncProducer, MessageDeliveryCallback)
 
     // The producer would close anyway
     {
-        KafkaAsyncProducer producer(getKafkaClientCommonConfig());
+        KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
         for (const auto& msg: messages)
         {
             auto record = ProducerRecord(topic, partition,
@@ -329,7 +327,7 @@ TEST(KafkaAsyncProducer, DeliveryCallback_ManuallyPollEvents)
 
     // The producer would close anyway
     {
-        KafkaAsyncProducer producer(getKafkaClientCommonConfig(), KafkaClient::EventsPollingOption::Manual);
+        KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig(), KafkaClient::EventsPollingOption::Manual);
         for (const auto& msg: messages)
         {
             auto record = ProducerRecord(topic, partition,
@@ -341,11 +339,11 @@ TEST(KafkaAsyncProducer, DeliveryCallback_ManuallyPollEvents)
         }
 
         // Wait for the delivery callback (to be triggered)
-        const auto end = std::chrono::steady_clock::now() + MAX_DELIVERY_TIMEOUT;
+        const auto end = std::chrono::steady_clock::now() + KafkaTestUtility::MAX_DELIVERY_TIMEOUT;
         do
         {
             // Keep polling for the delivery-callbacks
-            producer.pollEvents(POLL_INTERVAL);
+            producer.pollEvents(KafkaTestUtility::POLL_INTERVAL);
         } while (std::chrono::steady_clock::now() < end);
     }
 
@@ -373,7 +371,7 @@ TEST(KafkaAsyncProducer, NoBlockSendingWhileQueueIsFull_ManuallyPollEvents)
             ++msgSentCnt;
         };
 
-    auto props = getKafkaClientCommonConfig();
+    auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
     // Here we limit the queue buffering size to be only 1
     props.put(ProducerConfig::QUEUE_BUFFERING_MAX_MESSAGES, "1");
 
@@ -415,11 +413,11 @@ TEST(KafkaAsyncProducer, NoBlockSendingWhileQueueIsFull_ManuallyPollEvents)
     EXPECT_EQ(RD_KAFKA_RESP_ERR__QUEUE_FULL, ec.value());
 
     // Wait for the delivery callback (to be triggered)
-    const auto end = std::chrono::steady_clock::now() + MAX_DELIVERY_TIMEOUT;
+    const auto end = std::chrono::steady_clock::now() + KafkaTestUtility::MAX_DELIVERY_TIMEOUT;
     do
     {
         // Keep polling for the delivery-callbacks
-        producer.pollEvents(POLL_INTERVAL);
+        producer.pollEvents(KafkaTestUtility::POLL_INTERVAL);
     } while (std::chrono::steady_clock::now() < end);
 
     // The producer will wait for all delivery callbacks before close
@@ -437,7 +435,7 @@ TEST(KafkaAsyncProducer, TooLargeMessageForBroker)
     const auto value  = std::string(2048, 'a');
     const auto record = ProducerRecord(topic, partition, Key(nullptr, 0), Value(value.c_str(), value.size()));
 
-    const auto props = getKafkaClientCommonConfig()
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                        .put(ProducerConfig::MESSAGE_MAX_BYTES,  "2000000") // Note: by default, the brokers only support messages no larger than 1M
                        .put(ProducerConfig::LINGER_MS,          "100");    // Here use a large value to make sure it's long enough to generate a large message-batch
 
@@ -465,7 +463,7 @@ TEST(KafkaAsyncProducer, CopyRecordValueWithinSend)
 {
     const Topic topic = Utility::getRandomString();
 
-    const auto props = getKafkaClientCommonConfig()
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                        .put(ProducerConfig::PARTITIONER, "murmur2"); // `ProducerRecord`s with empty key are mapped to a single partition
 
     // Send messages (with option "ToCopyRecordValue")
@@ -487,18 +485,16 @@ TEST(KafkaAsyncProducer, CopyRecordValueWithinSend)
     // Poll all messages & check
     {
         // Prepare a consumer
-        Kafka::KafkaManualCommitConsumer consumer(getKafkaClientCommonConfig());
+        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
         consumer.setLogLevel(LOG_CRIT);
         consumer.subscribe({topic});
-        consumer.seekToBeginning();
 
         // Check messages
-        auto records = ConsumeMessagesUntilTimeout(consumer);
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         ASSERT_EQ(MSG_NUM, records.size());
         for (std::size_t i = 0; i < records.size(); ++i)
         {
-            auto payload = std::string(static_cast<const char *>(records[i].value().data()), records[i].value().size());
-            EXPECT_EQ(std::to_string(i), payload);
+            EXPECT_EQ(std::to_string(i), records[i].value().toString());
         }
     }
 }

@@ -283,14 +283,14 @@ public:
      * Stub for ProduceResponse handing.
      * Note: Only for internal unit tests
      */
-    void stubHandleProduceResponse(HandleProduceResponseCb cb = HandleProduceResponseCb()) { _handleProduceRespCb = cb; }
+    void stubHandleProduceResponse(HandleProduceResponseCb cb = HandleProduceResponseCb()) { _handleProduceRespCb = std::move(cb); }
 
 private:
     static rd_kafka_resp_err_t handleProduceResponse(rd_kafka_t* rk, int32_t brokerId, uint64_t msgSeq, rd_kafka_resp_err_t err)
     {
-        KafkaClient* client = static_cast<KafkaClient*>(rd_kafka_opaque(rk));
-        KafkaProducer* producer = dynamic_cast<KafkaProducer*>(client);
-        auto respCb = producer->_handleProduceRespCb;
+        auto* client   = static_cast<KafkaClient*>(rd_kafka_opaque(rk));
+        auto* producer = dynamic_cast<KafkaProducer*>(client);
+        auto  respCb   = producer->_handleProduceRespCb;
         return respCb ? respCb(rk, brokerId, msgSeq, err) : err;
     }
 
@@ -307,13 +307,13 @@ KafkaProducer::registerConfigCallbacks(rd_kafka_conf_t* conf)
 #ifdef KAFKA_API_ENABLE_UNIT_TEST_STUBS
     // UT stub for ProduceResponse
     LogBuffer<LOG_BUFFER_SIZE> errInfo;
-    if (rd_kafka_conf_set(conf, "ut_handle_ProduceResponse", reinterpret_cast<char*>(&handleProduceResponse), errInfo.str(), errInfo.capacity()))
+    if (rd_kafka_conf_set(conf, "ut_handle_ProduceResponse", reinterpret_cast<char*>(&handleProduceResponse), errInfo.str(), errInfo.capacity()))   // NOLINT
     {
         KafkaClient* client = nullptr;
         size_t clientPtrSize = 0;
-        if (rd_kafka_conf_get(conf, "opaque", reinterpret_cast<char*>(&client), &clientPtrSize))
+        if (rd_kafka_conf_get(conf, "opaque", reinterpret_cast<char*>(&client), &clientPtrSize))    // NOLINT
         {
-            LOG(LOG_CRIT, "failed to stub ut_handle_ProduceResponse! error[%s]. Meanwhile, failed to get the Kafka client!", errInfo.c_str());
+            KAFKA_API_LOG(LOG_CRIT, "failed to stub ut_handle_ProduceResponse! error[%s]. Meanwhile, failed to get the Kafka client!", errInfo.c_str());
         }
         else
         {
@@ -397,7 +397,7 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
     const auto* topic     = record.topic().c_str();
     const auto  partition = record.partition();
     const auto  msgFlags  = (static_cast<unsigned int>(option == SendOption::ToCopyRecordValue ? RD_KAFKA_MSG_F_COPY : 0)
-                            | static_cast<unsigned int>(action == ActionWhileQueueIsFull::Block ? RD_KAFKA_MSG_F_BLOCK : 0));
+                             | static_cast<unsigned int>(action == ActionWhileQueueIsFull::Block ? RD_KAFKA_MSG_F_BLOCK : 0));
     const auto* keyPtr    = record.key().data();
     const auto  keyLen    = record.key().size();
     const auto* valuePtr  = record.value().data();
