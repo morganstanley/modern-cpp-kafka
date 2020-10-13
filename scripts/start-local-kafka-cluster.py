@@ -35,8 +35,6 @@ class ProcessPool(object):
                              stdout=out,
                              stderr=err)
 
-        print('name: {0}, pid: {1}'.format(name, p.pid))
-
         if 'kafka' in name:
             kafkaPids.append(p.pid)
         else:
@@ -44,14 +42,13 @@ class ProcessPool(object):
 
         self.processList.append((p, name))
 
-
     def run(self):
         anyFailure = False
         while self.processList:
             for (i, (p, name)) in enumerate(self.processList):
                 ret = p.poll()
                 if ret != None:
-                    print('failed: {0}, pid: {1}, ret: {2}'.format(name, p.pid, ret))
+                    print('Failed to start server: {0}, pid: {1}, ret: {2}'.format(name, p.pid, ret))
                     self.processList.pop(i)
                     anyFailure = True
                     break
@@ -60,8 +57,8 @@ class ProcessPool(object):
 
     def terminate(self):
         for (p, name) in self.processList:
-            print('terminate: {0}, pid: {1}'.format(name, p.pid))
             p.kill()
+            print('{0} terminated'.format(name))
 
     def __del__(self):
         self.terminate()
@@ -142,6 +139,10 @@ def main():
         StartKafkaServer('kafka{0}'.format(i), kafkaPropFiles[i].filename, outDir)
 
     print('Kafka server started... (zookeeper pid: {0}, kafka pids: {1})'.format(zookeeperPids, kafkaPids))
+
+    with open(r'test.env', 'w') as envFile:
+        envFile.write('export KAFKA_BROKER_LIST={0}\n'.format(','.join(['127.0.0.1:{0}'.format(port) for port in brokerPorts])))
+        envFile.write('export KAFKA_BROKER_PIDS={0}\n'.format(','.join([str(pid) for pid in kafkaPids])))
 
     processPool.run()
 
