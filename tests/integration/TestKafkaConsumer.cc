@@ -102,6 +102,10 @@ TEST(KafkaAutoCommitConsumer, PollWithHeaders)
                        });
     EXPECT_FALSE(consumer.subscription().empty());
 
+    // No message yet
+    auto records = ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
+    EXPECT_EQ(0, records.size());
+
     // Prepare some messages to send
     const std::string v1 = "v1";
     const std::string v2 = "k2";
@@ -121,7 +125,7 @@ TEST(KafkaAutoCommitConsumer, PollWithHeaders)
     ProduceMessages(topic, partition, messages);
 
     // Poll these messages
-    auto records = ConsumeMessagesUntilTimeout(consumer);
+    records = ConsumeMessagesUntilTimeout(consumer);
     EXPECT_EQ(messages.size(), records.size());
 
     // Check mesages

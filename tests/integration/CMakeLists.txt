@@ -13,13 +13,13 @@ add_executable("${PROJECT_NAME}" ${TEST_SRCS})
 
 target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api gmock_main pthread)
 
-#add_test(NAME ${PROJECT_NAME} COMMAND ./${PROJECT_NAME})
+add_test(NAME ${PROJECT_NAME} COMMAND ./${PROJECT_NAME})
 
 if (BUILD_OPTION_USE_ASAN OR BUILD_OPTION_USE_TSAN)
     target_compile_options(${PROJECT_NAME} PRIVATE "-fno-sanitize=all")
     target_link_options(${PROJECT_NAME} PRIVATE "-fno-sanitize=all")
     if (BUILD_OPTION_USE_ASAN)
-        #set_property(TEST ${PROJECT_NAME} PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_leaks=1)
+        set_property(TEST ${PROJECT_NAME} PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_leaks=1)
     endif ()
 endif ()
 
