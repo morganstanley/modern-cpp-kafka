@@ -23,6 +23,8 @@ TEST(KafkaAutoCommitConsumer, BasicPoll)
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // The auto-commit consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
@@ -86,6 +88,8 @@ TEST(KafkaAutoCommitConsumer, PollWithHeaders)
     const Partition partition = 0;
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // The auto-commit consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -176,6 +180,8 @@ TEST(KafkaAutoCommitConsumer, SeekAndPoll)
     const Partition partition = 0;
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // The auto-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
@@ -867,6 +873,8 @@ TEST(KafkaAutoCommitConsumer, RebalancePartitionsAssign)
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "], group[" << group << "] would be used" << std::endl;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Prepare the consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::GROUP_ID, group);
 
@@ -959,6 +967,8 @@ TEST(KafkaAutoCommitConsumer, PartitionAssignment)
     const Partition partition1 = 0;
     const Partition partition2 = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
@@ -976,6 +986,8 @@ TEST(KafkaAutoCommitConsumer, PartitionAssignment)
 TEST(KafkaAutoCommitConsumer, TopicSubscription)
 {
     const Topics topics = { Utility::getRandomString(), Utility::getRandomString(), Utility::getRandomString() };
+
+    for (const auto& topic: topics) KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -995,6 +1007,8 @@ TEST(KafkaAutoCommitConsumer, SubscribeUnsubscribeThenAssign)
 {
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -1027,6 +1041,8 @@ TEST(KafkaAutoCommitConsumer, AssignUnassignAndSubscribe)
 {
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -1073,6 +1089,8 @@ TEST(KafkaAutoCommitConsumer, WrongOperation_SubscribeThenAssign)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
@@ -1093,6 +1111,8 @@ TEST(KafkaAutoCommitConsumer, WrongOperation_AssignThenSubscribe)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
@@ -1110,6 +1130,8 @@ TEST(KafkaAutoCommitConsumer, WrongOperation_AssignThenSubscribe)
 TEST(KafkaClient, GetBrokerMetadata)
 {
     const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -1143,6 +1165,8 @@ TEST(KafkaClient, GetBrokerMetadata)
 TEST(KafkaAutoCommitConsumer, SubscribeAndPoll)
 {
     const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
 
@@ -1183,6 +1207,9 @@ TEST(KafkaAutoCommitConsumer, PauseAndResume)
 {
     const Topic topic1 = Utility::getRandomString();
     const Topic topic2 = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic1, 5, 3);
+    KafkaTestUtility::CreateKafkaTopic(topic2, 5, 3);
 
     // Produce messages towards topic1
     const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
@@ -1254,6 +1281,9 @@ TEST(KafkaAutoCommitConsumer, PauseStillWorksAfterRebalance)
 {
     const Topic topic1 = Utility::getRandomString();
     const Topic topic2 = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic1, 5, 3);
+    KafkaTestUtility::CreateKafkaTopic(topic2, 5, 3);
 
     // Start the consumer1
     auto props1 = KafkaTestUtility::GetKafkaClientCommonConfig()
@@ -1396,7 +1426,7 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
 
     std::cout << "Try with all invalid topic-partitions: (exception caught)" << std::endl;
     {
-        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put("allow.auto.create.topics", "true"));
 
         const auto timepoint = checkPoints[0];
 
@@ -1408,18 +1438,10 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
     {
         Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
-        for (int i = 0; i < MESSAGES_NUM; ++i)
-        {
-            const auto timepoint = checkPoints[i];
-            const auto expected  = expectedOffsets[i];
+        const auto timepoint = checkPoints[0];
 
-            auto offsets = consumer.offsetsForTime({{topic1, partition1},
-                                                     {topic2, partition2},
-                                                     {Utility::getRandomString(), 100}}, timepoint);
-
-            std::cout << "Got offsets: " << Kafka::toString(offsets) << ", for time: " << Timestamp(duration_cast<milliseconds>(timepoint.time_since_epoch()).count()).toString() << std::endl;
-            EXPECT_EQ(expected, offsets);
-        }
+        EXPECT_KAFKA_THROW({consumer.offsetsForTime({{topic1, partition1}, {Utility::getRandomString(), 100}}, timepoint);},
+                           RD_KAFKA_RESP_ERR_LEADER_NOT_AVAILABLE);
     }
 }
 

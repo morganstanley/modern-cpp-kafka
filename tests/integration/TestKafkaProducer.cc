@@ -436,8 +436,9 @@ TEST(KafkaAsyncProducer, TooLargeMessageForBroker)
     const auto record = ProducerRecord(topic, partition, Key(nullptr, 0), Value(value.c_str(), value.size()));
 
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(ProducerConfig::MESSAGE_MAX_BYTES,  "2000000") // Note: by default, the brokers only support messages no larger than 1M
-                       .put(ProducerConfig::LINGER_MS,          "100");    // Here use a large value to make sure it's long enough to generate a large message-batch
+                       .put(ProducerConfig::BATCH_SIZE,        "2000000")
+                       .put(ProducerConfig::MESSAGE_MAX_BYTES, "2000000") // Note: by default, the brokers only support messages no larger than 1M
+                       .put(ProducerConfig::LINGER_MS,         "100");    // Here use a large value to make sure it's long enough to generate a large message-batch
 
     KafkaAsyncProducer producer(props);
 

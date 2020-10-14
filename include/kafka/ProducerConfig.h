@@ -65,6 +65,12 @@ public:
     static const constexpr char* BATCH_NUM_MESSAGES           = "batch.num.messages";
 
     /**
+     * Maximum size (in bytes) of all messages batched in one MessageSet (including protocol framing overhead).
+     * Default value: 1000000
+     */
+    static const constexpr char* BATCH_SIZE                   = "batch.size";
+
+    /**
      * Maximum Kafka protocol request message size.
      * Note: Should be coordinated with the bokers's configuration. Otherwise, any larger message would be rejected!
      * Default value: 1000000

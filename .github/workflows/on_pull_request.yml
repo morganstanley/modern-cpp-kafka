@@ -3,7 +3,8 @@ name: pull_request
 on: [push, pull_request]
 
 env:
-  CPU_CORE_NUM: 2
+  CPU_CORE_NUM      : 2
+  LIBRDKAFKA_VERSION: 1.5.0
 
 jobs:
   build_gcc_debug:
@@ -33,16 +34,16 @@ jobs:
           mkdir -p googletest
           cd googletest
           env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install zookeeper
           wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
@@ -59,7 +60,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
@@ -102,16 +103,16 @@ jobs:
           mkdir -p googletest
           cd googletest
           env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install zookeeper
           wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
@@ -128,7 +129,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
@@ -176,9 +177,9 @@ jobs:
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
           make && sudo make install
           cd ../
@@ -197,7 +198,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
@@ -240,16 +241,16 @@ jobs:
           mkdir -p googletest
           cd googletest
           env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install zookeeper
           wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
@@ -266,7 +267,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
@@ -308,16 +309,16 @@ jobs:
           mkdir -p googletest
           cd googletest
           env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install zookeeper
           wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
@@ -334,7 +335,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
@@ -376,16 +377,16 @@ jobs:
           mkdir -p googletest
           cd googletest
           env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install zookeeper
           wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
@@ -402,7 +403,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
@@ -445,16 +446,16 @@ jobs:
           mkdir -p googletest
           cd googletest
           cmake /usr/src/googletest/
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install zookeeper
           wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
@@ -471,7 +472,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
@@ -516,16 +517,16 @@ jobs:
           mkdir -p googletest
           cd googletest
           env CC=clang CXX=clang++ cmake /usr/src/googletest/
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 4. Install boost lib
           sudo apt install -y libboost-all-dev
           # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v1.4.2.tar.gz
-          tar -xvzf v1.4.2.tar.gz
-          cd librdkafka-1.4.2
+          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
-          make -j$CPU_CORE_NUM && sudo make install
+          make -j${CPU_CORE_NUM} && sudo make install
           cd ../
       - name: Config
         run: |
@@ -534,7 +535,7 @@ jobs:
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
-          make  -j$CPU_CORE_NUM VERBOSE=1
+          make -j${CPU_CORE_NUM} VERBOSE=1
 
   build_doc:
     name: Generate Documents
