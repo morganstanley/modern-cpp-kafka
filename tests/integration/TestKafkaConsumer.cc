@@ -1494,6 +1494,9 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
                                     assignedPartitions = tps;
                                 }
                            });
+        // No message yet
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
+        EXPECT_EQ(0, records.size());
 
         // Query where the consumer should start from
         const auto offsetsToSeek = consumer.offsetsForTime(assignedPartitions, persistedTimepoint);
@@ -1509,7 +1512,7 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
         }
 
         // Process messages
-        const auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+        records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         for (const auto& record: records)
         {
             messagesProcessed.emplace_back(record.key().toString(), record.value().toString());

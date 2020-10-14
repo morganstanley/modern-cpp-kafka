@@ -28,3 +28,5 @@ message(STATUS "googletest root directory: ${GTEST_ROOT}")
 
 add_subdirectory(unit)
 add_subdirectory(integration)
+add_subdirectory(robustness)
+

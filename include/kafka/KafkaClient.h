@@ -116,7 +116,7 @@ public:
         if (level >= LOG_EMERG && level <= _logLevel && logger)
         {
             LogBuffer<LOG_BUFFER_SIZE> logBuffer;
-            logBuffer.print(name().c_str()).print(format, args...);
+            logBuffer.print("%s ", name().c_str()).print(format, args...);
             logger(level, filename, lineno, logBuffer.c_str());
         }
     }

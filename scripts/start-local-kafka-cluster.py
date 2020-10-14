@@ -83,6 +83,9 @@ def GenerateBrokerConfig(brokerId, brokerPort, zookeeperPort, logDir):
         zookeeper.connect=127.0.0.1:${zookeeper_port}
         num.partitions=5
         default.replication.factor=3
+        offsets.topic.replication.factor=3
+        offsets.commit.timeout.ms=10000
+        unclean.leader.election.enable=false
         min.insync.replicas=2
     ''')
     properties = brokerTemplate.substitute(broker_id=brokerId, listener_port=brokerPort, zookeeper_port=zookeeperPort, log_dir=logDir)
@@ -138,13 +141,35 @@ def main():
     for (i, brokerPort) in enumerate(brokerPorts):
         StartKafkaServer('kafka{0}'.format(i), kafkaPropFiles[i].filename, outDir)
 
-    print('Kafka server started... (zookeeper pid: {0}, kafka pids: {1})'.format(zookeeperPids, kafkaPids))
+    MAX_RETRY = 60
+    retry = 0
+    while retry < MAX_RETRY:
+        time.sleep(1)
 
-    with open(r'test.env', 'w') as envFile:
-        envFile.write('export KAFKA_BROKER_LIST={0}\n'.format(','.join(['127.0.0.1:{0}'.format(port) for port in brokerPorts])))
-        envFile.write('export KAFKA_BROKER_PIDS={0}\n'.format(','.join([str(pid) for pid in kafkaPids])))
+        kafkaBrokerPids = []
+        netstatCall = subprocess.Popen(['netstat', '-tlp'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        (out, err) = netstatCall.communicate();
+        for brokerPort in brokerPorts:
+            matched = re.search('tcp[4 6] +[0-9]+ +[0-9]+ +localhost:{0} +.+ +LISTEN *([0-9]+)/java.*'.format(brokerPort), out.decode('utf-8'))
+            if matched:
+                kafkaBrokerPids.append(matched.group(1))
 
-    processPool.run()
+        if len(kafkaBrokerPids) != len(brokerPorts):
+            continue
+
+        with open(r'test.env', 'w') as envFile:
+            envFile.write('export KAFKA_BROKER_LIST={0}\n'.format(','.join(['127.0.0.1:{0}'.format(port) for port in brokerPorts])))
+            envFile.write('export KAFKA_BROKER_PIDS={0}\n'.format(','.join([pid for pid in kafkaBrokerPids])))
+            break
+
+        retry += 1
+
+    if retry < MAX_RETRY:
+        print('Kafka cluster started with ports: {0}!'.format(brokerPorts))
+        processPool.run()
+    else:
+        print('Kafka cluster failed to start with ports: {0}!'.format(brokerPorts))
+        processPoll.terminate()
 
 
 if __name__ == '__main__':

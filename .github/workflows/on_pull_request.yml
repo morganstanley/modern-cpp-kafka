@@ -65,11 +65,10 @@ jobs:
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
           # start kafka cluster
+          rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
-          sleep 10
-          kafkacat -L -b 127.0.0.1:40091
           # run tests
-          cat test.env
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
           ctest -VV
           # stop kafka cluster
@@ -135,11 +134,10 @@ jobs:
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
           # start kafka cluster
+          rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
-          sleep 10
-          kafkacat -L -b 127.0.0.1:40091
           # run tests
-          cat test.env
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
           ctest -VV
           # stop kafka cluster
@@ -205,11 +203,10 @@ jobs:
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
           # start kafka cluster
+          rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
-          sleep 10
-          kafkacat -L -b 127.0.0.1:40091
           # run tests
-          cat test.env
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
           ctest -VV
           # stop kafka cluster
@@ -275,11 +272,10 @@ jobs:
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
           # start kafka cluster
+          rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
-          sleep 10
-          kafkacat -L -b 127.0.0.1:40091
           # run tests
-          cat test.env
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
           ctest -VV
           # stop kafka cluster
@@ -344,11 +340,10 @@ jobs:
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
           # start kafka cluster
+          rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
-          sleep 10
-          kafkacat -L -b 127.0.0.1:40091
           # run tests
-          cat test.env
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
           ctest -VV
           # stop kafka cluster
@@ -413,11 +408,10 @@ jobs:
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
           # start kafka cluster
+          rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
-          sleep 10
-          kafkacat -L -b 127.0.0.1:40091
           # run tests
-          cat test.env
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
           ctest -VV
           # stop kafka cluster
@@ -483,11 +477,10 @@ jobs:
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
           # start kafka cluster
+          rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
-          sleep 10
-          kafkacat -L -b 127.0.0.1:40091
           # run tests
-          cat test.env
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
           ctest -VV
           # stop kafka cluster
