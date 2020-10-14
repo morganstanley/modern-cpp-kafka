@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <list>
 #include <regex>
+#include <signal.h>
 #include <vector>
 
 
@@ -159,5 +160,65 @@ public:
 private:
    std::thread _t;
 };
+
+inline void
+WaitMetadataSyncUpBetweenBrokers()
+{
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+}
+
+inline std::vector<int>
+getAllBrokersPids()
+{
+    std::vector<std::string> pidsString;
+    if (getenv("KAFKA_BROKER_PIDS"))
+    {
+        std::string toSplit = getenv("KAFKA_BROKER_PIDS");
+        boost::algorithm::split(pidsString, toSplit, boost::is_any_of(","));
+    }
+
+    std::vector<int> pids;
+    std::for_each(pidsString.begin(), pidsString.end(), [&pids](const auto& s) { pids.push_back(std::stoi(s)); });
+    return pids;
+}
+
+inline void
+signalToAllBrokers(int sig)
+{
+    auto pids = getAllBrokersPids();
+    std::for_each(pids.begin(), pids.end(), [sig](int pid) { kill(pid, sig); });
+
+    if (sig == SIGSTOP)
+    {
+        std::cout << "[" << Kafka::Utility::getCurrentTime() << "] Brokers paused"  << std::endl;
+    }
+    else if (sig == SIGCONT)
+    {
+        std::cout << "[" << Kafka::Utility::getCurrentTime() << "] Brokers resumed"  << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
+inline void
+PauseBrokers()
+{
+    signalToAllBrokers(SIGSTOP);
+}
+
+inline void
+ResumeBrokers()
+{
+    signalToAllBrokers(SIGCONT);
+}
+
+inline std::shared_ptr<JoiningThread>
+PauseBrokersForAWhile(std::chrono::milliseconds duration)
+{
+    PauseBrokers();
+
+    auto cb = [](int ms){ std::this_thread::sleep_for(std::chrono::milliseconds(ms)); ResumeBrokers(); };
+    return std::make_shared<JoiningThread>(cb, duration.count());
+}
+
 } // end of namespace KafkaTestUtility
 
