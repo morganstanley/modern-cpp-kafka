@@ -50,8 +50,9 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
             { Kafka::ProducerConfig::ACKS,                          "-1"             },
             { Kafka::ProducerConfig::QUEUE_BUFFERING_MAX_MESSAGES,  "100000"         },
             { Kafka::ProducerConfig::QUEUE_BUFFERING_MAX_KBYTES,    "1048576"        }, // 0x100000
-            { Kafka::ProducerConfig::LINGER_MS,                     "0.5"            },
+            { Kafka::ProducerConfig::LINGER_MS,                     "5"              },
             { Kafka::ProducerConfig::BATCH_NUM_MESSAGES,            "10000"          },
+            { Kafka::ProducerConfig::BATCH_SIZE,                    "1000000"        },
             { Kafka::ProducerConfig::MESSAGE_MAX_BYTES,             "1000000"        },
             { Kafka::ProducerConfig::MESSAGE_TIMEOUT_MS,            "300000"         },
             { Kafka::ProducerConfig::REQUEST_TIMEOUT_MS,            "5000"           },

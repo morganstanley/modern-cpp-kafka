@@ -150,6 +150,8 @@ CreateKafkaTopic(const Kafka::Topic& topic, int numPartitions, int replicationFa
     Kafka::AdminClient adminClient(GetKafkaClientCommonConfig());
     auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
     ASSERT_FALSE(createResult.error);
+    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": topic[" << topic << "] created with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 class JoiningThread {

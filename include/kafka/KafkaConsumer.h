@@ -177,9 +177,9 @@ public:
     /**
      * Get the offsets for the given partitions by time-point.
      * Throws KafkaException with errors:
-     *   - RD_KAFKA_RESP_ERR__TIMED_OUT:            Not all offsets could be fetched in time.
-     *   - RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION:    All partitions are unknown.
-     *   - RD_KAFKA_RESP_ERR__LEADER_NOT_AVAILABLE: Unable to query leaders from the given partitions.
+     *   - RD_KAFKA_RESP_ERR__TIMED_OUT:           Not all offsets could be fetched in time.
+     *   - RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION:   All partitions are unknown.
+     *   - RD_KAFKA_RESP_ERR_LEADER_NOT_AVAILABLE: Unable to query leaders from the given partitions.
      */
     std::map<TopicPartition, Offset> offsetsForTime(const TopicPartitions& tps,
                                                     std::chrono::time_point<std::chrono::system_clock> timepoint,

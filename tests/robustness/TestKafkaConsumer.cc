@@ -148,6 +148,10 @@ TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
 
 TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
 {
+    const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
 
@@ -160,7 +164,6 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
     KafkaAutoCommitConsumer consumer(props);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
-    const Topic topic = Utility::getRandomString();
 
     TopicPartitions assignment;
     // In some corner cases, the assigned partitions might be empty (due to "Local: Broker node update" error), and we'll retry
@@ -210,6 +213,8 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
 
     const Topic topic = Utility::getRandomString();
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     TopicPartitions assignment;
     // In some corner cases, the assigned partitions might be empty (due to "Local: Broker node update" error), and we'll retry
     while (assignment.empty())
@@ -244,6 +249,10 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
 
 TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
 {
+    const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                             .put(ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
@@ -255,7 +264,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
 
     // Subscribe the topic
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
-    consumer.subscribe({Utility::getRandomString()},
+    consumer.subscribe({topic},
                         [&consumer](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
                             if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
                                 std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << toString(tps) << std::endl;
