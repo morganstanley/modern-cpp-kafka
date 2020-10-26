@@ -116,7 +116,9 @@ TEST(KafkaSyncProducer, FailToSendMessagesWithAcksAll)
     KafkaTestUtility::CreateKafkaTopic(topic, numPartitions, replicationFactor);
 
     // Properties for the producer
-    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::ACKS, "all");
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ProducerConfig::ACKS,               "all")
+                        .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "5000"); // To shorten the test
 
     // Async-send producer
     KafkaSyncProducer producer(props);
@@ -131,8 +133,8 @@ TEST(KafkaSyncProducer, FailToSendMessagesWithAcksAll)
     {
         auto record = ProducerRecord(topic, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
         std::cout << "[" << Utility::getCurrentTime() << "] ProducerRecord: " << record.toString() << std::endl;
-        // "no in-sync replica" for the topic.
-        EXPECT_KAFKA_THROW(producer.send(record), RD_KAFKA_RESP_ERR_NOT_ENOUGH_REPLICAS);
+        // Since "no in-sync replica" for the topic, it would keep trying
+        EXPECT_KAFKA_THROW(producer.send(record), RD_KAFKA_RESP_ERR__MSG_TIMED_OUT);
     }
 }
 
@@ -148,11 +150,12 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
     {
         const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                            .put(ProducerConfig::ACKS,               "all")
+                           .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "1000")
                            .put(ProducerConfig::REQUEST_TIMEOUT_MS, "1"); // Here it's a short value, more likely to trigger the timeout
 
         KafkaSyncProducer producer(props);
 
-        constexpr int MAX_RETRIES = 1000;
+        constexpr int MAX_RETRIES = 100;
         for (int i = 0; i < MAX_RETRIES; ++i)
         {
             try
@@ -163,7 +166,7 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
             catch (const KafkaException& e)
             {
                 std::cout << "[" << Utility::getCurrentTime() << "] Exception caught: " << e.what() << std::endl;
-                EXPECT_EQ(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, e.error().value());
+                EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, e.error().value());
                 break;
             }
         }

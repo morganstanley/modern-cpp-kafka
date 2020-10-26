@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 env:
   CPU_CORE_NUM      : 2
-  LIBRDKAFKA_VERSION: 1.5.0
+  LIBRDKAFKA_VERSION: 1.5.2
 
 jobs:
   build_gcc_debug:
@@ -57,6 +57,7 @@ jobs:
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
+        timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
@@ -121,6 +122,7 @@ jobs:
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
+        timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
@@ -185,6 +187,7 @@ jobs:
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
+        timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
@@ -249,6 +252,7 @@ jobs:
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
+        timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
@@ -312,6 +316,7 @@ jobs:
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
+        timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
@@ -375,6 +380,7 @@ jobs:
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
+        timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
@@ -439,6 +445,7 @@ jobs:
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
       - name: Test
+        timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
           export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
@@ -531,7 +538,7 @@ jobs:
         run: |
           cd $BUILD_SUB_DIR
           make VERBOSE=1
-      - name: Test
+      - name: Post Check
         run: |
           cd $BUILD_SUB_DIR
           ls -l doc/README.html
