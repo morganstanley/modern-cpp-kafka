@@ -64,7 +64,7 @@ TEST(AdminClient, BrokersTimeout)
         {
             break;
         }
-       
+
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         auto listResult = adminClient.listTopics(std::chrono::seconds(1));
@@ -150,3 +150,4 @@ TEST(AdminClient, BrokersTimeout)
         }
     }
 }
+

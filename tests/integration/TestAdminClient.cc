@@ -70,6 +70,8 @@ TEST(AdminClient, createListDeleteTopics)
     }
     EXPECT_TRUE(areTopicsSuccessfullyCreated);
 
+    KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
+
     // Delete Topics
     auto deleteResult = adminClient.deleteTopics(topics);
     std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics deleted, result: " << deleteResult.detail << std::endl;

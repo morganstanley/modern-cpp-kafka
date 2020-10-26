@@ -45,14 +45,9 @@ jobs:
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 6. Install zookeeper
-          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
-          # 7. Install kafka
+          # 6. Install kafka
           wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
           tar xvzf kafka_2.13-2.6.0.tgz
-          # 8. Install kafkacat
-          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -64,10 +59,10 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
           # start kafka cluster
           rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
@@ -114,14 +109,9 @@ jobs:
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 6. Install zookeeper
-          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
-          # 7. Install kafka
+          # 6. Install kafka
           wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
           tar xvzf kafka_2.13-2.6.0.tgz
-          # 8. Install kafkacat
-          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -133,10 +123,10 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
           # start kafka cluster
           rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
@@ -183,14 +173,9 @@ jobs:
           ./configure
           make && sudo make install
           cd ../
-          # 6. Install zookeeper
-          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
-          # 7. Install kafka
+          # 6. Install kafka
           wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
           tar xvzf kafka_2.13-2.6.0.tgz
-          # 8. Install kafkacat
-          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -202,10 +187,10 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
           # start kafka cluster
           rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
@@ -252,14 +237,9 @@ jobs:
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 6. Install zookeeper
-          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
-          # 7. Install kafka
+          # 6. Install kafka
           wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
           tar xvzf kafka_2.13-2.6.0.tgz
-          # 8. Install kafkacat
-          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -271,10 +251,10 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
           # start kafka cluster
           rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
@@ -320,14 +300,9 @@ jobs:
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 6. Install zookeeper
-          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
-          # 7. Install kafka
+          # 6. Install kafka
           wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
           tar xvzf kafka_2.13-2.6.0.tgz
-          # 8. Install kafkacat
-          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -339,10 +314,10 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
           # start kafka cluster
           rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
@@ -388,14 +363,9 @@ jobs:
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 6. Install zookeeper
-          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
-          # 7. Install kafka
+          # 6. Install kafka
           wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
           tar xvzf kafka_2.13-2.6.0.tgz
-          # 8. Install kafkacat
-          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -407,10 +377,10 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
           # start kafka cluster
           rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
@@ -457,14 +427,9 @@ jobs:
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 6. Install zookeeper
-          wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-          tar xvzf apache-zookeeper-3.6.2-bin.tar.gz
-          # 7. Install kafka
+          # 6. Install kafka
           wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
           tar xvzf kafka_2.13-2.6.0.tgz
-          # 8. Install kafkacat
-          sudo apt install kafkacat
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -476,10 +441,10 @@ jobs:
       - name: Test
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:`pwd`/apache-zookeeper-3.6.2-bin/bin:$PATH
+          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
           # start kafka cluster
           rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --log-dir ./tmp/log --output-dir ./tmp/output &
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
           source test.env
