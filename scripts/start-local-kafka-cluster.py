@@ -8,6 +8,8 @@ import copy
 import json
 import argparse
 import os
+import shutil
+import glob
 import time
 from multiprocessing import Process
 from string import Template
@@ -95,11 +97,11 @@ def GenerateBrokerConfig(brokerId, brokerPort, zookeeperPort, logDir):
 
 def StartZookeeperServer(name, propFile, outDir):
     cmd = '{0} {1}'.format(ZOOKEEPER_SERVER_START_BIN, propFile)
-    processPool.addProcess(cmd, name, '{0}/{1}.out'.format(outDir, name), '{0}/{1}.err'.format(outDir, name))
+    processPool.addProcess(cmd, name, os.path.join(outDir, name+'.out'), os.path.join(outDir, name+'.err'))
 
 def StartKafkaServer(name, propFile, outDir):
     cmd = '{0} {1}'.format(KAFKA_SERVER_START_BIN, propFile)
-    processPool.addProcess(cmd, name, '{0}/{1}.out'.format(outDir, name), '{0}/{1}.err'.format(outDir, name))
+    processPool.addProcess(cmd, name, os.path.join(outDir, name+'.out'), os.path.join(outDir, name+'.err'))
 
 ################################################################################
 
@@ -107,32 +109,34 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--zookeeper-port', help='The port for zookeeper', required=True)
     parser.add_argument('--broker-ports', nargs='+', help='The ports for kafka brokers', required=True)
-    parser.add_argument('--log-dir', help='The location for kafka log files', required=True)
-    parser.add_argument('--output-dir', help='The location for console printout logging files of zookeeper/brokers', required=True)
+    parser.add_argument('--temp-dir', help='The location for kafka/zookeeper log files, console printout, etc', required=True)
     parsed = parser.parse_args()
 
     zookeeperPort = parsed.zookeeper_port
-    brokerPorts = parsed.broker_ports
+    brokerPorts   = parsed.broker_ports
 
-    logDir = parsed.log_dir
-    outDir = parsed.output_dir
-    currentDir = os.getcwd()
+    if os.path.exists(parsed.temp_dir):
+        shutil.rmtree(parsed.temp_dir)
+
+    logDir  = os.path.join(parsed.temp_dir, 'log')
+    outDir  = os.path.join(parsed.temp_dir, 'out')
+    propDir = os.path.join(parsed.temp_dir, 'properties')
 
     PropFile = namedtuple('PropertiesFile', 'filename context')
+
     # Generate properties files
-    propDir = '{0}/properties'.format(currentDir)
     zookeeperPropFiles = []
-    zookeeperPropFiles.append(PropFile('{0}/zookeeper.properties'.format(propDir), GenerateZookeeperConfig(zookeeperPort, '{0}/{1}'.format(logDir, 'zookeeper'))))
+    zookeeperPropFiles.append(PropFile(os.path.join(propDir, 'zookeeper.properties'), GenerateZookeeperConfig(zookeeperPort, os.path.join(logDir, 'zookeeper'))))
     kafkaPropFiles = []
     for (i, brokerPort) in enumerate(brokerPorts):
-        kafkaPropFiles.append(PropFile('{0}/kafka{1}.properties'.format(propDir, i), GenerateBrokerConfig(i, brokerPort, zookeeperPort, '{0}/kafka{1}'.format(logDir, i))))
+        kafkaPropFiles.append(PropFile(os.path.join(propDir, 'kafka{0}.properties'.format(i)), GenerateBrokerConfig(i, brokerPort, zookeeperPort, os.path.join(logDir, 'kafka{0}'.format(i)))))
 
-    os.makedirs(propDir, exist_ok=True)
+    os.makedirs(propDir)
     for propFile in (set(zookeeperPropFiles) | set(kafkaPropFiles)):
         with open(propFile.filename, 'w') as f:
               f.write(propFile.context)
 
-    os.makedirs(outDir, exist_ok=True)
+    os.makedirs(outDir)
 
     StartZookeeperServer('zookeeper', zookeeperPropFiles[0].filename, outDir)
 
@@ -155,6 +159,7 @@ def main():
                 kafkaBrokerPids.append(matched.group(1))
 
         if len(kafkaBrokerPids) != len(brokerPorts):
+            retry += 1
             continue
 
         with open(r'test.env', 'w') as envFile:
@@ -162,14 +167,17 @@ def main():
             envFile.write('export KAFKA_BROKER_PIDS={0}\n'.format(','.join([pid for pid in kafkaBrokerPids])))
             break
 
-        retry += 1
-
     if retry < MAX_RETRY:
         print('Kafka cluster started with ports: {0}!'.format(brokerPorts))
         processPool.run()
     else:
         print('Kafka cluster failed to start with ports: {0}!'.format(brokerPorts))
-        processPoll.terminate()
+        processPool.terminate()
+        for filename in glob.glob(os.path.join(outDir, '*')):
+            with open(filename, 'r') as f:
+                print('^^^^^^^^^^ {0} ^^^^^^^^^^'.format(os.path.basename(filename)))
+                print(f.read())
+                print('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv')
 
 
 if __name__ == '__main__':

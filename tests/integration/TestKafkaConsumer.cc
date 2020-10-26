@@ -159,7 +159,7 @@ TEST(KafkaAutoCommitConsumer, PollWithHeaders)
             auto value = record.lastHeaderValue("k1");
             // The last header value for "k1", should be "v3", instead of "v1"
             ASSERT_EQ(sizeof(int), value.size());
-            EXPECT_EQ(v3, *static_cast<const int*>(value.data()));
+            EXPECT_EQ(0, std::memcmp(&v3, value.data(), value.size()));
 
             // Nothing for a nonexist key
             value = record.lastHeaderValue("nonexist");
@@ -185,8 +185,9 @@ TEST(KafkaAutoCommitConsumer, SeekAndPoll)
 
     // The auto-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(ConsumerConfig::MAX_POLL_RECORDS,  "1")         // Only poll 1 message each time
-                       .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"); // Seek to the earliest offset at the beginning
+                       .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
+                       .put(ConsumerConfig::MAX_POLL_RECORDS,   "1")         // Only poll 1 message each time
+                       .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest"); // Seek to the earliest offset at the beginning
 
     KafkaAutoCommitConsumer consumer(props);
 
@@ -345,8 +346,9 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback)
 
     // The manual-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest") // Seek to the earliest offset at the beginning
-                       .put(ConsumerConfig::MAX_POLL_RECORDS,  "1");       // Only poll 1 message each time
+                       .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
+                       .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
+                       .put(ConsumerConfig::MAX_POLL_RECORDS,   "1");       // Only poll 1 message each time
 
     KafkaManualCommitConsumer consumer(props);
 
@@ -378,9 +380,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback)
                              });
     }
 
-
     KafkaTestUtility::WaitUntil([&commitCbCount, expectedCnt = messages.size()](){ return expectedCnt == commitCbCount; },
-                                       KafkaTestUtility::MAX_OFFSET_COMMIT_TIMEOUT);
+                                KafkaTestUtility::MAX_OFFSET_COMMIT_TIMEOUT);
 
     EXPECT_EQ(messages.size(), commitCbCount);
 
@@ -466,8 +467,9 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback_ManuallyPollEvents)
 
     // The manual-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest") // Seek to the earliest offset at the beginning
-                       .put(ConsumerConfig::MAX_POLL_RECORDS,  "1");       // Only poll 1 message each time
+                       .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
+                       .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
+                       .put(ConsumerConfig::MAX_POLL_RECORDS,   "1");       // Only poll 1 message each time
 
     KafkaManualCommitConsumer consumer(props, KafkaClient::EventsPollingOption::Manual);
 
@@ -508,6 +510,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback_ManuallyPollEvents)
     } while (std::chrono::steady_clock::now() < end && commitCbCount != messages.size());
 
     EXPECT_EQ(messages.size(), commitCbCount);
+
+    consumer.close();
 }
 
 TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
@@ -538,7 +542,9 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
 
     // Start consumer a few times, but only commit the offset for the first message each time
     {
-        auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::MAX_POLL_RECORDS, "1"); // Only poll 1 message each time
+        auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
+                        .put(ConsumerConfig::MAX_POLL_RECORDS,   "1");    // Only poll 1 message each time
 
         KafkaManualCommitConsumer consumer(props);
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;

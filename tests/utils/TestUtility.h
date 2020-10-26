@@ -89,7 +89,7 @@ GetNumberOfKafkaBrokers()
 
 const auto POLL_INTERVAL             = std::chrono::milliseconds(100);
 const auto MAX_POLL_MESSAGES_TIMEOUT = std::chrono::seconds(5);
-const auto MAX_OFFSET_COMMIT_TIMEOUT = std::chrono::seconds(5);
+const auto MAX_OFFSET_COMMIT_TIMEOUT = std::chrono::seconds(15);
 const auto MAX_DELIVERY_TIMEOUT      = std::chrono::seconds(5);
 
 inline std::vector<Kafka::ConsumerRecord>
