@@ -6,7 +6,7 @@ The `Modern C++ based Kafka API` is a layer of C++ wrapper based on [librdkafka]
 
 Here is the [doxygen documentation for developers](doxygen/annotated.html).
 
-- At present, the `Modern C++ based Kafka API` is compatible with `librdkafka` v1.5.0.
+- At present, the `Modern C++ based Kafka API` is compatible with `librdkafka` v1.5.2.
 
 ## Why it's here
 

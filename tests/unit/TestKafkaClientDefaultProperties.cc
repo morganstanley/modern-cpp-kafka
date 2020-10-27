@@ -55,7 +55,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
             { Kafka::ProducerConfig::BATCH_SIZE,                    "1000000"        },
             { Kafka::ProducerConfig::MESSAGE_MAX_BYTES,             "1000000"        },
             { Kafka::ProducerConfig::MESSAGE_TIMEOUT_MS,            "300000"         },
-            { Kafka::ProducerConfig::REQUEST_TIMEOUT_MS,            "5000"           },
+            { Kafka::ProducerConfig::REQUEST_TIMEOUT_MS,            "30000"          },
             { Kafka::ProducerConfig::PARTITIONER,                   "murmur2_random" },
             { Kafka::ProducerConfig::SECURITY_PROTOCOL,             "plaintext"      },
             { Kafka::ProducerConfig::MAX_IN_FLIGHT,                 "1000000"        },
