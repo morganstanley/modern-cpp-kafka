@@ -1,4 +1,4 @@
-name: pull_request
+name: CI Tests
 
 on: [push, pull_request]
 
@@ -508,40 +508,4 @@ jobs:
         run: |
           cd $BUILD_SUB_DIR
           make -j${CPU_CORE_NUM} VERBOSE=1
-
-  build_doc:
-    name: Generate Documents
-    runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/clang-doc
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install python3-pip
-          sudo apt install -y python3-pip
-          pip3 install markdown
-          # 3. Install doxygen
-          sudo apt install -y doxygen
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=clang CXX=clang++ cmake ../.. -DBUILD_OPTION_GEN_DOC=ON -DCMAKE_CXX_FLAGS="-std=c++17"
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make VERBOSE=1
-      - name: Post Check
-        run: |
-          cd $BUILD_SUB_DIR
-          ls -l doc/README.html
-          ls -l doc/markdown/KafkaClientConfiguration.html
-          ls -l doc/doxygen/annotated.html
 
