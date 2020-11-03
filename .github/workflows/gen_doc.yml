@@ -1,0 +1,50 @@
+name: Generate Documents
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_doc:
+    name: Build Doc
+    runs-on: ubuntu-latest
+    env:
+        BUILD_SUB_DIR: build/clang-doc
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: |
+          # Update the package list
+          sudo apt update
+          mkdir -p $BUILD_SUB_DIR
+          cd $BUILD_SUB_DIR
+          # 1. Install cmake
+          sudo snap install cmake --classic
+          export PATH=/snap/bin:$PATH
+          # 2. Install python3-pip
+          sudo apt install -y python3-pip
+          pip3 install markdown
+          # 3. Install doxygen
+          sudo apt install -y doxygen
+      - name: Config
+        run: |
+          cd $BUILD_SUB_DIR
+          env CC=clang CXX=clang++ cmake ../.. -DBUILD_OPTION_GEN_DOC=ON -DCMAKE_CXX_FLAGS="-std=c++17"
+      - name: Build
+        run: |
+          cd $BUILD_SUB_DIR
+          make VERBOSE=1
+      - name: Copy
+        run: |
+          mkdir doc-gen
+          cp $BUILD_SUB_DIR/doc/README.html doc-gen
+          cp -r $BUILD_SUB_DIR/doc/markdown doc-gen
+          cp -r $BUILD_SUB_DIR/doc/doxygen doc-gen
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+            name: document
+            path: doc-gen
+
