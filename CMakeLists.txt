@@ -183,5 +183,6 @@ else()
     add_subdirectory("include")
     add_subdirectory("tests")
     add_subdirectory("tools")
+    add_subdirectory("examples")
 endif ()
 
