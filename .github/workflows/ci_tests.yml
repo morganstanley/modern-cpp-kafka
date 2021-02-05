@@ -3,15 +3,15 @@ name: CI Tests
 on: [push, pull_request]
 
 env:
+  KAFKA_SRC_LINK    : https://archive.apache.org/dist/kafka/2.6.0/kafka_2.13-2.6.0.tgz
   CPU_CORE_NUM      : 2
-  LIBRDKAFKA_VERSION: 1.5.2
+  LIBRDKAFKA_VERSION: 1.6.0
+  BUILD_SUB_DIR     : build/sub-build
 
 jobs:
   build_gcc_debug:
     name: Build on Linux (GCC, Debug)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/gcc-debug
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -46,8 +46,8 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install kafka
-          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-          tar xvzf kafka_2.13-2.6.0.tgz
+          wget ${KAFKA_SRC_LINK}
+          tar xvzf `basename ${KAFKA_SRC_LINK}`
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -60,7 +60,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
+          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
@@ -75,8 +75,6 @@ jobs:
   build_gcc_release:
     name: Build on Linux (GCC, Release)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/gcc-release
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -111,8 +109,8 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install kafka
-          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-          tar xvzf kafka_2.13-2.6.0.tgz
+          wget ${KAFKA_SRC_LINK}
+          tar xvzf `basename ${KAFKA_SRC_LINK}`
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -125,7 +123,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
+          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
@@ -140,8 +138,6 @@ jobs:
   build_gcc_cxx14:
     name: Build on Linux (GCC, C++14)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/gcc
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -176,8 +172,8 @@ jobs:
           make && sudo make install
           cd ../
           # 6. Install kafka
-          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-          tar xvzf kafka_2.13-2.6.0.tgz
+          wget ${KAFKA_SRC_LINK}
+          tar xvzf `basename ${KAFKA_SRC_LINK}`
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -190,7 +186,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
+          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
@@ -205,8 +201,6 @@ jobs:
   build_gcc_asan:
     name: Build on Linux (GCC, ASAN)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/gcc-asan
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -241,8 +235,8 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install kafka
-          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-          tar xvzf kafka_2.13-2.6.0.tgz
+          wget ${KAFKA_SRC_LINK}
+          tar xvzf `basename ${KAFKA_SRC_LINK}`
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -255,7 +249,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
+          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
@@ -270,8 +264,6 @@ jobs:
   build_gcc_tsan:
     name: Build on Linux (GCC, TSAN)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/gcc-tsan
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -305,8 +297,8 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install kafka
-          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-          tar xvzf kafka_2.13-2.6.0.tgz
+          wget ${KAFKA_SRC_LINK}
+          tar xvzf `basename ${KAFKA_SRC_LINK}`
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -319,7 +311,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
+          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
@@ -334,8 +326,6 @@ jobs:
   build_gcc_ubsan:
     name: Build on Linux (GCC, UBSAN)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/gcc-ubsan
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -369,8 +359,8 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install kafka
-          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-          tar xvzf kafka_2.13-2.6.0.tgz
+          wget ${KAFKA_SRC_LINK}
+          tar xvzf `basename ${KAFKA_SRC_LINK}`
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -383,7 +373,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
+          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
@@ -398,8 +388,6 @@ jobs:
   build_clang:
     name: Build on Linux (Clang)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/clang
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -434,8 +422,8 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
           # 6. Install kafka
-          wget https://mirrors.bfsu.edu.cn/apache/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-          tar xvzf kafka_2.13-2.6.0.tgz
+          wget ${KAFKA_SRC_LINK}
+          tar xvzf `basename ${KAFKA_SRC_LINK}`
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
@@ -448,7 +436,7 @@ jobs:
         timeout-minutes: 15
         run: |
           cd $BUILD_SUB_DIR
-          export PATH=`pwd`/kafka_2.13-2.6.0/bin:$PATH
+          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
@@ -463,8 +451,6 @@ jobs:
   build_clang_tidy:
     name: Build on Linux (ClangTidy)
     runs-on: ubuntu-latest
-    env:
-        BUILD_SUB_DIR: build/clang-tidy
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies

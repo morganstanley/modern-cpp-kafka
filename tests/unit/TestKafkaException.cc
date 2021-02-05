@@ -36,7 +36,7 @@ TEST(KafkaException, Basic)
     }
     catch (const Kafka::KafkaException& e)
     {
-        std::regex reMatch(".*Broker: Request timed out \\(some_filename:100\\)");
+        std::regex reMatch(R"(.*Broker: Request timed out \[7\] \(some_filename:100\))");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
     }
 
@@ -48,7 +48,7 @@ TEST(KafkaException, Basic)
     }
     catch (const Kafka::KafkaException& e)
     {
-        std::regex reMatch(".*something wrong here \\(some_filename:100\\)");
+        std::regex reMatch(R"(.*something wrong here \[7\] \(some_filename:100\))");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
     }
 }

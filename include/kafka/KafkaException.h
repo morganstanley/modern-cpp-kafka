@@ -22,7 +22,8 @@ public:
     KafkaException(const char* filename, int lineno, std::error_code ec, const std::string& errMsg)
         : _errCode(ec)
     {
-        _errMsg = Utility::getCurrentTime() + ": " + errMsg + " (" + std::string(filename) + ":" + std::to_string(lineno) + ")";
+        _errMsg = Utility::getCurrentTime() + ": " + errMsg + " [" + std::to_string(ec.value())
+                  + "] (" + std::string(filename) + ":" + std::to_string(lineno) + ")";
     }
 
     KafkaException(const char* filename, int lineno, std::error_code ec)
