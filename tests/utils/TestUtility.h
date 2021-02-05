@@ -34,6 +34,24 @@
         EXPECT_FALSE(true);           \
     }
 
+#define EXPECT_KAFKA_NO_THROW(expr)   \
+    try {                             \
+        expr;                         \
+    } catch (...){                    \
+        EXPECT_FALSE(true);           \
+    }
+
+#define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                           \
+    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                               \
+        try {                                                                   \
+            expr;                                                               \
+            break;                                                              \
+        } catch (const KafkaException& e) {                                     \
+            if (e.error().value() == errToRetry && cnt != maxRetries) continue; \
+            throw;                                                              \
+        }                                                                       \
+    }
+
 namespace Kafka = KAFKA_API;
 
 namespace KafkaTestUtility {

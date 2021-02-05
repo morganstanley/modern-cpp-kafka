@@ -592,10 +592,13 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
                 {
                     std::cout << "[" << Utility::getCurrentTime() << "] will commit offset for record[" << record.toString() << "]" << std::endl;
                     consumer.commitAsync(record,
-                                         [expectedOffset = record.offset() + 1, topic, partition, &commitCbCount](const TopicPartitionOffsets& tpos, std::error_code ec) {
+                                         [expectedOffset = record.offset() + 1, topic, partition, &commitCbCount, &startCount, rcvMsgCount]
+                                         (const TopicPartitionOffsets& tpos, std::error_code ec) {
                                              std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << ec.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
-                                             ASSERT_FALSE(ec);
-                                             EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
+                                             if (!ec) {
+                                                 EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
+                                                 startCount = rcvMsgCount;
+                                             }
                                              ++commitCbCount;
                                          });
                 }
@@ -604,11 +607,7 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
 
         // Wait for the offset-commit callback (to be triggered)
         KafkaTestUtility::WaitUntil([&commitCbCount]() {return commitCbCount == 1; }, KafkaTestUtility::MAX_OFFSET_COMMIT_TIMEOUT);
-        EXPECT_EQ(1, commitCbCount);
-        EXPECT_EQ(messages.size() - startCount, rcvMsgCount);
     }
-
-    ++startCount;
 
     // Start the consumer (2nd time)
     {
@@ -645,7 +644,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
                 if (rcvMsgCount == 1)
                 {
                     std::cout << "[" << Utility::getCurrentTime() << "] will commit offset for record[" << record.toString() << "]" << std::endl;
-                    consumer.commitSync(record);
+                    // Retry for "Broker: Request timed out" error (if any)
+                    RETRY_FOR_ERROR(consumer.commitSync(record), RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, 1);
                 }
             }
         }
@@ -692,7 +692,9 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
                     std::cout << "[" << Utility::getCurrentTime() << "] will commit offset for record[" << record.toString() << "]" << std::endl;
                     TopicPartitionOffsets tpos;
                     tpos[{topic, partition}] = record.offset() + 1;
-                    consumer.commitSync(tpos);
+
+                    // Retry for "Broker: Request timed out" error (if any)
+                    RETRY_FOR_ERROR(consumer.commitSync(tpos), RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, 1);
                 }
             }
         }
@@ -733,10 +735,11 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
 
                 ++rcvMsgCount;
             }
-        }
 
-        std::cout << "[" << Utility::getCurrentTime() << "] will commit for all polled messages" << std::endl;
-        consumer.commitSync();
+            std::cout << "[" << Utility::getCurrentTime() << "] will commit for all polled messages" << std::endl;
+            // Retry for "Broker: Request timed out" error (if any)
+            RETRY_FOR_ERROR(consumer.commitSync(), RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, 1);
+        }
 
         EXPECT_EQ(messages.size() - startCount, rcvMsgCount);
     }
@@ -1416,23 +1419,30 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
     {
         Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
-        // Here we doesn't subsribe to topic1 or topic2
-
+        // Here we doesn't subsribe to topic1 or topic2 (the result is undefined)
         for (int i = 0; i < MESSAGES_NUM; ++i)
         {
-            const auto timepoint = checkPoints[i];
-            const auto expected  = expectedOffsets[i];
+            try
+            {
+                const auto timepoint = checkPoints[i];
+                const auto tp1       = Kafka::TopicPartition{topic1, partition1};
+                const auto tp2       = Kafka::TopicPartition{topic2, partition2};
+                const auto offsets   = consumer.offsetsForTime({tp1, tp2}, timepoint);
 
-            auto offsets = consumer.offsetsForTime({{topic1, partition1}, {topic2, partition2}}, timepoint);
-
-            std::cout << "Got offsets: " << Kafka::toString(offsets) << ", for time: " << Timestamp(duration_cast<milliseconds>(timepoint.time_since_epoch()).count()).toString() << std::endl;
-            EXPECT_EQ(expected, offsets);
+                EXPECT_TRUE((offsets == Kafka::TopicPartitionOffsets{{tp1, expectedOffsets[i][tp1]}}
+                             || offsets == Kafka::TopicPartitionOffsets{{tp2, expectedOffsets[i][tp2]}}
+                             || offsets == expectedOffsets[i]));                    // Might (partially) succeed
+            }
+            catch (const Kafka::KafkaException& e)
+            {
+                EXPECT_EQ(RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION, e.error().value()); // Or, fail
+            }
         }
      }
 
     std::cout << "Try with all invalid topic-partitions: (exception caught)" << std::endl;
     {
-        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put("allow.auto.create.topics", "true"));
+        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         const auto timepoint = checkPoints[0];
 
@@ -1443,11 +1453,18 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
     std::cout << "Try with partial valid topic-partitions:" << std::endl;
     {
         Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        consumer.subscribe({topic1, topic2});
 
-        const auto timepoint = checkPoints[0];
+        for (int i = 0; i < MESSAGES_NUM; ++i)
+        {
+            const auto timepoint = checkPoints[i];
+            const auto validTp   = Kafka::TopicPartition{topic1, partition1};
+            const auto invalidTp = Kafka::TopicPartition{Utility::getRandomString(), 100};
+            const auto offsets   = consumer.offsetsForTime({validTp, invalidTp}, timepoint);
 
-        EXPECT_KAFKA_THROW({consumer.offsetsForTime({{topic1, partition1}, {Utility::getRandomString(), 100}}, timepoint);},
-                           RD_KAFKA_RESP_ERR_LEADER_NOT_AVAILABLE);
+            std::cout << "Got offsets: " << Kafka::toString(offsets) << ", for time: " << Timestamp(duration_cast<milliseconds>(timepoint.time_since_epoch()).count()).toString() << std::endl;
+            EXPECT_EQ((Kafka::TopicPartitionOffsets{{validTp, expectedOffsets[i][validTp]}}), offsets);
+       }
     }
 }
 
