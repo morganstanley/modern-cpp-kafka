@@ -1,17 +1,24 @@
 project("kafka-examples")
 
-# Target
-file(GLOB EXAMPLE_SRCS *.cc)
+# Target: kafka_sync_producer
+add_executable("kafka_sync_producer" "kafka_sync_producer.cc")
+target_link_libraries("kafka_sync_producer" modern-cpp-kafka-api)
 
-add_executable("${PROJECT_NAME}" ${EXAMPLE_SRCS})
+# Target: kafka_async_producer_copy_payload
+add_executable("kafka_async_producer_copy_payload" "kafka_async_producer_copy_payload.cc")
+target_link_libraries("kafka_async_producer_copy_payload" modern-cpp-kafka-api)
+target_link_libraries("kafka_async_producer_copy_payload" "pthread")
 
-target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api)
+# Target: kafka_async_producer_not_copy_payload
+add_executable("kafka_async_producer_not_copy_payload" "kafka_async_producer_not_copy_payload.cc")
+target_link_libraries("kafka_async_producer_not_copy_payload" modern-cpp-kafka-api)
+target_link_libraries("kafka_async_producer_not_copy_payload" "pthread")
 
-if (BUILD_OPTION_USE_ASAN OR BUILD_OPTION_USE_ASAN)
-    target_compile_options(${PROJECT_NAME} PRIVATE "-fno-sanitize=all")
-    target_link_options(${PROJECT_NAME} PRIVATE "-fno-sanitize=all")
-    if (UILD_OPTION_USE_ASAN)
-        set_property(TEST ${PROJECT_NAME} PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_leaks=1)
-    endif ()
-endif ()
+# Target: kafka_auto_commit_consumer
+add_executable("kafka_auto_commit_consumer" "kafka_auto_commit_consumer.cc")
+target_link_libraries("kafka_auto_commit_consumer" modern-cpp-kafka-api)
 
+# Target: kafka_manual_commit_consumer
+add_executable("kafka_manual_commit_consumer" "kafka_manual_commit_consumer.cc")
+target_link_libraries("kafka_manual_commit_consumer" modern-cpp-kafka-api)
+target_link_libraries("kafka_manual_commit_consumer" "pthread")
