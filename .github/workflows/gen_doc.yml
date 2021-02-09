@@ -9,7 +9,7 @@ on:
 jobs:
   build_doc:
     name: Build Doc
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
         BUILD_SUB_DIR: build/clang-doc
     steps:
@@ -20,14 +20,13 @@ jobs:
           sudo apt update
           mkdir -p $BUILD_SUB_DIR
           cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install python3-pip
+
+          # 1. Install python3-pip
           sudo apt install -y python3-pip
           pip3 install markdown
-          # 3. Install doxygen
+          # 2. Install doxygen
           sudo apt install -y doxygen
+
       - name: Config
         run: |
           cd $BUILD_SUB_DIR

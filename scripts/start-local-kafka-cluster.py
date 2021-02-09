@@ -71,6 +71,7 @@ processPool=ProcessPool()
 
 def GenerateZookeeperConfig(zookeeperPort, dataDir):
     zookeeperTemplate = Template('''
+        admin.enableServer=false
         dataDir=${data_dir}
         clientPort=${port}
     ''')
@@ -153,8 +154,9 @@ def main():
         kafkaBrokerPids = []
         netstatCall = subprocess.Popen(['netstat', '-tlp'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         (out, err) = netstatCall.communicate();
+
         for brokerPort in brokerPorts:
-            matched = re.search('tcp[4 6] +[0-9]+ +[0-9]+ +localhost:{0} +.+ +LISTEN *([0-9]+)/java.*'.format(brokerPort), out.decode('utf-8'))
+            matched = re.search('tcp[4 6] +[0-9]+ +[0-9]+ +[^\s-]+:{0} +.+ +LISTEN *([0-9]+)/java.*'.format(brokerPort), out.decode('utf-8'))
             if matched:
                 kafkaBrokerPids.append(matched.group(1))
 
@@ -178,7 +180,6 @@ def main():
                 print('^^^^^^^^^^ {0} ^^^^^^^^^^'.format(os.path.basename(filename)))
                 print(f.read())
                 print('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv')
-
 
 if __name__ == '__main__':
     main()
