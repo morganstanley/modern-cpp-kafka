@@ -9,7 +9,7 @@ file(GLOB TEST_SRCS *.cc)
 
 add_executable("${PROJECT_NAME}" ${TEST_SRCS})
 
-target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api gmock_main pthread)
+target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api gtest gmock gtest_main pthread)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ./${PROJECT_NAME})
 

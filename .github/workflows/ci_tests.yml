@@ -3,495 +3,163 @@ name: CI Tests
 on: [push, pull_request]
 
 env:
-  KAFKA_SRC_LINK    : https://archive.apache.org/dist/kafka/2.6.0/kafka_2.13-2.6.0.tgz
-  CPU_CORE_NUM      : 2
+  KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.6.0/kafka_2.13-2.6.0.tgz
+  CPU_CORE_NUM:       2
   LIBRDKAFKA_VERSION: 1.6.0
-  BUILD_SUB_DIR     : build/sub-build
+  BUILD_SUB_DIR:      build/sub-build
 
 jobs:
-  build_gcc_debug:
-    name: Build on Linux (GCC, Debug)
-    runs-on: ubuntu-latest
+  on_linux:
+    runs-on: ${{ matrix.os }}
+
+    env:
+      LINUX_VERSION: ${{ matrix.os }}
+      BUILD_CXX:     ${{ matrix.build-cxx }}
+      BUILD_TYPE:    ${{ matrix.build-type }}
+      CXX_VERSION:   ${{ matrix.cxx-version }}
+      CHECK_OPTION:  ${{ matrix.check-option }}
+
+    strategy:
+      matrix:
+        include:
+          - os:           ubuntu-18.04
+            build-cxx:    g++
+
+          - os:           ubuntu-18.04
+            build-cxx:    clang++
+
+          - os:           ubuntu-20.04
+            build-cxx:    g++
+            build-type:   Debug
+
+          - os:           ubuntu-20.04
+            build-cxx:    g++
+            build-type:   Release
+
+          - os:           ubuntu-20.04
+            build-cxx:    g++
+            build-type:   Release
+            cxx-version:  c++14
+
+          - os:           ubuntu-20.04
+            build-cxx:    g++
+            check-option: asan
+
+          - os:           ubuntu-18.04
+            build-cxx:    g++
+            check-option: tsan
+
+          - os:           ubuntu-20.04
+            build-cxx:    g++
+            check-option: ubsan
+
+          - os:           ubuntu-20.04
+            build-cxx:    clang++
+
+          - os:           ubuntu-20.04
+            build-cxx:    clang++
+            check-option: clang-tidy
+
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
+
         run: |
           # Update the package list
           sudo apt update
 
           mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
+          cd ${BUILD_SUB_DIR}
+
           # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang
-          sudo apt remove -y --autoremove gcc-7
-          sudo apt install -y g++-8
-          sudo ln -s gcc-8 /usr/bin/gcc
-          sudo ln -s g++-8 /usr/bin/g++
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          env CC=gcc CXX=g++ cmake /usr/src/googletest/
+          if [ ${LINUX_VERSION} == "ubuntu-18.04" ]; then
+            sudo snap install cmake --classic
+            export PATH=/snap/bin:$PATH
+          fi
+
+          # 2. Install googletest (v1.10.0)
+          wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz
+          tar -xvzf release-1.10.0.tar.gz
+          cd googletest-release-1.10.0
+          env CXX=${BUILD_CXX} cmake ./
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 4. Install boost lib
+
+          # 3. Install boost lib
           sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
+
+          # 4. Install librdkafka
           wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
           tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
           cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
-          # 6. Install kafka
+
+          # 5. Install kafka
           wget ${KAFKA_SRC_LINK}
           tar xvzf `basename ${KAFKA_SRC_LINK}`
+
+          # 6. Install nettools
+          if [ ${LINUX_VERSION} != "ubuntu-18.04" ]; then
+            sudo apt install -y net-tools
+          fi
+
       - name: Config
         run: |
-          cd $BUILD_SUB_DIR
-          env CC=gcc CXX=g++ cmake ../.. -DCMAKE_CXX_FLAGS="-std=c++17" -DCMAKE_BUILD_TYPE=Debug
+          cd ${BUILD_SUB_DIR}
+
+          if [ ${CXX_VERSION} ]; then
+            export CMAKE_CXX_FLAGS="-DCMAKE_CXX_FLAGS=\"-std=${CXX_VERSION}\""
+          else
+            export CMAKE_CXX_FLAGS="-DCMAKE_CXX_FLAGS=\"-std=c++17\""
+          fi
+
+          if [ ${BUILD_TYPE} ]; then
+            export CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+          else
+            export CMAKE_BUILD_TYPE=""
+          fi
+
+          if [[ ${CHECK_OPTION} == *"clang-tidy"* ]]; then
+            export BUILD_OPTION='-DBUILD_OPTION_CLANG_TIEY=ON'
+          fi
+
+          if [[ ${CHECK_OPTION} == *"asan"* ]]; then
+            export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_USE_ASAN=ON"
+          fi
+
+          if [[ ${CHECK_OPTION} == *"tsan"* ]]; then
+            export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_USE_TSAN=ON"
+          fi
+
+          if [[ ${CHECK_OPTION} == *"ubsan"* ]]; then
+            export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_USE_UBSAN=ON"
+          fi
+
+          env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_FLAGS} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION}
+
       - name: Build
         run: |
-          cd $BUILD_SUB_DIR
+          cd ${BUILD_SUB_DIR}
+
           make -j${CPU_CORE_NUM} VERBOSE=1
+
       - name: Test
         timeout-minutes: 15
         run: |
-          cd $BUILD_SUB_DIR
+          cd ${BUILD_SUB_DIR}
+
           export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
           # start kafka cluster
           rm -f test.env
           ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
           # run tests
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
+
           source test.env
           ctest -VV
           # stop kafka cluster
           kafka-server-stop.sh
           zookeeper-server-stop.sh
-
-  build_gcc_release:
-    name: Build on Linux (GCC, Release)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang
-          sudo apt remove -y --autoremove gcc-7
-          sudo apt install -y g++-8
-          sudo ln -s gcc-8 /usr/bin/gcc
-          sudo ln -s g++-8 /usr/bin/g++
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 4. Install boost lib
-          sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 6. Install kafka
-          wget ${KAFKA_SRC_LINK}
-          tar xvzf `basename ${KAFKA_SRC_LINK}`
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=gcc CXX=g++ cmake ../.. -DCMAKE_CXX_FLAGS="-std=c++17" -DCMAKE_BUILD_TYPE=Release
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make -j${CPU_CORE_NUM} VERBOSE=1
-      - name: Test
-        timeout-minutes: 15
-        run: |
-          cd $BUILD_SUB_DIR
-          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
-          # start kafka cluster
-          rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
-          # run tests
-          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
-          source test.env
-          ctest -VV
-          # stop kafka cluster
-          kafka-server-stop.sh
-          zookeeper-server-stop.sh
-
-  build_gcc_cxx14:
-    name: Build on Linux (GCC, C++14)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang
-          sudo apt remove -y --autoremove gcc-7
-          sudo apt install -y g++-8
-          sudo ln -s gcc-8 /usr/bin/gcc
-          sudo ln -s g++-8 /usr/bin/g++
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make && sudo make install
-          cd ../
-          # 4. Install boost lib
-          sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
-          make && sudo make install
-          cd ../
-          # 6. Install kafka
-          wget ${KAFKA_SRC_LINK}
-          tar xvzf `basename ${KAFKA_SRC_LINK}`
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=gcc CXX=g++ cmake ../.. -DCMAKE_CXX_FLAGS="-std=c++14" -DCMAKE_BUILD_TYPE=Release
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make -j${CPU_CORE_NUM} VERBOSE=1
-      - name: Test
-        timeout-minutes: 15
-        run: |
-          cd $BUILD_SUB_DIR
-          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
-          # start kafka cluster
-          rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
-          # run tests
-          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
-          source test.env
-          ctest -VV
-          # stop kafka cluster
-          kafka-server-stop.sh
-          zookeeper-server-stop.sh
-
-  build_gcc_asan:
-    name: Build on Linux (GCC, ASAN)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang
-          sudo apt remove -y --autoremove gcc-7
-          sudo apt install -y g++-8
-          sudo ln -s gcc-8 /usr/bin/gcc
-          sudo ln -s g++-8 /usr/bin/g++
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 4. Install boost lib
-          sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 6. Install kafka
-          wget ${KAFKA_SRC_LINK}
-          tar xvzf `basename ${KAFKA_SRC_LINK}`
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=gcc CXX=g++ cmake ../.. -DBUILD_OPTION_USE_ASAN=ON -DCMAKE_CXX_FLAGS="-std=c++17"
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make -j${CPU_CORE_NUM} VERBOSE=1
-      - name: Test
-        timeout-minutes: 15
-        run: |
-          cd $BUILD_SUB_DIR
-          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
-          # start kafka cluster
-          rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
-          # run tests
-          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
-          source test.env
-          ctest -VV
-          # stop kafka cluster
-          kafka-server-stop.sh
-          zookeeper-server-stop.sh
-
-  build_gcc_tsan:
-    name: Build on Linux (GCC, TSAN)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang
-          sudo apt remove -y --autoremove gcc-7
-          sudo apt install -y g++-8
-          sudo ln -s gcc-8 /usr/bin/gcc
-          sudo ln -s g++-8 /usr/bin/g++
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 4. Install boost lib
-          sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 6. Install kafka
-          wget ${KAFKA_SRC_LINK}
-          tar xvzf `basename ${KAFKA_SRC_LINK}`
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=gcc CXX=g++ cmake ../.. -DBUILD_OPTION_USE_TSAN=ON -DCMAKE_CXX_FLAGS="-std=c++17"
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make -j${CPU_CORE_NUM} VERBOSE=1
-      - name: Test
-        timeout-minutes: 15
-        run: |
-          cd $BUILD_SUB_DIR
-          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
-          # start kafka cluster
-          rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
-          # run tests
-          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
-          source test.env
-          ctest -VV
-          # stop kafka cluster
-          kafka-server-stop.sh
-          zookeeper-server-stop.sh
-
-  build_gcc_ubsan:
-    name: Build on Linux (GCC, UBSAN)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang
-          sudo apt remove -y --autoremove gcc-7
-          sudo apt install -y g++-8
-          sudo ln -s gcc-8 /usr/bin/gcc
-          sudo ln -s g++-8 /usr/bin/g++
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          env CC=gcc CXX=g++ cmake /usr/src/googletest/
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 4. Install boost lib
-          sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 6. Install kafka
-          wget ${KAFKA_SRC_LINK}
-          tar xvzf `basename ${KAFKA_SRC_LINK}`
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=gcc CXX=g++ cmake ../.. -DBUILD_OPTION_USE_UBSAN=ON -DCMAKE_CXX_FLAGS="-std=c++17"
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make -j${CPU_CORE_NUM} VERBOSE=1
-      - name: Test
-        timeout-minutes: 15
-        run: |
-          cd $BUILD_SUB_DIR
-          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
-          # start kafka cluster
-          rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
-          # run tests
-          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
-          source test.env
-          ctest -VV
-          # stop kafka cluster
-          kafka-server-stop.sh
-          zookeeper-server-stop.sh
-
-  build_clang:
-    name: Build on Linux (Clang)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang
-          sudo apt install -y clang-10
-          sudo rm /usr/bin/clang /usr/bin/clang++
-          sudo ln -s clang-10 /usr/bin/clang
-          sudo ln -s clang++-10 /usr/bin/clang++
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          cmake /usr/src/googletest/
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 4. Install boost lib
-          sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 6. Install kafka
-          wget ${KAFKA_SRC_LINK}
-          tar xvzf `basename ${KAFKA_SRC_LINK}`
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=clang CXX=clang++ cmake ../.. -DCMAKE_CXX_FLAGS="-std=c++17"
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make -j${CPU_CORE_NUM} VERBOSE=1
-      - name: Test
-        timeout-minutes: 15
-        run: |
-          cd $BUILD_SUB_DIR
-          export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
-          # start kafka cluster
-          rm -f test.env
-          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
-          # run tests
-          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
-          source test.env
-          ctest -VV
-          # stop kafka cluster
-          kafka-server-stop.sh
-          zookeeper-server-stop.sh
-
-  build_clang_tidy:
-    name: Build on Linux (ClangTidy)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          # Update the package list
-          sudo apt update
-
-          mkdir -p $BUILD_SUB_DIR
-          cd $BUILD_SUB_DIR
-          # 1. Install cmake
-          sudo snap install cmake --classic
-          export PATH=/snap/bin:$PATH
-          # 2. Install clang & clang-tidy
-          sudo apt remove -y clang
-          sudo apt install -y clang-10 clang-tidy-10
-          sudo rm /usr/bin/clang /usr/bin/clang++
-          sudo ln -s clang-10 /usr/bin/clang
-          sudo ln -s clang++-10 /usr/bin/clang++
-          sudo ln -s clang-tidy-10 /usr/bin/clang-tidy
-          # 3. Install googletest
-          sudo apt install -y googletest
-          mkdir -p googletest
-          cd googletest
-          env CC=clang CXX=clang++ cmake /usr/src/googletest/
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-          # 4. Install boost lib
-          sudo apt install -y libboost-all-dev
-          # 5. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
-          make -j${CPU_CORE_NUM} && sudo make install
-          cd ../
-      - name: Config
-        run: |
-          cd $BUILD_SUB_DIR
-          env CC=clang CXX=clang++ cmake ../.. -DBUILD_OPTION_CLANG_TIDY=ON -DCMAKE_CXX_FLAGS="-std=c++17"
-      - name: Build
-        run: |
-          cd $BUILD_SUB_DIR
-          make -j${CPU_CORE_NUM} VERBOSE=1
 
