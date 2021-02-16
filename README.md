@@ -80,6 +80,8 @@ Thus we worked out `Modern C++ based Kafka API`, which makes the development wor
 
             * `BUILD_OPTION_GEN_DOC=ON`       -- Generate documentation as well
 
+            * `BUILD_OPTION_DOC_ONLY=ON`       -- Only generate documentation
+
             * `BUILD_OPTION_GEN_COVERAGE=ON`  -- Generate test coverage, only support by clang currently
 
         * Type `make install`

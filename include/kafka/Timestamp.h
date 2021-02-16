@@ -7,6 +7,7 @@
 #include <cassert>
 #include <chrono>
 #include <iomanip>
+#include <sstream>
 #include <string>
 #include <time.h>
 
@@ -62,10 +63,9 @@ struct Timestamp
 
     static std::string toString(Value v)
     {
-        using namespace std::chrono;
         auto ms = std::chrono::milliseconds(v);
-        auto timepoint = std::chrono::time_point<std::chrono::high_resolution_clock>(ms);
-        std::time_t time = system_clock::to_time_t(timepoint);
+        auto timepoint = std::chrono::time_point<std::chrono::system_clock>(ms);
+        std::time_t time = std::chrono::system_clock::to_time_t(timepoint);
         std::ostringstream oss;
         std::tm tmBuf = {};
         oss << std::put_time(localtime_r(&time, &tmBuf), "%F %T") << "." << std::setfill('0') << std::setw(3) << (v % 1000);

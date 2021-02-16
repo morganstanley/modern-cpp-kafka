@@ -11,7 +11,7 @@ jobs:
     name: Build Doc
     runs-on: ubuntu-20.04
     env:
-        BUILD_SUB_DIR: build/clang-doc
+        BUILD_SUB_DIR: build/sub-build
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -30,7 +30,7 @@ jobs:
       - name: Config
         run: |
           cd $BUILD_SUB_DIR
-          env CC=clang CXX=clang++ cmake ../.. -DBUILD_OPTION_GEN_DOC=ON -DCMAKE_CXX_FLAGS="-std=c++17"
+          cmake ../.. -DBUILD_OPTION_DOC_ONLY=ON
       - name: Build
         run: |
           cd $BUILD_SUB_DIR

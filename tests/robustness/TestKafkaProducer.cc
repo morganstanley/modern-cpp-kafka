@@ -47,9 +47,9 @@ TEST(KafkaSyncProducer, RecordTimestamp)
         auto record = ProducerRecord(topic, Key(), Value(payload.c_str(), payload.size()));
 
         std::cout << "[" << Utility::getCurrentTime() << "] Producer is about to send a message to topic [" << topic << "]" << std::endl;
-        Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
+        Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         auto metadata = producer.send(record);
-        Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
+        Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         std::cout << "[" << Utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
@@ -77,9 +77,9 @@ TEST(KafkaSyncProducer, RecordTimestamp)
         auto record = ProducerRecord(topic, Key(), Value(payload.c_str(), payload.size()));
 
         std::cout << "[" << Utility::getCurrentTime() << "] Producer is about to send a message to topic [" << topic << "]" << std::endl;
-        Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
+        Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         auto metadata = producer.send(record);
-        Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
+        Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         std::cout << "[" << Utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
