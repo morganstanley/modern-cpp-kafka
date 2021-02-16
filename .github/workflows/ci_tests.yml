@@ -9,11 +9,11 @@ env:
   BUILD_SUB_DIR:      build/sub-build
 
 jobs:
-  on_linux:
+  on_unix-like:
     runs-on: ${{ matrix.os }}
 
     env:
-      LINUX_VERSION: ${{ matrix.os }}
+      OS_VERSION:    ${{ matrix.os }}
       BUILD_CXX:     ${{ matrix.build-cxx }}
       BUILD_TYPE:    ${{ matrix.build-type }}
       CXX_VERSION:   ${{ matrix.cxx-version }}
@@ -22,10 +22,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os:           ubuntu-18.04
-            build-cxx:    g++
-
-          - os:           ubuntu-18.04
+          - os:           macos-10.15
             build-cxx:    clang++
 
           - os:           ubuntu-20.04
@@ -60,50 +57,53 @@ jobs:
             build-cxx:    clang++
             check-option: clang-tidy
 
+          - os:           ubuntu-18.04
+            build-cxx:    g++
+
+          - os:           ubuntu-18.04
+            build-cxx:    clang++
+
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
 
         run: |
-          # Update the package list
-          sudo apt update
-
           mkdir -p $BUILD_SUB_DIR
           cd ${BUILD_SUB_DIR}
 
           # 1. Install cmake
-          if [ ${LINUX_VERSION} == "ubuntu-18.04" ]; then
+          if [ ${OS_VERSION} == "ubuntu-18.04" ]; then
             sudo snap install cmake --classic
             export PATH=/snap/bin:$PATH
           fi
 
           # 2. Install googletest (v1.10.0)
-          wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz
-          tar -xvzf release-1.10.0.tar.gz
+          wget -nv https://github.com/google/googletest/archive/release-1.10.0.tar.gz
+          tar -xzf release-1.10.0.tar.gz
           cd googletest-release-1.10.0
           env CXX=${BUILD_CXX} cmake ./
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
 
           # 3. Install boost lib
-          sudo apt install -y libboost-all-dev
+          if [[ ${OS_VERSION} == "ubuntu"* ]]; then
+            sudo apt install -y libboost-all-dev
+          elif [[ ${OS_VERSION} == "macos"* ]]; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            brew install boost
+          fi
 
           # 4. Install librdkafka
-          wget https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xvzf v${LIBRDKAFKA_VERSION}.tar.gz
+          wget -nv https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xzf v${LIBRDKAFKA_VERSION}.tar.gz
           cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
 
           # 5. Install kafka
-          wget ${KAFKA_SRC_LINK}
-          tar xvzf `basename ${KAFKA_SRC_LINK}`
-
-          # 6. Install nettools
-          if [ ${LINUX_VERSION} != "ubuntu-18.04" ]; then
-            sudo apt install -y net-tools
-          fi
+          wget -nv ${KAFKA_SRC_LINK}
+          tar -xzf `basename ${KAFKA_SRC_LINK}`
 
       - name: Config
         run: |

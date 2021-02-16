@@ -177,12 +177,17 @@ endif ()
 #---------------------------
 # Build Sub-directories
 #---------------------------
-if (BUILD_OPTION_GEN_DOC)
+if (BUILD_OPTION_DOC_ONLY)
     add_subdirectory("doc")
 else()
+    if (BUILD_OPTION_GEN_DOC)
+        add_subdirectory("doc")
+    endif ()
+
     add_subdirectory("include")
     add_subdirectory("tests")
     add_subdirectory("tools")
     add_subdirectory("examples")
 endif ()
+
 

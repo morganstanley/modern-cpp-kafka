@@ -150,13 +150,13 @@ def main():
     retry = 0
     while retry < MAX_RETRY:
         time.sleep(1)
-
         kafkaBrokerPids = []
-        netstatCall = subprocess.Popen(['netstat', '-tlp'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        (out, err) = netstatCall.communicate();
 
         for brokerPort in brokerPorts:
-            matched = re.search('tcp[4 6] +[0-9]+ +[0-9]+ +[^\s-]+:{0} +.+ +LISTEN *([0-9]+)/java.*'.format(brokerPort), out.decode('utf-8'))
+            cmd = 'lsof -nP -iTCP:{0} | grep LISTEN'.format(brokerPort)
+            cmdCall = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            (out, err) = cmdCall.communicate();
+            matched = re.search('[^\s-]+ +([0-9]+) +.*', out.decode('utf-8'))
             if matched:
                 kafkaBrokerPids.append(matched.group(1))
 
