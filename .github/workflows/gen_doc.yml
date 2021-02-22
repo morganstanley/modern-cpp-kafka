@@ -31,17 +31,26 @@ jobs:
         run: |
           cd $BUILD_SUB_DIR
           cmake ../.. -DBUILD_OPTION_DOC_ONLY=ON
+
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
           make VERBOSE=1
+
       - name: Copy
         run: |
           mkdir doc-gen
           cp $BUILD_SUB_DIR/doc/README.html doc-gen
           cp -r $BUILD_SUB_DIR/doc/markdown doc-gen
           cp -r $BUILD_SUB_DIR/doc/doxygen doc-gen
-      - name: Upload
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+
+      - name: Upload to artifact
         uses: actions/upload-artifact@v2
         with:
             name: document
