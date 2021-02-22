@@ -38,7 +38,7 @@ namespace Consumer
 
 
 /**
- * The base class for KafkaAutoCommitProducer and KafkaManualCommitProducer.
+ * The base class for KafkaAutoCommitConsumer and KafkaManualCommitConsumer.
  */
 class KafkaConsumer: public KafkaClient
 {

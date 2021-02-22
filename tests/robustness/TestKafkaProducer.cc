@@ -44,7 +44,7 @@ TEST(KafkaSyncProducer, RecordTimestamp)
         const auto& topic = topicWithRecordCreateTime;
 
         const std::string payload = "message.timestamp.type=CreateTime";
-        auto record = ProducerRecord(topic, Key(), Value(payload.c_str(), payload.size()));
+        auto record = ProducerRecord(topic, NullKey, Value(payload.c_str(), payload.size()));
 
         std::cout << "[" << Utility::getCurrentTime() << "] Producer is about to send a message to topic [" << topic << "]" << std::endl;
         Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -74,7 +74,7 @@ TEST(KafkaSyncProducer, RecordTimestamp)
         const auto& topic = topicWithLogAppendTime;
 
         const std::string payload = "message.timestamp.type=LogAppendTime";
-        auto record = ProducerRecord(topic, Key(), Value(payload.c_str(), payload.size()));
+        auto record = ProducerRecord(topic, NullKey, Value(payload.c_str(), payload.size()));
 
         std::cout << "[" << Utility::getCurrentTime() << "] Producer is about to send a message to topic [" << topic << "]" << std::endl;
         Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -130,7 +130,7 @@ TEST(KafkaAsyncProducer, NoMissedDeliveryCallback)
         constexpr int NUM_OF_MESSAGES = 10;
         for (std::size_t i = 0; i < NUM_OF_MESSAGES; ++i)
         {
-            auto record = ProducerRecord(topic, Key(), Value(), i);
+            auto record = ProducerRecord(topic, NullKey, NullValue, i);
             std::cout << "[" << Utility::getCurrentTime() << "] Message will be sent with record id[" << i << "]" << std::endl;
             insertIdInFlight(i);
 
@@ -161,7 +161,7 @@ TEST(KafkaAsyncProducer, MightMissDeliveryCallbackIfCloseWithLimitedTimeout)
         constexpr int NUM_OF_MESSAGES = 10;
         for (std::size_t i = 0; i < NUM_OF_MESSAGES; ++i)
         {
-            auto record = ProducerRecord(topic, Key(), Value(), i);
+            auto record = ProducerRecord(topic, NullKey, NullValue, i);
             producer.send(record,
                           [&deliveryCount](const Producer::RecordMetadata& metadata, std::error_code ec) {
                                   std::cout << "[" << Utility::getCurrentTime() << "] Delivery callback: metadata[" << metadata.toString() << "], result[" << ec.message() << "]" << std::endl;
@@ -353,7 +353,7 @@ TEST(KafkaSyncProducer, Send_AckTimeout)
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
 
-    auto record = ProducerRecord(Utility::getRandomString(), Key(), Value());
+    auto record = ProducerRecord(Utility::getRandomString(), NullKey, NullValue);
     std::cout << "[" << Utility::getCurrentTime() << "] About to send record: " << record.toString() << std::endl;
 
     EXPECT_KAFKA_THROW(producer.send(record), RD_KAFKA_RESP_ERR__MSG_TIMED_OUT);

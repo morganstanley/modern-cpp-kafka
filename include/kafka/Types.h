@@ -111,6 +111,23 @@ private:
 
 
 /**
+ * Empty Key.
+ */
+#if __cplusplus >= 201703L
+const inline Key NullKey = Key();
+#else
+const static Key NullKey = Key();
+#endif
+/**
+ * Empty Value.
+ */
+#if __cplusplus >= 201703L
+const inline Value NullValue = Value();
+#else
+const static Value NullValue = Value();
+#endif
+
+/**
  * Obtains explanatory string for Topics.
  */
 inline std::string toString(const Topics& topics)

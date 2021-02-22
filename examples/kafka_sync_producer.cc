@@ -30,7 +30,7 @@ int main(int argc, char **argv)
         for (std::string line; std::getline(std::cin, line);) {
             // The ProducerRecord doesn't own `line`, it is just a thin wrapper
             auto record = kafka::ProducerRecord(topic,
-                                                kafka::Key(),
+                                                kafka::NullKey,
                                                 kafka::Value(line.c_str(), line.size()));
 
             // Send the message.
