@@ -388,7 +388,7 @@ TEST(KafkaAsyncProducer, NoBlockSendingWhileQueueIsFull_ManuallyPollEvents)
         {"key3", "value3"},
     };
 
-    auto record = ProducerRecord(topic, Key(), Value());
+    auto record = ProducerRecord(topic, NullKey, NullValue);
 
     // To send the 1st message, should succeed
     record.setKey(Key(messages[0].first.c_str(), messages[0].first.size()));

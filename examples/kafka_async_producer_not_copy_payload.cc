@@ -33,11 +33,12 @@ int main(int argc, char **argv)
              line = std::make_shared<std::string>()) {
             // The ProducerRecord doesn't own `line`, it is just a thin wrapper
             auto record = kafka::ProducerRecord(topic,
-                                                kafka::Key(),
+                                                kafka::NullKey,
                                                 kafka::Value(line->c_str(), line->size()));
 
             // Send the message.
             producer.send(record,
+                          // The delivery report handler
                           // Note: Here we capture the shared_pointer of `line`,
                           //       which holds the content for `record.value()`.
                           //       It makes sure the memory block is valid until the lambda finishes.

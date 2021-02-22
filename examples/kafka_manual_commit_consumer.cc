@@ -30,11 +30,16 @@ int main(int argc, char **argv)
 
         // Read messages from the topic.
         std::cout << "% Reading messages from topic: " << topic << std::endl;
-        while (true) {
+        bool allCommitted = true;
+        bool running      = true;
+        while (running) {
             auto records = consumer.poll(std::chrono::milliseconds(100));
             for (const auto& record: records) {
                 // In this example, quit on empty message
-                if (record.value().size() == 0) return 0;
+                if (record.value().size() == 0) {
+                    running = false;
+                    break;
+                }
 
                 if (!record.error()) {
                     std::cout << "% Got a new message..." << std::endl;
@@ -45,12 +50,14 @@ int main(int argc, char **argv)
                     std::cout << "    Headers  : " << kafka::toString(record.headers()) << std::endl;
                     std::cout << "    Key   [" << record.key().toString() << "]" << std::endl;
                     std::cout << "    Value [" << record.value().toString() << "]" << std::endl;
+
+                    allCommitted = false;
                 } else {
                     std::cerr << record.toString() << std::endl;
                 }
             }
 
-            if (!records.empty()) {
+            if (!allCommitted) {
                 auto now = std::chrono::steady_clock::now();
                 if (now - lastTimeCommitted > std::chrono::seconds(1)) {
                     // Commit offsets for messages polled
@@ -58,6 +65,7 @@ int main(int argc, char **argv)
                     consumer.commitSync(); // or commitAsync()
 
                     lastTimeCommitted = now;
+                    allCommitted      = true;
                 }
             }
         }
