@@ -526,15 +526,16 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
             continue;
         }
 
-        partitionInfo.setLeader(metadata.getNode(metadata_partition.leader));
+        partitionInfo.setLeader(metadata_partition.leader);
 
         for (int j = 0; j < metadata_partition.replica_cnt; ++j)
         {
-            partitionInfo.addReplica(metadata.getNode(metadata_partition.replicas[j]));
+            partitionInfo.addReplica(metadata_partition.replicas[j]);
         }
+
         for (int j = 0; j < metadata_partition.isr_cnt; ++j)
         {
-            partitionInfo.addInSyncReplica(metadata.getNode(metadata_partition.isrs[j]));
+            partitionInfo.addInSyncReplica(metadata_partition.isrs[j]);
         }
 
         metadata.addPartitionInfo(partition, partitionInfo);

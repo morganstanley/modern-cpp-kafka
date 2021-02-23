@@ -7,6 +7,7 @@
 
 #include "librdkafka/rdkafka.h"
 
+#include <map>
 #include <vector>
 
 
@@ -54,40 +55,51 @@ struct BrokerMetadata {
      */
     struct PartitionInfo
     {
-        void setLeader(const std::shared_ptr<Node>& ldr)            { leader = ldr; }
-        void addReplica(const std::shared_ptr<Node>& replica)       { replicas.emplace_back(replica); }
-        void addInSyncReplica(const std::shared_ptr<Node>& replica) { inSyncReplicas.emplace_back(replica); }
+        void setLeader(Node::Id id)        { leader = id; }
+        void addReplica(Node::Id id)       { replicas.emplace_back(id); }
+        void addInSyncReplica(Node::Id id) { inSyncReplicas.emplace_back(id); }
 
         /**
-         * The node currently acting as a leader for this partition or null if there is no leader.
+         * The node id currently acting as a leader for this partition or null if there is no leader.
          */
-        std::shared_ptr<Node> leader;
+        Node::Id              leader;
 
         /**
-         * The complete set of replicas for this partition regardless of whether they are alive or up-to-date.
+         * The complete set of replicas id for this partition regardless of whether they are alive or up-to-date.
          */
-        std::vector<std::shared_ptr<Node>> replicas;
+        std::vector<Node::Id> replicas;
 
         /**
-         * The subset of the replicas that are in sync, that is caught-up to the leader and ready to take over as leader if the leader should fail.
+         * The subset of the replicas id that are in sync, that is caught-up to the leader and ready to take over as leader if the leader should fail.
          */
-        std::vector<std::shared_ptr<Node>> inSyncReplicas;
+        std::vector<Node::Id> inSyncReplicas;
 
-        /**
-         * Obtains explanatory string.
-         */
-        std::string toString() const;
     };
 
     /**
-     * The BrokerMetadata is per-topic constructed
+     * Obtains explanatory string from Node::Id.
+     */
+    std::string getNodeDescription(Node::Id id) const;
+
+    /**
+     * Obtains explanatory string for PartitionInfo.
+     */
+    std::string toString(const PartitionInfo& partitionInfo) const;
+
+    /**
+     * The BrokerMetadata is per-topic constructed.
      */
     explicit BrokerMetadata(Topic topic): _topic(std::move(topic)) {}
 
     /**
      * The topic name.
      */
-    std::string topic()      const { return _topic; }
+    const std::string& topic() const { return _topic; }
+
+    /**
+     * The nodes info in the MetadataResponse.
+     */
+    std::vector<Node> nodes()  const;
 
     /**
      * The partitions' state in the MetadataResponse.
@@ -101,7 +113,6 @@ struct BrokerMetadata {
 
     void setOrigNodeName(const std::string& origNodeName)                          { _origNodeName = origNodeName; }
     void addNode(Node::Id nodeId, const Node::Host& host, Node::Port port)         { _nodes[nodeId] = std::make_shared<Node>(nodeId, host, port); }
-    std::shared_ptr<Node> getNode(Node::Id nodeId)                                 { return _nodes[nodeId]; }
     void addPartitionInfo(Partition partition, const PartitionInfo& partitionInfo) { _partitions.emplace(partition, partitionInfo); }
 
 private:
@@ -111,23 +122,44 @@ private:
     std::map<Partition, PartitionInfo>        _partitions;
 };
 
+inline std::vector<BrokerMetadata::Node>
+BrokerMetadata::nodes() const
+{
+    std::vector<Node> ret;
+    for (const auto& nodeInfo: _nodes)
+    {
+        ret.emplace_back(*nodeInfo.second);
+    }
+    return ret;
+}
+
 inline std::string
-BrokerMetadata::PartitionInfo::toString() const
+BrokerMetadata::getNodeDescription(Node::Id id) const
+{
+    const auto& found = _nodes.find(id);
+    if (found == _nodes.cend()) return "-:-/" + std::to_string(id);
+
+    auto node = found->second;
+    return node->host + ":" + std::to_string(node->port) + "/" + std::to_string(id);
+}
+
+inline std::string
+BrokerMetadata::toString(const PartitionInfo& partitionInfo) const
 {
     std::ostringstream oss;
 
-    auto streamNodes = [](std::ostringstream& ss, const std::vector<std::shared_ptr<Node>>& nodes) -> std::ostringstream& {
+    auto streamNodes = [this](std::ostringstream& ss, const std::vector<Node::Id> nodeIds) -> std::ostringstream& {
         bool isTheFirst = true;
-        std::for_each(nodes.cbegin(), nodes.cend(),
-                      [&isTheFirst, &ss](const auto& node) {
-                          ss << (isTheFirst ? (isTheFirst = false, "") : ", ") << node->toString();
-                      });
+        for (const auto id: nodeIds)
+        {
+            ss << (isTheFirst ? (isTheFirst = false, "") : ", ") << getNodeDescription(id);
+        }
         return ss;
     };
 
-    oss << "leader[" << leader->toString() << "], replicas[";
-    streamNodes(oss, replicas) << "], inSyncReplicas[";
-    streamNodes(oss, inSyncReplicas) << "]";
+    oss << "leader[" << getNodeDescription(partitionInfo.leader) << "], replicas[";
+    streamNodes(oss, partitionInfo.replicas) << "], inSyncReplicas[";
+    streamNodes(oss, partitionInfo.inSyncReplicas) << "]";
 
     return oss.str();
 }
@@ -143,7 +175,7 @@ BrokerMetadata::toString() const
     {
         const Partition       partition     = partitionInfoPair.first;
         const PartitionInfo&  partitionInfo = partitionInfoPair.second;
-        oss << (isTheFirst ? (isTheFirst = false, "") : "; ") << partition << ": " << partitionInfo.toString();
+        oss << (isTheFirst ? (isTheFirst = false, "") : "; ") << partition << ": " << toString(partitionInfo);
     }
     oss << "}";
 
