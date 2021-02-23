@@ -12,24 +12,36 @@ Unlike Java's KafkaProducer, here we introduce two derived classes, -- `KafkaSyn
 
 ### Example
 ```cpp
-    ProducerConfig props;
-    props.put(ConsumerConfig::BOOTSTRAP_SERVERS, "127.0.0.1:1234,127.0.0.1:2345"));
+        // Create configuration object
+        kafka::Properties props({
+            {"bootstrap.servers",  brokers},
+            {"enable.idempotence", "true"},
+        });
 
-    KafkaSyncProducer producer(props);
+        // Create a producer instance.
+        kafka::KafkaSyncProducer producer(props);
 
-    // Prepare "msgsToBeSent", and an empty "msgsFailedToBeSent" as well
+        // Read messages from stdin and produce to the broker.
+        std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;
 
-    for (const auto& msg : msgsToBeSent) {
-        auto record = ProducerRecord(topic, partition, msg.key, msg.value);
-        try {
-            producer.send(record);
-        } catch (const KafkaException& e) {
-            LOG_ERROR("Cannot send out message with err={0}", e.what());
-            msgsFailedToBeSent.emplace(msg); // Push it back to another list to handle with them later
-        }
-    }
+        for (std::string line; std::getline(std::cin, line);) {
+            // The ProducerRecord doesn't own `line`, it is just a thin wrapper
+            auto record = kafka::ProducerRecord(topic,
+                                                kafka::NullKey,
+                                                kafka::Value(line.c_str(), line.size()));
 
-    producer.close(); // Not mandatory (destructor of the producer would call it anyway)
+            // Send the message.
+            try {
+                kafka::Producer::RecordMetadata metadata = producer.send(record);
+                std::cout << "% Message delivered: " << metadata.toString() << std::endl;
+            } catch (const kafka::KafkaException& e) {
+                std::cerr << "% Message delivery failed: " << e.error().message() << std::endl;
+            }
+
+            if (line.empty()) break;
+        };
+
+        // producer.close(); // No explicit close is needed, RAII will take care of it
 ```
 
 * `ProducerConfig::BOOTSTRAP_SERVERS` is mandatory for ProducerConfig.
@@ -46,27 +58,38 @@ Unlike Java's KafkaProducer, here we introduce two derived classes, -- `KafkaSyn
 
 ### Example
 ```cpp
-    ProducerConfig props;
-    props.put(ConsumerConfig::BOOTSTRAP_SERVERS, "127.0.0.1:1234,127.0.0.1:2345");
+        // Create configuration object
+        kafka::Properties props ({
+            {"bootstrap.servers",  brokers},
+            {"enable.idempotence", "true"},
+        });
 
-    KafkaAsyncProducer producer(props);
+        // Create a producer instance.
+        kafka::KafkaAsyncProducer producer(props);
 
-    // Prepare "msgsToBeSent", and an empty "msgsFailedToBeSent" as well
+        // Read messages from stdin and produce to the broker.
+        std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;
 
-    for (const auto& msg : msgsToBeSent) {
-        auto record = ProducerRecord(topic, partition, msg.key, msg.value);
-        producer.send(record,
-                      // Ack callback
-                      [&msg](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                           // the message could be identified by `metadata.recordId()`
-                           if (ec)  {
-                               LOG_ERROR("Cannot send out message with recordId={0}", metadata.recordId());
-                               msgsFailedToBeSent.emplace(msg); // Push it back to another list to handle with them later
-                           }
-                       });
-    }
+        for (std::string line; std::getline(std::cin, line);) {
+            // The ProducerRecord doesn't own `line`, it is just a thin wrapper
+            auto record = kafka::ProducerRecord(topic,
+                                                kafka::NullKey,
+                                                kafka::Value(line.c_str(), line.size()));
+            // Send the message.
+            producer.send(record,
+                          // The delivery report handler
+                          [](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
+                              if (!ec) {
+                                  std::cout << "% Message delivered: " << metadata.toString() << std::endl;
+                              } else {
+                                  std::cerr << "% Message delivery failed: " << ec.message() << std::endl;
+                              }
+                          },
+                          // The memory block given by record.value() would be copied
+                          kafka::KafkaProducer::SendOption::ToCopyRecordValue);
 
-    producer.close(); // Not mandatory (destructor of the producer would call it anyway)
+            if (line.empty()) break;
+        }
 ```
 
 * Same with KafkaSyncProducer, the user must guarantee the memory block for `ProducerRecord`'s `key` is valid until being `send`.
@@ -75,35 +98,32 @@ Unlike Java's KafkaProducer, here we introduce two derived classes, -- `KafkaSyn
 
 * It's guaranteed that the delivery callback would be triggered anyway after `send`, -- a producer would even be waiting for it before `close`. So, it's a good way to release these memory resources in the `Producer::Callback` function.
 
-## KafkaAsyncProducer with `KafkaClient::EventsPollingOption::MANUAL`
+## KafkaAsyncProducer with `KafkaClient::EventsPollingOption::Manual`
 
-While we construct a `KafkaAsyncProducer` with option `KafkaClient::EventsPollingOption::AUTO` (default), an internal thread would be created for `MessageDelivery` callbacks handling. 
+While we construct a `KafkaAsyncProducer` with option `KafkaClient::EventsPollingOption::Auto` (default), an internal thread would be created for `MessageDelivery` callbacks handling. 
 
 This might not be what you want, since then you have to use 2 different threads to send the messages and handle the `MessageDelivery` responses.
 
-Here we have another choice, -- using `KafkaClient::EventsPollingOption::MANUAL`, thus the `MessageDelivery` callbacks would be called within member function `pollEvents()`.
+Here we have another choice, -- using `KafkaClient::EventsPollingOption::Manual`, thus the `MessageDelivery` callbacks would be called within member function `pollEvents()`.
 
-* Note, if you constructed the `KafkaAsyncProducer` with `EventsPollingOption::MANUAL`, the `send()` would be an `unblocked` operation.
+* Note, if you constructed the `KafkaAsyncProducer` with `EventsPollingOption::Manual`, the `send()` would be an `unblocked` operation.
 I.e, once the `message buffering queue` becomes full, the `send()` operation would throw an exception (or return an `error code` with the input reference parameter), -- instead of blocking there.
 This makes sense, since you might want to call `pollEvents()` later, thus delivery-callback could be called for some messages (which could then be removed from the `message buffering queue`).
 
 ### Example
 ```cpp
-    ProducerConfig props;
-    props.put(ConsumerConfig::BOOTSTRAP_SERVERS, "127.0.0.1:1234,127.0.0.1:2345");
-
-    KafkaAsyncProducer producer(props, KafkaClient::EventsPollingOption::MANUAL);
+    kafak::KafkaAsyncProducer producer(props, KafkaClient::EventsPollingOption::Manual);
 
     // Prepare "msgsToBeSent"
     auto std::map<int, std::pair<Key, Value>> msgsToBeSent = ...;
     
     for (const auto& msg : msgsToBeSent) {
-        auto record = ProducerRecord(topic, partition, msg.second.first, msg.second.second, msg.first);
-        std::error_code error;
-        producer.send(error,
+        auto record = kafak::ProducerRecord(topic, partition, msg.second.first, msg.second.second, msg.first);
+        std::error_code ec;
+        producer.send(ec,
                       record,
                       // Ack callback
-                      [&msg](const Producer::RecordMetadata& metadata, std::error_code ec) {
+                      [&msg](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
                            // the message could be identified by `metadata.recordId()`
                            if (ec)  {
                                LOG_ERROR("Cannot send out message with recordId={0}", metadata.recordId());
@@ -111,21 +131,13 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
                                msgsToBeSend.erase(metadata.recordId()); // Quite safe here
                            }
                        });
-        if (error) break;
+        if (ec) break;
     }
     
     // Here we call the `MessageDelivery` callbacks
     // Note, we can only do this while the producer was constructed with `EventsPollingOption::MANUAL`.
     producer.pollEvents();
-
-    producer.close();
 ```
-
-## Idempotent Producer
-
-The way to make a `KafkaProducer` be `Idempotent` is really simple, just adding one single line of configuration -- `{ProducerConfig::ENABLE_IDEMPOTENCE, "true"}` would be enough.
-
-Note: The `ProducerConfig::ENABLE_IDEMPOTENCE` configuration would internally set some default values for related properties, such as `{ProducerConfig::ACKS, "all"}`, `{ProducerConfig::MAX_IN_FLIGHT, "5"}`, etc. Thus suggest not to set them explicitly to avoid configuration conflict. 
 
 ## Headers in ProducerRecord
 
@@ -135,9 +147,9 @@ Note: The `ProducerConfig::ENABLE_IDEMPOTENCE` configuration would internally se
 
 ### Example
 ```cpp
-    KafkaAsyncProducer producer(props);
+    kafak::KafkaAsyncProducer producer(props);
 
-    auto record = ProducerRecord(topic, partition, Key(), Value());
+    auto record = kafka::ProducerRecord(topic, partition, Key(), Value());
 
     for (const auto& msg : msgsToBeSent) {
         // Prepare record headers
@@ -153,7 +165,7 @@ Note: The `ProducerConfig::ENABLE_IDEMPOTENCE` configuration would internally se
 
         producer.send(record,
                       // Ack callback
-                      [&msg](const Producer::RecordMetadata& metadata, std::error_code ec) {
+                      [&msg](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
                            if (ec)  {
                                LOG_ERROR("Cannot send out message: {0}, err: {1}", metadata.toString(), ec);
                            }

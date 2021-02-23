@@ -15,20 +15,39 @@ Note, each internal `commit` would "try its best", but "not guaranteed to succee
 
 ### Example
 ```cpp
-    ConsumerConfig props;
-    props.put(ConsumerConfig::BOOTSTRAP_SERVERS, "127.0.0.1:1234,127.0.0.1:2345");
+        // Create configuration object
+        kafka::Properties props ({
+            {"bootstrap.servers", brokers},
+        });
 
-    KafkaAutoCommitConsumer consumer(props);
+        // Create a consumer instance.
+        kafka::KafkaAutoCommitConsumer consumer(props);
 
-    consumer.subscribe({"topic1", "topic2"});
+        // Subscribe to topics
+        consumer.subscribe({topic});
 
-    while (true) {
-        auto records = consumer.poll(1000);
-        for (auto& record: records) {
-            // Process the message...
-            process(record);
+        // Read messages from the topic.
+        std::cout << "% Reading messages from topic: " << topic << std::endl;
+        while (true) {
+            auto records = consumer.poll(std::chrono::milliseconds(100));
+            for (const auto& record: records) {
+                // In this example, quit on empty message
+                if (record.value().size() == 0) return 0;
+
+                if (!record.error()) {
+                    std::cout << "% Got a new message..." << std::endl;
+                    std::cout << "    Topic    : " << record.topic() << std::endl;
+                    std::cout << "    Partition: " << record.partition() << std::endl;
+                    std::cout << "    Offset   : " << record.offset() << std::endl;
+                    std::cout << "    Timestamp: " << record.timestamp().toString() << std::endl;
+                    std::cout << "    Headers  : " << kafka::toString(record.headers()) << std::endl;
+                    std::cout << "    Key   [" << record.key().toString() << "]" << std::endl;
+                    std::cout << "    Value [" << record.value().toString() << "]" << std::endl;
+                } else {
+                    std::cerr << record.toString() << std::endl;
+                }
+            }
         }
-    }
 ```
 
 * `ConsumerConfig::BOOTSTRAP_SERVERS` is mandatory for `ConsumerConfig`.
@@ -45,48 +64,82 @@ Note, each internal `commit` would "try its best", but "not guaranteed to succee
 
 ### Example
 ```cpp
-    ConsumerConfig props;
-    props.put(ConsumerConfig::BOOTSTRAP_SERVERS, "127.0.0.1:1234,127.0.0.1:2345");
+        // Create configuration object
+        kafka::Properties props ({
+            {"bootstrap.servers", brokers},
+        });
 
-    KafkaManualCommitConsumer consumer(props);
+        // Create a consumer instance.
+        kafka::KafkaManualCommitConsumer consumer(props);
 
-    consumer.subscribe({"topic1", "topic2"});
+        // Subscribe to topics
+        consumer.subscribe({topic});
 
-    while (true) {
-        auto records = consumer.poll(1000);
-        for (auto& record: records) {
-            // Process the message...
-            process(record);
+        auto lastTimeCommitted = std::chrono::steady_clock::now();
 
-            // Then, must commit the offset manually
-            consumer.commitSync(*record);
+        // Read messages from the topic.
+        std::cout << "% Reading messages from topic: " << topic << std::endl;
+        bool allCommitted = true;
+        bool running      = true;
+        while (running) {
+            auto records = consumer.poll(std::chrono::milliseconds(100));
+            for (const auto& record: records) {
+                // In this example, quit on empty message
+                if (record.value().size() == 0) {
+                    running = false;
+                    break;
+                }
+
+                if (!record.error()) {
+                    std::cout << "% Got a new message..." << std::endl;
+                    std::cout << "    Topic    : " << record.topic() << std::endl;
+                    std::cout << "    Partition: " << record.partition() << std::endl;
+                    std::cout << "    Offset   : " << record.offset() << std::endl;
+                    std::cout << "    Timestamp: " << record.timestamp().toString() << std::endl;
+                    std::cout << "    Headers  : " << kafka::toString(record.headers()) << std::endl;
+                    std::cout << "    Key   [" << record.key().toString() << "]" << std::endl;
+                    std::cout << "    Value [" << record.value().toString() << "]" << std::endl;
+
+                    allCommitted = false;
+                } else {
+                    std::cerr << record.toString() << std::endl;
+                }
+            }
+
+            if (!allCommitted) {
+                auto now = std::chrono::steady_clock::now();
+                if (now - lastTimeCommitted > std::chrono::seconds(1)) {
+                    // Commit offsets for messages polled
+                    std::cout << "% syncCommit offsets: " << kafka::Utility::getCurrentTime() << std::endl;
+                    consumer.commitSync(); // or commitAsync()
+
+                    lastTimeCommitted = now;
+                    allCommitted      = true;
+                }
+            }
         }
-    }
 ```
 
 * The example is quite similar with the KafkaAutoCommitConsumer, with only 1 more line added for manual-commit.
 
 * `commitSync` and `commitAsync` are both available for a KafkaManualConsumer. Normally, use `commitSync` to guarantee the commitment, or use `commitAsync`(with `OffsetCommitCallback`) to get a better performance.
 
-## KafkaManualCommitConsumer with `KafkaClient::EventsPollingOption::MANUAL`
+## KafkaManualCommitConsumer with `KafkaClient::EventsPollingOption::Manual`
 
 While we construct a `KafkaManualCommitConsumer` with option `KafkaClient::EventsPollingOption::AUTO` (default), an internal thread would be created for `OffsetCommit` callbacks handling.
 
 This might not be what you want, since then you have to use 2 different threads to process the messages and handle the `OffsetCommit` responses.
 
-Here we have another choice, -- using `KafkaClient::EventsPollingOption::MANUAL`, thus the `OffsetCommit` callbacks would be called within member function `pollEvents()`.
+Here we have another choice, -- using `KafkaClient::EventsPollingOption::Manual`, thus the `OffsetCommit` callbacks would be called within member function `pollEvents()`.
 
 ### Example
 ```cpp
-    ConsumerConfig props;
-    props.put(ConsumerConfig::BOOTSTRAP_SERVERS, "127.0.0.1:1234,127.0.0.1:2345");
-
-    KafkaManualCommitConsumer consumer(props, KafkaClient::EventsPollingOption::MANUAL);
+    KafkaManualCommitConsumer consumer(props, KafkaClient::EventsPollingOption::Manual);
 
     consumer.subscribe({"topic1", "topic2"});
 
     while (true) {
-        auto records = consumer.poll(1000);
+        auto records = consumer.poll(std::chrono::milliseconds(100));
         for (auto& record: records) {
             // Process the message...
             process(record);
@@ -96,7 +149,7 @@ Here we have another choice, -- using `KafkaClient::EventsPollingOption::MANUAL`
         }
 
         // Here we call the `OffsetCommit` callbacks
-        // Note, we can only do this while the consumer was constructed with `EventsPollingOption::MANUAL`.
+        // Note, we can only do this while the consumer was constructed with `EventsPollingOption::Manual`.
         consumer.pollEvents();
     }
 ```

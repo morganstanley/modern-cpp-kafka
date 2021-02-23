@@ -10,11 +10,11 @@ Here is the [doxygen documentation for developers](doxygen/annotated.html).
 
 ## Why it's here
 
-The `librdkafka` is a robust high performance C/C++ library, -- widely used and well maintained.
+The `librdkafka` is a robust high performance C/C++ library, widely used and well maintained.
 
-Unfortunately, its `C++ interface` (a thin wrapper of its C lib), -- compared with Java version APIs -- is not object-oriented, nor ease-of-use.
+Unfortunately, the C++ interface of `librdkafka` is not quite object-oriented or user-friendly, since it has to be confined to C++ 98 for compatibility.
 
-Thus we worked out `Modern C++ based Kafka API`, which makes the development work much easier.
+To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.
 
 ## Features
 
@@ -50,7 +50,7 @@ Thus we worked out `Modern C++ based Kafka API`, which makes the development wor
 
 ## Build
 
-* To build its `tools`/`tests`, you should
+* To build its `tools`/`tests/examples`, you should
 
     * Specify library locations with environment variables
 
