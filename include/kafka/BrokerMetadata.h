@@ -99,7 +99,7 @@ struct BrokerMetadata {
     /**
      * The nodes info in the MetadataResponse.
      */
-    std::vector<Node> nodes()  const;
+    std::vector<std::shared_ptr<Node>> nodes() const;
 
     /**
      * The partitions' state in the MetadataResponse.
@@ -122,13 +122,13 @@ private:
     std::map<Partition, PartitionInfo>        _partitions;
 };
 
-inline std::vector<BrokerMetadata::Node>
+inline std::vector<std::shared_ptr<BrokerMetadata::Node>>
 BrokerMetadata::nodes() const
 {
-    std::vector<Node> ret;
+    std::vector<std::shared_ptr<BrokerMetadata::Node>> ret;
     for (const auto& nodeInfo: _nodes)
     {
-        ret.emplace_back(*nodeInfo.second);
+        ret.emplace_back(nodeInfo.second);
     }
     return ret;
 }
