@@ -55,7 +55,8 @@ struct BrokerMetadata {
      */
     struct PartitionInfo
     {
-        void setLeader(Node::Id id)        { leader = id; }
+        explicit PartitionInfo(Node::Id leaderId): leader(leaderId) {}
+
         void addReplica(Node::Id id)       { replicas.emplace_back(id); }
         void addInSyncReplica(Node::Id id) { inSyncReplicas.emplace_back(id); }
 
@@ -148,7 +149,7 @@ BrokerMetadata::toString(const PartitionInfo& partitionInfo) const
 {
     std::ostringstream oss;
 
-    auto streamNodes = [this](std::ostringstream& ss, const std::vector<Node::Id> nodeIds) -> std::ostringstream& {
+    auto streamNodes = [this](std::ostringstream& ss, const std::vector<Node::Id>& nodeIds) -> std::ostringstream& {
         bool isTheFirst = true;
         for (const auto id: nodeIds)
         {
