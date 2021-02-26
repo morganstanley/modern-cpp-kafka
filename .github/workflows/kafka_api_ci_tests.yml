@@ -1,4 +1,4 @@
-name: [Kafka API] CI Tests
+name: "[Kafka API] CI Tests"
 
 on: [push, pull_request]
 

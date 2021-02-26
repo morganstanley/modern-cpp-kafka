@@ -1,4 +1,4 @@
-name: [Kafka API] Generate Documents
+name: "[Kafka API] Generate Documents"
 
 on:
   pull_request:
