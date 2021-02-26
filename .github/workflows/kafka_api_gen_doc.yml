@@ -1,4 +1,4 @@
-name: Generate Documents
+name: [Kafka API] Generate Documents
 
 on:
   pull_request:
@@ -7,8 +7,7 @@ on:
       - master
 
 jobs:
-  build_doc:
-    name: Build Doc
+  kafka-api-build-doc:
     runs-on: ubuntu-20.04
     env:
         BUILD_SUB_DIR: build/sub-build
@@ -16,8 +15,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Dependencies
         run: |
-          # Update the package list
-          sudo apt update
           mkdir -p $BUILD_SUB_DIR
           cd $BUILD_SUB_DIR
 
@@ -31,16 +28,19 @@ jobs:
         run: |
           cd $BUILD_SUB_DIR
           cmake ../.. -DBUILD_OPTION_DOC_ONLY=ON
+
       - name: Build
         run: |
           cd $BUILD_SUB_DIR
           make VERBOSE=1
+
       - name: Copy
         run: |
           mkdir doc-gen
           cp $BUILD_SUB_DIR/doc/README.html doc-gen
           cp -r $BUILD_SUB_DIR/doc/markdown doc-gen
           cp -r $BUILD_SUB_DIR/doc/doxygen doc-gen
+
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
