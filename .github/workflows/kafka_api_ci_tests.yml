@@ -1,4 +1,4 @@
-name: CI Tests
+name: [Kafka API] CI Tests
 
 on: [push, pull_request]
 
@@ -9,7 +9,7 @@ env:
   BUILD_SUB_DIR:      build/sub-build
 
 jobs:
-  on_unix-like:
+  kafka-api-tests:
     runs-on: ${{ matrix.os }}
 
     env:
@@ -111,8 +111,6 @@ jobs:
 
           if [ ${CXX_VERSION} ]; then
             export CMAKE_CXX_FLAGS="-DCMAKE_CXX_FLAGS=\"-std=${CXX_VERSION}\""
-          else
-            export CMAKE_CXX_FLAGS="-DCMAKE_CXX_FLAGS=\"-std=c++17\""
           fi
 
           if [ ${BUILD_TYPE} ]; then
