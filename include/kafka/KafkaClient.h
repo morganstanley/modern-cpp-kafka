@@ -514,8 +514,6 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
 
         Partition partition = metadata_partition.id;
 
-        BrokerMetadata::PartitionInfo partitionInfo;
-
         if (metadata_partition.err != 0)
         {
             if (!disableErrorLogging)
@@ -526,7 +524,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
             continue;
         }
 
-        partitionInfo.setLeader(metadata_partition.leader);
+        BrokerMetadata::PartitionInfo partitionInfo(metadata_partition.leader);
 
         for (int j = 0; j < metadata_partition.replica_cnt; ++j)
         {

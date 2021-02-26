@@ -77,6 +77,11 @@ jobs:
             export PATH=/snap/bin:$PATH
           fi
 
+          # 2. Install clang-tidy
+          if [[ ${CHECK_OPTION} == *"clang-tidy"* ]]; then
+            sudo apt install -y clang-tidy
+          fi
+
           # 2. Install googletest (v1.10.0)
           wget -nv https://github.com/google/googletest/archive/release-1.10.0.tar.gz
           tar -xzf release-1.10.0.tar.gz
@@ -120,7 +125,7 @@ jobs:
           fi
 
           if [[ ${CHECK_OPTION} == *"clang-tidy"* ]]; then
-            export BUILD_OPTION='-DBUILD_OPTION_CLANG_TIEY=ON'
+            export BUILD_OPTION='-DBUILD_OPTION_CLANG_TIDY=ON'
           fi
 
           if [[ ${CHECK_OPTION} == *"asan"* ]]; then

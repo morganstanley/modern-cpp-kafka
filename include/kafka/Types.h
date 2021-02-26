@@ -90,6 +90,8 @@ public:
     std::size_t size()     const { return _size; }
     std::string toString() const
     {
+        if (_size == 0) return _data ? "[empty]" : "[NULL]";
+
         std::ostringstream oss;
 
         auto printChar = [&oss](const unsigned char c) {

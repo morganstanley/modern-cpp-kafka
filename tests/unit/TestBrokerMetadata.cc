@@ -39,8 +39,7 @@ TEST(BrokerMetadata, Basic)
     // Add info for partitions
     for (Kafka::Partition partition = 0; partition < numPartition; ++partition)
     {
-        Kafka::BrokerMetadata::PartitionInfo partitionInfo;
-        partitionInfo.setLeader(nodes[partition].id);
+        Kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
         for (const auto& node: nodes)
         {
             partitionInfo.addReplica(node.id);
@@ -83,8 +82,7 @@ TEST(BrokerMetadata, IncompleteInfo)
     // Add info for partitions
     for (Kafka::Partition partition = 0; partition < numPartition; ++partition)
     {
-        Kafka::BrokerMetadata::PartitionInfo partitionInfo;
-        partitionInfo.setLeader(nodes[partition].id);
+        Kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
         for (const auto& node: nodes)
         {
             partitionInfo.addReplica(node.id);
