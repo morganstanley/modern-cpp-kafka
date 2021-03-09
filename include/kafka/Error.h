@@ -2,6 +2,8 @@
 
 #include "kafka/Project.h"
 
+#include "kafka/RdKafkaHelper.h"
+
 #include "librdkafka/rdkafka.h"
 
 #include <string>
@@ -61,6 +63,60 @@ struct ErrorWithDetail
     std::error_code error;
     std::string     detail;
 };
+
+/**
+ * Error type with rich info.
+ */
+class Error
+{
+public:
+    explicit Error(rd_kafka_error_t* error = nullptr): _rkError(error, RkErrorDeleter) {}
+    Error(const Error&)            = default;
+    virtual ~Error()               = default;
+
+    /**
+     * Obtains the underlying error code.
+     */
+    virtual std::error_code     errorCode()   const { return ErrorCode(rd_kafka_error_code(_rkError.get())); }
+
+    /**
+     * Readable error string.
+     */
+    virtual std::string         message()     const { return rd_kafka_error_string(_rkError.get()); }
+
+    /**
+     * Fatal error indicates that the client instance is no longer usable.
+     */
+    virtual std::optional<bool> isFatal()     const { return rd_kafka_error_is_fatal(_rkError.get()); }
+
+    /**
+     * Show whether the operation may be retried.
+     */
+    virtual std::optional<bool> isRetriable() const { return rd_kafka_error_is_retriable(_rkError.get()); }
+
+private:
+    rd_kafka_error_shared_ptr _rkError;
+};
+
+/**
+ * Error type only with brief info.
+ */
+class SimpleError: public Error
+{
+public:
+    explicit SimpleError(rd_kafka_resp_err_t respErr, std::string message): _respErr(respErr), _message(std::move(message)) {}
+    SimpleError(const SimpleError&)            = default;
+
+    std::error_code     errorCode()   const override { return ErrorCode(_respErr); }
+    std::string         message()     const override { return _message; }
+    std::optional<bool> isFatal()     const override { return {}; }
+    std::optional<bool> isRetriable() const override { return {}; }
+
+private:
+    rd_kafka_resp_err_t _respErr;
+    std::string         _message;
+};
+
 
 } // end of KAFKA_API
 

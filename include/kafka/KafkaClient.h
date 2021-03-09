@@ -346,7 +346,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
                            rk_conf.release(),  // rk_conf's ownship would be transferred to rk, after the "rd_kafka_new()" call
                            errInfo.clear().str(),
                            errInfo.capacity()));
-    KAFKA_THROW_IF_WITH_ERROR(rd_kafka_last_error());
+    KAFKA_THROW_IF_WITH_RESP_ERROR(rd_kafka_last_error());
 
     // Add brokers
     auto brokers = properties.getProperty(BOOTSTRAP_SERVERS);

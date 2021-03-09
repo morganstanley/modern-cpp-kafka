@@ -166,7 +166,7 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
             catch (const KafkaException& e)
             {
                 std::cout << "[" << Utility::getCurrentTime() << "] Exception caught: " << e.what() << std::endl;
-                EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, e.error().value());
+                EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, e.error().errorCode().value());
                 break;
             }
         }

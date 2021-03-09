@@ -39,6 +39,11 @@ using rd_kafka_NewTopic_unique_ptr = std::unique_ptr<rd_kafka_NewTopic_t, RkNewT
 struct RkDeleteTopicDeleter { void operator()(rd_kafka_DeleteTopic_t* p) { rd_kafka_DeleteTopic_destroy(p); } };
 using rd_kafka_DeleteTopic_unique_ptr = std::unique_ptr<rd_kafka_DeleteTopic_t, RkDeleteTopicDeleter>;
 
+struct RkConsumerGroupMetadataDeleter { void operator()(rd_kafka_consumer_group_metadata_t* p) { rd_kafka_consumer_group_metadata_destroy(p) ; } };
+using rd_kafka_consumer_group_metadata_unique_ptr = std::unique_ptr<rd_kafka_consumer_group_metadata_t, RkConsumerGroupMetadataDeleter>;
+
+inline void RkErrorDeleter(rd_kafka_error_t* p) { rd_kafka_error_destroy(p); }
+using rd_kafka_error_shared_ptr = std::shared_ptr<rd_kafka_error_t>;
 
 // Convert from rd_kafka_xxx datatypes
 inline TopicPartitionOffsets getTopicPartitionOffsets(const rd_kafka_topic_partition_list_t* rk_tpos)

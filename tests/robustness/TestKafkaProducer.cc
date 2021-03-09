@@ -20,12 +20,12 @@ TEST(KafkaSyncProducer, RecordTimestamp)
         AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         auto createResult = adminClient.createTopics({topicWithRecordCreateTime}, 5, 3, Properties{{{"message.timestamp.type", "CreateTime"}}}, std::chrono::minutes(1));
-        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithRecordCreateTime << "] (with CreateTime) was created, result: " << createResult.detail << std::endl;
-        ASSERT_FALSE(createResult.error);
+        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithRecordCreateTime << "] (with CreateTime) was created, result: " << createResult.message() << std::endl;
+        ASSERT_FALSE(createResult.errorCode());
 
         createResult = adminClient.createTopics({topicWithLogAppendTime}, 5, 3, Properties{{{"message.timestamp.type", "LogAppendTime"}}}, std::chrono::minutes(1));
-        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithLogAppendTime << "] (with LogAppendTime) was created, result: " << createResult.detail << std::endl;
-        ASSERT_FALSE(createResult.error);
+        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithLogAppendTime << "] (with LogAppendTime) was created, result: " << createResult.message() << std::endl;
+        ASSERT_FALSE(createResult.errorCode());
 
         KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
     }

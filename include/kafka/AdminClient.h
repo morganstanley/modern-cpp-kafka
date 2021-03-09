@@ -23,20 +23,20 @@ namespace Admin
 /**
  * The result of AdminClient::createTopics().
  */
-using CreateTopicsResult = ErrorWithDetail;
+using CreateTopicsResult = SimpleError;
 
 /**
  * The result of AdminClient::deleteTopics().
  */
-using DeleteTopicsResult = ErrorWithDetail;
+using DeleteTopicsResult = SimpleError;
 
 /**
  * The result of AdminClient::listTopics().
  */
-struct ListTopicsResult: public ErrorWithDetail
+struct ListTopicsResult: public SimpleError
 {
-    ListTopicsResult(rd_kafka_resp_err_t respErr, std::string detailedMsg): ErrorWithDetail(respErr, std::move(detailedMsg)) {}
-    explicit ListTopicsResult(Topics names): ErrorWithDetail(RD_KAFKA_RESP_ERR_NO_ERROR, "Success"), topics(std::move(names)) {}
+    ListTopicsResult(rd_kafka_resp_err_t respErr, std::string detailedMsg): SimpleError(respErr, std::move(detailedMsg)) {}
+    explicit ListTopicsResult(Topics names): SimpleError(RD_KAFKA_RESP_ERR_NO_ERROR, "Success"), topics(std::move(names)) {}
 
     /**
      * The topics fetched.
@@ -75,8 +75,8 @@ public:
     Admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
 private:
-    static std::list<ErrorWithDetail> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount);
-    static ErrorWithDetail            combineErrors(const std::list<ErrorWithDetail>& errors);
+    static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount);
+    static SimpleError combineErrors(const std::list<SimpleError>& errors);
 
 #if __cplusplus >= 201703L
     static constexpr int DEFAULT_COMMAND_TIMEOUT_MS = 30000;
@@ -88,10 +88,10 @@ private:
 };
 
 
-inline std::list<ErrorWithDetail>
+inline std::list<SimpleError>
 AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount)
 {
-    std::list<ErrorWithDetail> errors;
+    std::list<SimpleError> errors;
 
     for (int i = 0; i < topicCount; ++i)
     {
@@ -105,8 +105,8 @@ AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, in
     return errors;
 }
 
-inline ErrorWithDetail
-AdminClient::combineErrors(const std::list<ErrorWithDetail>& errors)
+inline SimpleError
+AdminClient::combineErrors(const std::list<SimpleError>& errors)
 {
     if (!errors.empty())
     {
@@ -115,13 +115,13 @@ AdminClient::combineErrors(const std::list<ErrorWithDetail>& errors)
                       [&detailedMsg](const auto& error) {
                           if (!detailedMsg.empty()) detailedMsg += "; ";
 
-                          detailedMsg += error.detail;
+                          detailedMsg += error.message();
                       });
 
-        return  ErrorWithDetail(errors.front().error, detailedMsg);
+        return  SimpleError(static_cast<rd_kafka_resp_err_t>(errors.front().errorCode().value()), detailedMsg);
     }
 
-    return ErrorWithDetail(RD_KAFKA_RESP_ERR_NO_ERROR, "Success");
+    return SimpleError(RD_KAFKA_RESP_ERR_NO_ERROR, "Success");
 }
 
 inline Admin::CreateTopicsResult
@@ -182,7 +182,7 @@ AdminClient::createTopics(const Topics& topics, int numPartitions, int replicati
         return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit");
     }
 
-    std::list<ErrorWithDetail> errors;
+    std::list<SimpleError> errors;
 
     if (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))
     {
@@ -206,7 +206,7 @@ AdminClient::createTopics(const Topics& topics, int numPartitions, int replicati
     do
     {
         auto listResult = listTopics();
-        if (!listResult.error)
+        if (!listResult.errorCode())
         {
             return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR_NO_ERROR, "Success");
         }
@@ -255,7 +255,7 @@ AdminClient::deleteTopics(const Topics& topics, std::chrono::milliseconds timeou
         return Admin::DeleteTopicsResult(RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit");
     }
 
-    std::list<ErrorWithDetail> errors;
+    std::list<SimpleError> errors;
 
     if (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))
     {

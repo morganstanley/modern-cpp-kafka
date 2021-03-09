@@ -2,6 +2,7 @@
 
 #include "kafka/Project.h"
 
+#include "kafka/Consumer.h"
 #include "kafka/ConsumerConfig.h"
 #include "kafka/ConsumerRecord.h"
 #include "kafka/KafkaClient.h"
@@ -11,31 +12,11 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <functional>
 #include <iterator>
 #include <memory>
 
 
 namespace KAFKA_API {
-
-namespace Consumer
-{
-    /**
-     * To identify which kind of re-balance event is handling, when the set of partitions assigned to the consumer changes.
-     * It's guaranteed that rebalance callback will be called twice (first with PartitionsRevoked, and then with PartitionsAssigned).
-     */
-    enum class RebalanceEventType { PartitionsAssigned, PartitionsRevoked };
-
-    /**
-     * A callback interface that the user can implement to trigger custom actions when the set of partitions assigned to the consumer changes.
-     */
-    using RebalanceCallback    = std::function<void(RebalanceEventType eventType, const TopicPartitions& topicPartitions)>;
-    /**
-     * A callback interface that the user can implement to trigger custom actions when a commit request completes.
-     */
-    using OffsetCommitCallback = std::function<void(const TopicPartitionOffsets& topicPartitionOffsets, std::error_code ec)>;
-}
-
 
 /**
  * The base class for KafkaAutoCommitConsumer and KafkaManualCommitConsumer.
@@ -72,7 +53,7 @@ protected:
 
         // Redirect the reply queue (to the client group queue)
         rd_kafka_resp_err_t err = rd_kafka_poll_set_consumer(getClientHandle());
-        KAFKA_THROW_IF_WITH_ERROR(err);
+        KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
         // Initialize message-fetching queue
         _rk_queue.reset(rd_kafka_queue_get_consumer(getClientHandle()));
@@ -236,6 +217,12 @@ public:
      */
     void resume();
 
+    /**
+     * Return the current group metadata associated with this consumer.
+     */
+    Consumer::ConsumerGroupMetadata groupMetadata();
+
+
 protected:
     static const constexpr char* ENABLE_AUTO_OFFSET_STORE = "enable.auto.offset.store";
     static const constexpr char* ENABLE_AUTO_COMMIT       = "enable.auto.commit";
@@ -386,7 +373,7 @@ KafkaConsumer::subscribe(const Topics& topics, RebalanceCallback cb)
     auto rk_topics = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(topics));
 
     rd_kafka_resp_err_t err = rd_kafka_subscribe(getClientHandle(), rk_topics.get());
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
     rd_kafka_poll(getClientHandle(), TIMEOUT_INFINITE);
@@ -400,7 +387,7 @@ KafkaConsumer::unsubscribe()
     KAFKA_API_DO_LOG(LOG_INFO, "will unsubscribe");
 
     rd_kafka_resp_err_t err = rd_kafka_unsubscribe(getClientHandle());
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
     rd_kafka_poll(getClientHandle(), TIMEOUT_INFINITE);
@@ -415,7 +402,7 @@ KafkaConsumer::subscription() const
     rd_kafka_resp_err_t err = rd_kafka_subscription(getClientHandle(), &raw_topics);
     auto rk_topics = rd_kafka_topic_partition_list_unique_ptr(raw_topics);
 
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     return getTopics(rk_topics.get());
 }
@@ -430,7 +417,7 @@ KafkaConsumer::_assign(const TopicPartitions& tps)
     auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tps));
 
     rd_kafka_resp_err_t err = rd_kafka_assign(getClientHandle(), (rk_tps->cnt > 0) ? rk_tps.get() : nullptr);
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     _assignment = tps;
 
@@ -462,7 +449,7 @@ KafkaConsumer::assignment(bool withQueryRequest) const
 
         auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(raw_tps);
 
-        KAFKA_THROW_IF_WITH_ERROR(err);
+        KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
         return getTopicPartitions(rk_tps.get());
     }
@@ -487,7 +474,7 @@ KafkaConsumer::seek(const TopicPartition& tp, Offset o, std::chrono::millisecond
     auto rkt = rd_kafka_topic_unique_ptr(rd_kafka_topic_new(getClientHandle(), tp.first.c_str(), nullptr));
     if (!rkt)
     {
-        KAFKA_THROW(rd_kafka_last_error());
+        KAFKA_THROW_RESP_ERROR(rd_kafka_last_error());
     }
 
     const auto end = std::chrono::steady_clock::now() + timeout;
@@ -506,7 +493,7 @@ KafkaConsumer::seek(const TopicPartition& tp, Offset o, std::chrono::millisecond
         std::this_thread::yield();
     } while (std::chrono::steady_clock::now() < end);
 
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     KAFKA_API_DO_LOG(LOG_INFO, "seeked with topic-partition[%s], offset[%d]", tpStr.c_str(), o);
 }
@@ -526,7 +513,7 @@ KafkaConsumer::position(const TopicPartition& tp) const
     auto rk_tp = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList({tp}));
 
     rd_kafka_resp_err_t err = rd_kafka_position(getClientHandle(), rk_tp.get());
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     return rk_tp->elems[0].offset;
 }
@@ -550,7 +537,7 @@ KafkaConsumer::offsetsForTime(const TopicPartitions& tps,
     }
 
     rd_kafka_resp_err_t err = rd_kafka_offsets_for_times(getClientHandle(), rk_tpos.get(), timeout.count());
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     auto results = getTopicPartitionOffsets(rk_tpos.get());
 
@@ -572,7 +559,7 @@ KafkaConsumer::getOffsets(const TopicPartitions& tps, bool atBeginning) const
     {
         Offset beginning{}, end{};
         rd_kafka_resp_err_t err = rd_kafka_query_watermark_offsets(getClientHandle(), tp.first.c_str(), tp.second, &beginning, &end, 0);
-        KAFKA_THROW_IF_WITH_ERROR(err);
+        KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
         result[tp] = (atBeginning ? beginning : end);
     }
@@ -593,7 +580,7 @@ KafkaConsumer::commit(const TopicPartitionOffsets& tpos, CommitType type)
         err = RD_KAFKA_RESP_ERR_NO_ERROR;
     }
 
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 }
 
 // Fetch committed offset
@@ -603,7 +590,7 @@ KafkaConsumer::committed(const TopicPartition& tp)
     auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList({tp}));
 
     rd_kafka_resp_err_t err = rd_kafka_committed(getClientHandle(), rk_tps.get(), TIMEOUT_INFINITE);
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     return rk_tps->elems[0].offset;
 }
@@ -680,7 +667,7 @@ KafkaConsumer::pauseOrResumePartitions(const TopicPartitions& tps, PauseOrResume
 
     rd_kafka_resp_err_t err = (op == PauseOrResumeOperation::Pause) ?
                               rd_kafka_pause_partitions(getClientHandle(), rk_tpos.get()) : rd_kafka_resume_partitions(getClientHandle(), rk_tpos.get());
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     const char* opString = (op == PauseOrResumeOperation::Pause) ? "pause" : "resume";
     int cnt = 0;
@@ -800,6 +787,12 @@ KafkaConsumer::offsetCommitCallback(rd_kafka_t* rk, rd_kafka_resp_err_t err, rd_
         (*cb)(tpos, ErrorCode(err));
     }
     delete cb;
+}
+
+inline Consumer::ConsumerGroupMetadata
+KafkaConsumer::groupMetadata()
+{
+    return Consumer::ConsumerGroupMetadata{rd_kafka_consumer_group_metadata(getClientHandle())};
 }
 
 /**
@@ -988,7 +981,7 @@ KafkaManualCommitConsumer::commitAsync(const TopicPartitionOffsets& tpos, const 
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(tpos.empty() ? nullptr : createRkTopicPartitionList(tpos));
 
     rd_kafka_resp_err_t err = rd_kafka_commit_queue(getClientHandle(), rk_tpos.get(), getCommitCbQueue(), &KafkaConsumer::offsetCommitCallback, new OffsetCommitCallback(cb));
-    KAFKA_THROW_IF_WITH_ERROR(err);
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 }
 
 inline void

@@ -9,24 +9,31 @@
 #include <string>
 #include <time.h>
 
+
 namespace KAFKA_API {
 
 namespace Utility {
+
+/**
+ * Get local time as string.
+ */
+inline std::string getLocalTimeString(const std::chrono::system_clock::time_point& timePoint)
+{
+    auto micros = std::chrono::duration_cast<std::chrono::microseconds>(timePoint.time_since_epoch()) % 1000000;
+    auto time = std::chrono::system_clock::to_time_t(timePoint);
+
+    std::ostringstream oss;
+    std::tm tmBuf = {};
+    oss << std::put_time(localtime_r(&time, &tmBuf), "%F %T") <<  "." << std::setfill('0') << std::setw(6) << micros.count();
+    return oss.str();
+}
 
 /**
  * Get current local time as string.
  */
 inline std::string getCurrentTime()
 {
-    using namespace std::chrono;
-    auto current = system_clock::now();
-    auto micros = duration_cast<microseconds>(current.time_since_epoch()) % 1000000;
-    auto time = system_clock::to_time_t(current);
-
-    std::ostringstream oss;
-    std::tm tmBuf = {};
-    oss << std::put_time(localtime_r(&time, &tmBuf), "%F %T") <<  "." << std::setfill('0') << std::setw(6) << micros.count();
-    return oss.str();
+    return getLocalTimeString(std::chrono::system_clock::now());
 }
 
 /**
