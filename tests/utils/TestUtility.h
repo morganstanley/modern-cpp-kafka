@@ -15,16 +15,21 @@
 #include <vector>
 
 
-#define EXPECT_KAFKA_THROW(expr, err)               \
-    do {                                            \
-        try {                                       \
-            expr;                                   \
-        } catch (const KafkaException& e) {         \
-            EXPECT_EQ(err, e.error().value());      \
-            break;                                  \
-        } catch (...){                              \
-        }                                           \
-        EXPECT_FALSE(true);                         \
+#define EXPECT_KAFKA_THROW(expr, err)                                   \
+    do {                                                                \
+        try {                                                           \
+            expr;                                                       \
+        } catch (const KafkaException& e) {                                                                  \
+            const auto& error = e.error();                                                                   \
+            std::cout << "Exception caught: " << e.what()                                                    \
+                << (error.isFatal() ? (*error.isFatal() ? ", fatal" : ", non-fatal") : "")                      \
+                << (error.isRetriable() ? (*error.isRetriable() ? ",  retriable" : ", non-retriable") : "")  \
+                << std::endl;                                                                                \
+            EXPECT_EQ(err, e.error().errorCode().value());                                                   \
+            break;                                                                                           \
+        } catch (...){                                                  \
+        }                                                               \
+        EXPECT_FALSE(true);                                             \
     } while(false)
 
 #define EXPECT_KAFKA_NO_THROW(expr)   \
@@ -41,15 +46,15 @@
         EXPECT_FALSE(true);           \
     }
 
-#define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                           \
-    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                               \
-        try {                                                                   \
-            expr;                                                               \
-            break;                                                              \
-        } catch (const KafkaException& e) {                                     \
-            if (e.error().value() == errToRetry && cnt != maxRetries) continue; \
-            throw;                                                              \
-        }                                                                       \
+#define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                                       \
+    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                                           \
+        try {                                                                               \
+            expr;                                                                           \
+            break;                                                                          \
+        } catch (const KafkaException& e) {                                                 \
+            if (e.error().errorCode().value() == errToRetry && cnt != maxRetries) continue; \
+            throw;                                                                          \
+        }                                                                                   \
     }
 
 namespace Kafka = KAFKA_API;
@@ -167,7 +172,7 @@ CreateKafkaTopic(const Kafka::Topic& topic, int numPartitions, int replicationFa
 {
     Kafka::AdminClient adminClient(GetKafkaClientCommonConfig());
     auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
-    ASSERT_FALSE(createResult.error);
+    ASSERT_FALSE(createResult.errorCode());
     std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": topic[" << topic << "] created with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]." << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }

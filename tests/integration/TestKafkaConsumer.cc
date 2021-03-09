@@ -206,7 +206,7 @@ TEST(KafkaAutoCommitConsumer, RecordWithEmptyOrNullFields)
         consumer.subscribe({topic});
 
         // Poll all messages
-        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
 
         // Check the key/value (should be empty: 0 length, but not NULL)
         std::map<int, int> counts;
@@ -243,7 +243,7 @@ TEST(KafkaAutoCommitConsumer, RecordWithEmptyOrNullFields)
         consumer.subscribe({topic});
 
         // Poll all messages
-        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
 
         // Check the key/value (should be NULL)
         std::map<int, int> counts;
@@ -1524,7 +1524,7 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
             }
             catch (const Kafka::KafkaException& e)
             {
-                EXPECT_EQ(RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION, e.error().value()); // Or, fail
+                EXPECT_EQ(RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION, e.error().errorCode().value()); // Or, fail
             }
         }
      }

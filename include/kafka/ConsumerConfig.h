@@ -76,6 +76,13 @@ public:
     static const constexpr char* SOCKET_TIMEOUT_MS       = "socket.timeout.ms";
 
     /**
+     * Control how to read messages written transactionally.
+     * Available options: read_uncommitted, read_committed
+     * Default value: read_committed
+     */
+    static const constexpr char* ISOLATION_LEVEL         = "isolation.level";
+
+    /**
      * Protocol used to communicate with brokers.
      * Default value: plaintext
      */

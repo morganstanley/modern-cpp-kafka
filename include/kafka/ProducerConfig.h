@@ -119,6 +119,17 @@ public:
     static const constexpr char* ENABLE_IDEMPOTENCE           = "enable.idempotence";
 
     /**
+     * It's used to identify the same transactional producer instance across process restarts.
+     */
+    static const constexpr char* TRANSACTIONAL_ID             = "transactional.id";
+
+    /**
+     * Th maximus amount of time in milliseconds that the transaction coordinator will wait for a trnsaction status update from the producer before proactively ablrting the ongoing transaction.
+     * Default value: 60000
+     */
+    static const constexpr char* TRANSACTION_TIMEOUT_MS       = "transaction.timeout.ms";
+
+    /**
      * Protocol used to communicate with brokers.
      * Default value: plaintext
      */

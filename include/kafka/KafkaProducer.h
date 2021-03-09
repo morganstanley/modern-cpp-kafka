@@ -2,7 +2,9 @@
 
 #include "kafka/Project.h"
 
+#include "kafka/Consumer.h"
 #include "kafka/KafkaClient.h"
+#include "kafka/Producer.h"
 #include "kafka/ProducerConfig.h"
 #include "kafka/ProducerRecord.h"
 #include "kafka/Timestamp.h"
@@ -16,174 +18,8 @@
 #include <shared_mutex>
 #include <unordered_map>
 
+
 namespace KAFKA_API {
-
-/**
- * Namespace for datatypes defined for KafkaProducer.
- */
-namespace Producer
-{
-    /**
-     * The metadata for a record that has been acknowledged by the server.
-     */
-    class RecordMetadata
-    {
-    public:
-        enum class PersistedStatus { Not, Possibly, Done };
-
-        // This is only called by the KafkaProducer::deliveryCallback (with a valid rkmsg pointer)
-        RecordMetadata(const rd_kafka_message_t* rkmsg, ProducerRecord::Id recordId)
-            : _cachedInfo(),
-              _rkmsg(rkmsg),
-              _recordId(recordId)
-        {
-        }
-
-        RecordMetadata(const RecordMetadata& another)
-            : _cachedInfo(std::make_unique<CachedInfo>(another.topic(),
-                                                       another.partition(),
-                                                       another.offset() ? *another.offset() : RD_KAFKA_OFFSET_INVALID,
-                                                       another.keySize(),
-                                                       another.valueSize(),
-                                                       another.timestamp(),
-                                                       another.persistedStatus())),
-              _rkmsg(nullptr),
-              _recordId(another._recordId)
-        {
-        }
-
-        /**
-         * The topic the record was appended to.
-         */
-        std::string           topic()      const
-        {
-            return _rkmsg ? (_rkmsg->rkt ? rd_kafka_topic_name(_rkmsg->rkt) : "") : _cachedInfo->topic;
-        }
-
-        /**
-         * The partition the record was sent to.
-         */
-        Partition             partition()  const
-        {
-            return _rkmsg ? _rkmsg->partition : _cachedInfo->partition;
-        }
-
-        /**
-         * The offset of the record in the topic/partition.
-         */
-        Optional<Offset>      offset()     const
-        {
-            auto offset = _rkmsg ? _rkmsg->offset : _cachedInfo->offset;
-            return (offset != RD_KAFKA_OFFSET_INVALID) ? Optional<Offset>(offset) : Optional<Offset>();
-        }
-
-        /**
-         * The recordId could be used to identify the acknowledged message.
-         */
-        ProducerRecord::Id    recordId()   const
-        {
-            return _recordId;
-        }
-
-        /**
-         * The size of the key in bytes.
-         */
-        KeySize               keySize()    const
-        {
-            return _rkmsg ? _rkmsg->key_len : _cachedInfo->keySize;
-        }
-
-        /**
-         * The size of the value in bytes.
-         */
-        ValueSize             valueSize()  const
-        {
-            return _rkmsg ? _rkmsg->len : _cachedInfo->valueSize;
-        }
-
-        /**
-         * The timestamp of the record in the topic/partition.
-         */
-        Timestamp             timestamp()  const
-        {
-            return _rkmsg ? getMsgTimestamp(_rkmsg) : _cachedInfo->timestamp;
-        }
-
-        /**
-         * The persisted status of the record.
-         */
-        PersistedStatus       persistedStatus()  const
-        {
-            return _rkmsg ? getMsgPersistedStatus(_rkmsg) : _cachedInfo->persistedStatus;
-        }
-
-        std::string           persistedStatusString() const
-        {
-            return getPersistedStatusString(persistedStatus());
-        }
-
-        std::string toString() const
-        {
-            return topic() + "-" + std::to_string(partition()) + "@" + (offset() ? std::to_string(*offset()) : "NA")
-                   + ":id[" + std::to_string(recordId()) + "]," + timestamp().toString() + "," + persistedStatusString();
-        }
-
-    private:
-        static Timestamp getMsgTimestamp(const rd_kafka_message_t* rkmsg)
-        {
-            rd_kafka_timestamp_type_t tstype{};
-            Timestamp::Value tsValue = rd_kafka_message_timestamp(rkmsg, &tstype);
-            return {tsValue, tstype};
-        }
-
-        static PersistedStatus getMsgPersistedStatus(const rd_kafka_message_t* rkmsg)
-        {
-            rd_kafka_msg_status_t status = rd_kafka_message_status(rkmsg);
-            return status == RD_KAFKA_MSG_STATUS_NOT_PERSISTED ? PersistedStatus::Not : (status == RD_KAFKA_MSG_STATUS_PERSISTED ? PersistedStatus::Done : PersistedStatus::Possibly);
-        }
-
-        static std::string getPersistedStatusString(PersistedStatus status)
-        {
-            return status == PersistedStatus::Not ? "NotPersisted" :
-                (status == PersistedStatus::Done ? "Persisted" : "PossiblyPersisted");
-        }
-
-        struct CachedInfo
-        {
-            CachedInfo(Topic t, Partition p, Offset o, KeySize ks, ValueSize vs, Timestamp ts, PersistedStatus pst)
-                : topic(std::move(t)),
-                  partition(p),
-                  offset(o),
-                  keySize(ks),
-                  valueSize(vs),
-                  timestamp(ts),
-                  persistedStatus(pst)
-            {
-            }
-
-            CachedInfo(const CachedInfo&) = default;
-
-            std::string     topic;
-            Partition       partition;
-            Offset          offset;
-            KeySize         keySize;
-            ValueSize       valueSize;
-            Timestamp       timestamp;
-            PersistedStatus persistedStatus;
-        };
-
-        const std::unique_ptr<CachedInfo> _cachedInfo;
-        const rd_kafka_message_t*         _rkmsg;
-        const ProducerRecord::Id          _recordId;
-    };
-
-    /**
-     * A callback method could be used to provide asynchronous handling of request completion.
-     * This method will be called when the record sent (by KafkaAsyncProducer) to the server has been acknowledged.
-     */
-    using Callback = std::function<void(const RecordMetadata& metadata, std::error_code ec)>;
-}
-
 
 /**
  * The base class for KafkaAsyncProducer and KafkaSyncProducer.
@@ -201,13 +37,43 @@ public:
 
     enum class SendOption { NoCopyRecordValue, ToCopyRecordValue };
 
+    /**
+     * Needs to be called before any other methods when the transactional.id is set in the configuration.
+     */
+    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS));
+
+    /**
+     * Should be called before the start of each new transaction.
+     */
+    void beginTransaction();
+
+    /**
+     * Commit the ongoing transaction.
+     */
+    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS));
+
+    /**
+     * Abort the ongoing transaction.
+     */
+    void abortTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
+
+
+    /**
+     * Send a list of specified offsets to the consumer group coodinator, and also marks those offsets as part of the current transaction.
+     */
+    void sendOffsetsToTransaction(const TopicPartitionOffsets& tpos,
+                                  const Consumer::ConsumerGroupMetadata& groupMetadata,
+                                  std::chrono::milliseconds timeout);
+
 protected:
     explicit KafkaProducer(const Properties& properties)
         : KafkaClient(ClientType::KafkaProducer, properties, registerConfigCallbacks)
     {
         auto propStr = properties.toString();
         KAFKA_API_DO_LOG(LOG_INFO, "initializes with properties[%s]", propStr.c_str());
-    } std::error_code close(std::chrono::milliseconds timeout);
+    }
+
+    std::error_code close(std::chrono::milliseconds timeout);
 
     // Define datatypes for "opaque" (as a parameter of rd_kafka_produce), in order to implement the callback(async) or to return future(sync)
     class MsgOpaque
@@ -265,6 +131,14 @@ protected:
                                     ActionWhileQueueIsFull     action);
 
     static constexpr int CALLBACK_POLLING_INTERVAL_MS = 10;
+
+#if __cplusplus >= 201703L
+    static constexpr int DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000;
+    static constexpr int DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000;
+#else
+    enum { DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000 };
+    enum { DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000 };
+#endif
 
     // Validate properties (and fix it if necesary)
     static Properties validateAndReformProperties(const Properties& origProperties);
@@ -476,6 +350,43 @@ KafkaProducer::close(std::chrono::milliseconds timeout)
     return ec;
 }
 
+inline void
+KafkaProducer::initTransactions(std::chrono::milliseconds timeout)
+{
+    auto error =  Error{rd_kafka_init_transactions(getClientHandle(), timeout.count())};
+    KAFKA_THROW_IF_WITH_ERROR(error);
+}
+
+inline void
+KafkaProducer::beginTransaction()
+{
+    auto error = Error{rd_kafka_begin_transaction(getClientHandle())};
+    KAFKA_THROW_IF_WITH_ERROR(error);
+}
+
+inline void
+KafkaProducer::commitTransaction(std::chrono::milliseconds timeout)
+{
+    auto error = Error{rd_kafka_commit_transaction(getClientHandle(), timeout.count())};
+    KAFKA_THROW_IF_WITH_ERROR(error);
+}
+
+inline void
+KafkaProducer::abortTransaction(std::chrono::milliseconds timeout)
+{
+    auto error = Error{rd_kafka_abort_transaction(getClientHandle(), timeout.count())};
+    KAFKA_THROW_IF_WITH_ERROR(error);
+}
+
+inline void
+KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets& tpos,
+                                        const Consumer::ConsumerGroupMetadata& groupMetadata,
+                                        std::chrono::milliseconds timeout)
+{
+    auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tpos));
+    auto error = Error{rd_kafka_send_offsets_to_transaction(getClientHandle(), rk_tpos.get(), groupMetadata.rawHandle(), timeout.count())};
+    KAFKA_THROW_IF_WITH_ERROR(error);
+}
 
 /**
  * A Kafka client that publishes records to the Kafka cluster asynchronously.
@@ -542,7 +453,7 @@ public:
                                                   std::make_unique<MsgCallbackOpaque>(record.id(), cb),
                                                   option,
                                                   _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
-        KAFKA_THROW_IF_WITH_ERROR(respErr);
+        KAFKA_THROW_IF_WITH_RESP_ERROR(respErr);
     }
 
     /**
@@ -629,7 +540,7 @@ public:
         auto fut = opaque->getFuture();
 
         rd_kafka_resp_err_t err = sendMessage(record, std::move(opaque), SendOption::ToCopyRecordValue, ActionWhileQueueIsFull::Block);
-        KAFKA_THROW_IF_WITH_ERROR(err);
+        KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
         while (fut.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready)
         {
@@ -637,7 +548,7 @@ public:
         }
 
         auto result = fut.get();
-        KAFKA_THROW_IF_WITH_ERROR(static_cast<rd_kafka_resp_err_t>(result.first.value()));
+        KAFKA_THROW_IF_WITH_RESP_ERROR(static_cast<rd_kafka_resp_err_t>(result.first.value()));
 
         return result.second;
     }
