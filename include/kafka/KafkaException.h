@@ -28,11 +28,11 @@ public:
           _error(std::make_unique<SimpleError>(respErr, errMsg))
     {}
 
-    KafkaException(const char* filename, int lineno, rd_kafka_resp_err_t respErr)
+    KafkaException(const char* filename, std::size_t lineno, rd_kafka_resp_err_t respErr)
         : KafkaException(filename, lineno, respErr, rd_kafka_err2str(respErr))
     {}
 
-    KafkaException(const char* filename, int lineno, const Error& error)
+    KafkaException(const char* filename, std::size_t lineno, const Error& error)
         : _when(std::chrono::system_clock::now()),
           _filename(filename),
           _lineno(lineno),

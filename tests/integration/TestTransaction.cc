@@ -110,7 +110,7 @@ TEST(Transaction, CommitTransaction)
     }
 
     {
-        std::cout << "========== Producer: abortTransaction, Consumer: isolation.level=unread_committed ==========" << std::endl;
+        std::cout << "========== Producer: abortTransaction, Consumer: isolation.level=read_uncommitted ==========" << std::endl;
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
@@ -127,22 +127,22 @@ TEST(Transaction, CommitTransaction)
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
 
-        sendMessageWithTransactions("message with no commit/abortTransaction", topic, TransactionClosureAction::ToAbort);
+        sendMessageWithTransactions("message with no commit/abortTransaction", topic, TransactionClosureAction::NoAction);
 
         const auto messages = receiveMessages(topic, IsolationLevel::ReadCommitted);
         ASSERT_EQ(0, messages.size());
     }
 
     {
-        std::cout << "========== Producer: no commti/abortTransaction, Consumer: isolation.level=unread_committed ==========" << std::endl;
+        std::cout << "========== Producer: no commit/abortTransaction, Consumer: isolation.level=read_uncommitted ==========" << std::endl;
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
 
-        sendMessageWithTransactions("message with no commit/abortTransaction", topic, TransactionClosureAction::ToAbort);
+        sendMessageWithTransactions("message with no commit/abortTransaction", topic, TransactionClosureAction::NoAction);
 
         const auto messages = receiveMessages(topic, IsolationLevel::ReadUnCommitted);
-        ASSERT_EQ(0, messages.size());
+        ASSERT_EQ(1, messages.size());
     }
 }
 
