@@ -293,7 +293,7 @@ TEST(Transaction, ContinueTheTransaction)
                                            .put(ConsumerConfig::ISOLATION_LEVEL,   "read_committed"));
         consumer.subscribe({topic});
 
-        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         for (const auto& record: records)
         {
             std::cout << record.toString() << std::endl;
@@ -309,7 +309,7 @@ TEST(Transaction, ContinueTheTransaction)
                                            .put(ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
         consumer.subscribe({topic});
 
-        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         for (const auto& record: records)
         {
             std::cout << record.toString() << std::endl;
