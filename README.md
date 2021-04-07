@@ -8,6 +8,10 @@ Here is the [doxygen documentation for developers](doxygen/annotated.html).
 
 - At present, the `Modern C++ based Kafka API` is compatible with `librdkafka` v1.6.0.
 
+KAFKA is a registered trademark of The Apache Software Foundation and
+has been licensed for use by **modern-cpp-kafka**. **modern-cpp-kafka** has no
+affiliation with and is not endorsed by The Apache Software Foundation.
+
 ## Why it's here
 
 The `librdkafka` is a robust high performance C/C++ library, widely used and well maintained.
