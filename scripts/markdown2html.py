@@ -5,6 +5,7 @@ import os
 import argparse
 import time
 import re
+from string import Template
 
 import markdown
 
@@ -14,21 +15,26 @@ html_template = '''
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{title}</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-G9YbB4o4U6WS4wCthMOpAeweY4gQJyyx0P3nZbEBHyz+AtNoeasfRChmek1C2iqV" crossorigin="anonymous">
+    <title>$title</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" integrity="sha384-SI27wrMjH3ZZ89r4o+fGIJtnzkAnFs3E4qz9DIYioCQ5l9Rd/7UAa8DHcaL8jkWt" crossorigin="anonymous">
+    <style>
+      pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 0.6em 1em; }
+      h1,h2 { margin-top: 1em; }
+      div.navbar { padding: 8px 0; }
+      div.toc { float: right; }
+    </style>
   </head>
   <body>
     <div class="container">
-      {html_content}
+      $html_content
       <hr/>
       <footer class="text-center text-muted">
-        Generated: {date}
+        Generated: $date
       </footer>
       <hr/>
     </div>
   </body>
 </html>'''
-
 
 extensions = ['toc', 'codehilite', 'meta', 'fenced_code', 'tables']
 extension_configs = {
@@ -51,18 +57,18 @@ def convert(infile, outdir):
             else:
                 md_content_lines.append(line)
     md_content = '\n'.join(md_content_lines)
-    
+
     title_found = re.compile("# *(.+)").findall(md_content)
     title = '' if not title_found else title_found[0]
-  
+
     html_content = md.convert(md_content)
-  
-    html_doc = html_template.format(date=time.strftime("%Y. %m. %d"), title=title, html_content=html_content)
+
+    html_doc = Template(html_template).substitute(date=time.strftime("%Y. %m. %d"), title=title, html_content=html_content)
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    outfile =  os.path.join(outdir, os.path.splitext(os.path.basename(infile))[0] + '.html')
+    outfile = os.path.join(outdir, 'index.html' if is_root_entry else (os.path.splitext(os.path.basename(infile))[0] + '.html'))
     with open(outfile, 'w') as html_file:
         html_file.write(html_doc)
 
@@ -72,9 +78,10 @@ def main():
     parser.add_argument("-i", "--in-files", nargs='+', help='<Required> Markdown files to convert', required=True)
     parser.add_argument("-o", "--out-dir", help='<Required> The directory to output converted html files', required=True)
     args = parser.parse_args()
-    
+
     for in_file in args.in_files:
         convert(in_file, args.out_dir)
 
 if __name__ == "__main__":
-  main()
+    main()
+
