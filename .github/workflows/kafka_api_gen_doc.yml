@@ -11,8 +11,11 @@ jobs:
     runs-on: ubuntu-20.04
     env:
         BUILD_SUB_DIR: build/sub-build
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Install Dependencies
         run: |
           mkdir -p $BUILD_SUB_DIR
@@ -34,16 +37,39 @@ jobs:
           cd $BUILD_SUB_DIR
           make VERBOSE=1
 
-      - name: Copy
+      - name: Collect
         run: |
-          mkdir doc-gen
-          cp $BUILD_SUB_DIR/doc/README.html doc-gen
-          cp -r $BUILD_SUB_DIR/doc/markdown doc-gen
-          cp -r $BUILD_SUB_DIR/doc/doxygen doc-gen
+          mkdir document
+          cp $BUILD_SUB_DIR/doc/index.html document
+          cp -r $BUILD_SUB_DIR/doc/markdown document
+          cp -r $BUILD_SUB_DIR/doc/doxygen document
 
-      - name: Upload
+      - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
             name: document
-            path: doc-gen
+            path: document
+
+
+  kafka-api-deploy-doc:
+    needs: [kafka-api-build-doc]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.1
+        with:
+          persist-credentials: false
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v1
+        with:
+          name: document
+
+      #- name: Deploy to Pages
+      #  uses: JamesIves/github-pages-deploy-action@4.0.0
+      #  with:
+      #    #ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+      #    branch: gh-pages
+      #    folder: "document"
+      #    clean: true
 

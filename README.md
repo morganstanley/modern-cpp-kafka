@@ -92,15 +92,19 @@ To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a he
 
 ## Install
 
-    * The APIs is headers only
+* The APIs is headers only
 
-        * Just need to include the `include/kafka` directory in your project
+    * Just need to include the `include/kafka` directory in your project
 
-    * The compiler should support
+* The compiler should support
 
-        * Option 1: C++17
+    * Option 1: C++17
 
-        * Option 2: C++14, together with `boost` headers (would depend on `boost::optional` in the case)
+    * Option 2: C++14 (with pre-requirements)
+
+        * Need `boost` headers (for `boost::optional`)
+
+        * GCC only (with optimization, e.g. -O2)
 
 ## Start-up
 
