@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>About the `Modern C++ based Kafka API`</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" integrity="sha384-SI27wrMjH3ZZ89r4o+fGIJtnzkAnFs3E4qz9DIYioCQ5l9Rd/7UAa8DHcaL8jkWt" crossorigin="anonymous">
+    <style>
+      pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 0.6em 1em; }
+      h1,h2 { margin-top: 1em; }
+      div.navbar { padding: 8px 0; }
+      div.toc { float: right; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="about-the-modern-c-based-kafka-api"><a class="toclink" href="#about-the-modern-c-based-kafka-api">About the <code>Modern C++ based Kafka API</code></a></h1>
+<h2 id="introduction"><a class="toclink" href="#introduction">Introduction</a></h2>
+<p>The <code>Modern C++ based Kafka API</code> (<code>modern-cpp-kafka</code>) is a layer of C++ wrapper based on <a href="https://github.com/edenhill/librdkafka">librdkafka</a> (the C part), with high quality, but more friendly to users.</p>
+<ul>
+<li>By now, <code>modern-cpp-kafka</code> is compatible with <code>librdkafka</code> <strong>v1.6.0</strong>.</li>
+</ul>
+<div class="codehilite"><pre><span></span>KAFKA is a registered trademark of The Apache Software Foundation and
+
+has been licensed for use by modern-cpp-kafka. modern-cpp-kafka has no
+
+affiliation with and is not endorsed by The Apache Software Foundation.
+</pre></div>
+
+<h2 id="why-its-here"><a class="toclink" href="#why-its-here">Why it's here</a></h2>
+<p>The <code>librdkafka</code> is a robust high performance C/C++ library, widely used and well maintained.</p>
+<p>Unfortunately, to maintain C++98 compatibility, the C++ interface of <code>librdkafka</code> is not quite object-oriented or user-friendly.</p>
+<p>Since C++ is evolving quickly, we want to take advantage of new C++ features, thus make the life easier for developers. And this led us to create a new C++ API for Kafka clients.</p>
+<p>Eventually, we worked out the <code>modern-cpp-kafka</code>, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.</p>
+<h2 id="features"><a class="toclink" href="#features">Features</a></h2>
+<ul>
+<li>
+<p>Header-only</p>
+<ul>
+<li>Easy to deploy, and no extra library required to link</li>
+</ul>
+</li>
+<li>
+<p>Ease of Use</p>
+<ul>
+<li>
+<p>Interface/Naming matches the Java API</p>
+</li>
+<li>
+<p>Object-oriented</p>
+</li>
+<li>
+<p>RAII is used for lifetime management</p>
+</li>
+<li>
+<p>librdkafka's polling and queue management is now hidden</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Robust</p>
+<ul>
+<li>
+<p>Verified with kinds of test cases, which cover many abnormal scenarios (edge cases)</p>
+<ul>
+<li>
+<p>Stability test with unstable brokers</p>
+</li>
+<li>
+<p>Memory leak check for failed client with in-flight messages</p>
+</li>
+<li>
+<p>Client failure and taking over, etc.</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Efficient</p>
+<ul>
+<li>
+<p>No extra performance cost (No deep copy introduced internally)</p>
+</li>
+<li>
+<p>Much better (2~4 times throughput) performance result than those native language (Java/Scala) implementation, in most commonly used cases (message size: 256 B ~ 2 KB)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="build"><a class="toclink" href="#build">Build</a></h2>
+<ul>
+<li>
+<p>No need to build for installation</p>
+</li>
+<li>
+<p>To build its <code>tools</code>/<code>tests</code>/<code>examples</code>, you should</p>
+<ul>
+<li>
+<p>Specify library locations with environment variables</p>
+<ul>
+<li>
+<p><code>LIBRDKAFKA_ROOT</code>                 -- <code>librdkafka</code> headers and libraries</p>
+</li>
+<li>
+<p><code>GTEST_ROOT</code>                      -- <code>googletest</code> headers and libraries</p>
+</li>
+<li>
+<p><code>BOOST_ROOT</code>                      -- <code>boost</code> headers and libraries</p>
+</li>
+<li>
+<p><code>SASL_LIBRARYDIR</code>/<code>SASL_LIBRARY</code>  -- if SASL connection support is wanted</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Create an empty directory for the build, and <code>cd</code> to it</p>
+</li>
+<li>
+<p>Build commands</p>
+<ul>
+<li>
+<p>Type <code>cmake path-to-project-root</code></p>
+</li>
+<li>
+<p>Type <code>make</code> (could follow build options with <code>-D</code>)</p>
+<ul>
+<li>
+<p><code>BUILD_OPTION_USE_ASAN=ON</code>      -- Use Address Sanitizer</p>
+</li>
+<li>
+<p><code>BUILD_OPTION_USE_TSAN=ON</code>      -- Use Thread Sanitizer</p>
+</li>
+<li>
+<p><code>BUILD_OPTION_USE_UBSAN=ON</code>     -- Use Undefined Behavior Sanitizer</p>
+</li>
+<li>
+<p><code>BUILD_OPTION_CLANG_TIDY=ON</code>    -- Enable clang-tidy checking</p>
+</li>
+<li>
+<p><code>BUILD_OPTION_GEN_DOC=ON</code>       -- Generate documentation as well</p>
+</li>
+<li>
+<p><code>BUILD_OPTION_DOC_ONLY=ON</code>       -- Only generate documentation</p>
+</li>
+<li>
+<p><code>BUILD_OPTION_GEN_COVERAGE=ON</code>  -- Generate test coverage, only support by clang currently</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Type <code>make install</code></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="install"><a class="toclink" href="#install">Install</a></h2>
+<ul>
+<li>
+<p>Include the <code>include/kafka</code> directory in your project</p>
+</li>
+<li>
+<p>To work together with <code>modern-cpp-kafka</code> API, the compiler should support</p>
+<ul>
+<li>
+<p>Option 1: C++17</p>
+</li>
+<li>
+<p>Option 2: C++14 (with pre-requirements)</p>
+<ul>
+<li>
+<p>Need <code>boost</code> headers (for <code>boost::optional</code>)</p>
+</li>
+<li>
+<p>GCC only (with optimization, e.g. -O2)</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="to-start"><a class="toclink" href="#to-start">To Start</a></h2>
+<ul>
+<li>
+<p>Tutorial</p>
+<ul>
+<li>
+<p><a href="https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging">Debuting a Modern C++ API for Apache Kafka</a></p>
+</li>
+<li>
+<p><a href="markdown/KafkaProducerQuickStart.html">KafkaProducer Quick Start</a></p>
+</li>
+<li>
+<p><a href="markdown/KafkaConsumerQuickStart.html">KafkaConsumer Quick Start</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p>User's Manual</p>
+<ul>
+<li>
+<p>Kafka Client API</p>
+<ul>
+<li><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">modern-cpp-kafka API</a></li>
+</ul>
+</li>
+<li>
+<p>Kafka Client Properties</p>
+<ul>
+<li>
+<p>In most cases, the <code>Properties</code> setting in <code>modern-cpp-kafka</code> is identical with <a href="https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
+</li>
+<li>
+<p>With following exceptions</p>
+<ul>
+<li>
+<p>KafkaConsumer</p>
+<ul>
+<li>
+<p>More properties than <code>librdkafka</code></p>
+<ul>
+<li><code>max.poll.records</code> (default: <code>500</code>): The maxmum number of records that a single call to <code>poll()</code> would return</li>
+</ul>
+</li>
+<li>
+<p>Properties not supposed to be used (internally shadowed by <code>modern-cpp-kafka</code>)</p>
+<ul>
+<li>
+<p><code>enable.auto.offset.store</code></p>
+</li>
+<li>
+<p><code>enable.auto.commit</code></p>
+</li>
+<li>
+<p><code>auto.commit.interval.ms</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Properties with random string as default</p>
+<ul>
+<li>
+<p><code>client.id</code></p>
+</li>
+<li>
+<p><code>group.id</code></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>KafkaProducer</p>
+<ul>
+<li>
+<p>Different default value from <code>librdkafka</code></p>
+<ul>
+<li>
+<p>KafkaSyncProducer</p>
+<ul>
+<li><code>linger.ms</code> (default: <code>0</code>)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Properties with random string as default</p>
+<ul>
+<li><code>client.id</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Test Environment (ZooKeeper/Kafka cluster) Setup</p>
+<ul>
+<li><a href="https://kafka.apache.org/documentation/#quickstart_startserver">Start the servers</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="how-to-achieve-high-availability-performance"><a class="toclink" href="#how-to-achieve-high-availability-performance">How to Achieve High Availability &amp; Performance</a></h2>
+<ul>
+<li>
+<p><a href="markdown/KafkaBrokerConfiguration.html">Kafka Broker Configuration</a></p>
+</li>
+<li>
+<p><a href="markdown/GoodPracticesToUseKafkaProducer.html">Good Practices to Use KafkaProducer</a></p>
+</li>
+<li>
+<p><a href="markdown/GoodPracticesToUseKafkaConsumer.html">Good Practices to Use KafkaConsumer</a></p>
+</li>
+<li>
+<p><a href="markdown/HowToMakeKafkaProducerReliable.html">How to Make KafkaProducer Reliable</a></p>
+</li>
+</ul>
+<h2 id="other-references"><a class="toclink" href="#other-references">Other References</a></h2>
+<ul>
+<li>
+<p>Java API for Kafka clients</p>
+<ul>
+<li>
+<p><a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/producer/package-summary.html">org.apache.kafka.clients.producer</a></p>
+</li>
+<li>
+<p><a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/package-summary.html">org.apache.kafka.clients.consumer</a></p>
+</li>
+<li>
+<p><a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/admin/package-summary.html">org.apache.kafka.clients.admin</a></p>
+</li>
+</ul>
+</li>
+</ul>
+      <hr/>
+      <footer class="text-center text-muted">
+        Generated: 2021. 04. 16
+      </footer>
+      <hr/>
+    </div>
+  </body>
+</html>

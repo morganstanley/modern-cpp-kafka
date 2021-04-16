@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>KafkaConsumer Quick Start</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" integrity="sha384-SI27wrMjH3ZZ89r4o+fGIJtnzkAnFs3E4qz9DIYioCQ5l9Rd/7UAa8DHcaL8jkWt" crossorigin="anonymous">
+    <style>
+      pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 0.6em 1em; }
+      h1,h2 { margin-top: 1em; }
+      div.navbar { padding: 8px 0; }
+      div.toc { float: right; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="kafkaconsumer-quick-start"><a class="toclink" href="#kafkaconsumer-quick-start">KafkaConsumer Quick Start</a></h1>
+<p>Generally speaking, The <code>Modern C++ based Kafka API</code> is quite similar with <a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">Kafka Java's API</a></p>
+<p>We'd recommend users to cross-reference them, --especially the examples.</p>
+<p>Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAutoCommitConsumer and KafkaManualCommitConsumer, --depending on whether users should call <code>commit</code> manually.</p>
+<h2 id="kafkaautocommitconsumer"><a class="toclink" href="#kafkaautocommitconsumer">KafkaAutoCommitConsumer</a></h2>
+<ul>
+<li>
+<p>Friendly for users, --would not care about when to commit the offsets for these received messages.</p>
+</li>
+<li>
+<p>Internally, it would commit the offsets (for received records) within the next <code>poll</code> and the final <code>close</code>.</p>
+</li>
+</ul>
+<p>Note, each internal <code>commit</code> would "try its best", but "not guaranteed to succeed", -- it's supposed to be called periodically, thus occasional failure doesn't matter.</p>
+<h3 id="example"><a class="toclink" href="#example">Example</a></h3>
+<div class="codehilite"><pre><span></span>        <span class="c1">// Create configuration object</span>
+
+        <span class="n">kafka</span><span class="o">::</span><span class="n">Properties</span> <span class="n">props</span> <span class="p">({</span>
+
+            <span class="p">{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span> <span class="n">brokers</span><span class="p">},</span>
+
+        <span class="p">});</span>
+
+
+
+        <span class="c1">// Create a consumer instance.</span>
+
+        <span class="n">kafka</span><span class="o">::</span><span class="n">KafkaAutoCommitConsumer</span> <span class="n">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span>
+
+
+
+        <span class="c1">// Subscribe to topics</span>
+
+        <span class="n">consumer</span><span class="p">.</span><span class="n">subscribe</span><span class="p">({</span><span class="n">topic</span><span class="p">});</span>
+
+
+
+        <span class="c1">// Read messages from the topic.</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% Reading messages from topic: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">topic</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+        <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">auto</span> <span class="n">records</span> <span class="o">=</span> <span class="n">consumer</span><span class="p">.</span><span class="n">poll</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="nl">record</span><span class="p">:</span> <span class="n">records</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="c1">// In this example, quit on empty message</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">value</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+
+
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">record</span><span class="p">.</span><span class="n">error</span><span class="p">())</span> <span class="p">{</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% Got a new message...&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Topic    : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">topic</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Partition: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">partition</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Offset   : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">offset</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Timestamp: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">timestamp</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Headers  : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kafka</span><span class="o">::</span><span class="n">toString</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">headers</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Key   [&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">key</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Value [&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">value</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                <span class="p">}</span>
+
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+</pre></div>
+
+<ul>
+<li>
+<p><code>ConsumerConfig::BOOTSTRAP_SERVERS</code> is mandatory for <code>ConsumerConfig</code>.</p>
+</li>
+<li>
+<p><code>subscribe</code> could take a topic list. And it's a blocking operation, -- would return after the rebalance event triggered callback was executed.</p>
+</li>
+<li>
+<p><code>poll</code> must be periodically called, and it would trigger kinds of callback handling internally. As in this example, just put it in a "while loop" would be OK.</p>
+</li>
+<li>
+<p>At the end, the user could <code>close</code> the consumer manually, or just leave it to the destructor (which would <code>close</code> anyway).</p>
+</li>
+</ul>
+<h2 id="kafkamanualcommitconsumer"><a class="toclink" href="#kafkamanualcommitconsumer">KafkaManualCommitConsumer</a></h2>
+<ul>
+<li>Users must commit the offsets for received records manually.</li>
+</ul>
+<h3 id="example_1"><a class="toclink" href="#example_1">Example</a></h3>
+<div class="codehilite"><pre><span></span>        <span class="c1">// Create configuration object</span>
+
+        <span class="n">kafka</span><span class="o">::</span><span class="n">Properties</span> <span class="n">props</span> <span class="p">({</span>
+
+            <span class="p">{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span> <span class="n">brokers</span><span class="p">},</span>
+
+        <span class="p">});</span>
+
+
+
+        <span class="c1">// Create a consumer instance.</span>
+
+        <span class="n">kafka</span><span class="o">::</span><span class="n">KafkaManualCommitConsumer</span> <span class="n">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span>
+
+
+
+        <span class="c1">// Subscribe to topics</span>
+
+        <span class="n">consumer</span><span class="p">.</span><span class="n">subscribe</span><span class="p">({</span><span class="n">topic</span><span class="p">});</span>
+
+
+
+        <span class="k">auto</span> <span class="n">lastTimeCommitted</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">steady_clock</span><span class="o">::</span><span class="n">now</span><span class="p">();</span>
+
+
+
+        <span class="c1">// Read messages from the topic.</span>
+
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% Reading messages from topic: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">topic</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+        <span class="kt">bool</span> <span class="n">allCommitted</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+        <span class="kt">bool</span> <span class="n">running</span>      <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+        <span class="k">while</span> <span class="p">(</span><span class="n">running</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="k">auto</span> <span class="n">records</span> <span class="o">=</span> <span class="n">consumer</span><span class="p">.</span><span class="n">poll</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="nl">record</span><span class="p">:</span> <span class="n">records</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="c1">// In this example, quit on empty message</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">value</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+
+                    <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+                    <span class="k">break</span><span class="p">;</span>
+
+                <span class="p">}</span>
+
+
+
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">record</span><span class="p">.</span><span class="n">error</span><span class="p">())</span> <span class="p">{</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% Got a new message...&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Topic    : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">topic</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Partition: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">partition</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Offset   : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">offset</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Timestamp: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">timestamp</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Headers  : &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kafka</span><span class="o">::</span><span class="n">toString</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">headers</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Key   [&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">key</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;    Value [&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">value</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;]&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+
+
+                    <span class="n">allCommitted</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="n">record</span><span class="p">.</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                <span class="p">}</span>
+
+            <span class="p">}</span>
+
+
+
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">allCommitted</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="k">auto</span> <span class="n">now</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">steady_clock</span><span class="o">::</span><span class="n">now</span><span class="p">();</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="n">lastTimeCommitted</span> <span class="o">&gt;</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+
+                    <span class="c1">// Commit offsets for messages polled</span>
+
+                    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% syncCommit offsets: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kafka</span><span class="o">::</span><span class="n">Utility</span><span class="o">::</span><span class="n">getCurrentTime</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+                    <span class="n">consumer</span><span class="p">.</span><span class="n">commitSync</span><span class="p">();</span> <span class="c1">// or commitAsync()</span>
+
+
+
+                    <span class="n">lastTimeCommitted</span> <span class="o">=</span> <span class="n">now</span><span class="p">;</span>
+
+                    <span class="n">allCommitted</span>      <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+                <span class="p">}</span>
+
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+</pre></div>
+
+<ul>
+<li>
+<p>The example is quite similar with the KafkaAutoCommitConsumer, with only 1 more line added for manual-commit.</p>
+</li>
+<li>
+<p><code>commitSync</code> and <code>commitAsync</code> are both available for a KafkaManualConsumer. Normally, use <code>commitSync</code> to guarantee the commitment, or use <code>commitAsync</code>(with <code>OffsetCommitCallback</code>) to get a better performance.</p>
+</li>
+</ul>
+<h2 id="kafkamanualcommitconsumer-with-kafkaclienteventspollingoptionmanual"><a class="toclink" href="#kafkamanualcommitconsumer-with-kafkaclienteventspollingoptionmanual">KafkaManualCommitConsumer with <code>KafkaClient::EventsPollingOption::Manual</code></a></h2>
+<p>While we construct a <code>KafkaManualCommitConsumer</code> with option <code>KafkaClient::EventsPollingOption::AUTO</code> (default), an internal thread would be created for <code>OffsetCommit</code> callbacks handling.</p>
+<p>This might not be what you want, since then you have to use 2 different threads to process the messages and handle the <code>OffsetCommit</code> responses.</p>
+<p>Here we have another choice, -- using <code>KafkaClient::EventsPollingOption::Manual</code>, thus the <code>OffsetCommit</code> callbacks would be called within member function <code>pollEvents()</code>.</p>
+<h3 id="example_2"><a class="toclink" href="#example_2">Example</a></h3>
+<div class="codehilite"><pre><span></span>    <span class="n">KafkaManualCommitConsumer</span> <span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="n">KafkaClient</span><span class="o">::</span><span class="n">EventsPollingOption</span><span class="o">::</span><span class="n">Manual</span><span class="p">);</span>
+
+
+
+    <span class="n">consumer</span><span class="p">.</span><span class="n">subscribe</span><span class="p">({</span><span class="s">&quot;topic1&quot;</span><span class="p">,</span> <span class="s">&quot;topic2&quot;</span><span class="p">});</span>
+
+
+
+    <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="k">auto</span> <span class="n">records</span> <span class="o">=</span> <span class="n">consumer</span><span class="p">.</span><span class="n">poll</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="nl">record</span><span class="p">:</span> <span class="n">records</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// Process the message...</span>
+
+            <span class="n">process</span><span class="p">(</span><span class="n">record</span><span class="p">);</span>
+
+
+
+            <span class="c1">// Here we commit the offset manually</span>
+
+            <span class="n">consumer</span><span class="p">.</span><span class="n">commitSync</span><span class="p">(</span><span class="o">*</span><span class="n">record</span><span class="p">);</span>
+
+        <span class="p">}</span>
+
+
+
+        <span class="c1">// Here we call the `OffsetCommit` callbacks</span>
+
+        <span class="c1">// Note, we can only do this while the consumer was constructed with `EventsPollingOption::Manual`.</span>
+
+        <span class="n">consumer</span><span class="p">.</span><span class="n">pollEvents</span><span class="p">();</span>
+
+    <span class="p">}</span>
+</pre></div>
+
+<h2 id="error-handling"><a class="toclink" href="#error-handling">Error handling</a></h2>
+<p>No exception would be thrown by <code>KafkaProducer::poll()</code>.</p>
+<p>Once an error occurs, the <code>ErrorCode</code> would be embedded in the <code>Consumer::ConsumerRecord</code>.</p>
+<p>There're 2 cases,</p>
+<ol>
+<li>
+<p>Success</p>
+<ul>
+<li>
+<p>RD_KAFKA_RESP_ERR__NO_ERROR (0),    -- got a message successfully</p>
+</li>
+<li>
+<p>RD_KAFKA_RESP_ERR__PARTITION_EOF,   -- reached the end of a partition (no message got)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Failure</p>
+<ul>
+<li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="frequently-asked-questions"><a class="toclink" href="#frequently-asked-questions">Frequently Asked Questions</a></h2>
+<ul>
+<li>
+<p>What're the available configurations?</p>
+<ul>
+<li>
+<p><a href="KafkaClientConfiguration.md#kafkaconsumer-configuration">KafkaProducerConfiguration</a></p>
+</li>
+<li>
+<p><a href="../doxygen/classKAFKA__CPP__APIS__NAMESPACE_1_1ConsumerConfig.html">Inline doxygen page</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p>How to enhance the polling performance?</p>
+<p><code>ConsumerConfig::QUEUED_MIN_MESSAGES</code> determines how frequently the consumer would send the FetchRequest towards brokers.</p>
+<p>The default configuration (i.e, 100000) might not be good enough for small (less than 1KB) messages, and suggest using a larger value (e.g, 1000000) for it.</p>
+</li>
+<li>
+<p>How many threads would be created by a KafkaConsumer?</p>
+<p>Excluding the user's main thread, <code>KafkaAutoCommitConsumer</code> would start another (N + 2) threads in the background, while <code>KafkaManualConsumer</code> would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)</p>
+<ol>
+<li>
+<p>Each broker (in the list of BOOTSTRAP_SERVERS) would take a seperate thread to transmit messages towards a kafka cluster server.</p>
+</li>
+<li>
+<p>Another 3 threads will handle internal operations, consumer group operations, and kinds of timers, etc.</p>
+</li>
+<li>
+<p>KafkaManualConsumer has one more thread, which keeps polling the offset-commit callback event.</p>
+</li>
+</ol>
+<p>E.g, if a KafkaAutoCommitConsumer was created with property of <code>BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890</code>, it would take 6 threads in total (including the main thread).</p>
+</li>
+<li>
+<p>Which one of these threads will handle the callbacks?</p>
+<p>There are 2 kinds of callbacks for a KafkaConsumer,</p>
+<ol>
+<li>
+<p><code>RebalanceCallback</code> will be triggered internally by the user's thread, -- within the <code>poll</code> function.</p>
+</li>
+<li>
+<p><code>OffsetCommitCallback</code> (only available for <code>KafkaManualCommitConsumer</code>) will be triggered by a background thread, not by the user's thread.</p>
+</li>
+</ol>
+</li>
+</ul>
+      <hr/>
+      <footer class="text-center text-muted">
+        Generated: 2021. 04. 16
+      </footer>
+      <hr/>
+    </div>
+  </body>
+</html>
