@@ -2,35 +2,41 @@
 
 ## Introduction
 
-The `Modern C++ based Kafka API` is a layer of C++ wrapper based on [librdkafka](https://github.com/edenhill/librdkafka) (the C part), with high quality, but more friendly to users.
+The `Modern C++ based Kafka API` (`modern-cpp-kafka`) is a layer of C++ wrapper based on [librdkafka](https://github.com/edenhill/librdkafka) (the C part), with high quality, but more friendly to users.
 
-Here is the [doxygen documentation for developers](doxygen/annotated.html).
+- By now, `modern-cpp-kafka` is compatible with `librdkafka` **v1.6.0**.
 
-- At present, the `Modern C++ based Kafka API` is compatible with `librdkafka` v1.6.0.
-
+```
 KAFKA is a registered trademark of The Apache Software Foundation and
-has been licensed for use by **modern-cpp-kafka**. **modern-cpp-kafka** has no
+has been licensed for use by modern-cpp-kafka. modern-cpp-kafka has no
 affiliation with and is not endorsed by The Apache Software Foundation.
+```
 
 ## Why it's here
 
 The `librdkafka` is a robust high performance C/C++ library, widely used and well maintained.
 
-Unfortunately, the C++ interface of `librdkafka` is not quite object-oriented or user-friendly, since it has to be confined to C++ 98 for compatibility.
+Unfortunately, to maintain C++98 compatibility, the C++ interface of `librdkafka` is not quite object-oriented or user-friendly.
 
-To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.
+Since C++ is evolving quickly, we want to take advantage of new C++ features, thus make the life easier for developers. And this led us to create a new C++ API for Kafka clients.
+
+Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.
 
 ## Features
 
-* Java-like APIs
+* Header-only
 
-    * Here're some reference links for Java's native kafka clients, -- much helpful for cross-reference
+    * Easy to deploy, and no extra library required to link
 
-        [org.apache.kafka.clients.producer](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/producer/package-summary.html)
+* Ease of Use
 
-        [org.apache.kafka.clients.consumer](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/package-summary.html)
+    * Interface/Naming matches the Java API
 
-        [org.apache.kafka.clients.admin](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/admin/package-summary.html)
+    * Object-oriented
+
+    * RAII is used for lifetime management
+
+    * librdkafka's polling and queue management is now hidden
 
 * Robust
 
@@ -38,7 +44,7 @@ To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a he
 
         * Stability test with unstable brokers
 
-        * Memory leak check for failed client with on-flight messages
+        * Memory leak check for failed client with in-flight messages
 
         * Client failure and taking over, etc.
 
@@ -48,13 +54,12 @@ To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a he
 
     * Much better (2~4 times throughput) performance result than those native language (Java/Scala) implementation, in most commonly used cases (message size: 256 B ~ 2 KB)
 
-* Headers only
-
-    * No extra library required to link
 
 ## Build
 
-* To build its `tools`/`tests/examples`, you should
+* No need to build for installation
+
+* To build its `tools`/`tests`/`examples`, you should
 
     * Specify library locations with environment variables
 
@@ -92,11 +97,9 @@ To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a he
 
 ## Install
 
-* The APIs is headers only
+* Include the `include/kafka` directory in your project
 
-    * Just need to include the `include/kafka` directory in your project
-
-* The compiler should support
+* To work together with `modern-cpp-kafka` API, the compiler should support
 
     * Option 1: C++17
 
@@ -106,19 +109,67 @@ To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a he
 
         * GCC only (with optimization, e.g. -O2)
 
-## Start-up
+## To Start
 
-* Prepare the servers (ZooKeeper/Kafka cluster)
+* Tutorial
+
+    * [Debuting a Modern C++ API for Apache Kafka](https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging)
+
+    * [KafkaProducer Quick Start](doc/KafkaProducerQuickStart.md)
+
+    * [KafkaConsumer Quick Start](doc/KafkaConsumerQuickStart.md)
+
+* User's Manual
+
+    * Kafka Client API
+
+        * [modern-cpp-kafka API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html)
+
+    * Kafka Client Properties
+
+        * In most cases, the `Properties` setting in `modern-cpp-kafka` is identical with [librdkafka configuration](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
+
+        * With following exceptions
+
+            * KafkaConsumer
+
+                * More properties than `librdkafka`
+
+                    * `max.poll.records` (default: `500`): The maxmum number of records that a single call to `poll()` would return
+
+                * Properties not supposed to be used (internally shadowed by `modern-cpp-kafka`)
+
+                    * `enable.auto.offset.store`
+
+                    * `enable.auto.commit`
+
+                    * `auto.commit.interval.ms`
+
+                * Properties with random string as default
+
+                    * `client.id`
+
+                    * `group.id`
+
+            * KafkaProducer
+
+                * Different default value from `librdkafka`
+
+                    * KafkaSyncProducer
+
+                        * `linger.ms` (default: `0`)
+
+                * Properties with random string as default
+
+                    * `client.id`
+
+
+* Test Environment (ZooKeeper/Kafka cluster) Setup
 
     * [Start the servers](https://kafka.apache.org/documentation/#quickstart_startserver)
 
-* [KafkaProducer Quick Start](doc/KafkaProducerQuickStart.md)
 
-* [KafkaConsumer Quick Start](doc/KafkaConsumerQuickStart.md)
-
-* [KafkaClient Configuration](doc/KafkaClientConfiguration.md)
-
-## How to achieve good availability & performance
+## How to Achieve High Availability & Performance
 
 * [Kafka Broker Configuration](doc/KafkaBrokerConfiguration.md)
 
@@ -127,4 +178,15 @@ To make the life easier, we worked out the `Modern C++ based Kafka API`, -- a he
 * [Good Practices to Use KafkaConsumer](doc/GoodPracticesToUseKafkaConsumer.md)
 
 * [How to Make KafkaProducer Reliable](doc/HowToMakeKafkaProducerReliable.md)
+
+
+## Other References
+
+* Java API for Kafka clients
+
+    * [org.apache.kafka.clients.producer](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/producer/package-summary.html)
+
+    * [org.apache.kafka.clients.consumer](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/package-summary.html)
+
+    * [org.apache.kafka.clients.admin](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/admin/package-summary.html)
 
