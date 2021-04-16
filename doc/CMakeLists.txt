@@ -47,4 +47,4 @@ add_custom_target(
 )
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/markdown DESTINATION doc)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/README.html DESTINATION doc)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/index.html DESTINATION doc)
