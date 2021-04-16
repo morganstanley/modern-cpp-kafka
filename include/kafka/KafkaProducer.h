@@ -204,14 +204,10 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
     // Let the base class validate first
     Properties properties = KafkaClient::validateAndReformProperties(origProperties);
 
-    // By default, we'd use an equvilent partitioner to Java Producer's.
+    // Check whether it's an available partitioner
     const std::set<std::string> availPartitioners = {"murmur2_random", "murmur2", "random", "consistent", "consistent_random", "fnv1a", "fnv1a_random"};
     auto partitioner = properties.getProperty(ProducerConfig::PARTITIONER);
-    if (!partitioner)
-    {
-        properties.put(ProducerConfig::PARTITIONER, "murmur2_random");
-    }
-    else if (!availPartitioners.count(*partitioner))
+    if (partitioner && !availPartitioners.count(*partitioner))
     {
         std::string errMsg = "Invalid partitioner [" + *partitioner + "]! Valid options: ";
         bool isTheFirst = true;
