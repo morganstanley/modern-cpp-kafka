@@ -13,11 +13,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      OS_VERSION:    ${{ matrix.os }}
-      BUILD_CXX:     ${{ matrix.build-cxx }}
-      BUILD_TYPE:    ${{ matrix.build-type }}
-      CXX_VERSION:   ${{ matrix.cxx-version }}
-      CHECK_OPTION:  ${{ matrix.check-option }}
+      OS_VERSION:        ${{ matrix.os }}
+      BUILD_CXX:         ${{ matrix.build-cxx }}
+      BUILD_TYPE:        ${{ matrix.build-type }}
+      CXX_VERSION:       ${{ matrix.cxx-version }}
+      CHECK_OPTION:      ${{ matrix.check-option }}
+      GENERATE_DOC:      ${{ matrix.generate-doc }}
+      WITH_INSTALLATION: ${{ matrix.with-installation }}
 
     strategy:
       matrix:
@@ -52,6 +54,8 @@ jobs:
 
           - os:           ubuntu-20.04
             build-cxx:    clang++
+            generate-doc:      true
+            with-installation: true
 
           - os:           ubuntu-20.04
             build-cxx:    clang++
@@ -119,6 +123,13 @@ jobs:
           wget -nv ${KAFKA_SRC_LINK}
           tar -xzf `basename ${KAFKA_SRC_LINK}`
 
+          # 6. Install tools to generate document
+          if [ ${GENERATE_DOC} ]; then
+            sudo apt install -y python3-pip
+            sudo pip3 install markdown
+            sudo apt install -y doxygen
+          fi
+
       - name: Config
         run: |
           cd ${BUILD_SUB_DIR}
@@ -149,13 +160,23 @@ jobs:
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_USE_UBSAN=ON"
           fi
 
+          if [ ${GENERATE_DOC} ]; then
+            export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_GEN_DOC=ON"
+          fi
+
           env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_FLAGS} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION}
 
       - name: Build
         run: |
           cd ${BUILD_SUB_DIR}
-
           make -j${CPU_CORE_NUM} VERBOSE=1
+
+      - name: Install
+        run: |
+          if [ ${WITH_INSTALLATION} ]; then
+            cd ${BUILD_SUB_DIR}
+            sudo make install
+          fi
 
       - name: Test
         timeout-minutes: 15
