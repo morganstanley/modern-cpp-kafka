@@ -26,7 +26,7 @@ endif ()
 message(STATUS "librdkafka root directory: ${LIBRDKAFKA_ROOT}")
 
 include_directories(SYSTEM ${LIBRDKAFKA_ROOT}/include)
-link_directories(SYSTEM ${LIBRDKAFKA_ROOT}/lib)
+link_directories(${LIBRDKAFKA_ROOT}/lib)
 
 
 #---------------------------
