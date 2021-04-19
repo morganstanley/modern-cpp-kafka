@@ -1,10 +1,8 @@
 project("kafka-robustness-test")
 
 # Directories
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-
 include_directories(SYSTEM ${GTEST_ROOT}/include)
-link_directories(SYSTEM ${GTEST_ROOT}/lib)
+link_directories(${GTEST_ROOT}/lib)
 
 # Target
 file(GLOB TEST_SRCS *.cc)
