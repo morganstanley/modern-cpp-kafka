@@ -60,7 +60,7 @@ private:
     const   TimePoint               _when;
     const   std::string             _filename;
     const   std::size_t             _lineno;
-    const   std::unique_ptr<Error>  _error;
+    std::unique_ptr<const Error>    _error;
     mutable std::string             _what;
 };
 
