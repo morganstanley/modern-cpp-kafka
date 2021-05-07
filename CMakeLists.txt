@@ -10,7 +10,9 @@ include(CMakePushCheckState)
 #---------------------------
 # Suggest to use C++17
 #---------------------------
-set(CMAKE_CXX_STANDARD 17)
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED False)
 
 add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")

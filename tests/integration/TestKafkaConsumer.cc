@@ -1476,11 +1476,17 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
 
             auto metadata1 = producer.send(Kafka::ProducerRecord(topic1, partition1, Kafka::NullKey, Kafka::NullValue));
             std::cout << "[" << Utility::getCurrentTime() << "] Just send a message, metadata: " << metadata1.toString() << std::endl;
-            expected[{topic1, partition1}] = *metadata1.offset();
+            if (auto offset = metadata1.offset())
+            {
+                expected[{topic1, partition1}] = *offset;
+            }
 
             auto metadata2 = producer.send(Kafka::ProducerRecord(topic2, partition2, Kafka::NullKey, Kafka::NullValue));
             std::cout << "[" << Utility::getCurrentTime() << "] Just send a message, metadata: " << metadata2.toString() << std::endl;
-            expected[{topic2, partition2}] = *metadata2.offset();
+            if (auto offset = metadata2.offset())
+            {
+                expected[{topic2, partition2}] = *offset;
+            }
 
             expectedOffsets.emplace_back(expected);
 

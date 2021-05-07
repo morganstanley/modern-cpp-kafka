@@ -16,7 +16,7 @@ jobs:
       OS_VERSION:        ${{ matrix.os }}
       BUILD_CXX:         ${{ matrix.build-cxx }}
       BUILD_TYPE:        ${{ matrix.build-type }}
-      CXX_VERSION:       ${{ matrix.cxx-version }}
+      CXX_STANDARD:      ${{ matrix.cxx-standard }}
       CHECK_OPTION:      ${{ matrix.check-option }}
       GENERATE_DOC:      ${{ matrix.generate-doc }}
       WITH_INSTALLATION: ${{ matrix.with-installation }}
@@ -38,7 +38,7 @@ jobs:
           - os:           ubuntu-20.04
             build-cxx:    g++
             build-type:   Release
-            cxx-version:  c++14
+            cxx-standard: 14
 
           - os:           ubuntu-20.04
             build-cxx:    g++
@@ -134,8 +134,8 @@ jobs:
         run: |
           cd ${BUILD_SUB_DIR}
 
-          if [ ${CXX_VERSION} ]; then
-            export CMAKE_CXX_FLAGS="-DCMAKE_CXX_FLAGS=\"-std=${CXX_VERSION}\""
+          if [ ${CXX_STANDARD} ]; then
+            export CMAKE_CXX_STANDARD="-DCMAKE_CXX_STANDARD=${CXX_STANDARD}"
           fi
 
           if [ ${BUILD_TYPE} ]; then
@@ -164,7 +164,7 @@ jobs:
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_GEN_DOC=ON"
           fi
 
-          env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_FLAGS} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION}
+          env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_STANDARD} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION}
 
       - name: Build
         run: |
