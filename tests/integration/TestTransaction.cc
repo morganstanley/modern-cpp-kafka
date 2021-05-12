@@ -234,7 +234,7 @@ TEST(Transaction, CatchException)
 
         producer.beginTransaction();
 
-        EXPECT_KAFKA_THROW(producer.commitTransaction(), RD_KAFKA_RESP_ERR_INVALID_TXN_STATE);
+        producer.commitTransaction();
     }
 }
 

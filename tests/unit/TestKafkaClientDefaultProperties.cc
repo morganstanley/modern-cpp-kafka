@@ -107,7 +107,7 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
             { Kafka::ConsumerConfig::ENABLE_PARTITION_EOF,  "false"      },
             { Kafka::ConsumerConfig::MAX_POLL_RECORDS,      "500"        },
             { Kafka::ConsumerConfig::QUEUED_MIN_MESSAGES,   "100000"     },
-            { Kafka::ConsumerConfig::SESSION_TIMEOUT_MS,    "10000"      },
+            { Kafka::ConsumerConfig::SESSION_TIMEOUT_MS,    "45000"      },
             { Kafka::ConsumerConfig::SOCKET_TIMEOUT_MS,     "60000"      },
             { Kafka::ConsumerConfig::SECURITY_PROTOCOL,     "plaintext"  },
             { "enable.auto.commit",                         "false"      },
