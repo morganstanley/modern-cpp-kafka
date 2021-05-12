@@ -134,3 +134,7 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
     }
 }
 
+TEST(TSAN, SimpleClient)
+{
+    Kafka::KafkaAutoCommitConsumer consumer(commonProps);
+}

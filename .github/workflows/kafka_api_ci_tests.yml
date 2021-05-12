@@ -130,6 +130,9 @@ jobs:
             sudo apt install -y doxygen
           fi
 
+          g++ --version
+          clang --version
+
       - name: Config
         run: |
           cd ${BUILD_SUB_DIR}
