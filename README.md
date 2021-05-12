@@ -4,7 +4,7 @@
 
 The `Modern C++ based Kafka API` (`modern-cpp-kafka`) is a layer of C++ wrapper based on [librdkafka](https://github.com/edenhill/librdkafka) (the C part), with high quality, but more friendly to users.
 
-- By now, `modern-cpp-kafka` is compatible with `librdkafka` **v1.6.0**.
+- By now, `modern-cpp-kafka` is compatible with `librdkafka` **v1.7.0**.
 
 ```
 KAFKA is a registered trademark of The Apache Software Foundation and

@@ -172,9 +172,10 @@ CreateKafkaTopic(const Kafka::Topic& topic, int numPartitions, int replicationFa
 {
     Kafka::AdminClient adminClient(GetKafkaClientCommonConfig());
     auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
+    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": create topic[" << topic << "] "
+       << "with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]. Result: " << createResult.message() << std::endl;
     ASSERT_FALSE(createResult.errorCode());
-    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": topic[" << topic << "] created with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]." << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 class JoiningThread {
@@ -220,20 +221,23 @@ signalToAllBrokers(int sig)
     else if (sig == SIGCONT)
     {
         std::cout << "[" << Kafka::Utility::getCurrentTime() << "] Brokers resumed"  << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
 
 inline void
 PauseBrokers()
 {
+    constexpr int WAIT_AFTER_PAUSE_MS = 100;
     signalToAllBrokers(SIGSTOP);
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_AFTER_PAUSE_MS));
 }
 
 inline void
 ResumeBrokers()
 {
+    constexpr int WAIT_AFTER_RESUME_SEC = 5;
     signalToAllBrokers(SIGCONT);
+    std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_RESUME_SEC));
 }
 
 inline std::shared_ptr<JoiningThread>

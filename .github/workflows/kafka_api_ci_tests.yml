@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.6.0/kafka_2.13-2.6.0.tgz
   CPU_CORE_NUM:       2
-  LIBRDKAFKA_VERSION: 1.6.0
+  LIBRDKAFKA_VERSION: 1.7.0
   BUILD_SUB_DIR:      build/sub-build
 
 jobs:
@@ -179,7 +179,7 @@ jobs:
           fi
 
       - name: Test
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: |
           cd ${BUILD_SUB_DIR}
 
