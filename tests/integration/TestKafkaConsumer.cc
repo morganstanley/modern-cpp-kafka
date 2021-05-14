@@ -1677,7 +1677,7 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
 }
 
 // Would FAIL!!! -- since librdkafka v1.6.0
-TEST(KafkaAutoCommitConsumer, DISABLED_AutoCreateTopics)
+TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
 {
     const Topic topic = Utility::getRandomString();
 
