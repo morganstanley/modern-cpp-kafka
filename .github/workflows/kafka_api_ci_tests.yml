@@ -1,4 +1,4 @@
-name: "[Kafka API] CI Tests"
+name: '[Kafka API] CI Tests'
 
 on: [push, pull_request]
 
@@ -20,40 +20,49 @@ jobs:
       CHECK_OPTION:      ${{ matrix.check-option }}
       GENERATE_DOC:      ${{ matrix.generate-doc }}
       WITH_INSTALLATION: ${{ matrix.with-installation }}
+      TEST_LABELS:       ${{ matrix.test-labels }}
 
     strategy:
       matrix:
         include:
           - os:           macos-10.15
             build-cxx:    clang++
+            test-labels:  UT|IT
 
           - os:           ubuntu-20.04
             build-cxx:    g++
             build-type:   Debug
+            test-labels:  UT|IT
 
           - os:           ubuntu-20.04
             build-cxx:    g++
             build-type:   Release
+            test-labels:  RT
 
           - os:           ubuntu-20.04
             build-cxx:    g++
             build-type:   Release
             cxx-standard: 14
+            test-labels:  UT|IT
 
           - os:           ubuntu-20.04
             build-cxx:    g++
             check-option: asan
+            test-labels:  UT|IT
 
           - os:           ubuntu-18.04
             build-cxx:    g++
             check-option: tsan
+            test-labels:  UT|IT
 
           - os:           ubuntu-20.04
             build-cxx:    g++
             check-option: ubsan
+            test-labels:  UT|IT
 
           - os:           ubuntu-20.04
             build-cxx:    clang++
+            test-labels:  UT|IT
             generate-doc:      true
             with-installation: true
 
@@ -63,17 +72,19 @@ jobs:
 
           - os:           ubuntu-18.04
             build-cxx:    g++
+            test-labels:  UT|IT
 
           - os:           ubuntu-18.04
             build-cxx:    clang++
+            test-labels:  RT
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Update Repo
         run: |
-          if [[ ${OS_VERSION} == "ubuntu"* ]]; then
-            echo "about to update repo"
+          if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
+            echo 'about to update repo'
             sed -e 's/azure.archive.ubuntu.com/us.archive.ubuntu.com/g' -e t -e d /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/nonazure.list
             sudo apt-get update
           fi
@@ -85,17 +96,23 @@ jobs:
           cd ${BUILD_SUB_DIR}
 
           # 1. Install cmake
-          if [ ${OS_VERSION} == "ubuntu-18.04" ]; then
+          if [ ${OS_VERSION} == 'ubuntu-18.04' ]; then
             sudo snap install cmake --classic
             export PATH=/snap/bin:$PATH
           fi
 
-          # 2. Install clang-tidy
-          if [[ ${CHECK_OPTION} == *"clang-tidy"* ]]; then
+          # 2. Install clang/clang-tidy
+          if [[ ${BUILD_CXX} == 'clang'* ]] && [[ ${OS_VERSION} == 'ubuntu'* ]]; then
+            sudo rm /usr/bin/clang /usr/bin/clang++
+            sudo apt install -y clang-10
+            sudo ln -s clang-10 /usr/bin/clang
+            sudo ln -s clang++-10 /usr/bin/clang++
+          fi
+          if [[ ${CHECK_OPTION} == 'clang-tidy' ]]; then
             sudo apt install -y clang-tidy
           fi
 
-          # 2. Install googletest (v1.10.0)
+          # 3. Install googletest (v1.10.0)
           wget -nv https://github.com/google/googletest/archive/release-1.10.0.tar.gz
           tar -xzf release-1.10.0.tar.gz
           cd googletest-release-1.10.0
@@ -103,32 +120,37 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
 
-          # 3. Install boost lib
-          if [[ ${OS_VERSION} == "ubuntu"* ]]; then
+          # 4. Install boost lib
+          if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
             sudo apt install -y libboost-all-dev
-          elif [[ ${OS_VERSION} == "macos"* ]]; then
+          elif [[ ${OS_VERSION} == 'macos'* ]]; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
             brew install boost
           fi
 
-          # 4. Install librdkafka
+          # 5. Install librdkafka
           wget -nv https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
           tar -xzf v${LIBRDKAFKA_VERSION}.tar.gz
           cd librdkafka-${LIBRDKAFKA_VERSION}
-          ./configure
+          ./configure --cxx=${BUILD_CXX}
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
 
-          # 5. Install kafka
+          # 6. Install kafka
           wget -nv ${KAFKA_SRC_LINK}
           tar -xzf `basename ${KAFKA_SRC_LINK}`
 
-          # 6. Install tools to generate document
+          # 7. Install tools to generate document
           if [ ${GENERATE_DOC} ]; then
             sudo apt install -y python3-pip
             sudo pip3 install markdown
             sudo apt install -y doxygen
           fi
+
+          # Print dev env
+          cmake --version | head -n 1
+          g++ --version | head -n 1
+          clang++ --version | head -n 1
 
       - name: Config
         run: |
@@ -144,19 +166,19 @@ jobs:
             export CMAKE_BUILD_TYPE=""
           fi
 
-          if [[ ${CHECK_OPTION} == *"clang-tidy"* ]]; then
+          if [[ ${CHECK_OPTION} == 'clang-tidy' ]]; then
             export BUILD_OPTION='-DBUILD_OPTION_CLANG_TIDY=ON'
           fi
 
-          if [[ ${CHECK_OPTION} == *"asan"* ]]; then
+          if [[ ${CHECK_OPTION} == 'asan' ]]; then
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_USE_ASAN=ON"
           fi
 
-          if [[ ${CHECK_OPTION} == *"tsan"* ]]; then
+          if [[ ${CHECK_OPTION} == 'tsan' ]]; then
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_USE_TSAN=ON"
           fi
 
-          if [[ ${CHECK_OPTION} == *"ubsan"* ]]; then
+          if [[ ${CHECK_OPTION} == *"ubsan" ]]; then
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_USE_UBSAN=ON"
           fi
 
@@ -179,6 +201,7 @@ jobs:
           fi
 
       - name: Test
+        if: matrix.test-labels
         timeout-minutes: 20
         run: |
           cd ${BUILD_SUB_DIR}
@@ -191,7 +214,7 @@ jobs:
           for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
 
           source test.env
-          ctest -VV
+          ctest -VV -L "${TEST_LABELS}"
           # stop kafka cluster
           kafka-server-stop.sh
           zookeeper-server-stop.sh

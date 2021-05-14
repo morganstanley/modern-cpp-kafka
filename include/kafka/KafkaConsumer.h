@@ -74,8 +74,9 @@ public:
      * Subscribe to the given list of topics to get dynamically assigned partitions.
      * An exception would be thrown if assign is called previously (without a subsequent call to unsubscribe())
      */
-    void subscribe(const Topics& topics, Consumer::RebalanceCallback cb = Consumer::RebalanceCallback());
-
+    void subscribe(const Topics&               topics,
+                   Consumer::RebalanceCallback cb      = Consumer::RebalanceCallback(),
+                   std::chrono::milliseconds   timeout = std::chrono::milliseconds(DEFAULT_SUBSCRIBE_TIMEOUT_MS));
     /**
      * Get the current subscription.
      */
@@ -84,7 +85,7 @@ public:
     /**
      * Unsubscribe from topics currently subscribed.
      */
-    void unsubscribe();
+    void unsubscribe(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_UNSUBSCRIBE_TIMEOUT_MS));
 
     /**
      * Manually assign a list of partitions to this consumer.
@@ -119,7 +120,7 @@ public:
      */
     void seekToBeginning(const TopicPartitions& tps,
                          std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_SEEK_TIMEOUT_MS)) { seekToBeginningOrEnd(tps, true, timeout); }
-    void seekToBeginning(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_SEEK_TIMEOUT_MS)) { seekToBeginningOrEnd(assignment(false), true, timeout); }
+    void seekToBeginning(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_SEEK_TIMEOUT_MS)) { seekToBeginningOrEnd(_assignment, true, timeout); }
 
     /**
      * Seek to the last offset for each of the given partitions.
@@ -132,7 +133,7 @@ public:
      */
     void seekToEnd(const TopicPartitions& tps,
                    std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_SEEK_TIMEOUT_MS)) { seekToBeginningOrEnd(tps, false, timeout); }
-    void seekToEnd(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_SEEK_TIMEOUT_MS)) { seekToBeginningOrEnd(assignment(false), false, timeout); }
+    void seekToEnd(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_SEEK_TIMEOUT_MS)) { seekToBeginningOrEnd(_assignment, false, timeout); }
 
     /**
      * Get the offset of the next record that will be fetched (if a record with that offset exists).
@@ -229,13 +230,17 @@ protected:
     static const constexpr char* AUTO_COMMIT_INTERVAL_MS  = "auto.commit.interval.ms";
 
 #if __cplusplus >= 201703L
-    static constexpr int DEFAULT_QUERY_TIMEOUT_MS = 10000;
-    static constexpr int DEFAULT_SEEK_TIMEOUT_MS  = 10000;
-    static constexpr int SEEK_RETRY_INTERVAL_MS   = 5000;
+    static constexpr int DEFAULT_SUBSCRIBE_TIMEOUT_MS   = 30000;
+    static constexpr int DEFAULT_UNSUBSCRIBE_TIMEOUT_MS = 10000;
+    static constexpr int DEFAULT_QUERY_TIMEOUT_MS       = 10000;
+    static constexpr int DEFAULT_SEEK_TIMEOUT_MS        = 10000;
+    static constexpr int SEEK_RETRY_INTERVAL_MS         = 5000;
 #else
-    enum { DEFAULT_QUERY_TIMEOUT_MS = 10000 };
-    enum { DEFAULT_SEEK_TIMEOUT_MS  = 10000 };
-    enum { SEEK_RETRY_INTERVAL_MS   = 5000  };
+    enum { DEFAULT_SUBSCRIBE_TIMEOUT_MS   = 30000 };
+    enum { DEFAULT_UNSUBSCRIBE_TIMEOUT_MS = 10000 };
+    enum { DEFAULT_QUERY_TIMEOUT_MS       = 10000 };
+    enum { DEFAULT_SEEK_TIMEOUT_MS        = 10000 };
+    enum { SEEK_RETRY_INTERVAL_MS         = 5000  };
 #endif
 
     const OffsetCommitOption _offsetCommitOption;
@@ -260,8 +265,6 @@ private:
 
     // Internal interface for "assign"
     void _assign(const TopicPartitions& tps);
-    // Internal interface for "assignment"
-    TopicPartitions assignment(bool withQueryRequest) const;
 
     std::string  _groupId;
 
@@ -357,7 +360,7 @@ KafkaConsumer::close()
 
 // Subscription
 inline void
-KafkaConsumer::subscribe(const Topics& topics, RebalanceCallback cb)
+KafkaConsumer::subscribe(const Topics& topics, RebalanceCallback cb, std::chrono::milliseconds timeout)
 {
     std::string topicsStr = toString(topics);
 
@@ -376,13 +379,13 @@ KafkaConsumer::subscribe(const Topics& topics, RebalanceCallback cb)
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), TIMEOUT_INFINITE);
+    rd_kafka_poll(getClientHandle(), timeout.count());
 
     KAFKA_API_DO_LOG(LOG_INFO, "subscribed, topics[%s]", topicsStr.c_str());
 }
 
 inline void
-KafkaConsumer::unsubscribe()
+KafkaConsumer::unsubscribe(std::chrono::milliseconds timeout)
 {
     KAFKA_API_DO_LOG(LOG_INFO, "will unsubscribe");
 
@@ -390,7 +393,7 @@ KafkaConsumer::unsubscribe()
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), TIMEOUT_INFINITE);
+    rd_kafka_poll(getClientHandle(), timeout.count());
 
     KAFKA_API_DO_LOG(LOG_INFO, "unsubscribed");
 }
@@ -438,31 +441,20 @@ KafkaConsumer::assign(const TopicPartitions& tps)
     _assign(tps);
 }
 
-// Assignment, -- internal interface
-inline TopicPartitions
-KafkaConsumer::assignment(bool withQueryRequest) const
-{
-    if (withQueryRequest)
-    {
-        rd_kafka_topic_partition_list_t* raw_tps = nullptr;
-        rd_kafka_resp_err_t err = rd_kafka_assignment(getClientHandle(), &raw_tps);
-
-        auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(raw_tps);
-
-        KAFKA_THROW_IF_WITH_RESP_ERROR(err);
-
-        return getTopicPartitions(rk_tps.get());
-    }
-
-    return _assignment;
-}
-
-// Assignment, -- external interface
+// Assignment
 inline TopicPartitions
 KafkaConsumer::assignment() const
 {
-    return subscription().empty() ? assignment(false) : TopicPartitions();
+    rd_kafka_topic_partition_list_t* raw_tps = nullptr;
+    rd_kafka_resp_err_t err = rd_kafka_assignment(getClientHandle(), &raw_tps);
+
+    auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(raw_tps);
+
+    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
+
+    return getTopicPartitions(rk_tps.get());
 }
+
 
 // Seek & Position
 inline void

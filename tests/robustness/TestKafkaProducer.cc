@@ -39,7 +39,7 @@ TEST(KafkaSyncProducer, RecordTimestamp)
     // Test with "CreateTime" topic
     {
         // This would block the brokers for a while (not impact on "CreateTime")
-        auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
+        auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(3));
 
         const auto& topic = topicWithRecordCreateTime;
 

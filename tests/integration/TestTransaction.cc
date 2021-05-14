@@ -74,7 +74,7 @@ TEST(Transaction, CommitTransaction)
     };
 
     {
-        std::cout << "========== Producer: commitTransaction, Consumer: isolation.level=read_committed ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("Producer: commitTransaction, Consumer: isolation.level=read_committed");
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
@@ -86,7 +86,7 @@ TEST(Transaction, CommitTransaction)
     }
 
     {
-        std::cout << "========== Producer: commitTransaction, Consumer: isolation.level=read_uncommitted ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("Producer: commitTransaction, Consumer: isolation.level=read_uncommitted");
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
@@ -98,7 +98,7 @@ TEST(Transaction, CommitTransaction)
     }
 
     {
-        std::cout << "========== Producer: abortTransaction, Consumer: isolation.level=read_committed ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("Producer: abortTransaction, Consumer: isolation.level=read_committed");
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
@@ -110,7 +110,7 @@ TEST(Transaction, CommitTransaction)
     }
 
     {
-        std::cout << "========== Producer: abortTransaction, Consumer: isolation.level=read_uncommitted ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("Producer: abortTransaction, Consumer: isolation.level=read_uncommitted");
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
@@ -122,7 +122,7 @@ TEST(Transaction, CommitTransaction)
     }
 
     {
-        std::cout << "========== Producer: no commit/abortTransaction, Consumer: isolation.level=read_committed ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("Producer: no commit/abortTransaction, Consumer: isolation.level=read_committed");
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
@@ -134,7 +134,7 @@ TEST(Transaction, CommitTransaction)
     }
 
     {
-        std::cout << "========== Producer: no commit/abortTransaction, Consumer: isolation.level=read_uncommitted ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("Producer: no commit/abortTransaction, Consumer: isolation.level=read_uncommitted");
 
         const Topic     topic     = Utility::getRandomString();
         KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
@@ -149,7 +149,7 @@ TEST(Transaction, CommitTransaction)
 TEST(Transaction, CatchException)
 {
     {
-        std::cout << "========== No transaction.id configured ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("No transaction.id configured");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
 
@@ -159,7 +159,7 @@ TEST(Transaction, CatchException)
     }
 
     {
-        std::cout << "========== No initTransactions ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("No initTransactions");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
@@ -170,7 +170,7 @@ TEST(Transaction, CatchException)
     }
 
     {
-        std::cout << "========== No beginTransaction ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("No beginTransaction");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
@@ -184,7 +184,7 @@ TEST(Transaction, CatchException)
     }
 
     {
-        std::cout << "========== abortTransaction (with no initTransactions) ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("abortTransaction (with no initTransactions)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
@@ -195,7 +195,7 @@ TEST(Transaction, CatchException)
     }
 
     {
-        std::cout << "========== abortTransaction (with no beginTransaction) ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("abortTransaction (with no beginTransaction)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
@@ -208,7 +208,7 @@ TEST(Transaction, CatchException)
     }
 
     {
-        std::cout << "========== abortTransaction (with no message sent) ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("abortTransaction (with no message sent)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
@@ -223,7 +223,7 @@ TEST(Transaction, CatchException)
     }
 
     {
-        std::cout << "========== commitTransation (with no message sent) ==========" << std::endl;
+        KafkaTestUtility::PrintDividingLine("commitTransation (with no message sent)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
