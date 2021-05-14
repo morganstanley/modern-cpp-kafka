@@ -60,6 +60,11 @@
 namespace Kafka = KAFKA_API;
 
 namespace KafkaTestUtility {
+inline void
+PrintDividingLine(const std::string& description = "")
+{
+    std::cout << "---------------" << description << "---------------" << std::endl;
+}
 
 inline Kafka::Properties
 GetKafkaClientCommonConfig()
