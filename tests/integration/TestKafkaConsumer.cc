@@ -1676,17 +1676,17 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
     }
 }
 
-// Would FAIL!!! -- since librdkafka v1.6.0
+// `allow.auto.create.topics` has no longer been supported since librdkafka v1.6.0
 TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
 {
     const Topic topic = Utility::getRandomString();
 
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                      .put("allow.auto.create.topics", "true")
-                                     .put("debug",                    "all")
-                                     .put("log_level",                "7"));
+                                     /* .put("debug",                    "all")
+                                        .put("log_level",                "7")  */ );
 
-    constexpr int MAX_RETRIES = 5;
+    constexpr int MAX_RETRIES = 2;
     for (int i = 0; i < MAX_RETRIES; ++i)
     {
         // Subscribe topics
@@ -1700,6 +1700,7 @@ TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
         consumer.unsubscribe();
     }
 
-    EXPECT_FALSE(consumer.assignment().empty());
+    // Would never make it!
+    EXPECT_TRUE(consumer.assignment().empty());
 }
 
