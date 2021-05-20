@@ -294,7 +294,7 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
                                        RD_KAFKA_V_MSGFLAGS(msgFlags),
                                        RD_KAFKA_V_HEADERS(hdrs),
                                        RD_KAFKA_V_VALUE(const_cast<void*>(valuePtr), valueLen), // NOLINT
-                                       RD_KAFKA_V_KEY(keyPtr, keyLen),
+                                       RD_KAFKA_V_KEY(keyPtr, keyLen),                          // NOLINT
                                        RD_KAFKA_V_OPAQUE(opaquePtr),
                                        RD_KAFKA_V_END);
 #pragma GCC diagnostic pop
@@ -312,7 +312,7 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
                                        RD_KAFKA_V_PARTITION(partition),
                                        RD_KAFKA_V_MSGFLAGS(msgFlags),
                                        RD_KAFKA_V_VALUE(const_cast<void*>(valuePtr), valueLen), // NOLINT
-                                       RD_KAFKA_V_KEY(keyPtr, keyLen),
+                                       RD_KAFKA_V_KEY(keyPtr, keyLen),                          // NOLINT
                                        RD_KAFKA_V_OPAQUE(opaquePtr),
                                        RD_KAFKA_V_END);
 #pragma GCC diagnostic pop

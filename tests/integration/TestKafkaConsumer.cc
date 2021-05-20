@@ -1085,7 +1085,9 @@ TEST(KafkaAutoCommitConsumer, TopicSubscription)
 {
     const Topics topics = { Utility::getRandomString(), Utility::getRandomString(), Utility::getRandomString() };
 
-    for (const auto& topic: topics) KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+    constexpr int NUM_PARTITIONS = 5;
+    constexpr int REPLICA_FACTOR = 3;
+    for (const auto& topic: topics) KafkaTestUtility::CreateKafkaTopic(topic, NUM_PARTITIONS, REPLICA_FACTOR);
 
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -1095,10 +1097,11 @@ TEST(KafkaAutoCommitConsumer, TopicSubscription)
     consumer.subscribe(topics);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription[" << toString(consumer.subscription()) << "]" << std::endl;
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assignment[" << toString(consumer.assignment()) << "]" << std::endl;
 
     EXPECT_EQ(topics.size(), consumer.subscription().size());
     std::for_each(topics.cbegin(), topics.cend(), [&consumer](const auto& topic) { EXPECT_EQ(1, consumer.subscription().count(topic)); });
-    EXPECT_EQ(0, consumer.assignment().size());
+    EXPECT_EQ(NUM_PARTITIONS * topics.size(), consumer.assignment().size());
 }
 
 TEST(KafkaAutoCommitConsumer, SubscribeUnsubscribeThenAssign)
@@ -1140,7 +1143,9 @@ TEST(KafkaAutoCommitConsumer, AssignUnassignAndSubscribe)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
-    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+    constexpr int NUM_PARTITIONS = 5;
+    constexpr int REPLICA_FACTOR = 3;
+    KafkaTestUtility::CreateKafkaTopic(topic, NUM_PARTITIONS, REPLICA_FACTOR);
 
     // Start consumer
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -1163,11 +1168,12 @@ TEST(KafkaAutoCommitConsumer, AssignUnassignAndSubscribe)
     // Subscribe topics
     consumer.subscribe({topic});
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription[" << toString(consumer.subscription()) << "]" << std::endl;
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assignment[" << toString(consumer.assignment()) << "]" << std::endl;
 
     EXPECT_EQ(1, consumer.subscription().size());
     EXPECT_EQ(1, consumer.subscription().count(topic));
-    EXPECT_EQ(0, consumer.assignment().size());
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription[" << toString(consumer.subscription()) << "]" << std::endl;
+    EXPECT_EQ(NUM_PARTITIONS, consumer.assignment().size());
 }
 
 TEST(KafkaAutoCommitConsumer, WrongOperation_SeekBeforePartitionsAssigned)
@@ -1476,11 +1482,17 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
 
             auto metadata1 = producer.send(Kafka::ProducerRecord(topic1, partition1, Kafka::NullKey, Kafka::NullValue));
             std::cout << "[" << Utility::getCurrentTime() << "] Just send a message, metadata: " << metadata1.toString() << std::endl;
-            expected[{topic1, partition1}] = *metadata1.offset();
+            if (auto offset = metadata1.offset())
+            {
+                expected[{topic1, partition1}] = *offset;
+            }
 
             auto metadata2 = producer.send(Kafka::ProducerRecord(topic2, partition2, Kafka::NullKey, Kafka::NullValue));
             std::cout << "[" << Utility::getCurrentTime() << "] Just send a message, metadata: " << metadata2.toString() << std::endl;
-            expected[{topic2, partition2}] = *metadata2.offset();
+            if (auto offset = metadata2.offset())
+            {
+                expected[{topic2, partition2}] = *offset;
+            }
 
             expectedOffsets.emplace_back(expected);
 
@@ -1663,4 +1675,32 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
         EXPECT_EQ(messages[i].second, messagesProcessed[i].second);
     }
 }
- 
+
+// `allow.auto.create.topics` has no longer been supported since librdkafka v1.6.0
+TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
+{
+    const Topic topic = Utility::getRandomString();
+
+    KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                     .put("allow.auto.create.topics", "true")
+                                     /* .put("debug",                    "all")
+                                        .put("log_level",                "7")  */ );
+
+    constexpr int MAX_RETRIES = 2;
+    for (int i = 0; i < MAX_RETRIES; ++i)
+    {
+        // Subscribe topics
+        consumer.subscribe({topic});
+        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
+        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription: " << toString(consumer.subscription()) << std::endl;
+        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assignment: " << toString(consumer.assignment()) << std::endl;
+
+        if (!consumer.assignment().empty()) break;
+
+        consumer.unsubscribe();
+    }
+
+    // Would never make it!
+    EXPECT_TRUE(consumer.assignment().empty());
+}
+

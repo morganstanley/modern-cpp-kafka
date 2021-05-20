@@ -34,7 +34,7 @@ TEST(AdminClient, BrokersTimeout)
         std::cout << "[" << Utility::getCurrentTime() << "] will ListTopics" << std::endl;
         {
             auto listResult = adminClient.listTopics(std::chrono::seconds(1));
-            std::cout << "[" << Utility::getCurrentTime() << "] ListTopics: result[" << listResult.message() << "]" << std::endl;
+            std::cout << "[" << Utility::getCurrentTime() << "] ListTopics: result[" << listResult.message() << "]. Result: " << listResult.message() << std::endl;
             EXPECT_TRUE(listResult.errorCode().value() == RD_KAFKA_RESP_ERR__TRANSPORT || listResult.errorCode().value() == RD_KAFKA_RESP_ERR__TIMED_OUT);
             EXPECT_EQ(0, listResult.topics.size());
         }

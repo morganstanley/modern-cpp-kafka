@@ -25,7 +25,7 @@ public:
         : _when(std::chrono::system_clock::now()),
           _filename(filename),
           _lineno(lineno),
-          _error(std::make_unique<SimpleError>(respErr, errMsg))
+          _error(std::make_shared<SimpleError>(respErr, errMsg))
     {}
 
     KafkaException(const char* filename, std::size_t lineno, rd_kafka_resp_err_t respErr)
@@ -36,7 +36,7 @@ public:
         : _when(std::chrono::system_clock::now()),
           _filename(filename),
           _lineno(lineno),
-          _error(std::make_unique<Error>(error))
+          _error(std::make_shared<Error>(error))
     {}
 
     /**
@@ -60,7 +60,7 @@ private:
     const   TimePoint               _when;
     const   std::string             _filename;
     const   std::size_t             _lineno;
-    std::unique_ptr<const Error>    _error;
+    const   std::shared_ptr<Error>  _error;
     mutable std::string             _what;
 };
 
