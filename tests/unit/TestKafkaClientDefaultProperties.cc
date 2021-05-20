@@ -1,3 +1,5 @@
+#include "../utils/TestUtility.h"
+
 #include "kafka/ConsumerConfig.h"
 #include "kafka/KafkaConsumer.h"
 #include "kafka/KafkaProducer.h"
@@ -65,7 +67,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
         EXPECT_TRUE(checkProperties("KafkaAsyncProducer", producer, expectedKVs));
     }
 
-    std::cout << "--------------------" << std::endl;
+    KafkaTestUtility::PrintDividingLine();
 
     {
         auto props = commonProps.put(Kafka::ProducerConfig::ENABLE_IDEMPOTENCE, "true");
@@ -81,7 +83,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
         EXPECT_TRUE(checkProperties("KafkaAsyncProducer(idempotence enabled)", producer, expectedKVs));
     }
 
-    std::cout << "--------------------" << std::endl;
+    KafkaTestUtility::PrintDividingLine();
 
     {
         Kafka::KafkaSyncProducer producer(commonProps);
@@ -107,7 +109,7 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
             { Kafka::ConsumerConfig::ENABLE_PARTITION_EOF,  "false"      },
             { Kafka::ConsumerConfig::MAX_POLL_RECORDS,      "500"        },
             { Kafka::ConsumerConfig::QUEUED_MIN_MESSAGES,   "100000"     },
-            { Kafka::ConsumerConfig::SESSION_TIMEOUT_MS,    "10000"      },
+            { Kafka::ConsumerConfig::SESSION_TIMEOUT_MS,    "45000"      },
             { Kafka::ConsumerConfig::SOCKET_TIMEOUT_MS,     "60000"      },
             { Kafka::ConsumerConfig::SECURITY_PROTOCOL,     "plaintext"  },
             { "enable.auto.commit",                         "false"      },
@@ -121,7 +123,7 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
         EXPECT_FALSE(consumer.getProperty(Kafka::ConsumerConfig::AUTO_OFFSET_RESET));
     }
 
-    std::cout << "--------------------" << std::endl;
+    KafkaTestUtility::PrintDividingLine();
 
     {
         Kafka::KafkaManualCommitConsumer consumer(commonProps);
