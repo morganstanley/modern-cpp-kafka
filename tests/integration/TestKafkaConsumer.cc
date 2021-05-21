@@ -1682,22 +1682,20 @@ TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
     const Topic topic = Utility::getRandomString();
 
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                     .put("allow.auto.create.topics", "true")
-                                     /* .put("debug",                    "all")
-                                        .put("log_level",                "7")  */ );
+                                     .put("allow.auto.create.topics", "true"));
 
     constexpr int MAX_RETRIES = 2;
     for (int i = 0; i < MAX_RETRIES; ++i)
     {
         // Subscribe topics
-        consumer.subscribe({topic});
+        consumer.subscribe({topic}, Consumer::NullRebalanceCallback, std::chrono::milliseconds(10));
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription: " << toString(consumer.subscription()) << std::endl;
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assignment: " << toString(consumer.assignment()) << std::endl;
 
         if (!consumer.assignment().empty()) break;
 
-        consumer.unsubscribe();
+        consumer.unsubscribe(std::chrono::milliseconds(5));
     }
 
     // Would never make it!

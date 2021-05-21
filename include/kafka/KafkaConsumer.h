@@ -24,10 +24,6 @@ namespace KAFKA_API {
 class KafkaConsumer: public KafkaClient
 {
 protected:
-    using RebalanceEventType    = Consumer::RebalanceEventType;
-    using RebalanceCallback     = Consumer::RebalanceCallback;
-    using OffsetCommitCallback  = Consumer::OffsetCommitCallback;
-
     // Default value for property "max.poll.records" (which is same with Java API)
     static const constexpr char* DEFAULT_MAX_POLL_RECORDS_VALUE = "500";
 
@@ -75,7 +71,7 @@ public:
      * An exception would be thrown if assign is called previously (without a subsequent call to unsubscribe())
      */
     void subscribe(const Topics&               topics,
-                   Consumer::RebalanceCallback cb      = Consumer::RebalanceCallback(),
+                   Consumer::RebalanceCallback cb      = Consumer::NullRebalanceCallback,
                    std::chrono::milliseconds   timeout = std::chrono::milliseconds(DEFAULT_SUBSCRIBE_TIMEOUT_MS));
     /**
      * Get the current subscription.
@@ -293,7 +289,7 @@ private:
     // Rebalance Callback (for class instance)
     void onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* rk_partitions);
 
-    RebalanceCallback _rebalanceCb;
+    Consumer::RebalanceCallback _rebalanceCb;
 };
 
 
@@ -360,7 +356,7 @@ KafkaConsumer::close()
 
 // Subscription
 inline void
-KafkaConsumer::subscribe(const Topics& topics, RebalanceCallback cb, std::chrono::milliseconds timeout)
+KafkaConsumer::subscribe(const Topics& topics, Consumer::RebalanceCallback cb, std::chrono::milliseconds timeout)
 {
     std::string topicsStr = toString(topics);
 
@@ -746,8 +742,8 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
 
     if (_rebalanceCb)
     {
-        RebalanceEventType et =
-            (err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? RebalanceEventType::PartitionsAssigned : RebalanceEventType::PartitionsRevoked);
+        Consumer::RebalanceEventType et =
+            (err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? Consumer::RebalanceEventType::PartitionsAssigned : Consumer::RebalanceEventType::PartitionsRevoked);
         _rebalanceCb(et, tps);
     }
 }
@@ -895,17 +891,17 @@ public:
      * Commit offsets returned on the last poll() for all the subscribed list of topics and partition.
      * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
      */
-    void commitAsync(const Consumer::OffsetCommitCallback& cb = OffsetCommitCallback());
+    void commitAsync(const Consumer::OffsetCommitCallback& cb = Consumer::NullOffsetCommitCallback);
     /**
      * Commit the specified offsets for the specified records
      * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
      */
-    void commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& cb = OffsetCommitCallback());
+    void commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& cb = Consumer::NullOffsetCommitCallback);
     /**
      * Commit the specified offsets for the specified list of topics and partitions to Kafka.
      * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
      */
-    void commitAsync(const TopicPartitionOffsets& tpos, const Consumer::OffsetCommitCallback& cb = OffsetCommitCallback());
+    void commitAsync(const TopicPartitionOffsets& tpos, const Consumer::OffsetCommitCallback& cb = Consumer::NullOffsetCommitCallback);
 
     /**
      * Call the OffsetCommit callbacks (if any)
@@ -968,16 +964,16 @@ KafkaManualCommitConsumer::commitSync(const TopicPartitionOffsets& tpos)
 }
 
 inline void
-KafkaManualCommitConsumer::commitAsync(const TopicPartitionOffsets& tpos, const OffsetCommitCallback& cb)
+KafkaManualCommitConsumer::commitAsync(const TopicPartitionOffsets& tpos, const Consumer::OffsetCommitCallback& cb)
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(tpos.empty() ? nullptr : createRkTopicPartitionList(tpos));
 
-    rd_kafka_resp_err_t err = rd_kafka_commit_queue(getClientHandle(), rk_tpos.get(), getCommitCbQueue(), &KafkaConsumer::offsetCommitCallback, new OffsetCommitCallback(cb));
+    rd_kafka_resp_err_t err = rd_kafka_commit_queue(getClientHandle(), rk_tpos.get(), getCommitCbQueue(), &KafkaConsumer::offsetCommitCallback, new Consumer::OffsetCommitCallback(cb));
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 }
 
 inline void
-KafkaManualCommitConsumer::commitAsync(const ConsumerRecord& record, const OffsetCommitCallback& cb)
+KafkaManualCommitConsumer::commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& cb)
 {
     TopicPartitionOffsets tpos;
     // committed offset should be "current received record's offset" + 1
@@ -986,7 +982,7 @@ KafkaManualCommitConsumer::commitAsync(const ConsumerRecord& record, const Offse
 }
 
 inline void
-KafkaManualCommitConsumer::commitAsync(const OffsetCommitCallback& cb)
+KafkaManualCommitConsumer::commitAsync(const Consumer::OffsetCommitCallback& cb)
 {
     commitAsync(TopicPartitionOffsets(), cb);
 }

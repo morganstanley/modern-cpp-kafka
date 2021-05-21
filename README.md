@@ -163,6 +163,9 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
                     * `client.id`
 
+            * Log level
+
+                * The default `log_level` is `NOTICE` (`5`) for all these clients
 
 * Test Environment (ZooKeeper/Kafka cluster) Setup
 

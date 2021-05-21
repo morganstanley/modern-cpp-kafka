@@ -390,6 +390,12 @@ KafkaClient::validateAndReformProperties(const Properties& origProperties)
         }
     }
 
+    // If no "log_level" configured, use LOG_NOTICE as default
+    if (!properties.getProperty(LOG_LEVEL))
+    {
+        properties.put(LOG_LEVEL, std::to_string(LOG_NOTICE));
+    }
+
     return properties;
 }
 
