@@ -23,11 +23,30 @@ namespace Consumer
     /**
      * A callback interface that the user can implement to trigger custom actions when the set of partitions assigned to the consumer changes.
      */
-    using RebalanceCallback    = std::function<void(RebalanceEventType eventType, const TopicPartitions& topicPartitions)>;
+    using RebalanceCallback = std::function<void(RebalanceEventType eventType, const TopicPartitions& topicPartitions)>;
+
+    /**
+     * Null RebalanceCallback
+     */
+#if __cplusplus >= 201703L
+    const inline RebalanceCallback NullRebalanceCallback = RebalanceCallback{};
+#else
+    const static RebalanceCallback NullRebalanceCallback = RebalanceCallback{};
+#endif
+
     /**
      * A callback interface that the user can implement to trigger custom actions when a commit request completes.
      */
     using OffsetCommitCallback = std::function<void(const TopicPartitionOffsets& topicPartitionOffsets, std::error_code ec)>;
+
+    /**
+     * Null OffsetCommitCallback
+     */
+#if __cplusplus >= 201703L
+    const inline OffsetCommitCallback NullOffsetCommitCallback = OffsetCommitCallback{};
+#else
+    const static OffsetCommitCallback NullOffsetCommitCallback = OffsetCommitCallback{};
+#endif
 
     /**
      * A metadata struct containing the consumer group information.

@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+
 // Use `boost::optional` for C++14, which doesn't support `std::optional`
 #if __cplusplus >= 201703L
 #include <optional>
@@ -25,63 +26,10 @@ template<class T>
 using Optional = boost::optional<T>;
 #endif
 
+
 namespace KAFKA_API {
 
-class ConstBuffer;
-
-/**
- * Topic name.
- */
-using Topic     = std::string;
-
-/**
- * Partition number.
- */
-using Partition = std::int32_t;
-
-/**
- * Record offset.
- */
-using Offset    = std::int64_t;
-
-/**
- * Record key.
- */
-using Key       = ConstBuffer;
-using KeySize   = std::size_t;
-
-/**
- * Record value.
- */
-using Value     = ConstBuffer;
-using ValueSize = std::size_t;
-
-/**
- * Topic set.
- */
-using Topics                = std::set<Topic>;
-
-/**
- * Topic Partition pair.
- */
-using TopicPartition        = std::pair<Topic, Partition>;
-
-/**
- * TopicPartition set.
- */
-using TopicPartitions       = std::set<TopicPartition>;
-
-/**
- * Topic/Partition/Offset tuple
- */
-using TopicPartitionOffset  = std::tuple<Topic, Partition, Offset>;
-
-/**
- * TopicPartition to Offset map.
- */
-using TopicPartitionOffsets = std::map<TopicPartition, Offset>;
-
-
+// Which is similar with `boost::const_buffer` (thus avoid the dependency towards `boost`)
 class ConstBuffer
 {
 public:
@@ -111,23 +59,76 @@ private:
     std::size_t _size;
 };
 
+/**
+ * Topic name.
+ */
+using Topic     = std::string;
 
 /**
- * Empty Key.
+ * Partition number.
  */
-#if __cplusplus >= 201703L
-const inline Key NullKey = Key();
-#else
-const static Key NullKey = Key();
-#endif
+using Partition = std::int32_t;
+
 /**
- * Empty Value.
+ * Record offset.
+ */
+using Offset    = std::int64_t;
+
+/**
+ * Record key.
+ */
+using Key       = ConstBuffer;
+using KeySize   = std::size_t;
+
+/**
+ * Null Key.
  */
 #if __cplusplus >= 201703L
-const inline Value NullValue = Value();
+const inline Key NullKey = Key{};
 #else
-const static Value NullValue = Value();
+const static Key NullKey = Key{};
 #endif
+
+/**
+ * Record value.
+ */
+using Value     = ConstBuffer;
+using ValueSize = std::size_t;
+
+/**
+ * Null Value.
+ */
+#if __cplusplus >= 201703L
+const inline Value NullValue = Value{};
+#else
+const static Value NullValue = Value{};
+#endif
+
+/**
+ * Topic set.
+ */
+using Topics                = std::set<Topic>;
+
+/**
+ * Topic Partition pair.
+ */
+using TopicPartition        = std::pair<Topic, Partition>;
+
+/**
+ * TopicPartition set.
+ */
+using TopicPartitions       = std::set<TopicPartition>;
+
+/**
+ * Topic/Partition/Offset tuple
+ */
+using TopicPartitionOffset  = std::tuple<Topic, Partition, Offset>;
+
+/**
+ * TopicPartition to Offset map.
+ */
+using TopicPartitionOffsets = std::map<TopicPartition, Offset>;
+
 
 /**
  * Obtains explanatory string for Topics.
