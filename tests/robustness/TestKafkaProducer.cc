@@ -100,6 +100,7 @@ TEST(KafkaSyncProducer, RecordTimestamp)
 TEST(KafkaAsyncProducer, NoMissedDeliveryCallback)
 {
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     std::mutex                   inFlightMutex;
     std::set<ProducerRecord::Id> inFlightIds;
@@ -151,6 +152,7 @@ TEST(KafkaAsyncProducer, NoMissedDeliveryCallback)
 TEST(KafkaAsyncProducer, MightMissDeliveryCallbackIfCloseWithLimitedTimeout)
 {
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     std::size_t deliveryCount = 0;
     {
@@ -195,6 +197,7 @@ TEST(KafkaAsyncProducer, BrokerStopWhileSendingMessages)
     };
 
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     std::size_t deliveryCount = 0;
     {
@@ -241,6 +244,8 @@ TEST(KafkaAsyncProducer, Send_AckTimeout)
     };
 
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                         .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")); // If with no response, the delivery would fail in a short time
@@ -252,7 +257,7 @@ TEST(KafkaAsyncProducer, Send_AckTimeout)
         for (const auto& msg: messages)
         {
             auto record = ProducerRecord(topic, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
-            
+
             producer.send(record, [&failureCount](const Producer::RecordMetadata& metadata, std::error_code ec) {
                                       std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << ec.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
                                       EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, ec.value());
@@ -276,6 +281,8 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AckTimeout)
     };
 
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                         .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000"), // If with no response, the delivery would fail in a short time
@@ -288,7 +295,7 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AckTimeout)
         for (const auto& msg: messages)
         {
             auto record = ProducerRecord(topic, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
-            
+
             producer.send(record, [&failureCount](const Producer::RecordMetadata& metadata, std::error_code ec) {
                                       std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << ec.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
                                       EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, ec.value());
@@ -299,7 +306,7 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AckTimeout)
 
         const auto timeout  = std::chrono::seconds(10);
         const auto interval = std::chrono::milliseconds(100);
-        
+
         for (const auto end = std::chrono::steady_clock::now() + timeout; std::chrono::steady_clock::now() < end;)
         {
             // Keep polling for the delivery-callbacks
@@ -318,6 +325,9 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AlwaysFinishClosing)
         {"3", "value3"},
     };
 
+    const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     std::size_t failureCount = 0;
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
@@ -330,8 +340,8 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AlwaysFinishClosing)
         const auto appThreadId = std::this_thread::get_id();
         for (const auto& msg: messages)
         {
-            auto record = ProducerRecord(Utility::getRandomString(), Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
-            
+            auto record = ProducerRecord(topic, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
+
             producer.send(record, [&failureCount, appThreadId](const Producer::RecordMetadata& metadata, std::error_code ec) {
                                       std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << ec.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
                                       EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, ec.value());
@@ -348,12 +358,15 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AlwaysFinishClosing)
 
 TEST(KafkaSyncProducer, Send_AckTimeout)
 {
+    const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000"));
 
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
 
-    auto record = ProducerRecord(Utility::getRandomString(), NullKey, NullValue);
+    auto record = ProducerRecord(topic, NullKey, NullValue);
     std::cout << "[" << Utility::getCurrentTime() << "] About to send record: " << record.toString() << std::endl;
 
     EXPECT_KAFKA_THROW(producer.send(record), RD_KAFKA_RESP_ERR__MSG_TIMED_OUT);

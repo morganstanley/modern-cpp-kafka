@@ -22,6 +22,8 @@ TEST(KafkaManualCommitConsumer, AlwaysFinishClosing_ManuallyPollEvents)
     Topic     topic     = Utility::getRandomString();
     Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Producer some messages
     std::vector<std::tuple<Headers, std::string, std::string>> messages = {
         {Headers{}, "key1", "value1"},
@@ -86,6 +88,8 @@ TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Producer some messages
     std::vector<std::tuple<Headers, std::string, std::string>> messages = {
         {Headers{}, "key1", "value1"}
@@ -149,7 +153,6 @@ TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
 TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
 {
     const Topic topic = Utility::getRandomString();
-
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Pause the brokers for a while
@@ -212,7 +215,6 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
 
     const Topic topic = Utility::getRandomString();
-
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     TopicPartitions assignment;
@@ -250,7 +252,6 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
 TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
 {
     const Topic topic = Utility::getRandomString();
-
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Consumer properties
@@ -298,13 +299,14 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
     auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(10));
     EXPECT_FALSE(records.empty());
     ASSERT_TRUE(std::all_of(records.cbegin(), records.cend(), [](const auto& record){ return record.error().value() == RD_KAFKA_RESP_ERR__PARTITION_EOF; }));
-    
+
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
 }
 
 TEST(KafkaAutoCommitConsumer, BrokerStopDuringMsgPoll)
 {
     const Topic topic  = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Prepare messages to test
     const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
@@ -347,3 +349,4 @@ TEST(KafkaAutoCommitConsumer, BrokerStopDuringMsgPoll)
 
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " messages" << std::endl;
 }
+

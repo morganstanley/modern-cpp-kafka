@@ -23,6 +23,8 @@ TEST(KafkaSyncProducer, SendMessagesWithAcks1)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Properties for the producer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::ACKS, "1");
 
@@ -66,6 +68,8 @@ TEST(KafkaSyncProducer, SendMessagesWithAcksAll)
 
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Properties for the producer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::ACKS, "all");
@@ -143,6 +147,8 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     const auto key    = std::string(100000, 'a');
     const auto value  = std::string(100000, 'a');
     const auto record = ProducerRecord(topic, partition, Key(key.c_str(), key.size()), Value(value.c_str(), value.size()));
@@ -178,6 +184,7 @@ TEST(KafkaSyncProducer, DefaultPartitioner)
     KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     std::map<Partition, int> partitionCounts;
     constexpr int MSG_NUM = 20;
@@ -199,6 +206,9 @@ TEST(KafkaSyncProducer, DefaultPartitioner)
 
 TEST(KafkaSyncProducer, TryOtherPartitioners)
 {
+    const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Try another "partitioner" instead of the default one
     {
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
@@ -214,7 +224,7 @@ TEST(KafkaSyncProducer, TryOtherPartitioners)
             std::string key;
             std::string value = "v" + std::to_string(i);
 
-            auto record = ProducerRecord(Utility::getRandomString(), Key(key.c_str(), key.size()), Value(value.c_str(), value.size()));
+            auto record = ProducerRecord(topic, Key(key.c_str(), key.size()), Value(value.c_str(), value.size()));
 
             auto metadata = producer.send(record);
             std::cout << metadata.toString() << std::endl;
@@ -265,6 +275,8 @@ TEST(KafkaAsyncProducer, MessageDeliveryCallback)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Properties for the producer
     std::set<ProducerRecord::Id> msgIdsSent;
 
@@ -312,6 +324,8 @@ TEST(KafkaAsyncProducer, DeliveryCallback_ManuallyPollEvents)
 
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Properties for the producer
     std::set<ProducerRecord::Id> msgIdsSent;
@@ -363,6 +377,8 @@ TEST(KafkaAsyncProducer, NoBlockSendingWhileQueueIsFull_ManuallyPollEvents)
 {
     const Topic topic       = Utility::getRandomString();
     const auto  appThreadId = std::this_thread::get_id();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     int msgSentCnt  = 0;
 
@@ -435,6 +451,8 @@ TEST(KafkaAsyncProducer, TooLargeMessageForBroker)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     const auto value  = std::string(2048, 'a');
     const auto record = ProducerRecord(topic, partition, Key(nullptr, 0), Value(value.c_str(), value.size()));
 
@@ -466,6 +484,7 @@ TEST(KafkaAsyncProducer, TooLargeMessageForBroker)
 TEST(KafkaAsyncProducer, CopyRecordValueWithinSend)
 {
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                        .put(ProducerConfig::PARTITIONER, "murmur2"); // `ProducerRecord`s with empty key are mapped to a single partition
