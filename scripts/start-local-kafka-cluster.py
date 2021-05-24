@@ -90,6 +90,7 @@ def GenerateBrokerConfig(brokerId, brokerPort, zookeeperPort, logDir):
         offsets.commit.timeout.ms=10000
         unclean.leader.election.enable=false
         min.insync.replicas=2
+        auto.create.topics.enable=false
     ''')
     properties = brokerTemplate.substitute(broker_id=brokerId, listener_port=brokerPort, zookeeper_port=zookeeperPort, log_dir=logDir)
     return properties

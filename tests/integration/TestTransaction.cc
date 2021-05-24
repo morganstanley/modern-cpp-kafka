@@ -244,6 +244,8 @@ TEST(Transaction, ContinueTheTransaction)
     const std::string transactionId = Utility::getRandomString();
     const std::string messageToSent = "message to sent";
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
+
     // Start a producer to send the message, but fail to commit
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()

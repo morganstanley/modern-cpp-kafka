@@ -379,6 +379,8 @@ TEST(KafkaManualCommitConsumer, NoOffsetCommitCallback)
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Prepare some messages to send
     const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
         {Headers{}, "key1", "value1"},
@@ -422,6 +424,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback)
     const Partition partition = 0;
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Prepare some messages to send
     const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
@@ -485,6 +489,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallbackTriggeredBeforeClose)
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Prepare some messages to send
     const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
         {Headers{}, "key1", "value1"},
@@ -543,6 +549,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback_ManuallyPollEvents)
     const Partition partition = 0;
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Prepare some messages to send
     const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
@@ -609,6 +617,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
     const Partition partition = 0;
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Prepare some messages to send
     const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
@@ -854,6 +864,9 @@ TEST(KafkaAutoCommitConsumer, OffsetCommitAndPosition)
     const Partition partition = 0;
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Prepare some messages to send
     std::vector<std::tuple<Headers, std::string, std::string>> messages = {
         {Headers{}, "key1", "value1"},
@@ -1234,7 +1247,6 @@ TEST(KafkaAutoCommitConsumer, WrongOperation_AssignThenSubscribe)
 TEST(KafkaClient, GetBrokerMetadata)
 {
     const Topic topic = Utility::getRandomString();
-
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Start consumer
@@ -1269,7 +1281,6 @@ TEST(KafkaClient, GetBrokerMetadata)
 TEST(KafkaAutoCommitConsumer, SubscribeAndPoll)
 {
     const Topic topic = Utility::getRandomString();
-
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
@@ -1464,6 +1475,9 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
     const Topic     topic2     = Utility::getRandomString();
     const Partition partition2 = 1;
 
+    KafkaTestUtility::CreateKafkaTopic(topic1, 5, 3);
+    KafkaTestUtility::CreateKafkaTopic(topic2, 5, 3);
+
     using namespace std::chrono;
 
     constexpr int MESSAGES_NUM = 5;
@@ -1574,6 +1588,8 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Prepare some messages to send
     const std::vector<std::pair<std::string, std::string>> messages = {
         {"key1", "value1"},
@@ -1680,6 +1696,7 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
 TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
 {
     const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                      .put("allow.auto.create.topics", "true"));
