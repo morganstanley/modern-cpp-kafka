@@ -109,11 +109,37 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
         * GCC only (with optimization, e.g. -O2)
 
+## How to Run Tests
+
+* Unit test (`tests/unit`)
+
+    * The test could be run with no Kafka cluster depolyed
+
+* Integration test (`tests/integration`)
+
+    * The test should be run with Kafka cluster depolyed
+
+    * The environment variable `KAFKA_BROKER_LIST` should be set
+
+        * E.g. `export KAFKA_BROKER_LIST=127.0.0.1:29091,127.0.0.1:29092,127.0.0.1:29093`
+
+* Robustness test (`tests/robustness`)
+
+    * The test should be run with Kafka cluster depolyed locally
+
+    * The environment variable `KAFKA_BROKER_LIST` should be set
+
+    * The environment variable `KAFKA_BROKER_PIDS` should be set
+
+        * Make sure the test runner gets the privilege to stop/resume the pids
+
+        * E.g. `export KAFKA_BROKER_PIDS=61567,61569,61571`
+
 ## To Start
 
 * Tutorial
 
-    * [Debuting a Modern C++ API for Apache Kafka](https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging)
+    * Confluent Blog [Debuting a Modern C++ API for Apache Kafka](https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging)
 
     * [KafkaProducer Quick Start](doc/KafkaProducerQuickStart.md)
 
