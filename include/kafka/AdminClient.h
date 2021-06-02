@@ -75,7 +75,7 @@ public:
     Admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
 private:
-    static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount);
+    static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount);
     static SimpleError combineErrors(const std::list<SimpleError>& errors);
 
 #if __cplusplus >= 201703L
@@ -89,11 +89,11 @@ private:
 
 
 inline std::list<SimpleError>
-AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount)
+AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount)
 {
     std::list<SimpleError> errors;
 
-    for (int i = 0; i < topicCount; ++i)
+    for (std::size_t i = 0; i < topicCount; ++i)
     {
         const rd_kafka_topic_result_t* topicResult = topicResults[i];
         if (rd_kafka_resp_err_t topicError = rd_kafka_topic_result_error(topicResult))

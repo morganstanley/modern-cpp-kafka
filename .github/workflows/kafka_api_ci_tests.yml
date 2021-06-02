@@ -29,6 +29,10 @@ jobs:
             build-cxx:    clang++
             test-labels:  UT|IT
 
+          - os:           windows-latest
+            build-cxx:    g++
+            test-labels:  UT|IT
+
           - os:           ubuntu-20.04
             build-cxx:    g++
             build-type:   Debug
@@ -81,19 +85,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Update Repo
+      - name: Update Repo (for ubuntu)
+        if: contains(matrix.os, 'ubuntu')
         run: |
-          if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
-            echo 'about to update repo'
-            sed -e 's/azure.archive.ubuntu.com/us.archive.ubuntu.com/g' -e t -e d /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/nonazure.list
-            sudo apt-get update
-          fi
+          sed -e 's/azure.archive.ubuntu.com/us.archive.ubuntu.com/g' -e t -e d /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/nonazure.list
+          sudo apt-get update
 
-      - name: Install Dependencies
-
+      - name: Install Dependencies (non-windoes)
+        if: "!contains(matrix.os, 'windows')"
         run: |
           mkdir -p $BUILD_SUB_DIR
           cd ${BUILD_SUB_DIR}
+
+          export PATH=./:$PATH
 
           # 1. Install cmake
           if [ ${OS_VERSION} == 'ubuntu-18.04' ]; then
@@ -149,10 +153,34 @@ jobs:
 
           # Print dev env
           cmake --version | head -n 1
-          g++ --version | head -n 1
-          clang++ --version | head -n 1
+          #g++ --version | head -n 1
+          #clang++ --version | head -n 1
 
-      - name: Config
+      - name: Install Dependencies (for windows)
+        if: contains(matrix.os, 'windows')
+        run: |
+          mkdir -p $Env:BUILD_SUB_DIR
+          cd $Env:BUILD_SUB_DIR
+          #Invoke-WebRequest -Uri https://eternallybored.org/misc/wget/1.21.1/64/wget.exe -OutFile wget.exe
+          #.\wget.exe --version
+          #$Env:VCPKG_ROOT="./"
+          vcpkg install librdkafka
+          vcpkg install gtest
+          cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\manual-link\gtest_main*" "C:\VCPKG\INSTALLED\x86-windows\lib\"
+          vcpkg install pthread
+          cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\pthreadVC3.lib" "C:\VCPKG\INSTALLED\x86-windows\lib\pthread.lib"
+          #vcpkg install boost
+          vcpkg install boost-program-options
+          vcpkg install boost-optional
+          vcpkg install boost-algorithm
+          vcpkg integrate install
+          #tree c:/packages/
+          #tree ./
+          #tree "C:/vcpkg/installed"
+          #cp -v C:/vcpkg/scripts/buildsystems/vcpkg.cmake ./
+
+      - name: Config (non-windows)
+        if: "!contains(matrix.os, 'windows')"
         run: |
           cd ${BUILD_SUB_DIR}
 
@@ -186,14 +214,43 @@ jobs:
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_GEN_DOC=ON"
           fi
 
-          env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_STANDARD} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION}
+          if [[ ${OS_VERSION} == 'windows'* ]]; then
+            export TOOLCHAIN_FILE_OPTION="-DCMAKE_TOOLCHAIN_FILE=vcpkg.cmake"
+          fi
+          env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_STANDARD} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION} ${TOOLCHAIN_FILE_OPTION}
 
-      - name: Build
+      - name: Config (for windows)
+        if: contains(matrix.os, 'windows')
+        run: |
+          cd $Env:BUILD_SUB_DIR
+          tree "C:/vcpkg/installed"
+          ls -l "C:\VCPKG\INSTALLED\x86-windows\lib"
+          ls -l "C:\VCPKG\INSTALLED\x86-windows\lib\manual-link"
+          g++ --version
+          $Env:GTEST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
+          $Env:BOOST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'; $Env:LD_LIBRARY_PATH='C:\VCPKG\INSTALLED\x86-windows\lib'; cmake -B ./ -S ../.. "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake" "-DCMAKE_CXX_STANDARD=17"
+          $Env:BOOST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'; $Env:LD_LIBRARY_PATH='C:\VCPKG\INSTALLED\x86-windows\lib'; cmake --build ./
+
+      - name: Build (non-windows)
+        if: "!contains(matrix.os, 'windows')"
         run: |
           cd ${BUILD_SUB_DIR}
           make -j${CPU_CORE_NUM} VERBOSE=1
 
+      - name: Build (for windows)
+        if: contains(matrix.os, 'windows')
+        run: |
+          cd $Env:BUILD_SUB_DIR
+          echo $Env:CPS_CORE_NUM
+          pwd
+          tree "./"
+          ls "./"
+          # todo: kenneth
+          # make -j$Env:CPU_CORE_NUM VERBOSE=1
+          #make -j2 VERBOSE=1
+
       - name: Install
+        if: "!contains(matrix.os, 'windows')"
         run: |
           if [ ${WITH_INSTALLATION} ]; then
             cd ${BUILD_SUB_DIR}
@@ -201,7 +258,7 @@ jobs:
           fi
 
       - name: Test
-        if: matrix.test-labels
+        if: "!contains(matrix.os, 'windows') && matrix.test-labels"
         timeout-minutes: 20
         run: |
           cd ${BUILD_SUB_DIR}

@@ -23,7 +23,9 @@ find_library(PTHREAD_LIB pthread)
 if(PTHREAD_LIB)
     message(STATUS "pthread library: ${PTHREAD_LIB}")
 else()
-    message(FATAL_ERROR "Could not find library: pthread!")
+    # todo: kenneth
+    # message(FATAL_ERROR "Could not find library: pthread!")
+    message(STATUS "Could not find library: pthread!")
 endif()
 
 #---------------------------

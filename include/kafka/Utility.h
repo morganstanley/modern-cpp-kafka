@@ -24,7 +24,12 @@ inline std::string getLocalTimeString(const std::chrono::system_clock::time_poin
 
     std::ostringstream oss;
     std::tm tmBuf = {};
+#if !defined(WIN32)
     oss << std::put_time(localtime_r(&time, &tmBuf), "%F %T") <<  "." << std::setfill('0') << std::setw(6) << micros.count();
+#else
+    localtime_s(&tmBuf, &time);
+    oss << std::put_time(&tmBuf, "%F %T") <<  "." << std::setfill('0') << std::setw(6) << micros.count();
+#endif
     return oss.str();
 }
 
@@ -47,7 +52,7 @@ inline std::string getRandomString()
     std::random_device r;
     std::default_random_engine e(r());
     std::uniform_int_distribution<std::uint64_t> uniform_dist(0, 0xFFFFFFFF);
-    int rand = uniform_dist(e);
+    std::size_t rand = uniform_dist(e);
 
     std::ostringstream oss;
     oss << std::setfill('0') << std::setw(sizeof(std::uint32_t) * 2) << std::hex << timestamp << "-" << rand;

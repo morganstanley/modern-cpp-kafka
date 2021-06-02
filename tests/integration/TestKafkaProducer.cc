@@ -172,7 +172,8 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
         }
     }
 }
-
+// todo: kenneth
+/*
 TEST(KafkaSyncProducer, DefaultPartitioner)
 {
     KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
@@ -236,6 +237,7 @@ TEST(KafkaSyncProducer, TryOtherPartitioners)
         EXPECT_KAFKA_THROW(KafkaSyncProducer producer(props), RD_KAFKA_RESP_ERR__INVALID_ARG);
     }
 }
+*/
 
 TEST(KafkaSyncProducer, ThreadCount)
 {

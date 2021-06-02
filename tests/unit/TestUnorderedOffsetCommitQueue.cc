@@ -6,6 +6,13 @@
 #include <chrono>
 #include <vector>
 
+#if defined(WIN32)
+#ifdef min
+#undef min
+#endif
+#endif
+
+
 namespace Kafka = KAFKA_API;
 
 TEST(UnorderedOffsetCommitQueue, Functionality)

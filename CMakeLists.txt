@@ -15,7 +15,15 @@ if (NOT CMAKE_CXX_STANDARD)
 endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED False)
 
-add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")
+#---------------------------
+# Build options
+#---------------------------
+if ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+    add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    #add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif ()
+
 
 #---------------------------
 # Check librdkafka directory
@@ -30,6 +38,20 @@ message(STATUS "librdkafka root directory: ${LIBRDKAFKA_ROOT}")
 include_directories(SYSTEM ${LIBRDKAFKA_ROOT}/include)
 link_directories(${LIBRDKAFKA_ROOT}/lib)
 
+#---------------------------
+# Check boost headers for C++14 support
+#---------------------------
+if (CMAKE_CXX_STANDARD EQUAL 14)
+    if (DEFINED ENV{BOOST_ROOT})
+        set(Boost_INCLUDE_DIRS $ENV{BOOST_ROOT}/include)
+    else ()
+        find_package(Boost)
+        if (NOT Boost_FOUND)
+            message(FATAL_ERROR "Boost not found!")
+        endif ()
+    endif ()
+    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+endif ()
 
 #---------------------------
 # Build Option: clang-tidy
@@ -188,8 +210,9 @@ else()
 
     add_subdirectory("include")
     add_subdirectory("tests")
-    add_subdirectory("tools")
-    add_subdirectory("examples")
+    # todo: kenneth
+    # add_subdirectory("tools")
+    # add_subdirectory("examples")
 endif ()
 
 

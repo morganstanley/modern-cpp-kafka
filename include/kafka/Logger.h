@@ -8,6 +8,13 @@
 #include <functional>
 #include <iostream>
 
+#if defined(WIN32)
+#ifdef min
+#undef min
+#endif
+#endif
+
+
 namespace KAFKA_API {
 
 template <int MAX_CAPACITY>
@@ -37,7 +44,7 @@ public:
     }
     LogBuffer& print(const char* format) { return print("%s", format); }
 
-    int capacity() const { return _buf + MAX_CAPACITY - _wptr; }
+    std::size_t capacity() const { return static_cast<size_t>(_buf + MAX_CAPACITY - _wptr); }
     char* str() { return _buf; }
     const char* c_str() const { return _buf; }
 

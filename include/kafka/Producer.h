@@ -9,6 +9,7 @@
 
 #include "librdkafka/rdkafka.h"
 
+#include <cassert>
 #include <functional>
 #include <memory>
 
@@ -44,9 +45,28 @@ namespace Producer
                                                        another.valueSize(),
                                                        another.timestamp(),
                                                        another.persistedStatus())),
-              _rkmsg(nullptr),
               _recordId(another._recordId)
         {
+        }
+
+        RecordMetadata() { assert(false); } // todo: kenneth
+
+        RecordMetadata& operator=(const RecordMetadata& another)
+        {
+            if (this != &another)
+            {
+                _cachedInfo = std::make_unique<CachedInfo>(another.topic(),
+                                                           another.partition(),
+                                                           another.offset() ? *another.offset() : RD_KAFKA_OFFSET_INVALID,
+                                                           another.keySize(),
+                                                           another.valueSize(),
+                                                           another.timestamp(),
+                                                           another.persistedStatus());
+                _recordId = another._recordId;
+                _rkmsg    = nullptr;
+            }
+
+            return *this;
         }
 
         /**
@@ -169,9 +189,9 @@ namespace Producer
             PersistedStatus persistedStatus;
         };
 
-        const std::unique_ptr<CachedInfo> _cachedInfo;
-        const rd_kafka_message_t*         _rkmsg;
-        const ProducerRecord::Id          _recordId;
+        std::unique_ptr<CachedInfo> _cachedInfo;
+        const rd_kafka_message_t*   _rkmsg    = nullptr;
+        ProducerRecord::Id          _recordId = 0;
     };
 
     /**

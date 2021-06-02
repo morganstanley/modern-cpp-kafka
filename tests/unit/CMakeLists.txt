@@ -1,15 +1,11 @@
 project("kafka-unit-test")
 
-# Directories
-include_directories(SYSTEM ${GTEST_ROOT}/include)
-link_directories(${GTEST_ROOT}/lib)
-
 # Target
 file(GLOB TEST_SRCS *.cc)
 
 add_executable("${PROJECT_NAME}" ${TEST_SRCS})
 
-target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api gtest gmock gtest_main pthread)
+target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api rdkafka gtest gtest_main pthread)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ./${PROJECT_NAME})
 set_tests_properties(${PROJECT_NAME} PROPERTIES LABELS "UT")

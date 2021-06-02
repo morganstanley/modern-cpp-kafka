@@ -375,7 +375,7 @@ KafkaConsumer::subscribe(const Topics& topics, Consumer::RebalanceCallback cb, s
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), timeout.count());
+    rd_kafka_poll(getClientHandle(), static_cast<int>(timeout.count()));        // NOLLINT
 
     KAFKA_API_DO_LOG(LOG_INFO, "subscribed, topics[%s]", topicsStr.c_str());
 }
@@ -389,7 +389,7 @@ KafkaConsumer::unsubscribe(std::chrono::milliseconds timeout)
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), timeout.count());
+    rd_kafka_poll(getClientHandle(), static_cast<int>(timeout.count()));        // NOLLINT
 
     KAFKA_API_DO_LOG(LOG_INFO, "unsubscribed");
 }
@@ -524,7 +524,7 @@ KafkaConsumer::offsetsForTime(const TopicPartitions& tps,
         rk_tp.offset = msSinceEpoch;
     }
 
-    rd_kafka_resp_err_t err = rd_kafka_offsets_for_times(getClientHandle(), rk_tpos.get(), timeout.count());
+    rd_kafka_resp_err_t err = rd_kafka_offsets_for_times(getClientHandle(), rk_tpos.get(), static_cast<int>(timeout.count()));      // NOLINT
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     auto results = getTopicPartitionOffsets(rk_tpos.get());
@@ -619,13 +619,13 @@ KafkaConsumer::pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output)
     commitStoredOffsetsIfNecessary(CommitType::Async);
 
     // Poll messages with librdkafka's API
-    rd_kafka_message_t *msgPtrArray[_maxPollRecords];
-    std::size_t msgReceived = rd_kafka_consume_batch_queue(_rk_queue.get(), timeoutMs, msgPtrArray, _maxPollRecords);
+    std::vector<rd_kafka_message_t*> msgPtrArray(_maxPollRecords);
+    std::size_t msgReceived = rd_kafka_consume_batch_queue(_rk_queue.get(), timeoutMs, msgPtrArray.data(), _maxPollRecords);
 
     // Wrap messages with ConsumerRecord
     output.clear();
     output.reserve(msgReceived);
-    std::for_each(msgPtrArray, msgPtrArray + msgReceived, [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
+    std::for_each(&msgPtrArray[0], &msgPtrArray[msgReceived], [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
 
     // Store the offsets for all these polled messages (for KafkaAutoCommitConsumer)
     storeOffsetsIfNecessary(output);
