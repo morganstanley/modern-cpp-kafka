@@ -66,27 +66,31 @@ PrintDividingLine(const std::string& description = "")
     std::cout << "---------------" << description << "---------------" << std::endl;
 }
 
+inline Optional<std::string>
+GetEnvVar(const std::string& name)
+{
+    if (const auto* value = getenv(name.c_str()))
+    {
+        return std::string{value};
+    }
+
+    return Optional<std::string>{};
+}
+
 inline Kafka::Properties
 GetKafkaClientCommonConfig()
 {
+    auto kafkaBrokerListEnv = GetEnvVar("KAFKA_BROKER_LIST");
+    EXPECT_TRUE(kafkaBrokerListEnv);
+    if (!kafkaBrokerListEnv) return Kafka::Properties{};
+
     Kafka::Properties props;
-    if (!getenv("KAFKA_BROKER_LIST"))
-    {
-        EXPECT_TRUE(false);
-        return props;
-    }
+    props.put("bootstrap.servers", *kafkaBrokerListEnv);
 
-    std::string additionalSettings;
-    if (const auto* additionalSettingEnv = getenv("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
-    {
-        additionalSettings = additionalSettingEnv;
-    }
-
-    props.put("bootstrap.servers", getenv("KAFKA_BROKER_LIST"));
-    if (!additionalSettings.empty())
+    if (auto additionalSettingsEnv = GetEnvVar("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
     {
         std::vector<std::string> keyValuePairs;
-        boost::algorithm::split(keyValuePairs, additionalSettings, boost::is_any_of(";"));
+        boost::algorithm::split(keyValuePairs, *additionalSettingsEnv, boost::is_any_of(";"));
         for (const auto& keyValue: keyValuePairs)
         {
             std::vector<std::string> kv;
@@ -109,10 +113,8 @@ GetKafkaClientCommonConfig()
 inline std::size_t
 GetNumberOfKafkaBrokers()
 {
-    if (!getenv("KAFKA_BROKER_LIST")) return 0;
-
-    std::string brokers = getenv("KAFKA_BROKER_LIST");
-    return std::count(brokers.cbegin(), brokers.cend(), ',') + 1;
+    auto kafkaBrokerListEnv = GetEnvVar("KAFKA_BROKER_LIST");
+    return kafkaBrokerListEnv ? (std::count(kafkaBrokerListEnv->cbegin(), kafkaBrokerListEnv->cend(), ',') + 1) : 0;
 }
 
 const auto POLL_INTERVAL             = std::chrono::milliseconds(100);
@@ -160,7 +162,7 @@ inline void
 ProduceMessages(const std::string& topic, int partition, const std::vector<std::tuple<Kafka::Headers, std::string, std::string>>& msgs)
 {
     Kafka::KafkaSyncProducer producer(GetKafkaClientCommonConfig());
-    producer.setLogLevel(LOG_CRIT);
+    producer.setLogLevel(Kafka::Log::Level::Crit);
 
     for (const auto& msg: msgs)
     {
@@ -202,10 +204,9 @@ inline std::vector<int>
 getAllBrokersPids()
 {
     std::vector<std::string> pidsString;
-    if (getenv("KAFKA_BROKER_PIDS"))
+    if (auto kafkaBrokerPidsEnv = GetEnvVar("KAFKA_BROKER_PIDS"))
     {
-        std::string toSplit = getenv("KAFKA_BROKER_PIDS");
-        boost::algorithm::split(pidsString, toSplit, boost::is_any_of(","));
+        boost::algorithm::split(pidsString, *kafkaBrokerPidsEnv, boost::is_any_of(","));
     }
 
     std::vector<int> pids;
@@ -213,6 +214,7 @@ getAllBrokersPids()
     return pids;
 }
 
+#if !defined(WIN32)
 inline void
 signalToAllBrokers(int sig)
 {
@@ -228,12 +230,17 @@ signalToAllBrokers(int sig)
         std::cout << "[" << Kafka::Utility::getCurrentTime() << "] Brokers resumed"  << std::endl;
     }
 }
+#endif
 
 inline void
 PauseBrokers()
 {
     constexpr int WAIT_AFTER_PAUSE_MS = 100;
+#if !defined(WIN32)
     signalToAllBrokers(SIGSTOP);
+#else
+    std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] Can't pause brokers (doesn't support yet) on windows!"  << std::endl;
+#endif
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_AFTER_PAUSE_MS));
 }
 
@@ -241,7 +248,11 @@ inline void
 ResumeBrokers()
 {
     constexpr int WAIT_AFTER_RESUME_SEC = 5;
+#if !defined(WIN32)
     signalToAllBrokers(SIGCONT);
+#else
+    std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] Can't resume brokers (doesn't support yet) on windows!"  << std::endl;
+#endif
     std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_RESUME_SEC));
 }
 
@@ -250,8 +261,8 @@ PauseBrokersForAWhile(std::chrono::milliseconds duration)
 {
     PauseBrokers();
 
-    auto cb = [](int ms){ std::this_thread::sleep_for(std::chrono::milliseconds(ms)); ResumeBrokers(); };
-    return std::make_shared<JoiningThread>(cb, duration.count());
+    auto cb = [](std::chrono::milliseconds ms){ std::this_thread::sleep_for(ms); ResumeBrokers(); };
+    return std::make_shared<JoiningThread>(cb, duration);
 }
 
 } // end of namespace KafkaTestUtility

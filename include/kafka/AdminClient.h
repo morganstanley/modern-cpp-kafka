@@ -75,7 +75,7 @@ public:
     Admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
 private:
-    static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount);
+    static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount);
     static SimpleError combineErrors(const std::list<SimpleError>& errors);
 
 #if __cplusplus >= 201703L
@@ -89,11 +89,11 @@ private:
 
 
 inline std::list<SimpleError>
-AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, int topicCount)
+AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount)
 {
     std::list<SimpleError> errors;
 
-    for (int i = 0; i < topicCount; ++i)
+    for (std::size_t i = 0; i < topicCount; ++i)
     {
         const rd_kafka_topic_result_t* topicResult = topicResults[i];
         if (rd_kafka_resp_err_t topicError = rd_kafka_topic_result_error(topicResult))
@@ -147,7 +147,7 @@ AdminClient::createTopics(const Topics& topics, int numPartitions, int replicati
             if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
             {
                 std::string errMsg = "Invalid config[" + conf.first + "=" + conf.second + "]";
-                KAFKA_API_DO_LOG(LOG_ERR, errMsg.c_str());
+                KAFKA_API_DO_LOG(Log::Level::Err, errMsg.c_str());
                 return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg);
             }
         }
@@ -172,7 +172,7 @@ AdminClient::createTopics(const Topics& topics, int numPartitions, int replicati
 
         if (rk_ev)
         {
-            KAFKA_API_DO_LOG(LOG_INFO, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
+            KAFKA_API_DO_LOG(Log::Level::Info, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
             rk_ev.reset();
         }
     } while (std::chrono::steady_clock::now() < end);
@@ -245,7 +245,7 @@ AdminClient::deleteTopics(const Topics& topics, std::chrono::milliseconds timeou
 
         if (rk_ev)
         {
-            KAFKA_API_DO_LOG(LOG_INFO, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
+            KAFKA_API_DO_LOG(Log::Level::Info, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
             rk_ev.reset();
         }
     } while (std::chrono::steady_clock::now() < end);

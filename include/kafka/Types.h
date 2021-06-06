@@ -22,6 +22,7 @@ template<class T>
 using Optional = std::optional<T>;
 #else
 #include <boost/optional.hpp>
+#include <boost/optional/optional_io.hpp>
 template<class T>
 using Optional = boost::optional<T>;
 #endif

@@ -8,7 +8,32 @@
 #include <functional>
 #include <iostream>
 
+
 namespace KAFKA_API {
+
+struct Log
+{
+    enum Level
+    {
+        Emerg   = 0,
+        Alert   = 1,
+        Crit    = 2,
+        Err     = 3,
+        Warning = 4,
+        Notice  = 5,
+        Info    = 6,
+        Debug   = 7
+    };
+
+    static const std::string& levelString(int level)
+    {
+        static const std::vector<std::string> levelNames = {"EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG"};
+        static const int                      numLevels  = static_cast<int>(levelNames.size());
+        static const std::string              invalid    = "INVALID";
+
+        return (level >= 0 && level < numLevels) ? levelNames[level] : invalid;
+    }
+};
 
 template <int MAX_CAPACITY>
 class LogBuffer
@@ -37,7 +62,7 @@ public:
     }
     LogBuffer& print(const char* format) { return print("%s", format); }
 
-    int capacity() const { return _buf + MAX_CAPACITY - _wptr; }
+    std::size_t capacity() const { return static_cast<size_t>(_buf + MAX_CAPACITY - _wptr); }
     char* str() { return _buf; }
     const char* c_str() const { return _buf; }
 
@@ -50,10 +75,7 @@ using Logger = std::function<void(int, const char*, int, const char* msg)>;
 
 inline void DefaultLogger(int level, const char* /*filename*/, int /*lineno*/, const char* msg)
 {
-    const char levelNames[][10] = {"EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG", "INVALID"};
-    constexpr int INVALID_LEVEL = sizeof(levelNames)/sizeof(levelNames[0]) - 1;
-    const char* levelName = level < INVALID_LEVEL ? levelNames[level] : levelNames[INVALID_LEVEL];
-    std::cout << "[" << Utility::getCurrentTime() << "]" << levelName << " " << msg;
+    std::cout << "[" << Utility::getCurrentTime() << "]" << Log::levelString(level) << " " << msg;
     std::cout << std::endl;
 }
 

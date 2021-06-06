@@ -40,7 +40,7 @@ public:
     /**
      * Needs to be called before any other methods when the transactional.id is set in the configuration.
      */
-    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS));
+    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS));
 
     /**
      * Should be called before the start of each new transaction.
@@ -50,7 +50,7 @@ public:
     /**
      * Commit the ongoing transaction.
      */
-    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS));
+    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS));
 
     /**
      * Abort the ongoing transaction.
@@ -70,7 +70,7 @@ protected:
         : KafkaClient(ClientType::KafkaProducer, properties, registerConfigCallbacks)
     {
         auto propStr = properties.toString();
-        KAFKA_API_DO_LOG(LOG_INFO, "initializes with properties[%s]", propStr.c_str());
+        KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propStr.c_str());
     }
 
     std::error_code close(std::chrono::milliseconds timeout);
@@ -113,8 +113,8 @@ protected:
 
         void operator()(rd_kafka_t* /*rk*/, const rd_kafka_message_t* rkmsg) override
         {
-            Producer::RecordMetadata metadata(rkmsg, _recordId);
-            _promMetadata.set_value(ResultType(ErrorCode(rkmsg->err), metadata));
+            _promMetadata.set_value(std::make_pair(ErrorCode(rkmsg->err),
+                                                   Producer::RecordMetadata{rkmsg, _recordId}));
         }
 
         std::future<ResultType> getFuture() { return _promMetadata.get_future(); }
@@ -187,12 +187,12 @@ KafkaProducer::registerConfigCallbacks(rd_kafka_conf_t* conf)
         size_t clientPtrSize = 0;
         if (rd_kafka_conf_get(conf, "opaque", reinterpret_cast<char*>(&client), &clientPtrSize))    // NOLINT
         {
-            KAFKA_API_LOG(LOG_CRIT, "failed to stub ut_handle_ProduceResponse! error[%s]. Meanwhile, failed to get the Kafka client!", errInfo.c_str());
+            KAFKA_API_LOG(Log::Level::Crit, "failed to stub ut_handle_ProduceResponse! error[%s]. Meanwhile, failed to get the Kafka client!", errInfo.c_str());
         }
         else
         {
             assert(clientPtrSize == sizeof(client));
-            client->KAFKA_API_DO_LOG(LOG_ERR, "failed to stub ut_handle_ProduceResponse! error[%s]", errInfo.c_str());
+            client->KAFKA_API_DO_LOG(Log::Level::Err, "failed to stub ut_handle_ProduceResponse! error[%s]", errInfo.c_str());
         }
     }
 #endif
@@ -286,8 +286,6 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
             rd_kafka_header_add(hdrs, header.key.c_str(), header.key.size(), header.value.data(), header.value.size());
         }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
         sendResult = rd_kafka_producev(rk,
                                        RD_KAFKA_V_TOPIC(topic),
                                        RD_KAFKA_V_PARTITION(partition),
@@ -297,7 +295,6 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
                                        RD_KAFKA_V_KEY(keyPtr, keyLen),                          // NOLINT
                                        RD_KAFKA_V_OPAQUE(opaquePtr),
                                        RD_KAFKA_V_END);
-#pragma GCC diagnostic pop
         if (sendResult != RD_KAFKA_RESP_ERR_NO_ERROR)
         {
             rd_kafka_headers_destroy(hdrs);
@@ -305,8 +302,6 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
     }
     else
     {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
         sendResult = rd_kafka_producev(rk,
                                        RD_KAFKA_V_TOPIC(topic),
                                        RD_KAFKA_V_PARTITION(partition),
@@ -315,7 +310,6 @@ KafkaProducer::sendMessage(const ProducerRecord&      record,
                                        RD_KAFKA_V_KEY(keyPtr, keyLen),                          // NOLINT
                                        RD_KAFKA_V_OPAQUE(opaquePtr),
                                        RD_KAFKA_V_END);
-#pragma GCC diagnostic pop
     }
 
     if (sendResult == RD_KAFKA_RESP_ERR_NO_ERROR)
@@ -341,7 +335,7 @@ KafkaProducer::close(std::chrono::milliseconds timeout)
     std::error_code ec = flush(timeout);
 
     std::string errMsg = ec.message();
-    KAFKA_API_DO_LOG(LOG_INFO, "closed [%s]", errMsg.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Info, "closed [%s]", errMsg.c_str());
 
     return ec;
 }
@@ -349,7 +343,7 @@ KafkaProducer::close(std::chrono::milliseconds timeout)
 inline void
 KafkaProducer::initTransactions(std::chrono::milliseconds timeout)
 {
-    auto error =  Error{rd_kafka_init_transactions(getClientHandle(), timeout.count())};
+    auto error =  Error{rd_kafka_init_transactions(getClientHandle(), static_cast<int>(timeout.count()))};  // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
@@ -363,14 +357,14 @@ KafkaProducer::beginTransaction()
 inline void
 KafkaProducer::commitTransaction(std::chrono::milliseconds timeout)
 {
-    auto error = Error{rd_kafka_commit_transaction(getClientHandle(), timeout.count())};
+    auto error = Error{rd_kafka_commit_transaction(getClientHandle(), static_cast<int>(timeout.count()))};  // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
 inline void
 KafkaProducer::abortTransaction(std::chrono::milliseconds timeout)
 {
-    auto error = Error{rd_kafka_abort_transaction(getClientHandle(), timeout.count())};
+    auto error = Error{rd_kafka_abort_transaction(getClientHandle(), static_cast<int>(timeout.count()))};   // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
@@ -380,7 +374,10 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets& tpos,
                                         std::chrono::milliseconds timeout)
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tpos));
-    auto error = Error{rd_kafka_send_offsets_to_transaction(getClientHandle(), rk_tpos.get(), groupMetadata.rawHandle(), timeout.count())};
+    auto error = Error{rd_kafka_send_offsets_to_transaction(getClientHandle(),
+                                                            rk_tpos.get(),
+                                                            groupMetadata.rawHandle(),
+                                                            static_cast<int>(timeout.count()))};            // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 

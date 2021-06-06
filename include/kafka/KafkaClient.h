@@ -5,7 +5,7 @@
 #include "kafka/BrokerMetadata.h"
 #include "kafka/Error.h"
 #include "kafka/KafkaException.h"
-#include "kafka/Logger.h"
+#include "kafka/Log.h"
 #include "kafka/Properties.h"
 #include "kafka/RdKafkaHelper.h"
 #include "kafka/Types.h"
@@ -19,7 +19,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <syslog.h>
 #include <thread>
 
 
@@ -81,7 +80,7 @@ public:
     void setLogger(Logger logger) { _logger = std::move(logger); }
 
     /**
-     * Set log level for the kafka client (the default value: LOG_NOTICE).
+     * Set log level for the kafka client (the default value: 5).
      */
     void setLogLevel(int level);
 
@@ -113,7 +112,7 @@ public:
     void doLog(int level, const char* filename, int lineno, const char* format, Args... args) const
     {
         const auto& logger = _logger ? _logger : Global<>::logger;
-        if (level >= LOG_EMERG && level <= _logLevel && logger)
+        if (level >= 0 && level <= _logLevel && logger)
         {
             LogBuffer<LOG_BUFFER_SIZE> logBuffer;
             logBuffer.print("%s ", name().c_str()).print(format, args...);
@@ -146,7 +145,7 @@ public:
  * Log for kafka clients, with the callback which `setGlobalLogger` assigned.
  *
  * E.g,
- *     KAFKA_API_LOG(LOG_ERR, "something wrong happened! %s", detailedInfo.c_str());
+ *     KAFKA_API_LOG(Log::Level::Err, "something wrong happened! %s", detailedInfo.c_str());
  */
 #define KAFKA_API_LOG(lvl, ...) KafkaClient::doGlobalLog(lvl, __FILE__, __LINE__, ##__VA_ARGS__)
 
@@ -181,7 +180,7 @@ protected:
 private:
     std::string         _clientId;
     std::string         _clientName;
-    std::atomic<int>    _logLevel = {LOG_INFO};
+    std::atomic<int>    _logLevel = {Log::Level::Notice};
     Logger              _logger;
     Properties          _properties;
     StatsCallback       _statsCb;
@@ -296,7 +295,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
             KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be an number!").append(e.what()));
         }
 
-        if (_logLevel < LOG_EMERG || _logLevel > LOG_DEBUG)
+        if (_logLevel < Log::Level::Emerg || _logLevel > Log::Level::Debug)
         {
             KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be a value between 0 and 7!"));
         }
@@ -322,7 +321,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         }
         else
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "failed to be initialized with property[%s:%s], result[%d]", prop.first.c_str(), prop.second.c_str(), result);
+            KAFKA_API_DO_LOG(Log::Level::Err, "failed to be initialized with property[%s:%s], result[%d]", prop.first.c_str(), prop.second.c_str(), result);
         }
     }
 
@@ -390,10 +389,10 @@ KafkaClient::validateAndReformProperties(const Properties& origProperties)
         }
     }
 
-    // If no "log_level" configured, use LOG_NOTICE as default
+    // If no "log_level" configured, use Log::Level::Notice as default
     if (!properties.getProperty(LOG_LEVEL))
     {
-        properties.put(LOG_LEVEL, std::to_string(LOG_NOTICE));
+        properties.put(LOG_LEVEL, std::to_string(static_cast<int>(Log::Level::Notice)));
     }
 
     return properties;
@@ -430,7 +429,7 @@ KafkaClient::getProperty(const std::string& name) const
 inline void
 KafkaClient::setLogLevel(int level)
 {
-    _logLevel = level < LOG_EMERG ? LOG_EMERG : (level > LOG_DEBUG ? LOG_DEBUG : level);
+    _logLevel = level < Log::Level::Emerg ? Log::Level::Emerg : (level > Log::Level::Debug ? Log::Level::Debug : level);
     rd_kafka_set_log_level(getClientHandle(), _logLevel);
 }
 
@@ -473,7 +472,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
     {
         if (!disableErrorLogging)
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "failed to get BrokerMetadata! error[%s]", rd_kafka_err2str(err));
+            KAFKA_API_DO_LOG(Log::Level::Err, "failed to get BrokerMetadata! error[%s]", rd_kafka_err2str(err));
         }
         return ret;
     }
@@ -482,7 +481,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
     {
         if (!disableErrorLogging)
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "failed to construct MetaData! topic_cnt[%d]", rk_metadata->topic_cnt);
+            KAFKA_API_DO_LOG(Log::Level::Err, "failed to construct MetaData! topic_cnt[%d]", rk_metadata->topic_cnt);
         }
         return ret;
     }
@@ -492,7 +491,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
     {
         if (!disableErrorLogging)
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "failed to construct MetaData!  topic.err[%s]", rd_kafka_err2str(metadata_topic.err));
+            KAFKA_API_DO_LOG(Log::Level::Err, "failed to construct MetaData!  topic.err[%s]", rd_kafka_err2str(metadata_topic.err));
         }
         return ret;
     }
@@ -516,7 +515,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
         {
             if (!disableErrorLogging)
             {
-                KAFKA_API_DO_LOG(LOG_ERR, "got error[%s] while constructing BrokerMetadata for topic[%s]-partition[%d]", rd_kafka_err2str(metadata_partition.err), topic.c_str(), partition);
+                KAFKA_API_DO_LOG(Log::Level::Err, "got error[%s] while constructing BrokerMetadata for topic[%s]-partition[%d]", rd_kafka_err2str(metadata_partition.err), topic.c_str(), partition);
             }
 
             continue;
