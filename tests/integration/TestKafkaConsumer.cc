@@ -179,7 +179,7 @@ TEST(KafkaAutoCommitConsumer, RecordWithEmptyOrNullFields)
     auto sendMessages = [](const Kafka::ProducerRecord& record, std::size_t repeat, const std::string& partitioner) {
         Kafka::KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                           .put(ProducerConfig::PARTITIONER, partitioner));
-        producer.setLogLevel(LOG_CRIT);
+        producer.setLogLevel(Kafka::Log::Level::Crit);
         for (std::size_t i = 0; i < repeat; ++i) {
             producer.send(record);
         }

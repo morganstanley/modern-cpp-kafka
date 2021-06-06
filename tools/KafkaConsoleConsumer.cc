@@ -19,8 +19,6 @@ void stopRunning(int sig) {
 
     if (running)
     {
-        char msg[] = "SIGINT received, the program terminates\n";
-        write(STDOUT_FILENO, msg, sizeof(msg) - 1);
         running = false;
     }
     else

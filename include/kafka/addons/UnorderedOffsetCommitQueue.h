@@ -94,7 +94,7 @@ public:
         if (offset < 0 || (!_offsetsReceived.empty() && offset <= _offsetsReceived.back()))
         {
             // Invalid offset (might be fetched from the record which had no valid offset)
-            KAFKA_API_LOG(LOG_ERR, "Got invalid offset to wait[%lld]! %s", offset, (_partitionInfo.empty() ? "" : _partitionInfo.c_str()));
+            KAFKA_API_LOG(Log::Level::Err, "Got invalid offset to wait[%lld]! %s", offset, (_partitionInfo.empty() ? "" : _partitionInfo.c_str()));
             return;
         }
 
@@ -111,7 +111,7 @@ public:
         if (offset > maxOffsetReceived)
         {
             // Runtime error
-            KAFKA_API_LOG(LOG_ERR, "Got invalid ack offset[%lld]! Even larger than all offsets received[%lld]! %s", offset, maxOffsetReceived, (_partitionInfo.empty() ? "" : _partitionInfo.c_str()));
+            KAFKA_API_LOG(Log::Level::Err, "Got invalid ack offset[%lld]! Even larger than all offsets received[%lld]! %s", offset, maxOffsetReceived, (_partitionInfo.empty() ? "" : _partitionInfo.c_str()));
         }
 
         _offsetsToCommit.push(offset);
@@ -128,7 +128,7 @@ public:
             else if (minOffsetToCommit < expectedOffset)
             {
                 // Inconsist error (might be caused by duplicated ack)
-                KAFKA_API_LOG(LOG_ERR, "Got invalid ack offset[%lld]! Even smaller than expected[%lld]! %s", minOffsetToCommit, expectedOffset, (_partitionInfo.empty() ? "" : _partitionInfo.c_str()));
+                KAFKA_API_LOG(Log::Level::Err, "Got invalid ack offset[%lld]! Even smaller than expected[%lld]! %s", minOffsetToCommit, expectedOffset, (_partitionInfo.empty() ? "" : _partitionInfo.c_str()));
                 _offsetsToCommit.pop_front();
             }
             else

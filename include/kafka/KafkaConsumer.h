@@ -35,7 +35,7 @@ protected:
           _offsetCommitOption(offsetCommitOption)
     {
         auto propStr = properties.toString();
-        KAFKA_API_DO_LOG(LOG_INFO, "initializes with properties[%s]", propStr.c_str());
+        KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propStr.c_str());
 
         // Pick up the MAX_POLL_RECORDS configuration
         auto maxPollRecords = properties.getProperty(ConsumerConfig::MAX_POLL_RECORDS);
@@ -340,7 +340,7 @@ KafkaConsumer::close()
     }
     catch(const KafkaException& e)
     {
-        KAFKA_API_DO_LOG(LOG_ERR, "met error[%s] while closing", e.what());
+        KAFKA_API_DO_LOG(Log::Level::Err, "met error[%s] while closing", e.what());
     }
 
     rd_kafka_consumer_close(getClientHandle());
@@ -350,7 +350,7 @@ KafkaConsumer::close()
         rd_kafka_poll(getClientHandle(), KafkaClient::TIMEOUT_INFINITE);
     }
 
-    KAFKA_API_DO_LOG(LOG_INFO, "closed");
+    KAFKA_API_DO_LOG(Log::Level::Info, "closed");
 }
 
 
@@ -365,7 +365,7 @@ KafkaConsumer::subscribe(const Topics& topics, Consumer::RebalanceCallback cb, s
         KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__FAIL, "Unexpected Operation! Once assign() was used, subscribe() should not be called any more!");
     }
 
-    KAFKA_API_DO_LOG(LOG_INFO, "will subscribe, topics[%s]", topicsStr.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Info, "will subscribe, topics[%s]", topicsStr.c_str());
 
     _rebalanceCb = std::move(cb);
 
@@ -375,23 +375,23 @@ KafkaConsumer::subscribe(const Topics& topics, Consumer::RebalanceCallback cb, s
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), timeout.count());
+    rd_kafka_poll(getClientHandle(), static_cast<int>(timeout.count()));        // NOLLINT
 
-    KAFKA_API_DO_LOG(LOG_INFO, "subscribed, topics[%s]", topicsStr.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Info, "subscribed, topics[%s]", topicsStr.c_str());
 }
 
 inline void
 KafkaConsumer::unsubscribe(std::chrono::milliseconds timeout)
 {
-    KAFKA_API_DO_LOG(LOG_INFO, "will unsubscribe");
+    KAFKA_API_DO_LOG(Log::Level::Info, "will unsubscribe");
 
     rd_kafka_resp_err_t err = rd_kafka_unsubscribe(getClientHandle());
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), timeout.count());
+    rd_kafka_poll(getClientHandle(), static_cast<int>(timeout.count()));        // NOLLINT
 
-    KAFKA_API_DO_LOG(LOG_INFO, "unsubscribed");
+    KAFKA_API_DO_LOG(Log::Level::Info, "unsubscribed");
 }
 
 inline Topics
@@ -411,7 +411,7 @@ inline void
 KafkaConsumer::_assign(const TopicPartitions& tps)
 {
     std::string tpsStr = toString(tps);
-    KAFKA_API_DO_LOG(LOG_INFO, "will assign with TopicPartitions[%s]", tpsStr.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Info, "will assign with TopicPartitions[%s]", tpsStr.c_str());
 
     auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tps));
 
@@ -420,7 +420,7 @@ KafkaConsumer::_assign(const TopicPartitions& tps)
 
     _assignment = tps;
 
-    KAFKA_API_DO_LOG(LOG_INFO, "assigned with TopicPartitions[%s]", tpsStr.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Info, "assigned with TopicPartitions[%s]", tpsStr.c_str());
 }
 
 // Assign for Topic/Partition level, -- external interface
@@ -457,7 +457,7 @@ inline void
 KafkaConsumer::seek(const TopicPartition& tp, Offset o, std::chrono::milliseconds timeout)
 {
     std::string tpStr = toString(tp);
-    KAFKA_API_DO_LOG(LOG_INFO, "will seek with topic-partition[%s], offset[%d]", tpStr.c_str(), o);
+    KAFKA_API_DO_LOG(Log::Level::Info, "will seek with topic-partition[%s], offset[%d]", tpStr.c_str(), o);
 
     auto rkt = rd_kafka_topic_unique_ptr(rd_kafka_topic_new(getClientHandle(), tp.first.c_str(), nullptr));
     if (!rkt)
@@ -483,7 +483,7 @@ KafkaConsumer::seek(const TopicPartition& tp, Offset o, std::chrono::millisecond
 
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
-    KAFKA_API_DO_LOG(LOG_INFO, "seeked with topic-partition[%s], offset[%d]", tpStr.c_str(), o);
+    KAFKA_API_DO_LOG(Log::Level::Info, "seeked with topic-partition[%s], offset[%d]", tpStr.c_str(), o);
 }
 
 inline void
@@ -524,7 +524,7 @@ KafkaConsumer::offsetsForTime(const TopicPartitions& tps,
         rk_tp.offset = msSinceEpoch;
     }
 
-    rd_kafka_resp_err_t err = rd_kafka_offsets_for_times(getClientHandle(), rk_tpos.get(), timeout.count());
+    rd_kafka_resp_err_t err = rd_kafka_offsets_for_times(getClientHandle(), rk_tpos.get(), static_cast<int>(timeout.count()));      // NOLINT
     KAFKA_THROW_IF_WITH_RESP_ERROR(err);
 
     auto results = getTopicPartitionOffsets(rk_tpos.get());
@@ -619,13 +619,13 @@ KafkaConsumer::pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output)
     commitStoredOffsetsIfNecessary(CommitType::Async);
 
     // Poll messages with librdkafka's API
-    rd_kafka_message_t *msgPtrArray[_maxPollRecords];
-    std::size_t msgReceived = rd_kafka_consume_batch_queue(_rk_queue.get(), timeoutMs, msgPtrArray, _maxPollRecords);
+    std::vector<rd_kafka_message_t*> msgPtrArray(_maxPollRecords);
+    std::size_t msgReceived = rd_kafka_consume_batch_queue(_rk_queue.get(), timeoutMs, msgPtrArray.data(), _maxPollRecords);
 
     // Wrap messages with ConsumerRecord
     output.clear();
     output.reserve(msgReceived);
-    std::for_each(msgPtrArray, msgPtrArray + msgReceived, [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
+    std::for_each(&msgPtrArray[0], &msgPtrArray[msgReceived], [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
 
     // Store the offsets for all these polled messages (for KafkaAutoCommitConsumer)
     storeOffsetsIfNecessary(output);
@@ -664,11 +664,11 @@ KafkaConsumer::pauseOrResumePartitions(const TopicPartitions& tps, PauseOrResume
         const rd_kafka_topic_partition_t& rk_tp = rk_tpos->elems[i];
         if (rk_tp.err != RD_KAFKA_RESP_ERR_NO_ERROR)
         {
-            KAFKA_API_DO_LOG(LOG_ERR, "%s topic-partition[%s-%d] error[%s]", opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));
+            KAFKA_API_DO_LOG(Log::Level::Err, "%s topic-partition[%s-%d] error[%s]", opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));
         }
         else
         {
-            KAFKA_API_DO_LOG(LOG_INFO, "%sd topic-partition[%s-%d]", opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));
+            KAFKA_API_DO_LOG(Log::Level::Info, "%sd topic-partition[%s-%d]", opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));
             ++cnt;
         }
     }
@@ -714,14 +714,14 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
     switch(err)
     {
         case RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS:
-            KAFKA_API_DO_LOG(LOG_INFO, "invoked re-balance callback for event[ASSIGN_PARTITIONS]. topic-partitions[%s]", tpsStr.c_str());
+            KAFKA_API_DO_LOG(Log::Level::Info, "invoked re-balance callback for event[ASSIGN_PARTITIONS]. topic-partitions[%s]", tpsStr.c_str());
 
             // Assign with a brand new full list
             _assign(tps);
             break;
 
         case RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS:
-            KAFKA_API_DO_LOG(LOG_INFO, "invoked re-balance callback for event[REVOKE_PARTITIONS]. topic-partitions[%s]", tpsStr.c_str());
+            KAFKA_API_DO_LOG(Log::Level::Info, "invoked re-balance callback for event[REVOKE_PARTITIONS]. topic-partitions[%s]", tpsStr.c_str());
 
             _offsetsToStore.clear();
 
@@ -734,7 +734,7 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
             break;
 
         default:
-            KAFKA_API_DO_LOG(LOG_ERR, "invoked re-balance callback for event[unknown: %d]. topic-partitions[%s]",  err, tpsStr.c_str());
+            KAFKA_API_DO_LOG(Log::Level::Err, "invoked re-balance callback for event[unknown: %d]. topic-partitions[%s]",  err, tpsStr.c_str());
 
             _assign(TopicPartitions()); // with null
             return; // would not call user's rebalance event listener
@@ -766,7 +766,7 @@ KafkaConsumer::offsetCommitCallback(rd_kafka_t* rk, rd_kafka_resp_err_t err, rd_
     if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
     {
         auto tposStr = toString(tpos);
-        kafkaClient(rk).KAFKA_API_DO_LOG(LOG_ERR, "invoked offset-commit callback. offsets[%s], result[%s]", tposStr.c_str(), rd_kafka_err2str(err));
+        kafkaClient(rk).KAFKA_API_DO_LOG(Log::Level::Err, "invoked offset-commit callback. offsets[%s], result[%s]", tposStr.c_str(), rd_kafka_err2str(err));
     }
 
     auto* cb = static_cast<Consumer::OffsetCommitCallback*>(opaque);

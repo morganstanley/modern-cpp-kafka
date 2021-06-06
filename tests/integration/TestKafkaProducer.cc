@@ -42,7 +42,7 @@ TEST(KafkaSyncProducer, SendMessagesWithAcks1)
 
     // Prepare a consumer
     Kafka::KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
-    consumer.setLogLevel(LOG_CRIT);
+    consumer.setLogLevel(Kafka::Log::Level::Crit);
     consumer.subscribe({topic});
 
     // Poll these messages
@@ -89,7 +89,7 @@ TEST(KafkaSyncProducer, SendMessagesWithAcksAll)
     // Prepare a consumer
     const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(Kafka::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
     Kafka::KafkaAutoCommitConsumer consumer(consumerProps);
-    consumer.setLogLevel(LOG_CRIT);
+    consumer.setLogLevel(Kafka::Log::Level::Crit);
     consumer.subscribe({topic});
 
     // Poll these messages
@@ -187,7 +187,7 @@ TEST(KafkaSyncProducer, DefaultPartitioner)
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     std::map<Partition, int> partitionCounts;
-    constexpr int MSG_NUM = 20;
+    static constexpr int MSG_NUM = 20;
     for (int i = 0; i < MSG_NUM; ++i)
     {
         std::string key   = "k" + std::to_string(i);
@@ -218,7 +218,7 @@ TEST(KafkaSyncProducer, TryOtherPartitioners)
         KafkaSyncProducer producer(props);
 
         std::map<Partition, int> partitionCounts;
-        constexpr int MSG_NUM = 20;
+        static constexpr int MSG_NUM = 20;
         for (int i = 0; i < MSG_NUM; ++i)
         {
             std::string key;
@@ -509,7 +509,7 @@ TEST(KafkaAsyncProducer, CopyRecordValueWithinSend)
     {
         // Prepare a consumer
         Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
-        consumer.setLogLevel(LOG_CRIT);
+        consumer.setLogLevel(Kafka::Log::Level::Crit);
         consumer.subscribe({topic});
 
         // Check messages

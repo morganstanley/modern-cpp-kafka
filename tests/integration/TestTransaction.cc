@@ -59,7 +59,7 @@ TEST(Transaction, CommitTransaction)
         props.put(ConsumerConfig::ISOLATION_LEVEL,   isolationConf);
 
         Kafka::KafkaManualCommitConsumer consumer(props);
-        consumer.setLogLevel(LOG_CRIT);
+        consumer.setLogLevel(Kafka::Log::Level::Crit);
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
