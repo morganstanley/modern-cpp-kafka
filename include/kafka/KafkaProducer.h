@@ -75,60 +75,28 @@ protected:
 
     std::error_code close(std::chrono::milliseconds timeout);
 
-    // Define datatypes for "opaque" (as a parameter of rd_kafka_produce), in order to implement the callback(async) or to return future(sync)
-    class MsgOpaque
+    // Define datatypes for "opaque" (as a parameter of rd_kafka_produce), in order to handle the delivery callback
+    class DeliveryCbOpaque
     {
     public:
-        explicit MsgOpaque(ProducerRecord::Id id): _recordId(id) {}
-        virtual ~MsgOpaque() = default;
-        virtual void operator()(rd_kafka_t* rk, const rd_kafka_message_t* rkmsg) = 0;
-    protected:
+        DeliveryCbOpaque(ProducerRecord::Id id, Producer::Callback cb): _recordId(id), _drCb(std::move(cb)) {}
+
+        void operator()(rd_kafka_t* /*rk*/, const rd_kafka_message_t* rkmsg)
+        {
+            _drCb(Producer::RecordMetadata{rkmsg, _recordId}, ErrorCode(rkmsg->err));
+        }
+
+    private:
         ProducerRecord::Id _recordId;
-    };
-
-    class MsgCallbackOpaque: public MsgOpaque
-    {
-    public:
-        MsgCallbackOpaque(ProducerRecord::Id id, Producer::Callback cb): MsgOpaque(id), _drCb(std::move(cb)) {}
-
-        void operator()(rd_kafka_t* /*rk*/, const rd_kafka_message_t* rkmsg) override
-        {
-            if (_drCb)
-            {
-                Producer::RecordMetadata metadata(rkmsg, _recordId);
-                _drCb(metadata, ErrorCode(rkmsg->err));
-            }
-        }
-
-    private:
         Producer::Callback _drCb;
-    };
-
-    class MsgPromiseOpaque: public MsgOpaque
-    {
-    public:
-        using ResultType = std::pair<std::error_code, Producer::RecordMetadata>;
-
-        explicit MsgPromiseOpaque(ProducerRecord::Id id): MsgOpaque(id) {}
-
-        void operator()(rd_kafka_t* /*rk*/, const rd_kafka_message_t* rkmsg) override
-        {
-            _promMetadata.set_value(std::make_pair(ErrorCode(rkmsg->err),
-                                                   Producer::RecordMetadata{rkmsg, _recordId}));
-        }
-
-        std::future<ResultType> getFuture() { return _promMetadata.get_future(); }
-
-    private:
-        std::promise<ResultType> _promMetadata;
     };
 
     enum class ActionWhileQueueIsFull { Block, NoBlock };
 
-    rd_kafka_resp_err_t sendMessage(const ProducerRecord&      record,
-                                    std::unique_ptr<MsgOpaque> opaque,
-                                    SendOption                 option,
-                                    ActionWhileQueueIsFull     action);
+    rd_kafka_resp_err_t sendMessage(const ProducerRecord&                   record,
+                                    std::unique_ptr<DeliveryCbOpaque> opaque,
+                                    SendOption                              option,
+                                    ActionWhileQueueIsFull                  action);
 
     static constexpr int CALLBACK_POLLING_INTERVAL_MS = 10;
 
@@ -251,18 +219,18 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
 inline void
 KafkaProducer::deliveryCallback(rd_kafka_t* rk, const rd_kafka_message_t* rkmsg, void* /*opaque*/)
 {
-    if (auto* msgOpaque = static_cast<MsgOpaque*>(rkmsg->_private))
+    if (auto* deliveryCbOpaque = static_cast<DeliveryCbOpaque*>(rkmsg->_private))
     {
-        (*msgOpaque)(rk, rkmsg);
-        delete msgOpaque;
+        (*deliveryCbOpaque)(rk, rkmsg);
+        delete deliveryCbOpaque;
     }
 }
 
 inline rd_kafka_resp_err_t
-KafkaProducer::sendMessage(const ProducerRecord&      record,
-                           std::unique_ptr<MsgOpaque> opaque,
-                           SendOption                 option,
-                           ActionWhileQueueIsFull     action)
+KafkaProducer::sendMessage(const ProducerRecord&             record,
+                           std::unique_ptr<DeliveryCbOpaque> opaque,
+                           SendOption                        option,
+                           ActionWhileQueueIsFull            action)
 {
     const auto* topic     = record.topic().c_str();
     const auto  partition = record.partition();
@@ -443,7 +411,7 @@ public:
     void send(const ProducerRecord& record, const Producer::Callback& cb, SendOption option = SendOption::NoCopyRecordValue)
     {
         rd_kafka_resp_err_t respErr = sendMessage(record,
-                                                  std::make_unique<MsgCallbackOpaque>(record.id(), cb),
+                                                  std::make_unique<DeliveryCbOpaque>(record.id(), cb),
                                                   option,
                                                   _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
         KAFKA_THROW_IF_WITH_RESP_ERROR(respErr);
@@ -470,7 +438,7 @@ public:
     void send(const ProducerRecord& record, const Producer::Callback& cb, std::error_code& ec, SendOption option = SendOption::NoCopyRecordValue)
     {
         rd_kafka_resp_err_t respErr = sendMessage(record,
-                                                  std::make_unique<MsgCallbackOpaque>(record.id(), cb),
+                                                  std::make_unique<DeliveryCbOpaque>(record.id(), cb),
                                                   option,
                                                   _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
         ec = ErrorCode(respErr);
@@ -529,21 +497,29 @@ public:
      */
     Producer::RecordMetadata send(const ProducerRecord& record)
     {
-        auto opaque = std::make_unique<MsgPromiseOpaque>(record.id());
-        auto fut = opaque->getFuture();
+        std::error_code deliveryError;
+        std::promise<Producer::RecordMetadata> metadataPromise;
+        auto metadataFuture = metadataPromise.get_future();
 
-        rd_kafka_resp_err_t err = sendMessage(record, std::move(opaque), SendOption::ToCopyRecordValue, ActionWhileQueueIsFull::Block);
-        KAFKA_THROW_IF_WITH_RESP_ERROR(err);
+        auto cb = [&deliveryError, &metadataPromise] (const Producer::RecordMetadata& metadata, std::error_code ec) {
+            deliveryError = ec;
+            metadataPromise.set_value(metadata);
+        };
+        rd_kafka_resp_err_t sendError = sendMessage(record,
+                                                    std::make_unique<DeliveryCbOpaque>(record.id(), cb),
+                                                    SendOption::NoCopyRecordValue,
+                                                    ActionWhileQueueIsFull::NoBlock);
+        KAFKA_THROW_IF_WITH_RESP_ERROR(sendError);
 
-        while (fut.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready)
+        while (metadataFuture.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready)
         {
             rd_kafka_poll(getClientHandle(), CALLBACK_POLLING_INTERVAL_MS);
         }
 
-        auto result = fut.get();
-        KAFKA_THROW_IF_WITH_RESP_ERROR(static_cast<rd_kafka_resp_err_t>(result.first.value()));
+        auto metadata = metadataFuture.get();
+        KAFKA_THROW_IF_WITH_RESP_ERROR(static_cast<rd_kafka_resp_err_t>(deliveryError.value()));
 
-        return result.second;
+        return metadata;
     }
 
     /**
