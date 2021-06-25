@@ -28,28 +28,13 @@ namespace Producer
     public:
         enum class PersistedStatus { Not, Possibly, Done };
 
+        RecordMetadata() = default;
+
+        RecordMetadata(const RecordMetadata& another) { *this = another; }
+
         // This is only called by the KafkaProducer::deliveryCallback (with a valid rkmsg pointer)
         RecordMetadata(const rd_kafka_message_t* rkmsg, ProducerRecord::Id recordId)
-            : _cachedInfo(),
-              _rkmsg(rkmsg),
-              _recordId(recordId)
-        {
-        }
-
-        RecordMetadata(const RecordMetadata& another)
-            : _cachedInfo(std::make_unique<CachedInfo>(another.topic(),
-                                                       another.partition(),
-                                                       another.offset() ? *another.offset() : RD_KAFKA_OFFSET_INVALID,
-                                                       another.keySize(),
-                                                       another.valueSize(),
-                                                       another.timestamp(),
-                                                       another.persistedStatus())),
-              _recordId(another._recordId)
-        {
-        }
-
-#if defined(WIN32)
-        RecordMetadata() = default;
+            : _cachedInfo(), _rkmsg(rkmsg), _recordId(recordId) {}
 
         RecordMetadata& operator=(const RecordMetadata& another)
         {
@@ -68,7 +53,6 @@ namespace Producer
 
             return *this;
         }
-#endif
 
         /**
          * The topic the record was appended to.

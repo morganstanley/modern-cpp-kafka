@@ -274,7 +274,6 @@ TEST(KafkaAutoCommitConsumer, SeekAndPoll)
 
     // The auto-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
                        .put(ConsumerConfig::MAX_POLL_RECORDS,   "1")         // Only poll 1 message each time
                        .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest"); // Seek to the earliest offset at the beginning
 
@@ -439,7 +438,6 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback)
 
     // The manual-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
                        .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
                        .put(ConsumerConfig::MAX_POLL_RECORDS,   "1");       // Only poll 1 message each time
 
@@ -564,7 +562,6 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback_ManuallyPollEvents)
 
     // The manual-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
                        .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
                        .put(ConsumerConfig::MAX_POLL_RECORDS,   "1");       // Only poll 1 message each time
 
@@ -642,7 +639,6 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
     // Start consumer a few times, but only commit the offset for the first message each time
     {
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                        .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
                         .put(ConsumerConfig::MAX_POLL_RECORDS,   "1");    // Only poll 1 message each time
 
         KafkaManualCommitConsumer consumer(props);
@@ -744,7 +740,7 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
                 {
                     std::cout << "[" << Utility::getCurrentTime() << "] will commit offset for record[" << record.toString() << "]" << std::endl;
                     // Retry for "Broker: Request timed out" error (if any)
-                    RETRY_FOR_ERROR(consumer.commitSync(record), RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, 1);
+                    RETRY_FOR_ERROR(consumer.commitSync(record), RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, 2);
                 }
             }
         }
@@ -793,7 +789,7 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
                     tpos[{topic, partition}] = record.offset() + 1;
 
                     // Retry for "Broker: Request timed out" error (if any)
-                    RETRY_FOR_ERROR(consumer.commitSync(tpos), RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, 1);
+                    RETRY_FOR_ERROR(consumer.commitSync(tpos), RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, 2);
                 }
             }
         }
@@ -1336,7 +1332,6 @@ TEST(KafkaAutoCommitConsumer, PauseAndResume)
 
     // An auto-commit Consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                        .put(ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
                         .put(ConsumerConfig::AUTO_OFFSET_RESET,    "earliest")
                         .put(ConsumerConfig::MAX_POLL_RECORDS,     "1");
     KafkaAutoCommitConsumer consumer(props);
