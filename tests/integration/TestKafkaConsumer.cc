@@ -1714,3 +1714,56 @@ TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
     EXPECT_TRUE(consumer.assignment().empty());
 }
 
+TEST(KafkaAutoCommitConsumer, CooperativeRebalance)
+{
+    const std::string topic_prefix = "test_cooperative.";
+    const std::string topic_pattern = "^test_cooperative\\.*";
+    const int topic_num = 4;
+    for (int i = 0; i < topic_num; i++) {
+        Topic topic =  topic_prefix + Utility::getRandomString();
+        KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
+    }
+
+    Consumer::RebalanceCallback rebalance_callback = [&](Consumer::RebalanceEventType et,
+            const TopicPartitions &tps) {
+        std::cout << "[" << Utility::getCurrentTime() << "] " << "rebalance callback" << std::endl;
+        if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+            // assignment finished
+            std::cout << "[" << Utility::getCurrentTime() << "] assigned partitions: " << toString(tps) << std::endl;
+        } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
+            // unassignment finished
+            std::cout << "[" << Utility::getCurrentTime() << "] unassigned partitions: " << toString(tps) << std::endl;
+        }
+    };
+
+
+    KafkaAutoCommitConsumer consumer_1(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                       .put("partition.assignment.strategy", "cooperative-sticky"));
+
+    // Subscribe topics
+    consumer_1.subscribe({topic_pattern}, rebalance_callback, std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer_1.name() << " subscribed" << std::endl;
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer_1.name() << " subscription: " << toString(consumer_1.subscription()) << std::endl;
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer_1.name() << " assignment: " << toString(consumer_1.assignment()) << std::endl;
+
+    constexpr int ADDITIONAL_CONSUMER_NUMBER = 2;
+    for (int i = 0; i < ADDITIONAL_CONSUMER_NUMBER; ++i)
+    {
+        KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                         .put("partition.assignment.strategy", "cooperative-sticky"));
+        // Subscribe topics
+        consumer.subscribe({topic_pattern}, rebalance_callback, std::chrono::milliseconds(10));
+        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
+        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription: " << toString(consumer.subscription()) << std::endl;
+        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assignment: " << toString(consumer.assignment()) << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        consumer.unsubscribe(std::chrono::milliseconds(5));
+        consumer.close();
+    }
+    consumer_1.unsubscribe(std::chrono::milliseconds(5));
+    consumer_1.close();
+}
+
