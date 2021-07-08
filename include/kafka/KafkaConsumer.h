@@ -258,6 +258,7 @@ private:
 
     void seekToBeginningOrEnd(const TopicPartitions& tps, bool toBeginning, std::chrono::milliseconds timeout);
     std::map<TopicPartition, Offset> getOffsets(const TopicPartitions& tps, bool atBeginning) const;
+    void callRebalanceCallbackIfNecessary(rd_kafka_resp_err_t err, const TopicPartitions &tps);
 
     // Internal interface for "assign"
     void _assign(const TopicPartitions& tps);
@@ -611,6 +612,18 @@ KafkaConsumer::storeOffsetsIfNecessary(const std::vector<ConsumerRecord>& record
     }
 }
 
+// call rebalance callback
+inline void
+KafkaConsumer::callRebalanceCallbackIfNecessary(rd_kafka_resp_err_t err, const TopicPartitions &tps)
+{
+    if (_rebalanceCb)
+    {
+        Consumer::RebalanceEventType et =
+            (err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? Consumer::RebalanceEventType::PartitionsAssigned : Consumer::RebalanceEventType::PartitionsRevoked);
+        _rebalanceCb(et, tps);
+    }
+}
+
 // Fetch messages (internally used)
 inline void
 KafkaConsumer::pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output)
@@ -718,15 +731,18 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
 
             // Assign with a brand new full list
             _assign(tps);
+
+            callRebalanceCallbackIfNecessary(err, tps);
             break;
 
         case RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS:
             KAFKA_API_DO_LOG(Log::Level::Info, "invoked re-balance callback for event[REVOKE_PARTITIONS]. topic-partitions[%s]", tpsStr.c_str());
 
-            _offsetsToStore.clear();
-
             // For "manual commit" cases, user must take all the responsibility to commit while necessary.
             //   -- thus, they must register a valid rebalance event listener and do the "commit things" properly.
+            callRebalanceCallbackIfNecessary(err, tps);
+
+            _offsetsToStore.clear();
 
             // Revoke all previously assigned partitions.
             // Normally, another "ASSIGN_PARTITIONS" event would be received later.
@@ -740,12 +756,6 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
             return; // would not call user's rebalance event listener
     }
 
-    if (_rebalanceCb)
-    {
-        Consumer::RebalanceEventType et =
-            (err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? Consumer::RebalanceEventType::PartitionsAssigned : Consumer::RebalanceEventType::PartitionsRevoked);
-        _rebalanceCb(et, tps);
-    }
 }
 
 // Rebalance Callback (for librdkafka)
