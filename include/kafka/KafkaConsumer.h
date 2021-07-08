@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cstring>
 #include <iterator>
 #include <memory>
 
@@ -261,7 +262,7 @@ private:
     void callRebalanceCallbackIfNecessary(rd_kafka_resp_err_t err, const TopicPartitions &tps);
 
     // Internal interface for "assign"
-    void _assign(const TopicPartitions& tps);
+    void _assign(rd_kafka_resp_err_t err, const TopicPartitions& tps);
 
     std::string  _groupId;
 
@@ -409,15 +410,38 @@ KafkaConsumer::subscription() const
 
 // Assign for Topic/Partition level, -- internal interface
 inline void
-KafkaConsumer::_assign(const TopicPartitions& tps)
+KafkaConsumer::_assign(rd_kafka_resp_err_t err, const TopicPartitions& tps)
 {
-    std::string tpsStr = toString(tps);
-    KAFKA_API_DO_LOG(Log::Level::Info, "will assign with TopicPartitions[%s]", tpsStr.c_str());
-
     auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tps));
+    std::string tpsStr = toString(tps);
 
-    rd_kafka_resp_err_t err = rd_kafka_assign(getClientHandle(), (rk_tps->cnt > 0) ? rk_tps.get() : nullptr);
-    KAFKA_THROW_IF_WITH_RESP_ERROR(err);
+    auto *rk = getClientHandle();
+    rd_kafka_error_t *error = nullptr;
+    rd_kafka_resp_err_t ret_err = RD_KAFKA_RESP_ERR_NO_ERROR;
+    auto cooperative_enabled = strcmp(rd_kafka_rebalance_protocol(rk), "COOPERATIVE") == 0;
+
+    if (cooperative_enabled) {
+        KAFKA_API_DO_LOG(Log::Level::Info, "assigned with cooperative enabled");
+    }
+
+    if (cooperative_enabled && err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS) {
+        error = rd_kafka_incremental_assign(rk, rk_tps.get());
+    } else if (cooperative_enabled && err == RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS) {
+        error = rd_kafka_incremental_unassign(rk, rk_tps.get());
+    } else if (err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS) {
+        // Assign with a brand new full list
+        ret_err = rd_kafka_assign(rk, rk_tps.get());
+    } else {
+        // non cooperative and revoke partitions or unknown action
+        ret_err = rd_kafka_assign(rk, nullptr);
+    }
+
+    if (error) {
+        ret_err = rd_kafka_error_code(error);
+        rd_kafka_error_destroy(error);
+    }
+
+    KAFKA_THROW_IF_WITH_RESP_ERROR(ret_err);
 
     _assignment = tps;
 
@@ -435,7 +459,7 @@ KafkaConsumer::assign(const TopicPartitions& tps)
 
     _userAssignment = tps;
 
-    _assign(tps);
+    _assign(RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS, tps);
 }
 
 // Assignment
@@ -730,7 +754,7 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
             KAFKA_API_DO_LOG(Log::Level::Info, "invoked re-balance callback for event[ASSIGN_PARTITIONS]. topic-partitions[%s]", tpsStr.c_str());
 
             // Assign with a brand new full list
-            _assign(tps);
+            _assign(err, tps);
 
             callRebalanceCallbackIfNecessary(err, tps);
             break;
@@ -746,13 +770,11 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
 
             // Revoke all previously assigned partitions.
             // Normally, another "ASSIGN_PARTITIONS" event would be received later.
-            _assign(TopicPartitions()); // with null
+            _assign(err, tps);
             break;
 
         default:
             KAFKA_API_DO_LOG(Log::Level::Err, "invoked re-balance callback for event[unknown: %d]. topic-partitions[%s]",  err, tpsStr.c_str());
-
-            _assign(TopicPartitions()); // with null
             return; // would not call user's rebalance event listener
     }
 
