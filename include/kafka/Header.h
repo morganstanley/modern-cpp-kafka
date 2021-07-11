@@ -40,6 +40,15 @@ struct Header
 using Headers = std::vector<Header>;
 
 /**
+ * Null Headers.
+ */
+#if __cplusplus >= 201703L
+const inline Headers NullHeaders = Headers{};
+#else
+const static Headers NullHeaders = Headers{};
+#endif
+
+/**
  * Obtains explanatory string for Headers.
  */
 inline std::string toString(const Headers& headers)

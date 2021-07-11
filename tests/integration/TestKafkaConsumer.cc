@@ -854,6 +854,68 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
     }
 }
 
+TEST(KafkaManualCommitConsumer, CommitOffsetBeforeRevolkingPartitions)
+{
+    const Topic     topic     = Utility::getRandomString();
+    const Partition partition = 0;
+
+    std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
+    // Prepare some messages to send
+    const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
+        {NullHeaders, "key1", "value1"},
+        {NullHeaders, "key2", "value2"},
+        {NullHeaders, "key3", "value3"},
+        {NullHeaders, "key4", "value4"},
+    };
+
+    // Send the messages
+    KafkaTestUtility::ProduceMessages(topic, partition, messages);
+
+    // Prepare poperties for consumers
+    auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                    .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                    .put(ConsumerConfig::GROUP_ID, Utility::getRandomString());
+
+    {
+        // First consumer starts
+        KafkaManualCommitConsumer consumer(props);
+
+
+        consumer.subscribe({topic},
+                           [&consumer](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
+                               if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+                                   std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assigned partitions: " << toString(tps) << std::endl;
+                               } else {
+                                   consumer.commitSync();
+                                   std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " sync-committed offsets"  << std::endl;
+                                   std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " will revolke partitions: " << toString(tps) << std::endl;
+                               }
+                           });
+
+        // Get all messages
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+        //for (const auto& record: records) tpos[TopicPartition{record.topic(), record.partition()}] = record.offset() + 1;
+        EXPECT_EQ(messages.size(), records.size());
+    }
+
+    // Send one more message
+    KafkaTestUtility::ProduceMessages(topic, partition, {{NullHeaders, "key4", "value4"}});
+
+    {
+        // Second consumer starts
+        KafkaManualCommitConsumer consumer(props);
+
+        consumer.subscribe({topic});
+
+        // Get all messages (but none)
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+        EXPECT_EQ(1, records.size());
+    }
+}
+
 TEST(KafkaAutoCommitConsumer, OffsetCommitAndPosition)
 {
     const Topic     topic     = Utility::getRandomString();
