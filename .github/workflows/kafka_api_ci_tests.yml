@@ -1,6 +1,10 @@
 name: '[Kafka API] CI Tests'
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - master
 
 env:
   KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.6.0/kafka_2.13-2.6.0.tgz

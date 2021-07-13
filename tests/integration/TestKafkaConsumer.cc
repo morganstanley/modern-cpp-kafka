@@ -1778,54 +1778,60 @@ TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
 
 TEST(KafkaAutoCommitConsumer, CooperativeRebalance)
 {
-    const std::string topic_prefix = "test_cooperative.";
-    const std::string topic_pattern = "^test_cooperative\\.*";
-    const int topic_num = 4;
-    for (int i = 0; i < topic_num; i++) {
-        Topic topic =  topic_prefix + Utility::getRandomString();
-        KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
+    constexpr int NUM_TOPICS     = 3;
+    constexpr int NUM_PARTITIONS = 5;
+
+    const std::string topicPrefix  = Utility::getRandomString();
+    for (int i = 0; i < NUM_TOPICS; i++)
+    {
+        Topic topic = topicPrefix + std::to_string(i);
+        KafkaTestUtility::CreateKafkaTopic(topic, NUM_PARTITIONS, 1);
     }
 
-    Consumer::RebalanceCallback rebalance_callback = [&](Consumer::RebalanceEventType et,
-            const TopicPartitions &tps) {
-        std::cout << "[" << Utility::getCurrentTime() << "] " << "rebalance callback" << std::endl;
-        if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
-            // assignment finished
-            std::cout << "[" << Utility::getCurrentTime() << "] assigned partitions: " << toString(tps) << std::endl;
-        } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
-            // unassignment finished
-            std::cout << "[" << Utility::getCurrentTime() << "] unassigned partitions: " << toString(tps) << std::endl;
+    const std::string groupId = Utility::getRandomString();
+    const std::string topicPattern = "^" + topicPrefix + "\\.*";
+    auto startConsumer = [groupId, topicPattern](const std::string& clientId, int runningSec) {
+        TopicPartitions partitionsJustRevoked;
+        auto rebalanceCb = [clientId, &partitionsJustRevoked](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
+            if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+                std::cout << "[" << Utility::getCurrentTime() << "] " << clientId << " assigned partitions: " << toString(tps) << std::endl;
+                EXPECT_TRUE(std::none_of(tps.cbegin(), tps.cend(), [&partitionsJustRevoked](const auto& tp) { return partitionsJustRevoked.count(tp); }));
+            } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
+                std::cout << "[" << Utility::getCurrentTime() << "] " << clientId << " unassigned partitions: " << toString(tps) << std::endl;
+                partitionsJustRevoked = tps;
+            }
+        };
+
+        Properties props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                             .put(ConsumerConfig::CLIENT_ID, clientId)
+                             .put(ConsumerConfig::GROUP_ID,  groupId)
+                             .put(ConsumerConfig::PARTITION_ASSIGNMENT_STRATEGY, "cooperative-sticky");
+
+        KafkaTestUtility::PrintDividingLine(clientId + " is starting");
+
+        KafkaAutoCommitConsumer consumer(props);
+
+        consumer.subscribe({topicPattern}, rebalanceCb);
+
+        for (int i = 0; i < runningSec; ++i) {
+            consumer.poll(std::chrono::seconds(1));
         }
+
+        KafkaTestUtility::PrintDividingLine(clientId + " is quitting");
     };
 
+    KafkaTestUtility::JoiningThread consumer1Thread(startConsumer, "consumer1", 20);
 
-    KafkaAutoCommitConsumer consumer_1(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                       .put("partition.assignment.strategy", "cooperative-sticky"));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    // Subscribe topics
-    consumer_1.subscribe({topic_pattern}, rebalance_callback, std::chrono::milliseconds(10));
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    KafkaTestUtility::JoiningThread consumer2Thread(startConsumer, "consumer2", 10);
 
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer_1.name() << " subscribed" << std::endl;
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer_1.name() << " subscription: " << toString(consumer_1.subscription()) << std::endl;
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer_1.name() << " assignment: " << toString(consumer_1.assignment()) << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    constexpr int ADDITIONAL_CONSUMER_NUMBER = 2;
-    for (int i = 0; i < ADDITIONAL_CONSUMER_NUMBER; ++i)
-    {
-        KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                         .put("partition.assignment.strategy", "cooperative-sticky"));
-        // Subscribe topics
-        consumer.subscribe({topic_pattern}, rebalance_callback, std::chrono::milliseconds(10));
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription: " << toString(consumer.subscription()) << std::endl;
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assignment: " << toString(consumer.assignment()) << std::endl;
+    KafkaTestUtility::JoiningThread consumer3Thread(startConsumer, "consumer3", 10);
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        consumer.unsubscribe(std::chrono::milliseconds(5));
-        consumer.close();
-    }
-    consumer_1.unsubscribe(std::chrono::milliseconds(5));
-    consumer_1.close();
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    KafkaTestUtility::JoiningThread consumer4Thread(startConsumer, "consumer4", 10);
 }
 
