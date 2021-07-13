@@ -82,6 +82,13 @@ public:
      */
     static const constexpr char* ISOLATION_LEVEL         = "isolation.level";
 
+    /*
+     * The name of one or more partition assignment strategies.
+     * The elected group leader will use a strategy supported by all members of the group to assign partitions to group members.
+     * Available options: range, roundrobin, cooperative-sticky
+     * Default value: range,roundrobin
+     */
+    static const constexpr char* PARTITION_ASSIGNMENT_STRATEGY = "partition.assignment.strategy";
     /**
      * Protocol used to communicate with brokers.
      * Default value: plaintext

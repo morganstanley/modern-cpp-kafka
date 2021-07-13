@@ -74,6 +74,8 @@ public:
     Error(const Error&)            = default;
     virtual ~Error()               = default;
 
+    explicit operator bool() const { return static_cast<bool>(errorCode()); }
+
     /**
      * Obtains the underlying error code.
      */
@@ -105,7 +107,9 @@ class SimpleError: public Error
 {
 public:
     explicit SimpleError(rd_kafka_resp_err_t respErr, std::string message): _respErr(respErr), _message(std::move(message)) {}
-    SimpleError(const SimpleError&)            = default;
+    explicit SimpleError(rd_kafka_resp_err_t respErr): SimpleError(respErr, rd_kafka_err2str(respErr)) {}
+
+    SimpleError(const SimpleError&) = default;
 
     std::error_code errorCode()   const override { return ErrorCode(_respErr); }
     std::string     message()     const override { return _message; }
