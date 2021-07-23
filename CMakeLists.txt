@@ -197,6 +197,18 @@ if (BUILD_OPTION_GEN_COVERAGE)
     message(STATUS "Enable code coverage data generation")
 endif ()
 
+#---------------------------
+# Check sasl lib directory
+#---------------------------
+if(DEFINED ENV{SASL_LIBRARYDIR})
+    set(SASL_LIBRARYDIR $ENV{SASL_LIBRARYDIR})
+    link_directories(${SASL_LIBRARYDIR})
+    message(STATUS "sasl2 library directory: ${SASL_LIBRARYDIR}")
+endif()
+if(DEFINED ENV{SASL_LIBRARY})
+    set(SASL_LIBRARY $ENV{SASL_LIBRARY})
+    message(STATUS "sasl2 library: ${SASL_LIBRARY}")
+endif()
 
 #---------------------------
 # Build Sub-directories

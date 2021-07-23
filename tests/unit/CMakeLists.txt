@@ -5,7 +5,7 @@ file(GLOB TEST_SRCS *.cc)
 
 add_executable("${PROJECT_NAME}" ${TEST_SRCS})
 
-target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api rdkafka gtest gtest_main pthread)
+target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api rdkafka gtest gtest_main pthread ${SASL_LIBRARY})
 
 add_test(NAME ${PROJECT_NAME} COMMAND ./${PROJECT_NAME})
 set_tests_properties(${PROJECT_NAME} PROPERTIES LABELS "UT")
