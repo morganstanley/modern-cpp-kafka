@@ -198,6 +198,7 @@ private:
     static const constexpr char* DEBUG             = "debug";
     static const constexpr char* SECURITY_PROTOCOL          = "security.protocol";
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
+    static const constexpr char* SASL_MECHANISM = "sasl.mechanism";
 
 #if __cplusplus >= 201703L
     static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
@@ -376,15 +377,17 @@ KafkaClient::validateAndReformProperties(const Properties& origProperties)
         properties.put(CLIENT_ID, Utility::getRandomString());
     }
 
-    // "sasl.kerberos.service.name" is mandatory for SASL connection
+    // "sasl.kerberos.service.name" or "sasl.mechanism" set to SCRAM are mandatory for SASL connection
     if (auto securityProtocol = properties.getProperty(SECURITY_PROTOCOL))
     {
         if (securityProtocol->find("sasl") != std::string::npos)
         {
-            if (!properties.getProperty(SASL_KERBEROS_SERVICE_NAME))
+            auto saslMechanism = properties.getProperty(SASL_MECHANISM);
+            if (!properties.getProperty(SASL_KERBEROS_SERVICE_NAME) &&
+                saslMechanism->find("SCRAM") == std::string::npos)
             {
                 KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                     "The \"sasl.kerberos.service.name\" property is mandatory for SASL connection!");
+                                     "Either the \"sasl.kerberos.service.name\" property or the \"sasl.mechanism\" set to SCRAM must be provided for SASL connection!");
             }
         }
     }
@@ -542,4 +545,3 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
 
 
 } // end of KAFKA_API
-
