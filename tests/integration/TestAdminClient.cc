@@ -103,3 +103,32 @@ TEST(AdminClient, DuplicatedCreateDeleteTopics)
     }
 }
 
+TEST(AdminClient, deleteRecordsFromTopicPartitions)
+{
+    const Topic     topic     = Utility::getRandomString();
+    const Partition partition = 0;
+
+    std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
+    const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
+            {Headers{}, "key1", "value1"},
+            {Headers{}, "key2", "value2"},
+            {Headers{}, "key3", "value3"},
+    };
+
+    // Send the messages
+    KafkaTestUtility::ProduceMessages(topic, partition, messages);
+
+    AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
+
+    TopicPartitionOffsets tpos;
+    tpos[{topic, partition}] = messages.size();
+
+    auto deleteResult = adminClient.deleteRecords(tpos);
+    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " records deleted, result: " << deleteResult.message() << std::endl;
+    EXPECT_TRUE(!deleteResult.errorCode());
+}
+
