@@ -39,6 +39,9 @@ using rd_kafka_NewTopic_unique_ptr = std::unique_ptr<rd_kafka_NewTopic_t, RkNewT
 struct RkDeleteTopicDeleter { void operator()(rd_kafka_DeleteTopic_t* p) { rd_kafka_DeleteTopic_destroy(p); } };
 using rd_kafka_DeleteTopic_unique_ptr = std::unique_ptr<rd_kafka_DeleteTopic_t, RkDeleteTopicDeleter>;
 
+struct RkDeleteRecordsDeleter { void operator()(rd_kafka_DeleteRecords_t* p) { rd_kafka_DeleteRecords_destroy(p); } };
+using rd_kafka_DeleteRecords_unique_ptr = std::unique_ptr<rd_kafka_DeleteRecords_t, RkDeleteRecordsDeleter>;
+
 struct RkConsumerGroupMetadataDeleter { void operator()(rd_kafka_consumer_group_metadata_t* p) { rd_kafka_consumer_group_metadata_destroy(p) ; } };
 using rd_kafka_consumer_group_metadata_unique_ptr = std::unique_ptr<rd_kafka_consumer_group_metadata_t, RkConsumerGroupMetadataDeleter>;
 

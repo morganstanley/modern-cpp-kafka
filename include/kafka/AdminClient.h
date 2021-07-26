@@ -31,6 +31,11 @@ using CreateTopicsResult = SimpleError;
 using DeleteTopicsResult = SimpleError;
 
 /**
+ * The result of AdminClient::deleteRecords().
+ */
+using DeleteRecordsResult = SimpleError;
+
+/**
  * The result of AdminClient::listTopics().
  */
 struct ListTopicsResult: public SimpleError
@@ -74,8 +79,18 @@ public:
      */
     Admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
+    /**
+     * Delete records before given offset for a partition
+     * @param topicPartitionOffsets a batch of offsets for partitions
+     * @param timeout
+     * @return
+     */
+    Admin::DeleteRecordsResult deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
+                                             std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
+
 private:
     static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount);
+    static std::list<SimpleError> getPerTopicPartitionResults(const rd_kafka_topic_partition_list_t* partitionResults);
     static SimpleError combineErrors(const std::list<SimpleError>& errors);
 
 #if __cplusplus >= 201703L
@@ -100,6 +115,22 @@ AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, st
         {
             std::string detailedMsg = "topic[" + std::string(rd_kafka_topic_result_name(topicResult)) + "] with error[" + rd_kafka_topic_result_error_string(topicResult) + "]";
             errors.emplace_back(topicError, detailedMsg);
+        }
+    }
+    return errors;
+}
+
+inline std::list<SimpleError>
+AdminClient::getPerTopicPartitionResults(const rd_kafka_topic_partition_list_t* partitionResults)
+{
+    std::list<SimpleError> errors;
+
+    for (int i = 0; i < (partitionResults ? partitionResults->cnt : 0); ++i)
+    {
+        if (rd_kafka_resp_err_t partitionError = partitionResults->elems[i].err)
+        {
+            std::string detailedMsg = "topic-partition[" + std::string(partitionResults->elems[i].topic) + "-" + std::to_string(partitionResults->elems[i].partition) + "] with error[" + rd_kafka_err2str(partitionError) + "]";
+            errors.emplace_back(partitionError, detailedMsg);
         }
     }
     return errors;
@@ -172,7 +203,7 @@ AdminClient::createTopics(const Topics& topics, int numPartitions, int replicati
 
         if (rk_ev)
         {
-            KAFKA_API_DO_LOG(Log::Level::Info, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
+            KAFKA_API_DO_LOG(Log::Level::Err, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
             rk_ev.reset();
         }
     } while (std::chrono::steady_clock::now() < end);
@@ -245,7 +276,7 @@ AdminClient::deleteTopics(const Topics& topics, std::chrono::milliseconds timeou
 
         if (rk_ev)
         {
-            KAFKA_API_DO_LOG(Log::Level::Info, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
+            KAFKA_API_DO_LOG(Log::Level::Err, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
             rk_ev.reset();
         }
     } while (std::chrono::steady_clock::now() < end);
@@ -290,6 +321,53 @@ AdminClient::listTopics(std::chrono::milliseconds timeout)
         names.insert(rk_metadata->topics[i].topic);
     }
     return Admin::ListTopicsResult(names);
+}
+
+inline Admin::DeleteRecordsResult
+AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
+                           std::chrono::milliseconds timeout) {
+    auto rk_queue = rd_kafka_queue_unique_ptr(rd_kafka_queue_new(getClientHandle()));
+
+    rd_kafka_DeleteRecords_unique_ptr rkDeleteRecords(rd_kafka_DeleteRecords_new(createRkTopicPartitionList(topicPartitionOffsets)));
+
+    rd_kafka_DeleteRecords_t* rk_del_records = rkDeleteRecords.get();
+
+    rd_kafka_DeleteRecords(getClientHandle(), &rk_del_records, 1, nullptr, rk_queue.get());
+
+    auto rk_ev = rd_kafka_event_unique_ptr();
+
+    const auto end = std::chrono::steady_clock::now() + timeout;
+    do
+    {
+        rk_ev.reset(rd_kafka_queue_poll(rk_queue.get(), EVENT_POLLING_INTERVAL_MS));
+
+        if (rd_kafka_event_type(rk_ev.get()) == RD_KAFKA_EVENT_DELETERECORDS_RESULT) break;
+
+        if (rk_ev)
+        {
+            KAFKA_API_DO_LOG(Log::Level::Err, "rd_kafka_queue_poll got event[%s], with error[%s]", rd_kafka_event_name(rk_ev.get()), rd_kafka_event_error_string(rk_ev.get()));
+            rk_ev.reset();
+        }
+    } while (std::chrono::steady_clock::now() < end);
+
+    if (!rk_ev)
+    {
+        return Admin::DeleteRecordsResult(RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit");
+    }
+
+    std::list<SimpleError> errors;
+
+    if (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))
+    {
+        errors.emplace_back(respErr, rd_kafka_event_error_string(rk_ev.get()));
+    }
+
+    const rd_kafka_DeleteRecords_result_t* res = rd_kafka_event_DeleteRecords_result(rk_ev.get());
+    const rd_kafka_topic_partition_list_t* res_offsets = rd_kafka_DeleteRecords_result_offsets(res);
+
+    errors.splice(errors.end(), getPerTopicPartitionResults(res_offsets));
+
+    return combineErrors(errors);
 }
 
 } // end of KAFKA_API
