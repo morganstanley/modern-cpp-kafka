@@ -1500,7 +1500,7 @@ TEST(KafkaManualCommitConsumer, SeekAfterPause)
     }
 }
 
-TEST(KafkaManualCommitConsumer, DISABLED_SeekBeforePause)
+TEST(KafkaManualCommitConsumer, SeekBeforePause)
 {
     const Topic topic = Utility::getRandomString();
 
