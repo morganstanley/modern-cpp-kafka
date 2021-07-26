@@ -1402,7 +1402,7 @@ TEST(KafkaAutoCommitConsumer, PauseAndResume)
     // Subscribe topics
     consumer.subscribe({topic1, topic2});
 
-    // Poll 1 messaged from topic1
+    // Poll 1 message from topic1
     auto records = consumer.poll(KafkaTestUtility::MAX_POLL_MESSAGES_TIMEOUT);
     ASSERT_EQ(1, records.size());
     EXPECT_EQ(std::get<2>(messages[0]), records.front().value().toString());
@@ -1447,6 +1447,110 @@ TEST(KafkaAutoCommitConsumer, PauseAndResume)
     EXPECT_EQ(std::get<2>(messages[2]), records.front().value().toString());
 
     consumer.close();
+}
+
+TEST(KafkaManualCommitConsumer, SeekAfterPause)
+{
+    const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
+    // Produce messages towards topic
+    const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
+        {Headers{}, "", "msg1"},
+        {Headers{}, "", "msg2"},
+        {Headers{}, "", "msg3"}
+    };
+    KafkaTestUtility::ProduceMessages(topic, 0, messages);
+
+    // An auto-commit Consumer
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                        .put(ConsumerConfig::MAX_POLL_RECORDS,  "1");
+    KafkaManualCommitConsumer consumer(props);
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+
+    // Subscribe topics
+    consumer.subscribe({topic});
+
+    // Poll 1 message from topic
+    auto records = consumer.poll(KafkaTestUtility::MAX_POLL_MESSAGES_TIMEOUT);
+    ASSERT_EQ(1, records.size());
+    EXPECT_EQ(std::get<2>(messages[0]), records.front().value().toString());
+
+    // First, pause the partition
+    consumer.pause();
+
+    // Then, seek back (to the very first offset)
+    consumer.seek({topic, 0}, records[0].offset());
+
+    // Could not poll any message (with partition paused)
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    EXPECT_EQ(0, records.size());
+
+    // Resume the partition (and continue)
+    consumer.resume();
+
+    // Then would be able to poll from the very beginning
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    ASSERT_EQ(messages.size(), records.size());
+    for (std::size_t i = 0; i < messages.size(); ++i)
+    {
+        EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
+    }
+}
+
+TEST(KafkaManualCommitConsumer, DISABLED_SeekBeforePause)
+{
+    const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
+
+    // Produce messages towards topic
+    const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
+        {Headers{}, "", "msg1"},
+        {Headers{}, "", "msg2"},
+        {Headers{}, "", "msg3"}
+    };
+    KafkaTestUtility::ProduceMessages(topic, 0, messages);
+
+    // An auto-commit Consumer
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                        .put(ConsumerConfig::MAX_POLL_RECORDS,  "1")
+                        .put("log_level", "7")
+                        .put("debug",     "all");
+    KafkaManualCommitConsumer consumer(props);
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+
+    // Subscribe topics
+    consumer.subscribe({topic});
+
+    // Poll 1 message from topic
+    auto records = consumer.poll(KafkaTestUtility::MAX_POLL_MESSAGES_TIMEOUT);
+    ASSERT_EQ(1, records.size());
+    EXPECT_EQ(std::get<2>(messages[0]), records.front().value().toString());
+
+    // First, seek back (to the very first offset)
+    consumer.seek({topic, 0}, records[0].offset());
+
+    // Then, pause the partition
+    consumer.pause();
+
+    // Could not poll any message (with partition paused)
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    EXPECT_EQ(0, records.size());
+
+    // Resume the partition (and continue)
+    consumer.resume();
+
+    // Then would be able to poll from the very beginning
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    ASSERT_EQ(messages.size(), records.size());
+    for (std::size_t i = 0; i < messages.size(); ++i)
+    {
+        EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
+    }
 }
 
 TEST(KafkaAutoCommitConsumer, PauseStillWorksAfterRebalance)
