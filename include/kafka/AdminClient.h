@@ -9,6 +9,7 @@
 
 #include "librdkafka/rdkafka.h"
 
+#include <array>
 #include <cassert>
 #include <list>
 #include <memory>
@@ -66,13 +67,15 @@ public:
     /**
      * Create a batch of new topics.
      */
-    Admin::CreateTopicsResult createTopics(const Topics& topics, int numPartitions, int replicationFactor,
-                                           const Properties& topicConfig = Properties(),
+    Admin::CreateTopicsResult createTopics(const Topics&             topics,
+                                           int                       numPartitions,
+                                           int                       replicationFactor,
+                                           const Properties&         topicConfig = Properties(),
                                            std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
     /**
      * Delete a batch of topics.
      */
-    Admin::DeleteTopicsResult deleteTopics(const Topics& topics,
+    Admin::DeleteTopicsResult deleteTopics(const Topics&             topics,
                                            std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
     /**
      * List the topics available in the cluster.
@@ -80,13 +83,13 @@ public:
     Admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
     /**
-     * Delete records before given offset for a partition
+     * Delete records whose offset is smaller than the given offset of the corresponding partition.
      * @param topicPartitionOffsets a batch of offsets for partitions
      * @param timeout
      * @return
      */
     Admin::DeleteRecordsResult deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
-                                             std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
+                                             std::chrono::milliseconds    timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
 private:
     static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount);
@@ -156,8 +159,10 @@ AdminClient::combineErrors(const std::list<SimpleError>& errors)
 }
 
 inline Admin::CreateTopicsResult
-AdminClient::createTopics(const Topics& topics, int numPartitions, int replicationFactor,
-                          const Properties& topicConfig,
+AdminClient::createTopics(const Topics&             topics,
+                          int                       numPartitions,
+                          int                       replicationFactor,
+                          const Properties&         topicConfig,
                           std::chrono::milliseconds timeout)
 {
     LogBuffer<500> errInfo;
@@ -325,14 +330,14 @@ AdminClient::listTopics(std::chrono::milliseconds timeout)
 
 inline Admin::DeleteRecordsResult
 AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
-                           std::chrono::milliseconds timeout) {
+                           std::chrono::milliseconds    timeout)
+{
     auto rk_queue = rd_kafka_queue_unique_ptr(rd_kafka_queue_new(getClientHandle()));
 
     rd_kafka_DeleteRecords_unique_ptr rkDeleteRecords(rd_kafka_DeleteRecords_new(createRkTopicPartitionList(topicPartitionOffsets)));
+    std::array<rd_kafka_DeleteRecords_t*, 1> rk_del_records{rkDeleteRecords.get()};
 
-    rd_kafka_DeleteRecords_t* rk_del_records = rkDeleteRecords.get();
-
-    rd_kafka_DeleteRecords(getClientHandle(), &rk_del_records, 1, nullptr, rk_queue.get());
+    rd_kafka_DeleteRecords(getClientHandle(), rk_del_records.data(), rk_del_records.size(), nullptr, rk_queue.get());
 
     auto rk_ev = rd_kafka_event_unique_ptr();
 

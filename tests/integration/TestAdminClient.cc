@@ -9,7 +9,7 @@
 using namespace KAFKA_API;
 
 
-TEST(AdminClient, createListDeleteTopics)
+TEST(AdminClient, CreateListDeleteTopics)
 {
     AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
@@ -103,10 +103,12 @@ TEST(AdminClient, DuplicatedCreateDeleteTopics)
     }
 }
 
-TEST(AdminClient, deleteRecordsFromTopicPartitions)
+TEST(AdminClient, DeleteRecords)
 {
-    const Topic     topic     = Utility::getRandomString();
-    const Partition partition = 0;
+    const Topic     topic      = Utility::getRandomString();
+    const Partition partition1 = 0;
+    const Partition partition2 = 1;
+    const Partition partition3 = 2;
 
     std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topic << "] would be used" << std::endl;
 
@@ -119,16 +121,60 @@ TEST(AdminClient, deleteRecordsFromTopicPartitions)
     };
 
     // Send the messages
-    KafkaTestUtility::ProduceMessages(topic, partition, messages);
+    auto metadatas1 = KafkaTestUtility::ProduceMessages(topic, partition1, messages);
+    auto metadatas2 = KafkaTestUtility::ProduceMessages(topic, partition2, messages);
+    auto metadatas3 = KafkaTestUtility::ProduceMessages(topic, partition3, messages);
 
+    // Prepare the AdminClient
     AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
-    TopicPartitionOffsets tpos;
-    tpos[{topic, partition}] = messages.size();
+    // Prepare offsets for `deleteRecords`
+    TopicPartitionOffsets offsetsToDeleteWith = {
+        {TopicPartition{topic, partition1}, *metadatas1[0].offset()},  // the very first offset, which means no message would be deleted
+        {TopicPartition{topic, partition2}, *metadatas2[1].offset()},  // there's only 1 message before the offset
+        {TopicPartition{topic, partition3}, *metadatas3[2].offset() + 1} // the offset beyond the end, which means all messages would be deleted
+    };
 
-    auto deleteResult = adminClient.deleteRecords(tpos);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " records deleted, result: " << deleteResult.message() << std::endl;
-    EXPECT_TRUE(!deleteResult.errorCode());
+    // Delete some records
+    auto deleteResult = adminClient.deleteRecords(offsetsToDeleteWith);
+    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " just deleted some records, result: " << deleteResult.message() << std::endl;
+    EXPECT_FALSE(deleteResult.errorCode());
+
+    // Check whether the left records are as expected
+    Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+    {
+        // Check the first parition
+        consumer.assign({{topic, partition1}});
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+
+        ASSERT_EQ(messages.size(), records.size());
+        for (std::size_t i = 0; i < records.size(); ++i)
+        {
+            EXPECT_EQ(std::get<1>(messages[i]), records[i].key().toString());
+            EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
+        }
+    }
+    {
+        // Check the second partition
+        consumer.unsubscribe();
+        consumer.assign({{topic, partition2}});
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+
+        ASSERT_EQ(messages.size() - 1, records.size());
+        for (std::size_t i = 0; i < records.size(); ++i)
+        {
+            EXPECT_EQ(std::get<1>(messages[i + 1]), records[i].key().toString());
+            EXPECT_EQ(std::get<2>(messages[i + 1]), records[i].value().toString());
+        }
+    }
+    {
+        // Check the third partition
+        consumer.unsubscribe();
+        consumer.assign({{topic, partition3}});
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+
+        EXPECT_TRUE(records.empty());
+    }
 }
 
