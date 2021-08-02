@@ -61,9 +61,9 @@ public:
     /**
      * Send a list of specified offsets to the consumer group coodinator, and also marks those offsets as part of the current transaction.
      */
-    void sendOffsetsToTransaction(const TopicPartitionOffsets& tpos,
+    void sendOffsetsToTransaction(const TopicPartitionOffsets&           topicPartitionOffsets,
                                   const Consumer::ConsumerGroupMetadata& groupMetadata,
-                                  std::chrono::milliseconds timeout);
+                                  std::chrono::milliseconds              timeout);
 
 protected:
     explicit KafkaProducer(const Properties& properties)
@@ -337,11 +337,11 @@ KafkaProducer::abortTransaction(std::chrono::milliseconds timeout)
 }
 
 inline void
-KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets& tpos,
+KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           topicPartitionOffsets,
                                         const Consumer::ConsumerGroupMetadata& groupMetadata,
-                                        std::chrono::milliseconds timeout)
+                                        std::chrono::milliseconds              timeout)
 {
-    auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tpos));
+    auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(topicPartitionOffsets));
     auto error = Error{rd_kafka_send_offsets_to_transaction(getClientHandle(),
                                                             rk_tpos.get(),
                                                             groupMetadata.rawHandle(),
