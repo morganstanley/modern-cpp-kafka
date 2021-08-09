@@ -1951,9 +1951,9 @@ TEST(KafkaAutoCommitConsumer, FetchBrokerMetadataTriggersRejoin)
 
     auto rebalanceCb = [](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
         if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
-            std::cout << "[" << Utility::getCurrentTime() << "] assigned partitions: " << toString(tps) << std::endl;
+            std::cout << "[" << Utility::getCurrentTime() << "] newly assigned partitions: " << toString(tps) << std::endl;
         } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
-            std::cout << "[" << Utility::getCurrentTime() << "] unassigned partitions: " << toString(tps) << std::endl;
+            std::cout << "[" << Utility::getCurrentTime() << "] newly unassigned partitions: " << toString(tps) << std::endl;
         }
     };
 
@@ -1981,7 +1981,7 @@ TEST(KafkaAutoCommitConsumer, FetchBrokerMetadataTriggersRejoin)
     auto assignment = consumer.assignment();
     std::cout << "[" << Utility::getCurrentTime() << "] assignment: " << toString(assignment) << std::endl;
 
-    // The new created topic-partitions should be within the assignment as well
+    // The newly created topic-partitions should be within the assignment as well
     EXPECT_EQ(1, assignment.count({topic2, 0}));
 }
 
