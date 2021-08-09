@@ -68,7 +68,7 @@ public:
     /**
      * Set a log callback for kafka clients, which do not have a client specific logging callback configured (see `setLogger`).
      */
-    static void setGlobalLogger(Logger logger = NoneLogger)
+    static void setGlobalLogger(Logger logger = NullLogger)
     {
         std::call_once(Global<>::initOnce, [](){}); // Then no need to init within KafkaClient constructor
         Global<>::logger = std::move(logger);
@@ -103,6 +103,7 @@ public:
 
     /**
      * Fetch matadata from a available broker.
+     * Note: the Metadata response information may trigger a re-join if any subscribed topic has changed partition count or existence state.
      */
     Optional<BrokerMetadata> fetchBrokerMetadata(const std::string& topic,
                                                  std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_METADATA_TIMEOUT_MS),
@@ -436,7 +437,7 @@ KafkaClient::setLogLevel(int level)
 inline void
 KafkaClient::onLog(int level, const char* fac, const char* buf) const
 {
-    doLog(level, nullptr, 0, "%s | %s", fac, buf); // The `filename`/`lineno` here is NULL (just wouldn't help)
+    doLog(level, "LIBRDKAFKA", 0, "%s | %s", fac, buf); // The log is coming from librdkafka
 }
 
 inline void
@@ -461,11 +462,10 @@ KafkaClient::statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, 
 inline Optional<BrokerMetadata>
 KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::milliseconds timeout, bool disableErrorLogging)
 {
-    Optional<BrokerMetadata> ret;
-    auto rkt = rd_kafka_topic_unique_ptr(rd_kafka_topic_new(getClientHandle(), topic.c_str(), nullptr));
-
     const rd_kafka_metadata_t* rk_metadata = nullptr;
-    rd_kafka_resp_err_t err = rd_kafka_metadata(getClientHandle(), false, rkt.get(), &rk_metadata, convertMsDurationToInt(timeout));
+    // Here the input parameter for `all_topics` is `true`, since we want the `cgrp_update`
+    rd_kafka_resp_err_t err = rd_kafka_metadata(getClientHandle(), true, nullptr, &rk_metadata, convertMsDurationToInt(timeout));
+
     auto guard = rd_kafka_metadata_unique_ptr(rk_metadata);
 
     if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
@@ -474,30 +474,37 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
         {
             KAFKA_API_DO_LOG(Log::Level::Err, "failed to get BrokerMetadata! error[%s]", rd_kafka_err2str(err));
         }
-        return ret;
+        return Optional<BrokerMetadata>{};
     }
 
-    if (rk_metadata->topic_cnt != 1)
+    const rd_kafka_metadata_topic* metadata_topic = nullptr;
+    for (int i = 0; i < rk_metadata->topic_cnt; ++i)
+    {
+        if (rk_metadata->topics[i].topic == topic)
+        {
+            metadata_topic = &rk_metadata->topics[i];
+            break;
+        }
+    }
+
+    if (!metadata_topic || metadata_topic->err)
     {
         if (!disableErrorLogging)
         {
-            KAFKA_API_DO_LOG(Log::Level::Err, "failed to construct MetaData! topic_cnt[%d]", rk_metadata->topic_cnt);
+            if (!metadata_topic)
+            {
+                KAFKA_API_DO_LOG(Log::Level::Err, "failed to find BrokerMetadata for topic[%s]", topic.c_str());
+            }
+            else
+            {
+                KAFKA_API_DO_LOG(Log::Level::Err, "failed to get BrokerMetadata for topic[%s]! error[%s]", topic.c_str(), rd_kafka_err2str(metadata_topic->err));
+            }
         }
-        return ret;
-    }
-
-    const rd_kafka_metadata_topic& metadata_topic = rk_metadata->topics[0];
-    if (metadata_topic.err != 0)
-    {
-        if (!disableErrorLogging)
-        {
-            KAFKA_API_DO_LOG(Log::Level::Err, "failed to construct MetaData!  topic.err[%s]", rd_kafka_err2str(metadata_topic.err));
-        }
-        return ret;
+        return Optional<BrokerMetadata>{};
     }
 
     // Construct the BrokerMetadata
-    BrokerMetadata metadata(metadata_topic.topic);
+    BrokerMetadata metadata(metadata_topic->topic);
     metadata.setOrigNodeName(rk_metadata->orig_broker_name ? std::string(rk_metadata->orig_broker_name) : "");
 
     for (int i = 0; i < rk_metadata->broker_cnt; ++i)
@@ -505,9 +512,9 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
         metadata.addNode(rk_metadata->brokers[i].id, rk_metadata->brokers[i].host, rk_metadata->brokers[i].port);
     }
 
-    for (int i = 0; i < metadata_topic.partition_cnt; ++i)
+    for (int i = 0; i < metadata_topic->partition_cnt; ++i)
     {
-        const rd_kafka_metadata_partition& metadata_partition = metadata_topic.partitions[i];
+        const rd_kafka_metadata_partition& metadata_partition = metadata_topic->partitions[i];
 
         Partition partition = metadata_partition.id;
 
@@ -536,8 +543,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
         metadata.addPartitionInfo(partition, partitionInfo);
     }
 
-    ret = metadata;
-    return ret;
+    return metadata;
 }
 
 

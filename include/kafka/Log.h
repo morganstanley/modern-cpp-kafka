@@ -79,7 +79,7 @@ inline void DefaultLogger(int level, const char* /*filename*/, int /*lineno*/, c
     std::cout << std::endl;
 }
 
-inline void NoneLogger(int /*level*/, const char* /*filename*/, int /*lineno*/, const char* /*msg*/)
+inline void NullLogger(int /*level*/, const char* /*filename*/, int /*lineno*/, const char* /*msg*/)
 {
 }
 
