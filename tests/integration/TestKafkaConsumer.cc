@@ -1302,7 +1302,7 @@ TEST(KafkaAutoCommitConsumer, WrongOperation_AssignThenSubscribe)
     EXPECT_KAFKA_THROW(consumer.subscribe({topic}), RD_KAFKA_RESP_ERR__FAIL);
 }
 
-TEST(KafkaClient, GetBrokerMetadata)
+TEST(KafkaClient, FetchBrokerMetadata)
 {
     const Topic topic = Utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
@@ -1937,5 +1937,51 @@ TEST(KafkaAutoCommitConsumer, CooperativeRebalance)
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
     KafkaTestUtility::JoiningThread consumer4Thread(startConsumer, "consumer4", 10);
+}
+
+TEST(KafkaAutoCommitConsumer, FetchBrokerMetadataTriggersRejoin)
+{
+    const std::string topicPrefix  = Utility::getRandomString();
+    const std::string topicPattern = "^" + topicPrefix + "\\.*";
+
+    Topic topic1 = topicPrefix + "_1";
+    Topic topic2 = topicPrefix + "_2";
+
+    KafkaTestUtility::CreateKafkaTopic(topic1, 1, 1);
+
+    auto rebalanceCb = [](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
+        if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+            std::cout << "[" << Utility::getCurrentTime() << "] assigned partitions: " << toString(tps) << std::endl;
+        } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
+            std::cout << "[" << Utility::getCurrentTime() << "] unassigned partitions: " << toString(tps) << std::endl;
+        }
+    };
+
+    Properties props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ConsumerConfig::PARTITION_ASSIGNMENT_STRATEGY, "cooperative-sticky");
+
+    KafkaAutoCommitConsumer consumer(props);
+
+    // Subscribe to the topic pattern
+    consumer.subscribe({topicPattern}, rebalanceCb);
+
+    consumer.poll(std::chrono::seconds(1));
+
+    // Create one more topic (with the same subscription pattern)
+    KafkaTestUtility::CreateKafkaTopic(topic2, 1, 1);
+
+    // Should be able to get the metadata for the new topic
+    // Note: here the Metadata response information would trigger a re-join as well
+    auto metadata2 = consumer.fetchBrokerMetadata(topic2);
+    ASSERT_TRUE(metadata2);
+    std::cout << "[" << Utility::getCurrentTime() << "] brokerMetadata for topic[" << topic2 << "]: " << metadata2->toString() << std::endl;
+
+    consumer.poll(std::chrono::seconds(1));
+
+    auto assignment = consumer.assignment();
+    std::cout << "[" << Utility::getCurrentTime() << "] assignment: " << toString(assignment) << std::endl;
+
+    // The new created topic-partitions should be within the assignment as well
+    EXPECT_EQ(1, assignment.count({topic2, 0}));
 }
 
