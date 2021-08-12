@@ -42,7 +42,7 @@ using Headers = std::vector<Header>;
 /**
  * Null Headers.
  */
-#if __cplusplus >= 201703L
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) 
 const inline Headers NullHeaders = Headers{};
 #else
 const static Headers NullHeaders = Headers{};
