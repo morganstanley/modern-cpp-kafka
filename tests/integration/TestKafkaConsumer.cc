@@ -1302,7 +1302,7 @@ TEST(KafkaAutoCommitConsumer, WrongOperation_AssignThenSubscribe)
     EXPECT_KAFKA_THROW(consumer.subscribe({topic}), RD_KAFKA_RESP_ERR__FAIL);
 }
 
-TEST(KafkaClient, GetBrokerMetadata)
+TEST(KafkaClient, FetchBrokerMetadata)
 {
     const Topic topic = Utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
@@ -1402,7 +1402,7 @@ TEST(KafkaAutoCommitConsumer, PauseAndResume)
     // Subscribe topics
     consumer.subscribe({topic1, topic2});
 
-    // Poll 1 messaged from topic1
+    // Poll 1 message from topic1
     auto records = consumer.poll(KafkaTestUtility::MAX_POLL_MESSAGES_TIMEOUT);
     ASSERT_EQ(1, records.size());
     EXPECT_EQ(std::get<2>(messages[0]), records.front().value().toString());
@@ -1447,6 +1447,110 @@ TEST(KafkaAutoCommitConsumer, PauseAndResume)
     EXPECT_EQ(std::get<2>(messages[2]), records.front().value().toString());
 
     consumer.close();
+}
+
+TEST(KafkaManualCommitConsumer, SeekAfterPause)
+{
+    const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
+    // Produce messages towards topic
+    const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
+        {Headers{}, "", "msg1"},
+        {Headers{}, "", "msg2"},
+        {Headers{}, "", "msg3"}
+    };
+    KafkaTestUtility::ProduceMessages(topic, 0, messages);
+
+    // An auto-commit Consumer
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                        .put(ConsumerConfig::MAX_POLL_RECORDS,  "1");
+    KafkaManualCommitConsumer consumer(props);
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+
+    // Subscribe topics
+    consumer.subscribe({topic});
+
+    // Poll 1 message from topic
+    auto records = consumer.poll(KafkaTestUtility::MAX_POLL_MESSAGES_TIMEOUT);
+    ASSERT_EQ(1, records.size());
+    EXPECT_EQ(std::get<2>(messages[0]), records.front().value().toString());
+
+    // First, pause the partition
+    consumer.pause();
+
+    // Then, seek back (to the very first offset)
+    consumer.seek({topic, 0}, records[0].offset());
+
+    // Could not poll any message (with partition paused)
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    EXPECT_EQ(0, records.size());
+
+    // Resume the partition (and continue)
+    consumer.resume();
+
+    // Then would be able to poll from the very beginning
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    ASSERT_EQ(messages.size(), records.size());
+    for (std::size_t i = 0; i < messages.size(); ++i)
+    {
+        EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
+    }
+}
+
+TEST(KafkaManualCommitConsumer, DISABLED_SeekBeforePause)
+{
+    const Topic topic = Utility::getRandomString();
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
+
+    // Produce messages towards topic
+    const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
+        {Headers{}, "", "msg1"},
+        {Headers{}, "", "msg2"},
+        {Headers{}, "", "msg3"}
+    };
+    KafkaTestUtility::ProduceMessages(topic, 0, messages);
+
+    // An auto-commit Consumer
+    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                        .put(ConsumerConfig::MAX_POLL_RECORDS,  "1")
+                        .put("log_level", "7")
+                        .put("debug",     "all");
+    KafkaManualCommitConsumer consumer(props);
+    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+
+    // Subscribe topics
+    consumer.subscribe({topic});
+
+    // Poll 1 message from topic
+    auto records = consumer.poll(KafkaTestUtility::MAX_POLL_MESSAGES_TIMEOUT);
+    ASSERT_EQ(1, records.size());
+    EXPECT_EQ(std::get<2>(messages[0]), records.front().value().toString());
+
+    // First, seek back (to the very first offset)
+    consumer.seek({topic, 0}, records[0].offset());
+
+    // Then, pause the partition
+    consumer.pause();
+
+    // Could not poll any message (with partition paused)
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    EXPECT_EQ(0, records.size());
+
+    // Resume the partition (and continue)
+    consumer.resume();
+
+    // Then would be able to poll from the very beginning
+    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+    ASSERT_EQ(messages.size(), records.size());
+    for (std::size_t i = 0; i < messages.size(); ++i)
+    {
+        EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
+    }
 }
 
 TEST(KafkaAutoCommitConsumer, PauseStillWorksAfterRebalance)
@@ -1833,5 +1937,51 @@ TEST(KafkaAutoCommitConsumer, CooperativeRebalance)
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
     KafkaTestUtility::JoiningThread consumer4Thread(startConsumer, "consumer4", 10);
+}
+
+TEST(KafkaAutoCommitConsumer, FetchBrokerMetadataTriggersRejoin)
+{
+    const std::string topicPrefix  = Utility::getRandomString();
+    const std::string topicPattern = "^" + topicPrefix + "\\.*";
+
+    Topic topic1 = topicPrefix + "_1";
+    Topic topic2 = topicPrefix + "_2";
+
+    KafkaTestUtility::CreateKafkaTopic(topic1, 1, 1);
+
+    auto rebalanceCb = [](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
+        if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+            std::cout << "[" << Utility::getCurrentTime() << "] newly assigned partitions: " << toString(tps) << std::endl;
+        } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
+            std::cout << "[" << Utility::getCurrentTime() << "] newly unassigned partitions: " << toString(tps) << std::endl;
+        }
+    };
+
+    Properties props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(ConsumerConfig::PARTITION_ASSIGNMENT_STRATEGY, "cooperative-sticky");
+
+    KafkaAutoCommitConsumer consumer(props);
+
+    // Subscribe to the topic pattern
+    consumer.subscribe({topicPattern}, rebalanceCb);
+
+    consumer.poll(std::chrono::seconds(1));
+
+    // Create one more topic (with the same subscription pattern)
+    KafkaTestUtility::CreateKafkaTopic(topic2, 1, 1);
+
+    // Should be able to get the metadata for the new topic
+    // Note: here the Metadata response information would trigger a re-join as well
+    auto metadata2 = consumer.fetchBrokerMetadata(topic2);
+    ASSERT_TRUE(metadata2);
+    std::cout << "[" << Utility::getCurrentTime() << "] brokerMetadata for topic[" << topic2 << "]: " << metadata2->toString() << std::endl;
+
+    consumer.poll(std::chrono::seconds(1));
+
+    auto assignment = consumer.assignment();
+    std::cout << "[" << Utility::getCurrentTime() << "] assignment: " << toString(assignment) << std::endl;
+
+    // The newly created topic-partitions should be within the assignment as well
+    EXPECT_EQ(1, assignment.count({topic2, 0}));
 }
 

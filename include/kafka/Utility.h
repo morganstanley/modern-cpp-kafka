@@ -2,6 +2,8 @@
 
 #include "kafka/Project.h"
 
+#include "librdkafka/rdkafka.h"
+
 #include <chrono>
 #include <iomanip>
 #include <random>

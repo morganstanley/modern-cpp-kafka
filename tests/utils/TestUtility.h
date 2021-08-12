@@ -158,20 +158,23 @@ WaitUntil(const std::function<bool()>& checkDone, std::chrono::milliseconds time
     }
 }
 
-inline void
+inline std::vector<Kafka::Producer::RecordMetadata>
 ProduceMessages(const std::string& topic, int partition, const std::vector<std::tuple<Kafka::Headers, std::string, std::string>>& msgs)
 {
     Kafka::KafkaSyncProducer producer(GetKafkaClientCommonConfig());
     producer.setLogLevel(Kafka::Log::Level::Crit);
 
+    std::vector<Kafka::Producer::RecordMetadata> ret;
     for (const auto& msg: msgs)
     {
         auto record = Kafka::ProducerRecord(topic, partition, Kafka::Key(std::get<1>(msg).c_str(), std::get<1>(msg).size()), Kafka::Value(std::get<2>(msg).c_str(), std::get<2>(msg).size()));
         record.headers() = std::get<0>(msg);
-        producer.send(record);
+        auto metadata = producer.send(record);
+        ret.emplace_back(metadata);
     }
 
-    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": " << msgs.size() << " messages have been sent." << std::endl;
+    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": " << msgs.size() << " messages have been sent to " << topic << "-" << partition << std::endl;
+    return ret;
 }
 
 inline void
