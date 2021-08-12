@@ -16,7 +16,7 @@
 
 
 // Use `boost::optional` for C++14, which doesn't support `std::optional`
-#if  (__cplusplus >= 201703L) || (_MSVC_LANG >= 201703L) 
+#if  (__cplusplus >= 201703L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) 
 #include <optional>
 template<class T>
 using Optional = std::optional<T>;
@@ -84,7 +84,7 @@ using KeySize   = std::size_t;
 /**
  * Null Key.
  */
-#if (__cplusplus >= 201703L) || (_MSVC_LANG >= 201703L) 
+#if (__cplusplus >= 201703L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) 
 const inline Key NullKey = Key{};
 #else
 const static Key NullKey = Key{};
@@ -99,7 +99,7 @@ using ValueSize = std::size_t;
 /**
  * Null Value.
  */
-#if (__cplusplus >= 201703L) || (_MSVC_LANG >= 201703L) 
+#if (__cplusplus >= 201703L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) 
 const inline Value NullValue = Value{};
 #else
 const static Value NullValue = Value{};
