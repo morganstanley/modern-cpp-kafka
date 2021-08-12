@@ -10,6 +10,6 @@
 // #define KAFKA_API_ENABLE_UNIT_TEST_STUBS
 // #endif
 
-#if defined(WIN32)
+#if defined(WIN32) && !defined(NOMINMAX)
 #define NOMINMAX
 #endif
