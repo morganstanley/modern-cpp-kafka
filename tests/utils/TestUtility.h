@@ -132,15 +132,21 @@ ConsumeMessagesUntilTimeout(Kafka::KafkaConsumer& consumer,
     do
     {
         auto polled = consumer.poll(POLL_INTERVAL);
+
+        for (const auto& record: polled)
+        {
+            auto errorCode = record.error();
+            if (errorCode && errorCode.value() != RD_KAFKA_RESP_ERR__PARTITION_EOF)
+            {
+                std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] met error[" << errorCode.value() << "|" << errorCode.message() << "] while polling messages!" << std::endl;
+                EXPECT_FALSE(errorCode);
+            }
+        }
+
         records.insert(records.end(), std::make_move_iterator(polled.begin()), std::make_move_iterator(polled.end()));
     } while (std::chrono::steady_clock::now() < end);
 
     std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << consumer.name() << " polled "  << records.size() << " messages" << std::endl;
-
-    EXPECT_TRUE(std::none_of(records.cbegin(), records.cend(),
-                             [](const auto& record) {
-                                 return record.error() && record.error().value() != RD_KAFKA_RESP_ERR__PARTITION_EOF;
-                             }));
 
     return records;
 }
