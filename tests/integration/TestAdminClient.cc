@@ -141,37 +141,62 @@ TEST(AdminClient, DeleteRecords)
     std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " just deleted some records, result: " << deleteResult.message() << std::endl;
     EXPECT_FALSE(deleteResult.errorCode());
 
+    KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
+
+    Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+    {
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+        EXPECT_EQ(0, records.size());
+    }
+
     // Check whether the left records are as expected
-    Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
     {
         // Check the first parition
-        consumer.assign({{topic, partition1}});
+        const TopicPartition topicPartition = {topic, partition1};
+        consumer.assign({topicPartition});
+        RETRY_FOR_FAILURE(consumer.seekToBeginning(), 2);
+        std::cout << "[" << Utility::getCurrentTime() << "] topic-partition[" << toString(topicPartition) << "], position: " << consumer.position(topicPartition) << std::endl;
+
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
 
-        ASSERT_EQ(messages.size(), records.size());
-        for (std::size_t i = 0; i < records.size(); ++i)
+        EXPECT_EQ(messages.size(), records.size());
+        if (records.size() == messages.size())
         {
-            EXPECT_EQ(std::get<1>(messages[i]), records[i].key().toString());
-            EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
+            for (std::size_t i = 0; i < records.size(); ++i)
+            {
+                EXPECT_EQ(std::get<1>(messages[i]), records[i].key().toString());
+                EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
+            }
         }
     }
     {
         // Check the second partition
         consumer.unsubscribe();
-        consumer.assign({{topic, partition2}});
+        const TopicPartition topicPartition = {topic, partition2};
+        consumer.assign({topicPartition});
+        RETRY_FOR_FAILURE(consumer.seekToBeginning(), 2);
+        std::cout << "[" << Utility::getCurrentTime() << "] topic-partition[" << toString(topicPartition) << "], position: " << consumer.position(topicPartition) << std::endl;
+
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
 
-        ASSERT_EQ(messages.size() - 1, records.size());
-        for (std::size_t i = 0; i < records.size(); ++i)
+        EXPECT_EQ(messages.size() - 1, records.size());
+        if (records.size() == messages.size() - 1)
         {
-            EXPECT_EQ(std::get<1>(messages[i + 1]), records[i].key().toString());
-            EXPECT_EQ(std::get<2>(messages[i + 1]), records[i].value().toString());
+            for (std::size_t i = 0; i < records.size(); ++i)
+            {
+                EXPECT_EQ(std::get<1>(messages[i + 1]), records[i].key().toString());
+                EXPECT_EQ(std::get<2>(messages[i + 1]), records[i].value().toString());
+            }
         }
     }
     {
         // Check the third partition
         consumer.unsubscribe();
-        consumer.assign({{topic, partition3}});
+        const TopicPartition topicPartition = {topic, partition3};
+        consumer.assign({topicPartition});
+        RETRY_FOR_FAILURE(consumer.seekToBeginning(), 2);
+        std::cout << "[" << Utility::getCurrentTime() << "] topic-partition[" << toString(topicPartition) << "], position: " << consumer.position(topicPartition) << std::endl;
+
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
 
         EXPECT_TRUE(records.empty());
