@@ -57,6 +57,18 @@
         }                                                                                   \
     }
 
+#define RETRY_FOR_FAILURE(expr, maxRetries)                                                 \
+    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                                           \
+        try {                                                                               \
+            expr;                                                                           \
+            break;                                                                          \
+        } catch (const KafkaException& e) {                                                 \
+            std::cerr << "Met error: " << e.what() << std::endl;                            \
+            if (cnt != maxRetries) continue;                                                \
+            throw;                                                                          \
+        }                                                                                   \
+    }
+
 namespace Kafka = KAFKA_API;
 
 namespace KafkaTestUtility {
@@ -136,11 +148,10 @@ ConsumeMessagesUntilTimeout(Kafka::KafkaConsumer& consumer,
         for (const auto& record: polled)
         {
             auto errorCode = record.error();
-            if (errorCode && errorCode.value() != RD_KAFKA_RESP_ERR__PARTITION_EOF)
-            {
-                std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] met error[" << errorCode.value() << "|" << errorCode.message() << "] while polling messages!" << std::endl;
-                EXPECT_FALSE(errorCode);
-            }
+            if (!errorCode || errorCode.value() == RD_KAFKA_RESP_ERR__PARTITION_EOF) continue;
+
+            std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] met " << record.toString() << " while polling messages!" << std::endl;
+            EXPECT_FALSE(errorCode);
         }
 
         records.insert(records.end(), std::make_move_iterator(polled.begin()), std::make_move_iterator(polled.end()));
