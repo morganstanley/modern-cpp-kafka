@@ -200,7 +200,7 @@ private:
     static const constexpr char* SECURITY_PROTOCOL          = "security.protocol";
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
 
-#if __cplusplus >= 201703L
+#if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
 #else
     enum { DEFAULT_METADATA_TIMEOUT_MS = 10000 };

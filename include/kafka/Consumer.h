@@ -28,7 +28,7 @@ namespace Consumer
     /**
      * Null RebalanceCallback
      */
-#if __cplusplus >= 201703L
+#if COMPILER_SUPPORTS_CPP_17
     const inline RebalanceCallback NullRebalanceCallback = RebalanceCallback{};
 #else
     const static RebalanceCallback NullRebalanceCallback = RebalanceCallback{};
@@ -42,7 +42,7 @@ namespace Consumer
     /**
      * Null OffsetCommitCallback
      */
-#if __cplusplus >= 201703L
+#if COMPILER_SUPPORTS_CPP_17
     const inline OffsetCommitCallback NullOffsetCommitCallback = OffsetCommitCallback{};
 #else
     const static OffsetCommitCallback NullOffsetCommitCallback = OffsetCommitCallback{};

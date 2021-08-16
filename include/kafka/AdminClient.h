@@ -96,7 +96,7 @@ private:
     static std::list<SimpleError> getPerTopicPartitionResults(const rd_kafka_topic_partition_list_t* partitionResults);
     static SimpleError combineErrors(const std::list<SimpleError>& errors);
 
-#if __cplusplus >= 201703L
+#if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_COMMAND_TIMEOUT_MS = 30000;
     static constexpr int EVENT_POLLING_INTERVAL_MS  = 100;
 #else

@@ -100,7 +100,7 @@ protected:
 
     static constexpr int CALLBACK_POLLING_INTERVAL_MS = 10;
 
-#if __cplusplus >= 201703L
+#if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000;
     static constexpr int DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000;
 #else

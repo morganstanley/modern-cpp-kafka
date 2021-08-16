@@ -225,7 +225,7 @@ protected:
     static const constexpr char* ENABLE_AUTO_COMMIT       = "enable.auto.commit";
     static const constexpr char* AUTO_COMMIT_INTERVAL_MS  = "auto.commit.interval.ms";
 
-#if __cplusplus >= 201703L
+#if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_SUBSCRIBE_TIMEOUT_MS   = 30000;
     static constexpr int DEFAULT_UNSUBSCRIBE_TIMEOUT_MS = 10000;
     static constexpr int DEFAULT_QUERY_TIMEOUT_MS       = 10000;
