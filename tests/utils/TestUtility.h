@@ -98,6 +98,8 @@ GetKafkaClientCommonConfig()
 
     Kafka::Properties props;
     props.put("bootstrap.servers", *kafkaBrokerListEnv);
+    props.put("log_level", "7");
+    props.put("debug", "all");
 
     if (auto additionalSettingsEnv = GetEnvVar("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
     {
