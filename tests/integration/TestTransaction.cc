@@ -31,8 +31,8 @@ TEST(Transaction, CommitTransaction)
         auto record = ProducerRecord(topic, NullKey, Value(payload->c_str(), payload->size()));
 
         producer.send(record,
-                      [payload](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                          std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << ec.message()
+                      [payload](const Producer::RecordMetadata& metadata, const Error& error) {
+                          std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << error.message()
                               << ", with metadata: " << metadata.toString() << std::endl;
                       });
 
@@ -258,8 +258,8 @@ TEST(Transaction, ContinueTheTransaction)
         auto record = ProducerRecord(topic, NullKey, Value(messageToSent.c_str(), messageToSent.size()));
 
         producer.send(record,
-                      [](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                          std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << ec.message()
+                      [](const Producer::RecordMetadata& metadata, const Error& error) {
+                          std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << error.message()
                               << ", with metadata: " << metadata.toString() << std::endl;
                       });
 
@@ -278,8 +278,8 @@ TEST(Transaction, ContinueTheTransaction)
         auto record = ProducerRecord(topic, NullKey, Value(messageToSent.c_str(), messageToSent.size()));
 
         producer.send(record,
-                      [](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                          std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << ec.message()
+                      [](const Producer::RecordMetadata& metadata, const Error& error) {
+                          std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << error.message()
                               << ", with metadata: " << metadata.toString() << std::endl;
                       });
 

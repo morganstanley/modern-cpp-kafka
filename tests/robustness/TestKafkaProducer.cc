@@ -20,12 +20,12 @@ TEST(KafkaSyncProducer, RecordTimestamp)
         AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         auto createResult = adminClient.createTopics({topicWithRecordCreateTime}, 5, 3, Properties{{{"message.timestamp.type", "CreateTime"}}}, std::chrono::minutes(1));
-        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithRecordCreateTime << "] (with CreateTime) was created, result: " << createResult.message() << std::endl;
-        ASSERT_FALSE(createResult.errorCode());
+        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithRecordCreateTime << "] (with CreateTime) was created, result: " << createResult.error.message() << std::endl;
+        ASSERT_FALSE(createResult.error);
 
         createResult = adminClient.createTopics({topicWithLogAppendTime}, 5, 3, Properties{{{"message.timestamp.type", "LogAppendTime"}}}, std::chrono::minutes(1));
-        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithLogAppendTime << "] (with LogAppendTime) was created, result: " << createResult.message() << std::endl;
-        ASSERT_FALSE(createResult.errorCode());
+        std::cout << "[" << Utility::getCurrentTime() << "] Topic[" << topicWithLogAppendTime << "] (with LogAppendTime) was created, result: " << createResult.error.message() << std::endl;
+        ASSERT_FALSE(createResult.error);
 
         KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
     }
@@ -136,8 +136,8 @@ TEST(KafkaAsyncProducer, NoMissedDeliveryCallback)
             insertIdInFlight(i);
 
             producer.send(record,
-                          [&removeIdInFlight](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                                  std::cout << "[" << Utility::getCurrentTime() << "] Delivery callback: metadata[" << metadata.toString() << "], result[" << ec.message() << "]" << std::endl;
+                          [&removeIdInFlight](const Producer::RecordMetadata& metadata, const Error& error) {
+                                  std::cout << "[" << Utility::getCurrentTime() << "] Delivery callback: metadata[" << metadata.toString() << "], result[" << error.message() << "]" << std::endl;
                                   removeIdInFlight(metadata.recordId());
                           });
         }
@@ -165,22 +165,22 @@ TEST(KafkaAsyncProducer, MightMissDeliveryCallbackIfCloseWithLimitedTimeout)
         {
             auto record = ProducerRecord(topic, NullKey, NullValue, i);
             producer.send(record,
-                          [&deliveryCount](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                                  std::cout << "[" << Utility::getCurrentTime() << "] Delivery callback: metadata[" << metadata.toString() << "], result[" << ec.message() << "]" << std::endl;
+                          [&deliveryCount](const Producer::RecordMetadata& metadata, const Error& error) {
+                                  std::cout << "[" << Utility::getCurrentTime() << "] Delivery callback: metadata[" << metadata.toString() << "], result[" << error.message() << "]" << std::endl;
                                   ++deliveryCount;
                           });
             std::cout << "[" << Utility::getCurrentTime() << "] Message was just sent: " << record.toString() << std::endl;
         }
 
         // Would fail since no response from brokers
-        auto ec = producer.flush(std::chrono::seconds(1));
-        EXPECT_EQ(RD_KAFKA_RESP_ERR__TIMED_OUT, ec.value());
-        std::cout << "[" << Utility::getCurrentTime() << "] producer flush result[" << ec.message() << "]" << std::endl;
+        auto error = producer.flush(std::chrono::seconds(1));
+        EXPECT_EQ(RD_KAFKA_RESP_ERR__TIMED_OUT, error.value());
+        std::cout << "[" << Utility::getCurrentTime() << "] producer flush result[" << error.message() << "]" << std::endl;
 
         // Still fail since no response from brokers
-        ec = producer.close(std::chrono::seconds(1));
-        EXPECT_EQ(RD_KAFKA_RESP_ERR__TIMED_OUT, ec.value());
-        std::cout << "[" << Utility::getCurrentTime() << "] producer close result[" << ec.message() << "]" << std::endl;
+        error = producer.close(std::chrono::seconds(1));
+        EXPECT_EQ(RD_KAFKA_RESP_ERR__TIMED_OUT, error.value());
+        std::cout << "[" << Utility::getCurrentTime() << "] producer close result[" << error.message() << "]" << std::endl;
     }
 
     KafkaTestUtility::ResumeBrokers();
@@ -210,9 +210,9 @@ TEST(KafkaAsyncProducer, BrokerStopWhileSendingMessages)
         {
             auto record = ProducerRecord(topic, 0, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
 
-            producer.send(record, [&deliveryCount]( const Producer::RecordMetadata& metadata, std::error_code ec) {
-                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: metadata[" << metadata.toString() << "], result[" << ec.message() << "]" << std::endl;
-                                      EXPECT_FALSE(ec); // since the brokers just pause for a short while (< MESSAGE_TIMEOUT_MS), the delivery would success
+            producer.send(record, [&deliveryCount]( const Producer::RecordMetadata& metadata, const Error& error) {
+                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: metadata[" << metadata.toString() << "], result[" << error.message() << "]" << std::endl;
+                                      EXPECT_FALSE(error); // since the brokers just pause for a short while (< MESSAGE_TIMEOUT_MS), the delivery would success
                                       ++deliveryCount;
                                   });
             std::cout << "[" << Utility::getCurrentTime() << "] Message was just sent: " << record.toString() << std::endl;
@@ -258,9 +258,9 @@ TEST(KafkaAsyncProducer, Send_AckTimeout)
         {
             auto record = ProducerRecord(topic, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
 
-            producer.send(record, [&failureCount](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << ec.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
-                                      EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, ec.value());
+            producer.send(record, [&failureCount](const Producer::RecordMetadata& metadata, const Error& error) {
+                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << error.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
+                                      EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, error.value());
                                       ++failureCount;
                                   });
             std::cout << "[" << Utility::getCurrentTime() << "] Message was just sent: " << record.toString() << std::endl;
@@ -296,9 +296,9 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AckTimeout)
         {
             auto record = ProducerRecord(topic, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
 
-            producer.send(record, [&failureCount](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << ec.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
-                                      EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, ec.value());
+            producer.send(record, [&failureCount](const Producer::RecordMetadata& metadata, const Error& error) {
+                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << error.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
+                                      EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, error.value());
                                       ++failureCount;
                                   });
             std::cout << "[" << Utility::getCurrentTime() << "] Message was just sent: " << record.toString() << std::endl;
@@ -342,9 +342,9 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AlwaysFinishClosing)
         {
             auto record = ProducerRecord(topic, Key(msg.first.c_str(), msg.first.size()), Value(msg.second.c_str(), msg.second.size()));
 
-            producer.send(record, [&failureCount, appThreadId](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << ec.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
-                                      EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, ec.value());
+            producer.send(record, [&failureCount, appThreadId](const Producer::RecordMetadata& metadata, const Error& error) {
+                                      std::cout << "[" << Utility::getCurrentTime() << "] delivery callback: result[" << error.message() << "],  metadata[" << metadata.toString() << "]" << std::endl;
+                                      EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, error.value());
                                       EXPECT_EQ(appThreadId, std::this_thread::get_id());
                                       ++failureCount;
                                   });

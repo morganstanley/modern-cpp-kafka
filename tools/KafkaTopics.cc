@@ -164,9 +164,9 @@ int main (int argc, char **argv)
     if (args->opType == Arguments::OpType::List)
     {
         auto listResult = adminClient.listTopics();
-        if (listResult.errorCode())
+        if (listResult.error)
         {
-            std::cerr << "Error: " << listResult.message() << std::endl;
+            std::cerr << "Error: " << listResult.error.message() << std::endl;
             return EXIT_FAILURE;
         }
 
@@ -178,18 +178,18 @@ int main (int argc, char **argv)
     else if (args->opType == Arguments::OpType::Create)
     {
         auto createResult = adminClient.createTopics({args->topic}, args->partitions, args->replicationFactor, args->topicProps);
-        if (createResult.errorCode())
+        if (createResult.error)
         {
-            std::cerr << "Error: " << createResult.message() << std::endl;
+            std::cerr << "Error: " << createResult.error.message() << std::endl;
             return EXIT_FAILURE;
         }
     }
     else
     {
         auto deleteResult = adminClient.deleteTopics({args->topic});
-        if (deleteResult.errorCode())
+        if (deleteResult.error)
         {
-            std::cerr << "Error: " << deleteResult.message() << std::endl;
+            std::cerr << "Error: " << deleteResult.error.message() << std::endl;
             return EXIT_FAILURE;
         }
     }

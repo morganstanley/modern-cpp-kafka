@@ -462,8 +462,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback)
         EXPECT_EQ(1, records.size());
         auto expected = std::make_tuple(records[0].topic(), records[0].partition(), records[0].offset() + 1);
         consumer.commitAsync(records[0],
-                             [expected, &commitCbCount](const TopicPartitionOffsets& tpos, std::error_code ec) {
-                                 std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << toString(tpos) << "], result[" << ec.message()<< "]" << std::endl;
+                             [expected, &commitCbCount](const TopicPartitionOffsets& tpos, const Error& error) {
+                                 std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << toString(tpos) << "], result[" << error.message()<< "]" << std::endl;
                                  EXPECT_EQ(1, tpos.size());
                                  EXPECT_EQ(std::get<2>(expected), tpos.at(TopicPartition{std::get<0>(expected), std::get<1>(expected)}));
 
@@ -526,8 +526,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallbackTriggeredBeforeClose)
             EXPECT_EQ(1, records.size());
             auto expected = std::make_tuple(records[0].topic(), records[0].partition(), records[0].offset() + 1);
             consumer.commitAsync(records[0],
-                                 [expected, &commitCbCount](const TopicPartitionOffsets& tpos, std::error_code ec) {
-                                     std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << toString(tpos) << "], result[" << ec.message()<< "]" << std::endl;
+                                 [expected, &commitCbCount](const TopicPartitionOffsets& tpos, const Error& error) {
+                                     std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << toString(tpos) << "], result[" << error.message()<< "]" << std::endl;
                                      EXPECT_EQ(1, tpos.size());
                                      EXPECT_EQ(std::get<2>(expected), tpos.at(TopicPartition{std::get<0>(expected), std::get<1>(expected)}));
 
@@ -586,8 +586,8 @@ TEST(KafkaManualCommitConsumer, OffsetCommitCallback_ManuallyPollEvents)
         EXPECT_EQ(1, records.size());
         auto expected = std::make_tuple(records[0].topic(), records[0].partition(), records[0].offset() + 1);
         consumer.commitAsync(records[0],
-                             [expected, &commitCbCount](const TopicPartitionOffsets& tpos, std::error_code ec) {
-                                 std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << toString(tpos) << "], result[" << ec.message()<< "]" << std::endl;
+                             [expected, &commitCbCount](const TopicPartitionOffsets& tpos, const Error& error) {
+                                 std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << toString(tpos) << "], result[" << error.message()<< "]" << std::endl;
                                  EXPECT_EQ(1, tpos.size());
                                  EXPECT_EQ(std::get<2>(expected), tpos.at(TopicPartition{std::get<0>(expected), std::get<1>(expected)}));
 
@@ -688,9 +688,9 @@ TEST(KafkaManualCommitConsumer, OffsetCommitAndPosition)
                     std::cout << "[" << Utility::getCurrentTime() << "] will commit offset for record[" << record.toString() << "]" << std::endl;
                     consumer.commitAsync(record,
                                          [expectedOffset = record.offset() + 1, topic, partition, &commitCbCount, &startCount, rcvMsgCount]
-                                         (const TopicPartitionOffsets& tpos, std::error_code ec) {
-                                             std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << ec.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
-                                             if (!ec) {
+                                         (const TopicPartitionOffsets& tpos, const Error& error) {
+                                             std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << error.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
+                                             if (!error) {
                                                  EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
                                                  startCount = rcvMsgCount;
                                              }
@@ -1711,7 +1711,7 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
             }
             catch (const Kafka::KafkaException& e)
             {
-                EXPECT_EQ(RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION, e.error().errorCode().value()); // Or, fail
+                EXPECT_EQ(RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION, e.error().value()); // Or, fail
             }
         }
      }
@@ -1924,7 +1924,7 @@ TEST(KafkaAutoCommitConsumer, CooperativeRebalance)
         KafkaTestUtility::PrintDividingLine(clientId + " is quitting");
     };
 
-    KafkaTestUtility::JoiningThread consumer1Thread(startConsumer, "consumer1", 20);
+    KafkaTestUtility::JoiningThread consumer1Thread(startConsumer, "consumer1", 10);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 

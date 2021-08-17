@@ -62,8 +62,8 @@ TEST(KafkaManualCommitConsumer, AlwaysFinishClosing_ManuallyPollEvents)
 
             Offset expectedOffset = records[i].offset() + 1;
             consumer.commitAsync(records[i],
-                                 [expectedOffset, topic, partition, &commitCbCount](const TopicPartitionOffsets& tpos, std::error_code ec){
-                                     std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << ec.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
+                                 [expectedOffset, topic, partition, &commitCbCount](const TopicPartitionOffsets& tpos, const Error& error){
+                                     std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << error.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
                                      EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
                                      ++commitCbCount;
                                  });
@@ -136,8 +136,8 @@ TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
                 // Try to commit the offsets
                 Offset expectedOffset = records[i].offset() + 1;
                 consumer.commitAsync(records[i],
-                                     [expectedOffset, topic, partition, &commitCbCount](const TopicPartitionOffsets& tpos, std::error_code ec){
-                                         std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], result[" << ec.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
+                                     [expectedOffset, topic, partition, &commitCbCount](const TopicPartitionOffsets& tpos, const Error& error){
+                                         std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], result[" << error.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
                                          EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
                                          ++commitCbCount;
                                      });
