@@ -23,8 +23,8 @@ TEST(AdminClient, CreateListDeleteTopics)
     // Create Topics
     const auto timeout = std::chrono::seconds(30);
     auto createResult = adminClient.createTopics(topics, numPartitions, replicaFactor, Properties(), timeout);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics created, result: " << createResult.message() << std::endl;
-    EXPECT_FALSE(createResult.errorCode());
+    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics created, result: " << createResult.error.message() << std::endl;
+    EXPECT_FALSE(createResult.error);
 
     // Check Topics (might wait a while for new created topics to take effect)
     bool areTopicsSuccessfullyCreated = false;
@@ -74,8 +74,8 @@ TEST(AdminClient, CreateListDeleteTopics)
 
     // Delete Topics
     auto deleteResult = adminClient.deleteTopics(topics);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics deleted, result: " << deleteResult.message() << std::endl;
-    EXPECT_FALSE(deleteResult.errorCode());
+    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics deleted, result: " << deleteResult.error.message() << std::endl;
+    EXPECT_FALSE(deleteResult.error);
 }
 
 TEST(AdminClient, DuplicatedCreateDeleteTopics)
@@ -91,15 +91,15 @@ TEST(AdminClient, DuplicatedCreateDeleteTopics)
     for (int i = 0; i < MAX_REPEAT; ++i)
     {
         auto createResult = adminClient.createTopics({topic}, numPartitions, replicaFactor);
-        std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics created, result: " << createResult.message() << std::endl;
-        EXPECT_TRUE(!createResult.errorCode() || createResult.errorCode().value() == RD_KAFKA_RESP_ERR_TOPIC_ALREADY_EXISTS);
+        std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics created, result: " << createResult.error.message() << std::endl;
+        EXPECT_TRUE(!createResult.error || createResult.error.value() == RD_KAFKA_RESP_ERR_TOPIC_ALREADY_EXISTS);
     }
 
     for (int i = 0; i < MAX_REPEAT; ++i)
     {
         auto deleteResult = adminClient.deleteTopics({topic});
-        std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics deleted, result: " << deleteResult.message() << std::endl;
-        EXPECT_TRUE(!deleteResult.errorCode() || deleteResult.errorCode().value() == RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART);
+        std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " topics deleted, result: " << deleteResult.error.message() << std::endl;
+        EXPECT_TRUE(!deleteResult.error || deleteResult.error.value() == RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART);
     }
 }
 
@@ -138,8 +138,8 @@ TEST(AdminClient, DeleteRecords)
 
     // Delete some records
     auto deleteResult = adminClient.deleteRecords(offsetsToDeleteWith);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " just deleted some records, result: " << deleteResult.message() << std::endl;
-    EXPECT_FALSE(deleteResult.errorCode());
+    std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " just deleted some records, result: " << deleteResult.error.message() << std::endl;
+    EXPECT_FALSE(deleteResult.error);
 
     KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
 

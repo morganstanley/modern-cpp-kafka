@@ -22,10 +22,10 @@
         } catch (const KafkaException& e) {                                                                  \
             const auto& error = e.error();                                                                   \
             std::cout << "Exception caught: " << e.what()                                                    \
-                << (error.isFatal() ? (*error.isFatal() ? ", fatal" : ", non-fatal") : "")                      \
+                << (error.isFatal() ? (*error.isFatal() ? ", fatal" : ", non-fatal") : "")                   \
                 << (error.isRetriable() ? (*error.isRetriable() ? ",  retriable" : ", non-retriable") : "")  \
                 << std::endl;                                                                                \
-            EXPECT_EQ(err, e.error().errorCode().value());                                                   \
+            EXPECT_EQ(err, e.error().value());                                                               \
             break;                                                                                           \
         } catch (...){                                                  \
         }                                                               \
@@ -46,27 +46,27 @@
         EXPECT_FALSE(true);           \
     }
 
-#define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                                       \
-    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                                           \
-        try {                                                                               \
-            expr;                                                                           \
-            break;                                                                          \
-        } catch (const KafkaException& e) {                                                 \
-            if (e.error().errorCode().value() == errToRetry && cnt != maxRetries) continue; \
-            throw;                                                                          \
-        }                                                                                   \
+#define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                           \
+    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                               \
+        try {                                                                   \
+            expr;                                                               \
+            break;                                                              \
+        } catch (const KafkaException& e) {                                     \
+            if (e.error().value() == errToRetry && cnt != maxRetries) continue; \
+            throw;                                                              \
+        }                                                                       \
     }
 
-#define RETRY_FOR_FAILURE(expr, maxRetries)                                                 \
-    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                                           \
-        try {                                                                               \
-            expr;                                                                           \
-            break;                                                                          \
-        } catch (const KafkaException& e) {                                                 \
-            std::cerr << "Met error: " << e.what() << std::endl;                            \
-            if (cnt != maxRetries) continue;                                                \
-            throw;                                                                          \
-        }                                                                                   \
+#define RETRY_FOR_FAILURE(expr, maxRetries)                         \
+    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                   \
+        try {                                                       \
+            expr;                                                   \
+            break;                                                  \
+        } catch (const KafkaException& e) {                         \
+            std::cerr << "Met error: " << e.what() << std::endl;    \
+            if (cnt != maxRetries) continue;                        \
+            throw;                                                  \
+        }                                                           \
     }
 
 namespace Kafka = KAFKA_API;
@@ -147,11 +147,11 @@ ConsumeMessagesUntilTimeout(Kafka::KafkaConsumer& consumer,
 
         for (const auto& record: polled)
         {
-            auto errorCode = record.error();
-            if (!errorCode || errorCode.value() == RD_KAFKA_RESP_ERR__PARTITION_EOF) continue;
+            auto error = record.error();
+            if (!error || error.value() == RD_KAFKA_RESP_ERR__PARTITION_EOF) continue;
 
             std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] met " << record.toString() << " while polling messages!" << std::endl;
-            EXPECT_FALSE(errorCode);
+            EXPECT_FALSE(error);
         }
 
         records.insert(records.end(), std::make_move_iterator(polled.begin()), std::make_move_iterator(polled.end()));
@@ -200,8 +200,8 @@ CreateKafkaTopic(const Kafka::Topic& topic, int numPartitions, int replicationFa
     Kafka::AdminClient adminClient(GetKafkaClientCommonConfig());
     auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
     std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": create topic[" << topic << "] "
-       << "with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]. Result: " << createResult.message() << std::endl;
-    ASSERT_FALSE(createResult.errorCode());
+       << "with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]. Result: " << createResult.error.message() << std::endl;
+    ASSERT_FALSE(createResult.error);
     std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 

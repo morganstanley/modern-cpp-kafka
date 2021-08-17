@@ -40,8 +40,8 @@ TEST(Transaction, DeliveryFailure)
         for (std::size_t i = 0; i < numMessages; ++i)
         {
             producer.send(record,
-                          [](const Producer::RecordMetadata& metadata, std::error_code ec) {
-                              std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << ec.message()
+                          [](const Producer::RecordMetadata& metadata, const Error& error) {
+                              std::cout << "[" << Utility::getCurrentTime() << "] Producer got the delivery result: " << error.message()
                                   << ", with metadata: " << metadata.toString() << std::endl;
                           });
             std::cout << "[" << Utility::getCurrentTime() << "] Producer async-sent the message: " << record.toString() << std::endl;
@@ -56,7 +56,7 @@ TEST(Transaction, DeliveryFailure)
         catch (const KafkaException& e)
         {
             std::cout << "[" << Utility::getCurrentTime() << "] Exception caught: " << e.what() << std::endl;
-            EXPECT_EQ(RD_KAFKA_RESP_ERR__INCONSISTENT, e.error().errorCode().value());
+            EXPECT_EQ(RD_KAFKA_RESP_ERR__INCONSISTENT, e.error().value());
 
             std::cout << "[" << Utility::getCurrentTime() << "] Producer will abort the transaction" << record.toString() << std::endl;
             producer.abortTransaction();

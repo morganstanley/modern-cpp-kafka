@@ -31,6 +31,7 @@ Checks: "*,\
          -cppcoreguidelines-no-malloc,\
          -cppcoreguidelines-non-private-member-variables-in-classes,\
          -cppcoreguidelines-pro-bounds-constant-array-index,\
+         -cppcoreguidelines-pro-type-union-access,\
          -misc-non-private-member-variables-in-classes,\
          -readability-magic-numbers,\
          -readability-implicit-bool-conversion,\

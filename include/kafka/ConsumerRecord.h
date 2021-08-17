@@ -79,7 +79,7 @@ public:
      *   2. Failure
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    std::error_code error() const { return ErrorCode(_rk_msg->err); }
+    Error error() const { return Error{_rk_msg->err}; }
 
     /**
     * Obtains explanatory string.

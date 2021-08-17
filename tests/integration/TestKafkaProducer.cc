@@ -172,7 +172,7 @@ TEST(KafkaSyncProducer, InSyncBrokersAckTimeout)
             catch (const KafkaException& e)
             {
                 std::cout << "[" << Utility::getCurrentTime() << "] Exception caught: " << e.what() << std::endl;
-                EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, e.error().errorCode().value());
+                EXPECT_EQ(RD_KAFKA_RESP_ERR__MSG_TIMED_OUT, e.error().value());
                 break;
             }
         }
@@ -282,9 +282,9 @@ TEST(KafkaAsyncProducer, MessageDeliveryCallback)
 
     // Delivery callback
     Producer::Callback drCallback =
-        [&msgIdsSent, topic, partition](const Producer::RecordMetadata& metadata, std::error_code ec) {
+        [&msgIdsSent, topic, partition](const Producer::RecordMetadata& metadata, const Error& error) {
             std::cout << "[" << Utility::getCurrentTime() << "] Producer::Metadata: " << metadata.toString() << std::endl;
-            EXPECT_FALSE(ec);
+            EXPECT_FALSE(error);
             EXPECT_EQ(topic, metadata.topic());
             EXPECT_EQ(partition, metadata.partition());
             msgIdsSent.emplace(metadata.recordId());
@@ -332,9 +332,9 @@ TEST(KafkaAsyncProducer, DeliveryCallback_ManuallyPollEvents)
 
     // Delivery callback
     Producer::Callback drCallback = [&msgIdsSent, topic, partition, appThreadId = std::this_thread::get_id()]
-        (const Producer::RecordMetadata& metadata, std::error_code ec) {
+        (const Producer::RecordMetadata& metadata, const Error& error) {
             std::cout << "[" << Utility::getCurrentTime() << "] Producer::Metadata: " << metadata.toString() << std::endl;
-            EXPECT_FALSE(ec);
+            EXPECT_FALSE(error);
             EXPECT_EQ(topic, metadata.topic());
             EXPECT_EQ(partition, metadata.partition());
             msgIdsSent.emplace(metadata.recordId());
@@ -383,9 +383,9 @@ TEST(KafkaAsyncProducer, NoBlockSendingWhileQueueIsFull_ManuallyPollEvents)
     int msgSentCnt  = 0;
 
     Producer::Callback drCallback =
-        [&msgSentCnt, appThreadId](const Producer::RecordMetadata& metadata, std::error_code ec) {
+        [&msgSentCnt, appThreadId](const Producer::RecordMetadata& metadata, const Error& error) {
             EXPECT_EQ(std::this_thread::get_id(), appThreadId); // It should be polled by the same thread
-            EXPECT_FALSE(ec);
+            EXPECT_FALSE(error);
             std::cout << "[" << Utility::getCurrentTime() << "] Delivery callback called. RecordMetadata: " << metadata.toString() << std::endl;
             ++msgSentCnt;
         };
@@ -426,10 +426,10 @@ TEST(KafkaAsyncProducer, NoBlockSendingWhileQueueIsFull_ManuallyPollEvents)
     // To send the 3rd message, should fail (return the error code)
     record.setKey(Key(messages[2].first.c_str(), messages[2].first.size()));
     record.setValue(Value(messages[2].second.c_str(), messages[2].second.size()));
-    std::error_code ec;
+    Error error;
     std::cout << "[" << Utility::getCurrentTime() << "] About to send ProducerRecord: " << record.toString() << std::endl;
-    producer.send(record, drCallback, ec);
-    EXPECT_EQ(RD_KAFKA_RESP_ERR__QUEUE_FULL, ec.value());
+    producer.send(record, drCallback, error);
+    EXPECT_EQ(RD_KAFKA_RESP_ERR__QUEUE_FULL, error.value());
 
     // Wait for the delivery callback (to be triggered)
     const auto end = std::chrono::steady_clock::now() + KafkaTestUtility::MAX_DELIVERY_TIMEOUT;
@@ -467,10 +467,10 @@ TEST(KafkaAsyncProducer, TooLargeMessageForBroker)
     std::size_t failedCount = 0;
     for (std::size_t i = 0; i < MSG_NUM; ++i) {
         producer.send(record,
-                      [&failedCount] (const Producer::RecordMetadata& /*metadata*/, std::error_code ec) {
-                          if (ec) {
+                      [&failedCount] (const Producer::RecordMetadata& /*metadata*/, const Error& error) {
+                          if (error) {
                               ++failedCount;
-                              EXPECT_EQ(RD_KAFKA_RESP_ERR_MSG_SIZE_TOO_LARGE, ec.value());
+                              EXPECT_EQ(RD_KAFKA_RESP_ERR_MSG_SIZE_TOO_LARGE, error.value());
                           }
                       });
     }
@@ -499,7 +499,7 @@ TEST(KafkaAsyncProducer, CopyRecordValueWithinSend)
             auto value  = std::to_string(i); // The payload is string for integar
             auto record = ProducerRecord(topic, Key(nullptr, 0), Value(value.c_str(), value.size()));
             producer.send(record,
-                          [] (const Producer::RecordMetadata& /*metadata*/, std::error_code ec) { EXPECT_FALSE(ec); },
+                          [] (const Producer::RecordMetadata& /*metadata*/, const Error& error) { EXPECT_FALSE(error); },
                           KafkaProducer::SendOption::ToCopyRecordValue); // Copy the payload internally
         }
     }

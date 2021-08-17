@@ -42,11 +42,11 @@ int main(int argc, char **argv)
                           // Note: Here we capture the shared_pointer of `line`,
                           //       which holds the content for `record.value()`.
                           //       It makes sure the memory block is valid until the lambda finishes.
-                          [line](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
-                              if (!ec) {
+                          [line](const kafka::Producer::RecordMetadata& metadata, const kafka::Error& error) {
+                              if (!error) {
                                   std::cout << "% Message delivered: " << metadata.toString() << std::endl;
                               } else {
-                                  std::cerr << "% Message delivery failed: " << ec.message() << std::endl;
+                                  std::cerr << "% Message delivery failed: " << error.message() << std::endl;
                               }
                           });
 

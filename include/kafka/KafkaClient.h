@@ -293,12 +293,12 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         }
         catch (const std::exception& e)
         {
-            KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be an number!").append(e.what()));
+            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be an number!").append(e.what())));
         }
 
         if (_logLevel < Log::Level::Emerg || _logLevel > Log::Level::Debug)
         {
-            KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be a value between 0 and 7!"));
+            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be a value between 0 and 7!")));
         }
     }
 
@@ -346,14 +346,14 @@ KafkaClient::KafkaClient(ClientType                     clientType,
                            rk_conf.release(),  // rk_conf's ownship would be transferred to rk, after the "rd_kafka_new()" call
                            errInfo.clear().str(),
                            errInfo.capacity()));
-    KAFKA_THROW_IF_WITH_RESP_ERROR(rd_kafka_last_error());
+    KAFKA_THROW_IF_WITH_ERROR(Error(rd_kafka_last_error()));
 
     // Add brokers
     auto brokers = properties.getProperty(BOOTSTRAP_SERVERS);
     if (rd_kafka_brokers_add(getClientHandle(), brokers->c_str()) == 0)
     {
-        KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                             "No broker could be added successfully, BOOTSTRAP_SERVERS=[" + *brokers + "]");
+        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                                "No broker could be added successfully, BOOTSTRAP_SERVERS=[" + *brokers + "]"));
     }
 
     _opened = true;
@@ -367,8 +367,8 @@ KafkaClient::validateAndReformProperties(const Properties& origProperties)
     // BOOTSTRAP_SERVERS property is mandatory
     if (!properties.getProperty(BOOTSTRAP_SERVERS))
     {
-        KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                             "Validation failed! With no property [" + std::string(BOOTSTRAP_SERVERS) + "]");
+        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                                "Validation failed! With no property [" + std::string(BOOTSTRAP_SERVERS) + "]"));
     }
 
     // If no "client.id" configured, generate a random one for user
@@ -384,8 +384,8 @@ KafkaClient::validateAndReformProperties(const Properties& origProperties)
         {
             if (!properties.getProperty(SASL_KERBEROS_SERVICE_NAME))
             {
-                KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                     "The \"sasl.kerberos.service.name\" property is mandatory for SASL connection!");
+                KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                                        "The \"sasl.kerberos.service.name\" property is mandatory for SASL connection!"));
             }
         }
     }

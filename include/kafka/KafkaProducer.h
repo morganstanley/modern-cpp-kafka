@@ -30,10 +30,10 @@ public:
     /**
      * Invoking this method makes all buffered records immediately available to send, and blocks on the completion of the requests associated with these records.
      *
-     * Possible errors:
+     * Possible error values:
      *   - RD_KAFKA_RESP_ERR__TIMED_OUT: The `timeout` was reached before all outstanding requests were completed.
      */
-    std::error_code flush(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
+    Error flush(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     enum class SendOption { NoCopyRecordValue, ToCopyRecordValue };
 
@@ -73,7 +73,7 @@ protected:
         KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propStr.c_str());
     }
 
-    std::error_code close(std::chrono::milliseconds timeout);
+    Error close(std::chrono::milliseconds timeout);
 
     // Define datatypes for "opaque" (as a parameter of rd_kafka_produce), in order to handle the delivery callback
     class DeliveryCbOpaque
@@ -83,7 +83,7 @@ protected:
 
         void operator()(rd_kafka_t* /*rk*/, const rd_kafka_message_t* rkmsg)
         {
-            _drCb(Producer::RecordMetadata{rkmsg, _recordId}, ErrorCode(rkmsg->err));
+            _drCb(Producer::RecordMetadata{rkmsg, _recordId}, Error{rkmsg->err});
         }
 
     private:
@@ -93,10 +93,10 @@ protected:
 
     enum class ActionWhileQueueIsFull { Block, NoBlock };
 
-    rd_kafka_resp_err_t sendMessage(const ProducerRecord&                   record,
-                                    std::unique_ptr<DeliveryCbOpaque> opaque,
-                                    SendOption                              option,
-                                    ActionWhileQueueIsFull                  action);
+    Error sendMessage(const ProducerRecord&             record,
+                      std::unique_ptr<DeliveryCbOpaque> opaque,
+                      SendOption                        option,
+                      ActionWhileQueueIsFull            action);
 
     static constexpr int CALLBACK_POLLING_INTERVAL_MS = 10;
 
@@ -185,7 +185,7 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
         }
         errMsg += ".";
 
-        KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg);
+        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg));
     }
 
     // For "idempotence" feature
@@ -197,8 +197,8 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
         {
             if (std::stoi(*maxInFlight) > KAFKA_IDEMP_MAX_INFLIGHT)
             {
-                KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                     "`max.in.flight` must be set <= " + std::to_string(KAFKA_IDEMP_MAX_INFLIGHT) + " when `enable.idempotence` is `true`");
+                KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                                        "`max.in.flight` must be set <= " + std::to_string(KAFKA_IDEMP_MAX_INFLIGHT) + " when `enable.idempotence` is `true`"));
             }
         }
 
@@ -206,8 +206,8 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
         {
             if (*acks != "all" && *acks != "-1")
             {
-                KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                     "`acks` must be set to `all`/`-1` when `enable.idempotence` is `true`");
+                KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                                        "`acks` must be set to `all`/`-1` when `enable.idempotence` is `true`"));
             }
         }
     }
@@ -226,7 +226,7 @@ KafkaProducer::deliveryCallback(rd_kafka_t* rk, const rd_kafka_message_t* rkmsg,
     }
 }
 
-inline rd_kafka_resp_err_t
+inline Error
 KafkaProducer::sendMessage(const ProducerRecord&             record,
                            std::unique_ptr<DeliveryCbOpaque> opaque,
                            SendOption                        option,
@@ -244,95 +244,114 @@ KafkaProducer::sendMessage(const ProducerRecord&             record,
     auto* rk        = getClientHandle();
     auto* opaquePtr = opaque.get();
 
-    rd_kafka_resp_err_t sendResult = RD_KAFKA_RESP_ERR_NO_ERROR;
+    constexpr std::size_t VU_LIST_SIZE_WITH_NO_HEADERS = 6;
+    std::vector<rd_kafka_vu_t> rkVUs(VU_LIST_SIZE_WITH_NO_HEADERS + record.headers().size());
 
-    if (auto cntHeaders = record.headers().size())
-    {
-        rd_kafka_headers_t* hdrs = rd_kafka_headers_new(cntHeaders);
-        for (const auto& header: record.headers())
-        {
-            rd_kafka_header_add(hdrs, header.key.c_str(), header.key.size(), header.value.data(), header.value.size());
-        }
+    std::size_t uvCount = 0;
 
-        sendResult = rd_kafka_producev(rk,
-                                       RD_KAFKA_V_TOPIC(topic),
-                                       RD_KAFKA_V_PARTITION(partition),
-                                       RD_KAFKA_V_MSGFLAGS(msgFlags),
-                                       RD_KAFKA_V_HEADERS(hdrs),
-                                       RD_KAFKA_V_VALUE(const_cast<void*>(valuePtr), valueLen), // NOLINT
-                                       RD_KAFKA_V_KEY(keyPtr, keyLen),                          // NOLINT
-                                       RD_KAFKA_V_OPAQUE(opaquePtr),
-                                       RD_KAFKA_V_END);
-        if (sendResult != RD_KAFKA_RESP_ERR_NO_ERROR)
-        {
-            rd_kafka_headers_destroy(hdrs);
-        }
-    }
-    else
-    {
-        sendResult = rd_kafka_producev(rk,
-                                       RD_KAFKA_V_TOPIC(topic),
-                                       RD_KAFKA_V_PARTITION(partition),
-                                       RD_KAFKA_V_MSGFLAGS(msgFlags),
-                                       RD_KAFKA_V_VALUE(const_cast<void*>(valuePtr), valueLen), // NOLINT
-                                       RD_KAFKA_V_KEY(keyPtr, keyLen),                          // NOLINT
-                                       RD_KAFKA_V_OPAQUE(opaquePtr),
-                                       RD_KAFKA_V_END);
+    {   // Topic
+        auto& vu = rkVUs[uvCount++];
+        vu.vtype  = RD_KAFKA_VTYPE_TOPIC;
+        vu.u.cstr = topic;
     }
 
-    if (sendResult == RD_KAFKA_RESP_ERR_NO_ERROR)
-    {
-        // KafkaProducer::deliveryCallback would delete the "opaque"
-        opaque.release();
+    {   // Partition
+        auto& vu = rkVUs[uvCount++];
+        vu.vtype = RD_KAFKA_VTYPE_PARTITION;
+        vu.u.i32 = partition;
     }
 
-    return sendResult; // NOLINT: leak of memory pointed to by 'opaquePtr' [clang-analyzer-cplusplus.NewDeleteLeaks]
+    {   // Message flags
+        auto& vu = rkVUs[uvCount++];
+        vu.vtype = RD_KAFKA_VTYPE_MSGFLAGS;
+        vu.u.i   = static_cast<int>(msgFlags);
+    }
+
+    {   // Key
+        auto& vu = rkVUs[uvCount++];
+        vu.vtype      = RD_KAFKA_VTYPE_KEY;
+        vu.u.mem.ptr  = const_cast<void*>(keyPtr);      // NOLINT
+        vu.u.mem.size = keyLen;
+    }
+
+    {   // Value
+        auto& vu = rkVUs[uvCount++];
+        vu.vtype      = RD_KAFKA_VTYPE_VALUE;
+        vu.u.mem.ptr  = const_cast<void*>(valuePtr);    // NOLINT
+        vu.u.mem.size = valueLen;
+    }
+
+    {   // Opaque
+        auto& vu = rkVUs[uvCount++];
+        vu.vtype = RD_KAFKA_VTYPE_OPAQUE;
+        vu.u.ptr = opaquePtr;
+    }
+
+    // Headers
+    for (const auto& header: record.headers())
+    {
+        auto& vu = rkVUs[uvCount++];
+        vu.vtype         = RD_KAFKA_VTYPE_HEADER;
+        vu.u.header.name = header.key.c_str();
+        vu.u.header.val  = header.value.data();
+        vu.u.header.size = header.value.size();
+    }
+
+    assert(uvCount == rkVUs.size());
+
+    Error error{ rd_kafka_produceva(rk, rkVUs.data(), rkVUs.size()) };
+
+    // KafkaProducer::deliveryCallback would delete the "opaque"
+    if (!error) opaque.release();
+
+    return error;   // NOLINT: leak of memory pointed to by 'opaquePtr' [clang-analyzer-cplusplus.NewDeleteLeaks]
+
 }
 
-inline std::error_code
+inline Error
 KafkaProducer::flush(std::chrono::milliseconds timeout)
 {
-    return ErrorCode(rd_kafka_flush(getClientHandle(), convertMsDurationToInt(timeout)));
+    return Error{rd_kafka_flush(getClientHandle(), convertMsDurationToInt(timeout))};
 }
 
-inline std::error_code
+inline Error
 KafkaProducer::close(std::chrono::milliseconds timeout)
 {
     _opened = false;
 
-    std::error_code ec = flush(timeout);
+    auto error = flush(timeout);
 
-    std::string errMsg = ec.message();
+    std::string errMsg = error.message();
     KAFKA_API_DO_LOG(Log::Level::Info, "closed [%s]", errMsg.c_str());
 
-    return ec;
+    return error;
 }
 
 inline void
 KafkaProducer::initTransactions(std::chrono::milliseconds timeout)
 {
-    auto error =  Error{rd_kafka_init_transactions(getClientHandle(), static_cast<int>(timeout.count()))};  // NOLINT
+    Error error{ rd_kafka_init_transactions(getClientHandle(), static_cast<int>(timeout.count())) };  // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
 inline void
 KafkaProducer::beginTransaction()
 {
-    auto error = Error{rd_kafka_begin_transaction(getClientHandle())};
+    Error error{ rd_kafka_begin_transaction(getClientHandle()) };
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
 inline void
 KafkaProducer::commitTransaction(std::chrono::milliseconds timeout)
 {
-    auto error = Error{rd_kafka_commit_transaction(getClientHandle(), static_cast<int>(timeout.count()))};  // NOLINT
+    Error error{ rd_kafka_commit_transaction(getClientHandle(), static_cast<int>(timeout.count())) };  // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
 inline void
 KafkaProducer::abortTransaction(std::chrono::milliseconds timeout)
 {
-    auto error = Error{rd_kafka_abort_transaction(getClientHandle(), static_cast<int>(timeout.count()))};   // NOLINT
+    Error error{ rd_kafka_abort_transaction(getClientHandle(), static_cast<int>(timeout.count())) };   // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
@@ -342,10 +361,10 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           t
                                         std::chrono::milliseconds              timeout)
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(topicPartitionOffsets));
-    auto error = Error{rd_kafka_send_offsets_to_transaction(getClientHandle(),
-                                                            rk_tpos.get(),
-                                                            groupMetadata.rawHandle(),
-                                                            static_cast<int>(timeout.count()))};            // NOLINT
+    Error error{ rd_kafka_send_offsets_to_transaction(getClientHandle(),
+                                                     rk_tpos.get(),
+                                                     groupMetadata.rawHandle(),
+                                                     static_cast<int>(timeout.count())) };            // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
@@ -382,7 +401,7 @@ public:
     /**
      * Close this producer. This method waits up to timeout for the producer to complete the sending of all incomplete requests.
      */
-    std::error_code close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
+    Error close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
     {
         _pollThread.reset(); // Join the polling thread (in case it's running)
         _pollable.reset();
@@ -410,11 +429,11 @@ public:
      */
     void send(const ProducerRecord& record, const Producer::Callback& cb, SendOption option = SendOption::NoCopyRecordValue)
     {
-        rd_kafka_resp_err_t respErr = sendMessage(record,
-                                                  std::make_unique<DeliveryCbOpaque>(record.id(), cb),
-                                                  option,
-                                                  _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
-        KAFKA_THROW_IF_WITH_RESP_ERROR(respErr);
+        Error error{ sendMessage(record,
+                                 std::make_unique<DeliveryCbOpaque>(record.id(), cb),
+                                 option,
+                                 _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock) };
+        KAFKA_THROW_IF_WITH_ERROR(error);
     }
 
     /**
@@ -435,13 +454,12 @@ public:
      *   Broker errors,
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    void send(const ProducerRecord& record, const Producer::Callback& cb, std::error_code& ec, SendOption option = SendOption::NoCopyRecordValue)
+    void send(const ProducerRecord& record, const Producer::Callback& cb, Error& error, SendOption option = SendOption::NoCopyRecordValue)
     {
-        rd_kafka_resp_err_t respErr = sendMessage(record,
-                                                  std::make_unique<DeliveryCbOpaque>(record.id(), cb),
-                                                  option,
-                                                  _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
-        ec = ErrorCode(respErr);
+        error = sendMessage(record,
+                            std::make_unique<DeliveryCbOpaque>(record.id(), cb),
+                            option,
+                            _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
     }
 
     /**
@@ -497,19 +515,19 @@ public:
      */
     Producer::RecordMetadata send(const ProducerRecord& record)
     {
-        std::error_code deliveryError;
+        Error deliveryError;
         std::promise<Producer::RecordMetadata> metadataPromise;
         auto metadataFuture = metadataPromise.get_future();
 
-        auto cb = [&deliveryError, &metadataPromise] (const Producer::RecordMetadata& metadata, std::error_code ec) {
-            deliveryError = ec;
+        auto cb = [&deliveryError, &metadataPromise] (const Producer::RecordMetadata& metadata, const Error& error) {
+            deliveryError = error;
             metadataPromise.set_value(metadata);
         };
-        rd_kafka_resp_err_t sendError = sendMessage(record,
-                                                    std::make_unique<DeliveryCbOpaque>(record.id(), cb),
-                                                    SendOption::NoCopyRecordValue,
-                                                    ActionWhileQueueIsFull::NoBlock);
-        KAFKA_THROW_IF_WITH_RESP_ERROR(sendError);
+        Error sendError{ sendMessage(record,
+                                     std::make_unique<DeliveryCbOpaque>(record.id(), cb),
+                                     SendOption::NoCopyRecordValue,
+                                     ActionWhileQueueIsFull::NoBlock) };
+        KAFKA_THROW_IF_WITH_ERROR(sendError);
 
         while (metadataFuture.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready)
         {
@@ -517,7 +535,7 @@ public:
         }
 
         auto metadata = metadataFuture.get();
-        KAFKA_THROW_IF_WITH_RESP_ERROR(static_cast<rd_kafka_resp_err_t>(deliveryError.value()));
+        KAFKA_THROW_IF_WITH_ERROR(deliveryError);
 
         return metadata;
     }
@@ -525,10 +543,11 @@ public:
     /**
      * Close this producer. This method waits up to timeout for the producer to complete the sending of all incomplete requests.
      */
-    std::error_code close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
+    Error close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
     {
         return KafkaProducer::close(timeout);
     }
+
 private:
     static Properties validateAndReformProperties(const Properties& origProperties)
     {

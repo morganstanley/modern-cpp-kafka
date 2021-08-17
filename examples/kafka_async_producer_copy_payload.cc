@@ -36,11 +36,11 @@ int main(int argc, char **argv)
             // Send the message.
             producer.send(record,
                           // The delivery report handler
-                          [](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
-                              if (!ec) {
+                          [](const kafka::Producer::RecordMetadata& metadata, const kafka::Error& error) {
+                              if (!error) {
                                   std::cout << "% Message delivered: " << metadata.toString() << std::endl;
                               } else {
-                                  std::cerr << "% Message delivery failed: " << ec.message() << std::endl;
+                                  std::cerr << "% Message delivery failed: " << error.message() << std::endl;
                               }
                           },
                           // The memory block given by record.value() would be copied
