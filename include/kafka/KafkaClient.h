@@ -31,7 +31,7 @@ class KafkaClient
 {
 protected:
     using ConfigCallbacksRegister = std::function<void(rd_kafka_conf_t*)>;
-    using StatsCallback           = std::function<void(std::string)>;
+    using StatsCallback           = std::function<void(const std::string&)>;
 
     enum class ClientType { KafkaConsumer, KafkaProducer, AdminClient };
     static std::string getClientTypeString(ClientType type)
@@ -178,6 +178,12 @@ protected:
     // To avoid double-close
     bool _opened = false;
 
+#if COMPILER_SUPPORTS_CPP_17
+    static constexpr int EVENT_POLLING_INTERVAL_MS = 100;
+#else
+    enum { EVENT_POLLING_INTERVAL_MS  = 100 };
+#endif
+
 private:
     std::string         _clientId;
     std::string         _clientName;
@@ -191,7 +197,7 @@ private:
     void onLog(int level, const char* fac, const char* buf) const;
 
     // Stats callback (for class instance)
-    void onStats(std::string&& jsonString);
+    void onStats(const std::string& jsonString);
 
     static const constexpr char* BOOTSTRAP_SERVERS = "bootstrap.servers";
     static const constexpr char* CLIENT_ID         = "client.id";
@@ -447,15 +453,16 @@ KafkaClient::logCallback(const rd_kafka_t* rk, int level, const char* fac, const
 }
 
 inline void
-KafkaClient::onStats(std::string&& jsonString)
+KafkaClient::onStats(const std::string& jsonString)
 {
-    if (_statsCb) _statsCb(std::move(jsonString));
+    if (_statsCb) _statsCb(jsonString);
 }
 
 inline int
 KafkaClient::statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, void* /*opaque*/)
 {
-    kafkaClient(rk).onStats(std::string(jsonStrBuf, jsonStrBuf+jsonStrLen));
+    std::string stats(jsonStrBuf, jsonStrBuf+jsonStrLen);
+    kafkaClient(rk).onStats(stats);
     return 0;
 }
 

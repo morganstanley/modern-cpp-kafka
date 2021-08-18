@@ -49,8 +49,8 @@ protected:
         setGroupId(*groupId);
 
         // Redirect the reply queue (to the client group queue)
-        Error error{ rd_kafka_poll_set_consumer(getClientHandle()) };
-        KAFKA_THROW_IF_WITH_ERROR(error);
+        Error result{ rd_kafka_poll_set_consumer(getClientHandle()) };
+        KAFKA_THROW_IF_WITH_ERROR(result);
 
         // Initialize message-fetching queue
         _rk_queue.reset(rd_kafka_queue_get_consumer(getClientHandle()));
@@ -220,7 +220,6 @@ public:
      */
     Consumer::ConsumerGroupMetadata groupMetadata();
 
-
 protected:
     static const constexpr char* ENABLE_AUTO_OFFSET_STORE = "enable.auto.offset.store";
     static const constexpr char* ENABLE_AUTO_COMMIT       = "enable.auto.commit";
@@ -273,6 +272,15 @@ private:
     TopicPartitions _assignment;
     // Assignment from user's input, -- by calling "assign()"
     TopicPartitions _userAssignment;
+    // Subscription from user's input, -- by calling "subscribe()"
+    Topics          _userSubscription;
+
+    enum class PendingEvent { PartitionsAssignment, PartitionsRevocation };
+    Optional<PendingEvent> _pendingEvent;
+
+    // Identify whether the "partition.assignment.strategy" is "cooperative-sticky"
+    Optional<bool> _cooperativeEnabled;
+    bool isCooperativeEnabled() const { return _cooperativeEnabled && *_cooperativeEnabled; }
 
     // The offsets to store (and commit later)
     std::map<TopicPartition, Offset> _offsetsToStore;
@@ -359,50 +367,98 @@ KafkaConsumer::close()
 inline void
 KafkaConsumer::subscribe(const Topics& topics, Consumer::RebalanceCallback rebalanceCallback, std::chrono::milliseconds timeout)
 {
-    std::string topicsStr = toString(topics);
-
     if (!_userAssignment.empty())
     {
         KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__FAIL, "Unexpected Operation! Once assign() was used, subscribe() should not be called any more!"));
     }
 
+    if (isCooperativeEnabled() && topics == _userSubscription)
+    {
+        KAFKA_API_DO_LOG(Log::Level::Info, "skip subscribe (no change since last time)");
+        return;
+    }
+
+    _userSubscription = topics;
+
+    std::string topicsStr = toString(topics);
     KAFKA_API_DO_LOG(Log::Level::Info, "will subscribe, topics[%s]", topicsStr.c_str());
 
     _rebalanceCb = std::move(rebalanceCallback);
 
     auto rk_topics = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(topics));
 
-    Error error{ rd_kafka_subscribe(getClientHandle(), rk_topics.get()) };
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    Error result{ rd_kafka_subscribe(getClientHandle(), rk_topics.get()) };
+    KAFKA_THROW_IF_WITH_ERROR(result);
 
-    // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), static_cast<int>(timeout.count()));        // NOLLINT
+    _pendingEvent = PendingEvent::PartitionsAssignment;
 
-    KAFKA_API_DO_LOG(Log::Level::Info, "subscribed, topics[%s]", topicsStr.c_str());
+    // The rebalcance callback would be served during the time (within this thread)
+    for (const auto end = std::chrono::steady_clock::now() + timeout; std::chrono::steady_clock::now() < end; )
+    {
+        rd_kafka_poll(getClientHandle(), EVENT_POLLING_INTERVAL_MS);
+
+        if (!_pendingEvent)
+        {
+            KAFKA_API_DO_LOG(Log::Level::Info, "subscribed, topics[%s]", topicsStr.c_str());
+            return;
+        }
+    }
+
+    KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__TIMED_OUT, "subscribe() timed out!"));
 }
 
 inline void
 KafkaConsumer::unsubscribe(std::chrono::milliseconds timeout)
 {
+    if (_userSubscription.empty() && _userAssignment.empty())
+    {
+        KAFKA_API_DO_LOG(Log::Level::Info, "skip unsubscribe (no assignment/subscription yet)");
+        return;
+    }
+
     KAFKA_API_DO_LOG(Log::Level::Info, "will unsubscribe");
 
-    Error error{ rd_kafka_unsubscribe(getClientHandle()) };
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    // While it's for the previous `assign(...)`
+    if (!_userAssignment.empty())
+    {
+        changeAssignment(isCooperativeEnabled() ? PartitionsRebalanceEvent::IncrementalUnassign : PartitionsRebalanceEvent::Revoke,
+                         _userAssignment);
+        _userAssignment.clear();
 
-    // The rebalcance callback (e.g. "assign", etc) would be served during the time (within this thread)
-    rd_kafka_poll(getClientHandle(), static_cast<int>(timeout.count()));        // NOLLINT
+        KAFKA_API_DO_LOG(Log::Level::Info, "unsubscribed (the previously assigned partitions)");
+        return;
+    }
 
-    KAFKA_API_DO_LOG(Log::Level::Info, "unsubscribed");
+    _userSubscription.clear();
+
+    Error result{ rd_kafka_unsubscribe(getClientHandle()) };
+    KAFKA_THROW_IF_WITH_ERROR(result);
+
+    _pendingEvent = PendingEvent::PartitionsRevocation;
+
+    // The rebalance callback would be served during the time (within this thread)
+    for (const auto end = std::chrono::steady_clock::now() + timeout; std::chrono::steady_clock::now() < end; )
+    {
+        rd_kafka_poll(getClientHandle(), EVENT_POLLING_INTERVAL_MS);
+
+        if (!_pendingEvent)
+        {
+            KAFKA_API_DO_LOG(Log::Level::Info, "unsubscribed");
+            return;
+        }
+    }
+
+    KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__TIMED_OUT, "unsubscribe() timed out!"));
 }
 
 inline Topics
 KafkaConsumer::subscription() const
 {
     rd_kafka_topic_partition_list_t* raw_topics = nullptr;
-    Error error{ rd_kafka_subscription(getClientHandle(), &raw_topics) };
+    Error result{ rd_kafka_subscription(getClientHandle(), &raw_topics) };
     auto rk_topics = rd_kafka_topic_partition_list_unique_ptr(raw_topics);
 
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    KAFKA_THROW_IF_WITH_ERROR(result);
 
     return getTopics(rk_topics.get());
 }
@@ -412,37 +468,70 @@ KafkaConsumer::changeAssignment(PartitionsRebalanceEvent event, const TopicParti
 {
     auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(tps));
 
-    std::unique_ptr<Error> result;
+    Error result;
     switch (event)
     {
         case PartitionsRebalanceEvent::Assign:
+            result = Error{ rd_kafka_assign(getClientHandle(), rk_tps.get()) };
+            // Update assignment
+            _assignment = tps;
+            break;
+
         case PartitionsRebalanceEvent::Revoke:
-            result = std::make_unique<Error>(rd_kafka_assign(getClientHandle(), (rk_tps->cnt > 0) ? rk_tps.get() : nullptr));
+            result = Error{ rd_kafka_assign(getClientHandle(), nullptr) };
+            // Update assignment
+            _assignment.clear();
             break;
+
         case PartitionsRebalanceEvent::IncrementalAssign:
-            result = std::make_unique<Error>(rd_kafka_incremental_assign(getClientHandle(), rk_tps.get()));
+            result = Error{ rd_kafka_incremental_assign(getClientHandle(), rk_tps.get()) };
+            // Update assignment
+            for (const auto& tp: tps)
+            {
+                auto found = _assignment.find(tp);
+                if (found != _assignment.end())
+                {
+                    std::string tpStr = toString(tp);
+                    KAFKA_API_DO_LOG(Log::Level::Err, "incremental assign partition[%s] has already been assigned", tpStr.c_str());
+                    continue;
+                }
+                _assignment.emplace(tp);
+            }
             break;
+
         case PartitionsRebalanceEvent::IncrementalUnassign:
-            result = std::make_unique<Error>(rd_kafka_incremental_unassign(getClientHandle(), rk_tps.get()));
+            result = Error{ rd_kafka_incremental_unassign(getClientHandle(), rk_tps.get()) };
+            // Update assignment
+            for (const auto& tp: tps)
+            {
+                auto found = _assignment.find(tp);
+                if (found == _assignment.end())
+                {
+                    std::string tpStr = toString(tp);
+                    KAFKA_API_DO_LOG(Log::Level::Err, "incremental unassign partition[%s] could not be found", tpStr.c_str());
+                    continue;
+                }
+                _assignment.erase(found);
+            }
             break;
     }
 
-    KAFKA_THROW_IF_WITH_ERROR(*result);
-    _assignment = tps;
+    KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
 // Assign Topic-Partitions
 inline void
 KafkaConsumer::assign(const TopicPartitions& topicPartitions)
 {
-    if (!subscription().empty())
+    if (!_userSubscription.empty())
     {
         KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__FAIL, "Unexpected Operation! Once subscribe() was used, assign() should not be called any more!"));
     }
 
     _userAssignment = topicPartitions;
 
-    changeAssignment(PartitionsRebalanceEvent::Assign, topicPartitions);
+    changeAssignment(isCooperativeEnabled() ? PartitionsRebalanceEvent::IncrementalAssign : PartitionsRebalanceEvent::Assign,
+                     topicPartitions);
 }
 
 // Assignment
@@ -450,11 +539,11 @@ inline TopicPartitions
 KafkaConsumer::assignment() const
 {
     rd_kafka_topic_partition_list_t* raw_tps = nullptr;
-    Error error{ rd_kafka_assignment(getClientHandle(), &raw_tps) };
+    Error result{ rd_kafka_assignment(getClientHandle(), &raw_tps) };
 
     auto rk_tps = rd_kafka_topic_partition_list_unique_ptr(raw_tps);
 
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    KAFKA_THROW_IF_WITH_ERROR(result);
 
     return getTopicPartitions(rk_tps.get());
 }
@@ -725,17 +814,31 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
         return;
     }
 
-    const char* protocol = rd_kafka_rebalance_protocol(getClientHandle());
-    bool cooperativeEnabled = (protocol && (std::string(protocol) == "COOPERATIVE"));
+    // Initialize attribute for cooperative protocol
+    if (!_cooperativeEnabled)
+    {
+        if (const char* protocol = rd_kafka_rebalance_protocol(getClientHandle()))
+        {
+            _cooperativeEnabled = (std::string(protocol) == "COOPERATIVE");
+        }
+    }
 
     KAFKA_API_DO_LOG(Log::Level::Info, "re-balance event triggered[%s], cooperative[%s], topic-partitions[%s]",
                      err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? "ASSIGN_PARTITIONS" : "REVOKE_PARTITIONS",
-                     cooperativeEnabled ? "enabled" : "disabled",
+                     isCooperativeEnabled() ? "enabled" : "disabled",
                      tpsStr.c_str());
 
+    // Remove the mark for pending event
+    if (_pendingEvent
+        && ((err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS && *_pendingEvent == PendingEvent::PartitionsAssignment)
+            || (err == RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS && *_pendingEvent == PendingEvent::PartitionsRevocation)))
+    {
+        _pendingEvent.reset();
+    }
+
     PartitionsRebalanceEvent event = (err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ?
-                                         (cooperativeEnabled ? PartitionsRebalanceEvent::IncrementalAssign : PartitionsRebalanceEvent::Assign)
-                                         : (cooperativeEnabled ? PartitionsRebalanceEvent::IncrementalUnassign : PartitionsRebalanceEvent::Revoke));
+                                         (isCooperativeEnabled() ? PartitionsRebalanceEvent::IncrementalAssign : PartitionsRebalanceEvent::Assign)
+                                         : (isCooperativeEnabled() ? PartitionsRebalanceEvent::IncrementalUnassign : PartitionsRebalanceEvent::Revoke));
 
     if (err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS)
     {
@@ -750,7 +853,7 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
 
     if (err == RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS)
     {
-        changeAssignment(event, cooperativeEnabled ? tps : TopicPartitions{});
+        changeAssignment(event, isCooperativeEnabled() ? tps : TopicPartitions{});
     }
 }
 
