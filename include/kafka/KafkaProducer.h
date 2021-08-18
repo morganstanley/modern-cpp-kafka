@@ -330,29 +330,29 @@ KafkaProducer::close(std::chrono::milliseconds timeout)
 inline void
 KafkaProducer::initTransactions(std::chrono::milliseconds timeout)
 {
-    Error error{ rd_kafka_init_transactions(getClientHandle(), static_cast<int>(timeout.count())) };  // NOLINT
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    Error result{ rd_kafka_init_transactions(getClientHandle(), static_cast<int>(timeout.count())) };  // NOLINT
+    KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
 inline void
 KafkaProducer::beginTransaction()
 {
-    Error error{ rd_kafka_begin_transaction(getClientHandle()) };
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    Error result{ rd_kafka_begin_transaction(getClientHandle()) };
+    KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
 inline void
 KafkaProducer::commitTransaction(std::chrono::milliseconds timeout)
 {
-    Error error{ rd_kafka_commit_transaction(getClientHandle(), static_cast<int>(timeout.count())) };  // NOLINT
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    Error result{ rd_kafka_commit_transaction(getClientHandle(), static_cast<int>(timeout.count())) };  // NOLINT
+    KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
 inline void
 KafkaProducer::abortTransaction(std::chrono::milliseconds timeout)
 {
-    Error error{ rd_kafka_abort_transaction(getClientHandle(), static_cast<int>(timeout.count())) };   // NOLINT
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    Error result{ rd_kafka_abort_transaction(getClientHandle(), static_cast<int>(timeout.count())) };   // NOLINT
+    KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
 inline void
@@ -361,11 +361,11 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           t
                                         std::chrono::milliseconds              timeout)
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(topicPartitionOffsets));
-    Error error{ rd_kafka_send_offsets_to_transaction(getClientHandle(),
-                                                     rk_tpos.get(),
-                                                     groupMetadata.rawHandle(),
-                                                     static_cast<int>(timeout.count())) };            // NOLINT
-    KAFKA_THROW_IF_WITH_ERROR(error);
+    Error result{ rd_kafka_send_offsets_to_transaction(getClientHandle(),
+                                                       rk_tpos.get(),
+                                                       groupMetadata.rawHandle(),
+                                                       static_cast<int>(timeout.count())) };            // NOLINT
+    KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
 /**
@@ -429,11 +429,11 @@ public:
      */
     void send(const ProducerRecord& record, const Producer::Callback& cb, SendOption option = SendOption::NoCopyRecordValue)
     {
-        Error error{ sendMessage(record,
-                                 std::make_unique<DeliveryCbOpaque>(record.id(), cb),
-                                 option,
-                                 _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock) };
-        KAFKA_THROW_IF_WITH_ERROR(error);
+        Error result{ sendMessage(record,
+                                  std::make_unique<DeliveryCbOpaque>(record.id(), cb),
+                                  option,
+                                  _pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock) };
+        KAFKA_THROW_IF_WITH_ERROR(result);
     }
 
     /**
@@ -515,19 +515,19 @@ public:
      */
     Producer::RecordMetadata send(const ProducerRecord& record)
     {
-        Error deliveryError;
+        Error deliveryResult;
         std::promise<Producer::RecordMetadata> metadataPromise;
         auto metadataFuture = metadataPromise.get_future();
 
-        auto cb = [&deliveryError, &metadataPromise] (const Producer::RecordMetadata& metadata, const Error& error) {
-            deliveryError = error;
+        auto cb = [&deliveryResult, &metadataPromise] (const Producer::RecordMetadata& metadata, const Error& error) {
+            deliveryResult = error;
             metadataPromise.set_value(metadata);
         };
-        Error sendError{ sendMessage(record,
-                                     std::make_unique<DeliveryCbOpaque>(record.id(), cb),
-                                     SendOption::NoCopyRecordValue,
-                                     ActionWhileQueueIsFull::NoBlock) };
-        KAFKA_THROW_IF_WITH_ERROR(sendError);
+        Error sendResult{ sendMessage(record,
+                                      std::make_unique<DeliveryCbOpaque>(record.id(), cb),
+                                      SendOption::NoCopyRecordValue,
+                                      ActionWhileQueueIsFull::NoBlock) };
+        KAFKA_THROW_IF_WITH_ERROR(sendResult);
 
         while (metadataFuture.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready)
         {
@@ -535,7 +535,7 @@ public:
         }
 
         auto metadata = metadataFuture.get();
-        KAFKA_THROW_IF_WITH_ERROR(deliveryError);
+        KAFKA_THROW_IF_WITH_ERROR(deliveryResult);
 
         return metadata;
     }

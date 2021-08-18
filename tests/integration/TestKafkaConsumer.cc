@@ -1857,26 +1857,13 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
 TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
 {
     const Topic topic = Utility::getRandomString();
-    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                      .put("allow.auto.create.topics", "true"));
 
-    constexpr int MAX_RETRIES = 2;
-    for (int i = 0; i < MAX_RETRIES; ++i)
-    {
-        // Subscribe topics
-        consumer.subscribe({topic}, Consumer::NullRebalanceCallback, std::chrono::milliseconds(10));
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscription: " << toString(consumer.subscription()) << std::endl;
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " assignment: " << toString(consumer.assignment()) << std::endl;
+    // Subscribe topics, but would never make it!
+    EXPECT_KAFKA_THROW(consumer.subscribe({topic}, Consumer::NullRebalanceCallback, std::chrono::seconds(10)), RD_KAFKA_RESP_ERR__TIMED_OUT);
 
-        if (!consumer.assignment().empty()) break;
-
-        consumer.unsubscribe(std::chrono::milliseconds(5));
-    }
-
-    // Would never make it!
     EXPECT_TRUE(consumer.assignment().empty());
 }
 
@@ -1983,5 +1970,120 @@ TEST(KafkaAutoCommitConsumer, FetchBrokerMetadataTriggersRejoin)
 
     // The newly created topic-partitions should be within the assignment as well
     EXPECT_EQ(1, assignment.count({topic2, 0}));
+}
+
+TEST(KafkaAutoCommitConsumer, SubscribeNotConflictWithStatsEvent)
+{
+    const Topic topic1 = Utility::getRandomString();
+    const Topic topic2 = Utility::getRandomString();
+    const Topic topic3 = Utility::getRandomString();
+
+    // Prepare topics
+    KafkaTestUtility::CreateKafkaTopic(topic1, 1, 1);
+    KafkaTestUtility::CreateKafkaTopic(topic2, 1, 1);
+    KafkaTestUtility::CreateKafkaTopic(topic3, 1, 1);
+
+    auto testNormalOperations = [topic1, topic2, topic3](const Properties& props) {
+        KafkaTestUtility::PrintDividingLine("[Normal operations] Test with consumer properties[" + props.toString() + "]");
+
+        KafkaAutoCommitConsumer consumer(props);
+
+        // Subscribe topics
+        Topics topicsToSubscribe = {topic1, topic2};
+        KafkaTestUtility::PrintDividingLine("Subscribe to [" + toString(topicsToSubscribe) + "]");
+        consumer.subscribe(topicsToSubscribe);
+        EXPECT_EQ((TopicPartitions{{topic1, 0}, {topic2, 0}}), consumer.assignment());
+
+        KafkaTestUtility::PrintDividingLine("Unsubscribe");
+        consumer.unsubscribe();
+        EXPECT_TRUE(consumer.assignment().empty());
+
+        TopicPartitions topicPartitionsToAssign = {{topic2, 0}, {topic3, 0}};
+        KafkaTestUtility::PrintDividingLine("Assign [" + toString(topicPartitionsToAssign) + "]");
+        consumer.assign(topicPartitionsToAssign);
+        EXPECT_EQ(topicPartitionsToAssign, consumer.assignment());
+
+        KafkaTestUtility::PrintDividingLine("Unsubscribe");
+        consumer.unsubscribe();
+        EXPECT_TRUE(consumer.assignment().empty());
+
+        topicPartitionsToAssign = {{topic1, 0}};
+        KafkaTestUtility::PrintDividingLine("Assign [" + toString(topicPartitionsToAssign) + "]");
+        consumer.assign(topicPartitionsToAssign);
+        EXPECT_EQ(topicPartitionsToAssign, consumer.assignment());
+
+        KafkaTestUtility::PrintDividingLine("Unsubscribe");
+        consumer.unsubscribe();
+        EXPECT_TRUE(consumer.assignment().empty());
+
+        topicsToSubscribe = {topic3};
+        KafkaTestUtility::PrintDividingLine("Subscribe to [" + toString(topicsToSubscribe) + "]");
+        consumer.subscribe(topicsToSubscribe);
+        EXPECT_EQ((TopicPartitions{{topic3, 0}}), consumer.assignment());
+
+        KafkaTestUtility::PrintDividingLine("END");
+    };
+
+    auto testDuplicatedOperations = [topic1, topic2, topic3](const Properties& props) {
+        KafkaTestUtility::PrintDividingLine("[Duplicated operations] Test with consumer properties[" + props.toString() + "]");
+
+        KafkaAutoCommitConsumer consumer(props);
+
+        // Rebalance callback
+        auto rebalanceCb = [](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
+                               if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+                                   std::cout << "[" << Utility::getCurrentTime() << "] PartitionsAssigned: " << toString(tps) << std::endl;
+                               } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
+                                   std::cout << "[" << Utility::getCurrentTime() << "] PartitionsRevoked: " << toString(tps) << std::endl;
+                               }
+                           };
+
+        // Subscribe topics
+        Topics topicsToSubscribe = {topic1};
+        KafkaTestUtility::PrintDividingLine("Subscribe to [" + toString(topicsToSubscribe) + "]");
+        consumer.subscribe(topicsToSubscribe, rebalanceCb);
+        EXPECT_EQ((TopicPartitions{{topic1, 0}}), consumer.assignment());
+
+        KafkaTestUtility::PrintDividingLine("Subscribe to [" + toString(topicsToSubscribe) + "], again");
+        consumer.subscribe(topicsToSubscribe, rebalanceCb);
+        EXPECT_EQ((TopicPartitions{{topic1, 0}}), consumer.assignment());
+
+        topicsToSubscribe = {topic2, topic3};
+        KafkaTestUtility::PrintDividingLine("Subscribe to total different topics[" + toString(topicsToSubscribe) + "]");
+        consumer.subscribe(topicsToSubscribe, rebalanceCb);
+        EXPECT_EQ((TopicPartitions{{topic2, 0}, {topic3, 0}}), consumer.assignment());
+
+        topicsToSubscribe = {topic3};
+        KafkaTestUtility::PrintDividingLine("Subscribe to topics[" + toString(topicsToSubscribe) + "], less then before");
+        consumer.subscribe(topicsToSubscribe, rebalanceCb);
+        EXPECT_EQ((TopicPartitions{{topic3, 0}}), consumer.assignment());
+
+        KafkaTestUtility::PrintDividingLine("Unsubscribe");
+        consumer.unsubscribe();
+        EXPECT_TRUE(consumer.assignment().empty());
+
+        KafkaTestUtility::PrintDividingLine("Unsubscribe, again");
+        consumer.unsubscribe();
+        EXPECT_TRUE(consumer.assignment().empty());
+
+        KafkaTestUtility::PrintDividingLine("END");
+    };
+
+    // Prepare the properties
+    auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
+    props.put("log_level", "6");
+
+    testDuplicatedOperations(props);
+    testNormalOperations(props);
+
+    // Enable statistics event (5 ms)
+    props.put("statistics.interval.ms", "5");
+    testDuplicatedOperations(props);
+    testNormalOperations(props);
+
+    // Try with incremental partitions assignment
+    props.put(ConsumerConfig::PARTITION_ASSIGNMENT_STRATEGY, "cooperative-sticky");
+    testDuplicatedOperations(props);
+    testNormalOperations(props);
 }
 

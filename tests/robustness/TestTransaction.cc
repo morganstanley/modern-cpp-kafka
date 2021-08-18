@@ -18,6 +18,8 @@ TEST(Transaction, DeliveryFailure)
     const std::string messageToSent = "message to sent";
     const std::size_t numMessages   = 10;
 
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     {
         auto record = ProducerRecord(topic, NullKey, Value(messageToSent.c_str(), messageToSent.size()));
 
