@@ -404,6 +404,7 @@ KafkaConsumer::subscribe(const Topics& topics, Consumer::RebalanceCallback rebal
         }
     }
 
+    _pendingEvent.reset();
     KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__TIMED_OUT, "subscribe() timed out!"));
 }
 
@@ -448,6 +449,7 @@ KafkaConsumer::unsubscribe(std::chrono::milliseconds timeout)
         }
     }
 
+    _pendingEvent.reset();
     KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__TIMED_OUT, "unsubscribe() timed out!"));
 }
 
