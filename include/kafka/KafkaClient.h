@@ -32,6 +32,7 @@ class KafkaClient
 protected:
     using ConfigCallbacksRegister = std::function<void(rd_kafka_conf_t*)>;
     using StatsCallback           = std::function<void(const std::string&)>;
+    using ErrorCallback           = std::function<void(const Error&)>;
 
     enum class ClientType { KafkaConsumer, KafkaProducer, AdminClient };
     static std::string getClientTypeString(ClientType type)
@@ -90,6 +91,11 @@ public:
      *       2) The callback would be triggered periodically, receiving the internal statistics info (with JSON format) emited from librdkafka.
      */
     void setStatsCallback(StatsCallback cb) { _statsCb = std::move(cb); }
+
+    /**
+     * Set callback for error notification.
+     */
+    void setErrorCallback(ErrorCallback cb) { _errorCb = std::move(cb); }
 
     /**
      * Return the properties which took effect.
@@ -172,6 +178,9 @@ protected:
     // Statistics callback (for librdkafka)
     static int statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, void* opaque);
 
+    // Error callback (for librdkafka)
+    static void errorCallback(rd_kafka_t* rk, int err, const char* reason, void* opaque);
+
     // Validate properties (and fix it if necesary)
     static Properties validateAndReformProperties(const Properties& origProperties);
 
@@ -191,6 +200,7 @@ private:
     Logger              _logger;
     Properties          _properties;
     StatsCallback       _statsCb;
+    ErrorCallback       _errorCb;
     rd_kafka_unique_ptr _rk;
 
     // Log callback (for class instance)
@@ -198,6 +208,9 @@ private:
 
     // Stats callback (for class instance)
     void onStats(const std::string& jsonString);
+
+    // Error callback (for class instance)
+    void onError(const Error& error);
 
     static const constexpr char* BOOTSTRAP_SERVERS = "bootstrap.servers";
     static const constexpr char* CLIENT_ID         = "client.id";
@@ -341,6 +354,9 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     // Statistics Callback
     rd_kafka_conf_set_stats_cb(rk_conf.get(), KafkaClient::statsCallback);
 
+    // Error Callback
+    rd_kafka_conf_set_error_cb(rk_conf.get(), KafkaClient::errorCallback);
+
     // Other Callbacks
     if (registerCallbacks)
     {
@@ -464,6 +480,32 @@ KafkaClient::statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, 
     std::string stats(jsonStrBuf, jsonStrBuf+jsonStrLen);
     kafkaClient(rk).onStats(stats);
     return 0;
+}
+
+inline void
+KafkaClient::onError(const Error& error)
+{
+    if (_errorCb) _errorCb(error);
+}
+
+inline void
+KafkaClient::errorCallback(rd_kafka_t* rk, int err, const char* reason, void* /*opaque*/)
+{
+    auto respErr = static_cast<rd_kafka_resp_err_t>(err);
+
+    Error error;
+    if (respErr != RD_KAFKA_RESP_ERR__FATAL)
+    {
+        error = Error{respErr, reason};
+    }
+    else
+    {
+        LogBuffer<LOG_BUFFER_SIZE> errInfo;
+        respErr = rd_kafka_fatal_error(rk, errInfo.str(), errInfo.capacity());
+        error = Error{respErr, errInfo.c_str(), true};
+    }
+
+    kafkaClient(rk).onError(error);
 }
 
 inline Optional<BrokerMetadata>

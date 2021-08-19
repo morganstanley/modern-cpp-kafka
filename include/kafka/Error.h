@@ -34,9 +34,12 @@ public:
     // The error with rich info
     explicit Error(rd_kafka_error_t* error = nullptr): _rkError(error, RkErrorDeleter) {}
     // The error with brief info
-    explicit Error(rd_kafka_resp_err_t respErr): _rkRespErr(respErr) {}
+    explicit Error(rd_kafka_resp_err_t respErr): _respErr(respErr) {}
     // The error with detailed message
-    Error(rd_kafka_resp_err_t respErr, std::string message): _rkRespErr(respErr), _message(std::move(message)) {}
+    Error(rd_kafka_resp_err_t respErr, std::string message)
+        : _respErr(respErr), _message(std::move(message)) {}
+    Error(rd_kafka_resp_err_t respErr, std::string message, bool fatal)
+        : _respErr(respErr), _message(std::move(message)), _fatal(fatal) {}
 
     explicit operator bool() const { return static_cast<bool>(value()); }
 
@@ -58,7 +61,7 @@ public:
       */
     int             value()        const
     {
-        return static_cast<int>(_rkError ? rd_kafka_error_code(_rkError.get()) : _rkRespErr);
+        return static_cast<int>(_rkError ? rd_kafka_error_code(_rkError.get()) : _respErr);
     }
 
     /**
@@ -67,7 +70,7 @@ public:
     std::string     message()     const
     {
         return _message ? *_message :
-                 (_rkError ? rd_kafka_error_string(_rkError.get()) : rd_kafka_err2str(_rkRespErr));
+                 (_rkError ? rd_kafka_error_string(_rkError.get()) : rd_kafka_err2str(_respErr));
     }
 
     /**
@@ -75,7 +78,7 @@ public:
      */
     Optional<bool>  isFatal()     const
     {
-        return  _rkError ? rd_kafka_error_is_fatal(_rkError.get()) : Optional<bool>{};
+        return  _rkError ? rd_kafka_error_is_fatal(_rkError.get()) : _fatal;
     }
 
     /**
@@ -87,9 +90,10 @@ public:
     }
 
 private:
-    rd_kafka_error_shared_ptr _rkError;       // For error with rich info
-    rd_kafka_resp_err_t       _rkRespErr{};   // For error with a simple response code
-    Optional<std::string>     _message;       // For additional detailed message
+    rd_kafka_error_shared_ptr _rkError;     // For error with rich info
+    rd_kafka_resp_err_t       _respErr{};   // For error with a simple response code
+    Optional<std::string>     _message;     // Additional detailed message (if any)
+    Optional<bool>            _fatal;       // Fatal flag (if any)
 };
 
 } // end of KAFKA_API
