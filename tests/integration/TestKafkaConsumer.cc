@@ -1861,10 +1861,44 @@ TEST(KafkaAutoCommitConsumer, AutoCreateTopics)
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                      .put("allow.auto.create.topics", "true"));
 
+    // The error would be triggered while consumer tries to subscribe a non-existed topic.
+    consumer.setErrorCallback([](const Error& error) {
+                                  std::cout << "consumer met an error: " << error.toString() << std::endl;
+                                  EXPECT_EQ(RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART, error.value());
+                              });
+
     // Subscribe topics, but would never make it!
-    EXPECT_KAFKA_THROW(consumer.subscribe({topic}, Consumer::NullRebalanceCallback, std::chrono::seconds(10)), RD_KAFKA_RESP_ERR__TIMED_OUT);
+    EXPECT_KAFKA_THROW(consumer.subscribe({topic}, Consumer::NullRebalanceCallback, std::chrono::seconds(10)),
+                       RD_KAFKA_RESP_ERR__TIMED_OUT);
 
     EXPECT_TRUE(consumer.assignment().empty());
+}
+
+TEST(KafkaAutoCommitConsumer, CreateTopicAfterSubscribe)
+{
+    const Topic topic = Utility::getRandomString();
+
+    auto createTopicAfterSeconds = [topic](int seconds) {
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
+        KafkaTestUtility::CreateKafkaTopic(topic, 1, 1);
+    };
+
+    KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+
+    // The error would be triggered while consumer tries to subscribe a non-existed topic.
+    consumer.setErrorCallback([](const Error& error) {
+                                 KafkaTestUtility::DumpError(error);
+                                 EXPECT_EQ(RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART, error.value());
+                              });
+
+    // The topic would be created after 5 seconds
+    KafkaTestUtility::JoiningThread consumer1Thread(createTopicAfterSeconds, 5);
+
+    std::cout << "[" << Utility::getCurrentTime() << "] Consumer will subscribe" << std::endl;
+    EXPECT_KAFKA_NO_THROW(consumer.subscribe({topic}));
+    std::cout << "[" << Utility::getCurrentTime() << "] Consumer just subscribed" << std::endl;
+
+    EXPECT_FALSE(consumer.assignment().empty());
 }
 
 TEST(KafkaAutoCommitConsumer, CooperativeRebalance)

@@ -74,6 +74,23 @@ public:
     }
 
     /**
+     * Detailed error string.
+     */
+    std::string     toString()     const
+    {
+        std::ostringstream oss;
+
+        oss << rd_kafka_err2str(static_cast<rd_kafka_resp_err_t>(value())) << " [" << value() << "]";
+
+        if (auto fatal = isFatal())         oss << " | " << (*fatal ? "fatal" : "non-fatal");
+        if (transactionRequiresAbort())     oss << " | transaction-requires-abort";
+        if (auto retriable = isRetriable()) oss << " | " << (*retriable ? "retriable" : "non-retriable");
+        if (_message)                       oss << " | " << *_message;
+
+        return oss.str();
+    }
+
+    /**
      * Fatal error indicates that the client instance is no longer usable.
      */
     Optional<bool>  isFatal()     const
@@ -87,6 +104,18 @@ public:
     Optional<bool>  isRetriable() const
     {
         return _rkError ? rd_kafka_error_is_retriable(_rkError.get()) : Optional<bool>{};
+    }
+
+    /**
+     * Show whether the error is an abortable transaction error.
+     *
+     * Note:
+     * 1. Only valid for transactional API.
+     * 2. If `true`, the producer must call `abortTransaction` and start a new transaction with `beginTransaction` to proceed with transactions.
+     */
+    bool transactionRequiresAbort() const
+    {
+        return _rkError ? rd_kafka_error_txn_requires_abort(_rkError.get()) : false;
     }
 
 private:

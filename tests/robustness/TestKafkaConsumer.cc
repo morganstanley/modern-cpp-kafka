@@ -42,6 +42,7 @@ TEST(KafkaManualCommitConsumer, AlwaysFinishClosing_ManuallyPollEvents)
     {
         // Start a consumer (which need to call `pollEvents()` to trigger the commit callback)
         KafkaManualCommitConsumer consumer(props, KafkaClient::EventsPollingOption::Manual);
+        consumer.setErrorCallback(KafkaTestUtility::DumpError);
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
         // Subscribe the topic
@@ -106,6 +107,7 @@ TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
     {
         // Start a consumer
         KafkaManualCommitConsumer consumer(props);
+        consumer.setErrorCallback(KafkaTestUtility::DumpError);
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
         // Subscribe th topic
@@ -165,6 +167,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
 
     // Start the consumer
     KafkaAutoCommitConsumer consumer(props);
+    consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
 
@@ -202,6 +205,9 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
 
 TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
 {
+    const Topic topic = Utility::getRandomString();
+    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                             .put(ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
@@ -209,14 +215,11 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
 
     // Start the consumer
     KafkaAutoCommitConsumer consumer(props);
+    consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
-
-    const Topic topic = Utility::getRandomString();
-    KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
-
     TopicPartitions assignment;
     // In some corner cases, the assigned partitions might be empty (due to "Local: Broker node update" error), and we'll retry
     while (assignment.empty())
@@ -261,6 +264,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
 
     // Start the consumer
     KafkaAutoCommitConsumer consumer(props);
+    consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe the topic
@@ -325,6 +329,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopDuringMsgPoll)
 
     // Start the consumer
     KafkaAutoCommitConsumer consumer(props);
+    consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe the topic

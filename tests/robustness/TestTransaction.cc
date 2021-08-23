@@ -26,6 +26,7 @@ TEST(Transaction, DeliveryFailure)
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                       .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")  // The delivery would fail in a short timeout
                                       .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
+        producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         std::cout << "[" << Utility::getCurrentTime() << "] Producer created." << std::endl;
 
