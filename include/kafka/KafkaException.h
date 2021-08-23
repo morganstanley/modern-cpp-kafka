@@ -38,8 +38,7 @@ public:
      */
     const char* what() const noexcept override
     {
-        _what = Utility::getLocalTimeString(_when)  + ": " + _error->message() + " [" + std::to_string(_error->value())
-                  + "] (" + std::string(_filename) + ":" + std::to_string(_lineno) + ")";
+        _what = Utility::getLocalTimeString(_when) + ": " + _error->toString() + " (" + std::string(_filename) + ":" + std::to_string(_lineno) + ")";
         return _what.c_str();
     }
 

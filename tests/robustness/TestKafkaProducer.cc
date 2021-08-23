@@ -32,6 +32,7 @@ TEST(KafkaSyncProducer, RecordTimestamp)
 
     // Prepare a producer
     KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
+    producer.setErrorCallback(KafkaTestUtility::DumpError);
 
     constexpr int TIME_LAPSE_THRESHOLD_MS = 1000;
     using namespace std::chrono;
@@ -124,6 +125,7 @@ TEST(KafkaAsyncProducer, NoMissedDeliveryCallback)
 
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::MESSAGE_TIMEOUT_MS, "5000"));
+        producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -157,6 +159,7 @@ TEST(KafkaAsyncProducer, MightMissDeliveryCallbackIfCloseWithLimitedTimeout)
     std::size_t deliveryCount = 0;
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         KafkaTestUtility::PauseBrokers();
 
@@ -202,6 +205,7 @@ TEST(KafkaAsyncProducer, BrokerStopWhileSendingMessages)
     std::size_t deliveryCount = 0;
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         // Pause the brokers for a while (shorter then the default "MESSAGE_TIMEOUT_MS" for producer, which is 10 seconds)
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -249,6 +253,7 @@ TEST(KafkaAsyncProducer, Send_AckTimeout)
     {
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                         .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")); // If with no response, the delivery would fail in a short time
+        producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -287,6 +292,7 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AckTimeout)
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                         .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000"), // If with no response, the delivery would fail in a short time
                                     KafkaClient::EventsPollingOption::Manual);            // Manually call `pollEvents()`
+        producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -333,6 +339,7 @@ TEST(KafkaAsyncProducer, ManuallyPollEvents_AlwaysFinishClosing)
         KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                         .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000"), // If with no response, the delivery would fail in a short time
                                     KafkaClient::EventsPollingOption::Manual);            // Manually call `pollEvents()`
+        producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -362,6 +369,7 @@ TEST(KafkaSyncProducer, Send_AckTimeout)
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000"));
+    producer.setErrorCallback(KafkaTestUtility::DumpError);
 
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));

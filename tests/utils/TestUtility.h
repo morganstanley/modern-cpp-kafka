@@ -9,6 +9,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <cstdlib>
+#include <functional>
 #include <list>
 #include <regex>
 #include <signal.h>
@@ -19,31 +20,21 @@
     do {                                                                \
         try {                                                           \
             expr;                                                       \
-        } catch (const KafkaException& e) {                                                                  \
-            const auto& error = e.error();                                                                   \
-            std::cout << "Exception caught: " << e.what()                                                    \
-                << (error.isFatal() ? (*error.isFatal() ? ", fatal" : ", non-fatal") : "")                   \
-                << (error.isRetriable() ? (*error.isRetriable() ? ",  retriable" : ", non-retriable") : "")  \
-                << std::endl;                                                                                \
-            EXPECT_EQ(err, e.error().value());                                                               \
-            break;                                                                                           \
+        } catch (const KafkaException& e) {                             \
+            std::cout << "Exception caught: " << e.what() << std::endl; \
+            EXPECT_EQ(err, e.error().value());                          \
+            break;                                                      \
         } catch (...){                                                  \
         }                                                               \
         EXPECT_FALSE(true);                                             \
     } while(false)
 
-#define EXPECT_KAFKA_NO_THROW(expr)   \
-    try {                             \
-        expr;                         \
-    } catch (...){                    \
-        EXPECT_FALSE(true);           \
-    }
-
-#define EXPECT_KAFKA_NO_THROW(expr)   \
-    try {                             \
-        expr;                         \
-    } catch (...){                    \
-        EXPECT_FALSE(true);           \
+#define EXPECT_KAFKA_NO_THROW(expr)                                 \
+    try {                                                           \
+        expr;                                                       \
+    } catch (const KafkaException& e) {                             \
+        std::cerr << "Exception caught: " << e.what() << std::endl; \
+        EXPECT_FALSE(true);                                         \
     }
 
 #define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                           \
@@ -69,9 +60,19 @@
         }                                                           \
     }
 
+
 namespace Kafka = KAFKA_API;
 
 namespace KafkaTestUtility {
+
+inline void
+DumpError(const Kafka::Error& error)
+{
+    // https://en.wikipedia.org/wiki/ANSI_escape_code
+    std::cerr << "\033[1;31m" << "[" << Kafka::Utility::getCurrentTime() << "] ==> Met Error: " << "\033[0m";
+    std::cerr << "\033[4;35m" << error.toString() << "\033[0m" << std::endl;
+};
+
 inline void
 PrintDividingLine(const std::string& description = "")
 {
