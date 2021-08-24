@@ -1885,8 +1885,11 @@ TEST(KafkaAutoCommitConsumer, CreateTopicAfterSubscribe)
 
     KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
+    bool errCbTriggered = false;
+
     // The error would be triggered while consumer tries to subscribe a non-existed topic.
-    consumer.setErrorCallback([](const Error& error) {
+    consumer.setErrorCallback([&errCbTriggered](const Error& error) {
+                                 errCbTriggered = true;
                                  KafkaTestUtility::DumpError(error);
                                  EXPECT_EQ(RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART, error.value());
                               });
@@ -1898,6 +1901,7 @@ TEST(KafkaAutoCommitConsumer, CreateTopicAfterSubscribe)
     EXPECT_KAFKA_NO_THROW(consumer.subscribe({topic}));
     std::cout << "[" << Utility::getCurrentTime() << "] Consumer just subscribed" << std::endl;
 
+    EXPECT_TRUE(errCbTriggered);
     EXPECT_FALSE(consumer.assignment().empty());
 }
 
