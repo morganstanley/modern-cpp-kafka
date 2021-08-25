@@ -12,11 +12,8 @@
 
 #if defined(WIN32) && !defined(NOMINMAX)
 #define NOMINMAX
-#endif
 
-#if ((__cplusplus >= 201703L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
-#define COMPILER_SUPPORTS_CPP_17 1
-#else
-#define COMPILER_SUPPORTS_CPP_17 0
+#define COMPILER_SUPPORTS_CPP_17 ((__cplusplus >= 201703L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
+
 #endif
 
