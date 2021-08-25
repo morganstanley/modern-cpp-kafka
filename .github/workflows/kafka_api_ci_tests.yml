@@ -258,7 +258,9 @@ jobs:
           cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\pthreadVC3.dll" "C:\VCPKG\INSTALLED\x86-windows\bin\pthread.dll"
 
           # Install boost headers/libraries
-          vcpkg install boost-optional
+          if ($Env:CXX_STANDARD -eq '14') {
+            vcpkg install boost-optional
+          }
           vcpkg install boost-algorithm
           vcpkg install boost-program-options
 
