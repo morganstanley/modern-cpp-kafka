@@ -39,7 +39,7 @@ public:
     std::size_t size()     const { return _size; }
     std::string toString() const
     {
-        if (_size == 0) return _data ? "[empty]" : "[NULL]";
+        if (_size == 0) return _data ? "[empty]" : "[null]";
 
         std::ostringstream oss;
 

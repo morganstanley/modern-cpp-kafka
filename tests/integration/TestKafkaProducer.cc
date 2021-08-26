@@ -201,7 +201,7 @@ TEST(KafkaSyncProducer, DefaultPartitioner)
     }
 
     // Not all be sent to the same paritition
-    EXPECT_TRUE(std::none_of(partitionCounts.cbegin(), partitionCounts.cend(), [](const auto& count) {return count.second == MSG_NUM; }));
+    for (const auto& count: partitionCounts) EXPECT_NE(MSG_NUM, count.second);
 }
 
 TEST(KafkaSyncProducer, TryOtherPartitioners)
@@ -245,6 +245,78 @@ TEST(KafkaSyncProducer, TryOtherPartitioners)
         // An exception would be thrown for invalid "partitioner" setting
         EXPECT_KAFKA_THROW(KafkaSyncProducer producer(props), RD_KAFKA_RESP_ERR__INVALID_ARG);
     }
+}
+
+TEST(KafkaSyncProducer, RecordWithEmptyOrNullFields)
+{
+    auto sendMessages = [](const Kafka::ProducerRecord& record, std::size_t repeat, const std::string& partitioner) {
+        Kafka::KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                          .put(ProducerConfig::PARTITIONER, partitioner));
+        producer.setLogLevel(Kafka::Log::Level::Crit);
+        for (std::size_t i = 0; i < repeat; ++i) {
+            producer.send(record);
+        }
+    };
+
+    enum class FieldType { Empty, Null };
+    auto runTest = [sendMessages](FieldType fieldType, const std::string& partitioner, bool expectRandomlyPartitioned) {
+        KafkaTestUtility::PrintDividingLine("Run test for partitioner[" + partitioner + "], with " + (fieldType == FieldType::Empty ?  "EmptyField" : "NullField"));
+
+        const Topic topic = Utility::getRandomString();
+        KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
+
+        const std::string emptyStr{};
+        const auto emptyField = ConstBuffer(emptyStr.c_str(), emptyStr.size());
+        auto producerRecord =  (fieldType == FieldType::Empty ?
+                                    Kafka::ProducerRecord(topic, emptyField, emptyField) : Kafka::ProducerRecord(topic, Kafka::NullKey, Kafka::NullValue));
+
+        sendMessages(producerRecord, 10, partitioner);
+
+        // The auto-commit consumer
+        KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                         .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+        // Subscribe topics
+        consumer.subscribe({topic});
+
+        // Poll all messages
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+
+        // Check the key/value (empty or null)
+        std::map<int, int> counts;
+        for (const auto& record: records) {
+            if (fieldType == FieldType::Empty) {
+                EXPECT_TRUE(record.key().size()   == 0);
+                EXPECT_TRUE(record.value().size() == 0);
+                EXPECT_TRUE(record.key().data()   != nullptr);
+                EXPECT_TRUE(record.value().data() != nullptr);
+            } else {
+                EXPECT_TRUE(record.key().size()   == 0);
+                EXPECT_TRUE(record.value().size() == 0);
+                EXPECT_TRUE(record.key().data()   == nullptr);
+                EXPECT_TRUE(record.value().data() == nullptr);
+            }
+
+            counts[record.partition()] += 1;
+        }
+        // Should be hashed to the same partition?
+        if (expectRandomlyPartitioned) {
+            EXPECT_TRUE(counts.size() > 1);
+        } else {
+            EXPECT_TRUE(counts.size() == 1);
+        }
+    };
+
+    runTest(FieldType::Null,  "consistent_random", true);
+    runTest(FieldType::Empty, "consistent_random", true);
+
+    runTest(FieldType::Null,  "murmur2_random",    true);
+    runTest(FieldType::Empty, "murmur2_random",    false); // empty keys are mapped to a single partition
+
+    runTest(FieldType::Null,  "fnv1a_random",      true);
+    runTest(FieldType::Empty, "fnv1a_random",      false); // empty keys are mapped to a single partition
+
+    runTest(FieldType::Null,  "consistent",        false);
+    runTest(FieldType::Empty, "consistent",        false);
 }
 
 TEST(KafkaSyncProducer, ThreadCount)
