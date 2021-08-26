@@ -96,12 +96,12 @@ public:
      * Note: It's not the same with Java version's "partitioner.class" property
      * Available options:
      *     1) random            -- random distribution
-     *     2) consistent        -- CRC32 hash of key (`ProducerRecord`s with empty key are mapped to single partition)
-     *     3) consistent_random -- CRC32 hash of key (`ProducerRecord`s with empty key are randomly partitioned)
-     *     4) murmur2           -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with empty key are mapped to single partition)
-     *     5) murmur2_random    -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with empty key are randomly partitioned. It's equivalent to the Java Producer's default partitioner)
-     *     6) fnv1a             -- FNV-1a hash of key (`ProducerRecord`s with empty key are mapped to single partition)
-     *     7) fnv1a_random      -- FNV-1a hash of key (`ProducerRecord`s with empty key are randomly partitioned)
+     *     2) consistent        -- CRC32 hash of key (`ProducerRecord`s with empty/null key are mapped to single partition)
+     *     3) consistent_random -- CRC32 hash of key (`ProducerRecord`s with empty/null key are randomly partitioned)
+     *     4) murmur2           -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with null key are mapped to single partition)
+     *     5) murmur2_random    -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with null key are randomly partitioned. It's equivalent to the Java Producer's default partitioner)
+     *     6) fnv1a             -- FNV-1a hash of key (`ProducerRecord`s with null key are mapped to single partition)
+     *     7) fnv1a_random      -- FNV-1a hash of key (`ProducerRecord`s with null key are randomly partitioned)
      * Default value: murmur2_random
      */
     static const constexpr char* PARTITIONER                  = "partitioner";
