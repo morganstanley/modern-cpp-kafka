@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Modern C++ based Kafka API: KAFKA_API::Admin::ListTopicsResult Struct Reference</title>
+<title>Modern C++ based Kafka API: KAFKA_API::Admin::DeleteTopicsResult Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -61,46 +61,39 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>KAFKA_API</b></li><li class="navelem"><b>Admin</b></li><li class="navelem"><a class="el" href="structKAFKA__API_1_1Admin_1_1ListTopicsResult.html">ListTopicsResult</a></li>  </ul>
+<li class="navelem"><b>KAFKA_API</b></li><li class="navelem"><b>Admin</b></li><li class="navelem"><a class="el" href="structKAFKA__API_1_1Admin_1_1DeleteTopicsResult.html">DeleteTopicsResult</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="structKAFKA__API_1_1Admin_1_1ListTopicsResult-members.html">List of all members</a>  </div>
+<a href="structKAFKA__API_1_1Admin_1_1DeleteTopicsResult-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">KAFKA_API::Admin::ListTopicsResult Struct Reference</div>  </div>
+<div class="title">KAFKA_API::Admin::DeleteTopicsResult Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>The result of <a class="el" href="classKAFKA__API_1_1AdminClient.html#a1ad4c460465b0a7e8cf47aa92e1c0b0d" title="List the topics available in the cluster.">AdminClient::listTopics()</a>.  
- <a href="structKAFKA__API_1_1Admin_1_1ListTopicsResult.html#details">More...</a></p>
+<p>The result of <a class="el" href="classKAFKA__API_1_1AdminClient.html#aea62addc57b2aad1f156fc10461d4e5e" title="Delete a batch of topics.">AdminClient::deleteTopics()</a>.  
+ <a href="structKAFKA__API_1_1Admin_1_1DeleteTopicsResult.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="AdminClient_8h_source.html">AdminClient.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af5207955f43caff1a77df88f60b12fd3"><td class="memItemLeft" align="right" valign="top"><a id="af5207955f43caff1a77df88f60b12fd3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ListTopicsResult</b> (<a class="el" href="classKAFKA__API_1_1Error.html">Error</a> err)</td></tr>
-<tr class="separator:af5207955f43caff1a77df88f60b12fd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2fa206d93fba6ba6d1fdd73b2ee8aef0"><td class="memItemLeft" align="right" valign="top"><a id="a2fa206d93fba6ba6d1fdd73b2ee8aef0"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ListTopicsResult</b> (Topics names)</td></tr>
-<tr class="separator:a2fa206d93fba6ba6d1fdd73b2ee8aef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addb74b3b771436f5a559f60a44c830a2"><td class="memItemLeft" align="right" valign="top"><a id="addb74b3b771436f5a559f60a44c830a2"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DeleteTopicsResult</b> (<a class="el" href="classKAFKA__API_1_1Error.html">Error</a> err)</td></tr>
+<tr class="separator:addb74b3b771436f5a559f60a44c830a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a72af017f0320b6865032fe1428b144fb"><td class="memItemLeft" align="right" valign="top"><a id="a72af017f0320b6865032fe1428b144fb"></a>
-<a class="el" href="classKAFKA__API_1_1Error.html">Error</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structKAFKA__API_1_1Admin_1_1ListTopicsResult.html#a72af017f0320b6865032fe1428b144fb">error</a></td></tr>
-<tr class="memdesc:a72af017f0320b6865032fe1428b144fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result error. <br /></td></tr>
-<tr class="separator:a72af017f0320b6865032fe1428b144fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a069c08f5d95c45346383e6e72a1a79bd"><td class="memItemLeft" align="right" valign="top"><a id="a069c08f5d95c45346383e6e72a1a79bd"></a>
-Topics&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structKAFKA__API_1_1Admin_1_1ListTopicsResult.html#a069c08f5d95c45346383e6e72a1a79bd">topics</a></td></tr>
-<tr class="memdesc:a069c08f5d95c45346383e6e72a1a79bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">The topics fetched. <br /></td></tr>
-<tr class="separator:a069c08f5d95c45346383e6e72a1a79bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a486128ddb43601458fdba5332ae95ce4"><td class="memItemLeft" align="right" valign="top"><a id="a486128ddb43601458fdba5332ae95ce4"></a>
+<a class="el" href="classKAFKA__API_1_1Error.html">Error</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structKAFKA__API_1_1Admin_1_1DeleteTopicsResult.html#a486128ddb43601458fdba5332ae95ce4">error</a></td></tr>
+<tr class="memdesc:a486128ddb43601458fdba5332ae95ce4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result error. <br /></td></tr>
+<tr class="separator:a486128ddb43601458fdba5332ae95ce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The result of <a class="el" href="classKAFKA__API_1_1AdminClient.html#a1ad4c460465b0a7e8cf47aa92e1c0b0d" title="List the topics available in the cluster.">AdminClient::listTopics()</a>. </p>
+<div class="textblock"><p>The result of <a class="el" href="classKAFKA__API_1_1AdminClient.html#aea62addc57b2aad1f156fc10461d4e5e" title="Delete a batch of topics.">AdminClient::deleteTopics()</a>. </p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>/home/runner/work/modern-cpp-kafka/modern-cpp-kafka/include/kafka/<a class="el" href="AdminClient_8h_source.html">AdminClient.h</a></li>
 </ul>

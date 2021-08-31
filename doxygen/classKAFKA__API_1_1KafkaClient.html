@@ -119,11 +119,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:a088143b9687f9e27075a1b2bff5c34f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a547ee00891d12ad42a0fb3b8ca1b61b4"><td class="memItemLeft" align="right" valign="top"><a id="a547ee00891d12ad42a0fb3b8ca1b61b4"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#a547ee00891d12ad42a0fb3b8ca1b61b4">setLogLevel</a> (int level)</td></tr>
-<tr class="memdesc:a547ee00891d12ad42a0fb3b8ca1b61b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set log level for the kafka client (the default value: LOG_NOTICE). <br /></td></tr>
+<tr class="memdesc:a547ee00891d12ad42a0fb3b8ca1b61b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set log level for the kafka client (the default value: 5). <br /></td></tr>
 <tr class="separator:a547ee00891d12ad42a0fb3b8ca1b61b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a678613fd893859387ce96b6f0a77d608"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#a678613fd893859387ce96b6f0a77d608">setStatsCallback</a> (StatsCallback cb)</td></tr>
 <tr class="memdesc:a678613fd893859387ce96b6f0a77d608"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set callback to receive the periodic statistics info.  <a href="classKAFKA__API_1_1KafkaClient.html#a678613fd893859387ce96b6f0a77d608">More...</a><br /></td></tr>
 <tr class="separator:a678613fd893859387ce96b6f0a77d608"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb421f478c61d29850d898f29a8cd9bd"><td class="memItemLeft" align="right" valign="top"><a id="adb421f478c61d29850d898f29a8cd9bd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#adb421f478c61d29850d898f29a8cd9bd">setErrorCallback</a> (ErrorCallback cb)</td></tr>
+<tr class="memdesc:adb421f478c61d29850d898f29a8cd9bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set callback for error notification. <br /></td></tr>
+<tr class="separator:adb421f478c61d29850d898f29a8cd9bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79f54433b395e4e306a11bb10be53e28"><td class="memItemLeft" align="right" valign="top"><a id="a79f54433b395e4e306a11bb10be53e28"></a>
 const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#a79f54433b395e4e306a11bb10be53e28">properties</a> () const</td></tr>
 <tr class="memdesc:a79f54433b395e4e306a11bb10be53e28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the properties which took effect. <br /></td></tr>
@@ -132,9 +136,8 @@ const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &am
 Optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#a4a7ea0e2f4e1a321866e6f7ec1abc70e">getProperty</a> (const std::string &amp;name) const</td></tr>
 <tr class="memdesc:a4a7ea0e2f4e1a321866e6f7ec1abc70e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch the effected property (including the property internally set by librdkafka). <br /></td></tr>
 <tr class="separator:a4a7ea0e2f4e1a321866e6f7ec1abc70e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad7e46aad5007f3fe95800cb3b8d3c73"><td class="memItemLeft" align="right" valign="top"><a id="aad7e46aad5007f3fe95800cb3b8d3c73"></a>
-Optional&lt; <a class="el" href="structKAFKA__API_1_1BrokerMetadata.html">BrokerMetadata</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#aad7e46aad5007f3fe95800cb3b8d3c73">fetchBrokerMetadata</a> (const std::string &amp;topic, std::chrono::milliseconds timeout=std::chrono::milliseconds(DEFAULT_METADATA_TIMEOUT_MS), bool disableErrorLogging=false)</td></tr>
-<tr class="memdesc:aad7e46aad5007f3fe95800cb3b8d3c73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch matadata from a available broker. <br /></td></tr>
+<tr class="memitem:aad7e46aad5007f3fe95800cb3b8d3c73"><td class="memItemLeft" align="right" valign="top">Optional&lt; <a class="el" href="structKAFKA__API_1_1BrokerMetadata.html">BrokerMetadata</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#aad7e46aad5007f3fe95800cb3b8d3c73">fetchBrokerMetadata</a> (const std::string &amp;topic, std::chrono::milliseconds timeout=std::chrono::milliseconds(DEFAULT_METADATA_TIMEOUT_MS), bool disableErrorLogging=false)</td></tr>
+<tr class="memdesc:aad7e46aad5007f3fe95800cb3b8d3c73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch matadata from a available broker.  <a href="classKAFKA__API_1_1KafkaClient.html#aad7e46aad5007f3fe95800cb3b8d3c73">More...</a><br /></td></tr>
 <tr class="separator:aad7e46aad5007f3fe95800cb3b8d3c73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acec3e648a9704aaa204460e3c5a9caaf"><td class="memTemplParams" colspan="2"><a id="acec3e648a9704aaa204460e3c5a9caaf"></a>
 template&lt;class ... Args&gt; </td></tr>
@@ -146,10 +149,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>doLog</b> (int level,
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a37f4a7c1bca7144ff1444e9e975214ab"><td class="memItemLeft" align="right" valign="top"><a id="a37f4a7c1bca7144ff1444e9e975214ab"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#a37f4a7c1bca7144ff1444e9e975214ab">setGlobalLogger</a> (Logger logger=NoneLogger)</td></tr>
-<tr class="memdesc:a37f4a7c1bca7144ff1444e9e975214ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a log callback for kafka clients, which do not have a client specific logging callback configured (see <code>setLogger</code>). <br /></td></tr>
-<tr class="separator:a37f4a7c1bca7144ff1444e9e975214ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbf57cf226d5f51c35e4a4e55e65e97c"><td class="memItemLeft" align="right" valign="top"><a id="abbf57cf226d5f51c35e4a4e55e65e97c"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaClient.html#abbf57cf226d5f51c35e4a4e55e65e97c">setGlobalLogger</a> (Logger logger=NullLogger)</td></tr>
+<tr class="memdesc:abbf57cf226d5f51c35e4a4e55e65e97c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a log callback for kafka clients, which do not have a client specific logging callback configured (see <code>setLogger</code>). <br /></td></tr>
+<tr class="separator:abbf57cf226d5f51c35e4a4e55e65e97c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac08805eb9e2b93c42598c4b98ecc971a"><td class="memTemplParams" colspan="2"><a id="ac08805eb9e2b93c42598c4b98ecc971a"></a>
 template&lt;class ... Args&gt; </td></tr>
 <tr class="memitem:ac08805eb9e2b93c42598c4b98ecc971a"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>doGlobalLog</b> (int level, const char *filename, int lineno, const char *format, Args... args)</td></tr>
@@ -161,6 +164,51 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The base class for Kafka clients (i.e, <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html" title="The base class for KafkaAutoCommitConsumer and KafkaManualCommitConsumer.">KafkaConsumer</a>, <a class="el" href="classKAFKA__API_1_1KafkaProducer.html" title="The base class for KafkaAsyncProducer and KafkaSyncProducer.">KafkaProducer</a>, and <a class="el" href="classKAFKA__API_1_1AdminClient.html" title="The administrative client for Kafka, which supports managing and inspecting topics,...">AdminClient</a>). </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="aad7e46aad5007f3fe95800cb3b8d3c73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad7e46aad5007f3fe95800cb3b8d3c73">&#9670;&nbsp;</a></span>fetchBrokerMetadata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Optional&lt; <a class="el" href="structKAFKA__API_1_1BrokerMetadata.html">BrokerMetadata</a> &gt; KAFKA_API::KafkaClient::fetchBrokerMetadata </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>topic</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::chrono::milliseconds&#160;</td>
+          <td class="paramname"><em>timeout</em> = <code>std::chrono::milliseconds(DEFAULT_METADATA_TIMEOUT_MS)</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>disableErrorLogging</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fetch matadata from a available broker. </p>
+<p>Note: the Metadata response information may trigger a re-join if any subscribed topic has changed partition count or existence state. </p>
+
+</div>
+</div>
 <a id="a678613fd893859387ce96b6f0a77d608"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a678613fd893859387ce96b6f0a77d608">&#9670;&nbsp;</a></span>setStatsCallback()</h2>
 

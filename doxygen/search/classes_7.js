@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['node_154',['Node',['../structKAFKA__API_1_1BrokerMetadata_1_1Node.html',1,'KAFKA_API::BrokerMetadata']]]
+  ['listtopicsresult_159',['ListTopicsResult',['../structKAFKA__API_1_1Admin_1_1ListTopicsResult.html',1,'KAFKA_API::Admin']]]
 ];

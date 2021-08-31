@@ -19,7 +19,7 @@
 <h2 id="introduction"><a class="toclink" href="#introduction">Introduction</a></h2>
 <p>The <code>Modern C++ based Kafka API</code> (<code>modern-cpp-kafka</code>) is a layer of C++ wrapper based on <a href="https://github.com/edenhill/librdkafka">librdkafka</a> (the C part), with high quality, but more friendly to users.</p>
 <ul>
-<li>By now, <code>modern-cpp-kafka</code> is compatible with <code>librdkafka</code> <strong>v1.6.0</strong>.</li>
+<li>By now, <code>modern-cpp-kafka</code> is compatible with <code>librdkafka</code> <strong>v1.7.0</strong>.</li>
 </ul>
 <div class="codehilite"><pre><span></span>KAFKA is a registered trademark of The Apache Software Foundation and
 
@@ -182,13 +182,58 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </ul>
 </li>
 </ul>
+<h2 id="how-to-run-tests"><a class="toclink" href="#how-to-run-tests">How to Run Tests</a></h2>
+<ul>
+<li>
+<p>Unit test (<code>tests/unit</code>)</p>
+<ul>
+<li>The test could be run with no Kafka cluster depolyed</li>
+</ul>
+</li>
+<li>
+<p>Integration test (<code>tests/integration</code>)</p>
+<ul>
+<li>
+<p>The test should be run with Kafka cluster depolyed</p>
+</li>
+<li>
+<p>The environment variable <code>KAFKA_BROKER_LIST</code> should be set</p>
+<ul>
+<li>E.g. <code>export KAFKA_BROKER_LIST=127.0.0.1:29091,127.0.0.1:29092,127.0.0.1:29093</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Robustness test (<code>tests/robustness</code>)</p>
+<ul>
+<li>
+<p>The test should be run with Kafka cluster depolyed locally</p>
+</li>
+<li>
+<p>The environment variable <code>KAFKA_BROKER_LIST</code> should be set</p>
+</li>
+<li>
+<p>The environment variable <code>KAFKA_BROKER_PIDS</code> should be set</p>
+<ul>
+<li>
+<p>Make sure the test runner gets the privilege to stop/resume the pids</p>
+</li>
+<li>
+<p>E.g. <code>export KAFKA_BROKER_PIDS=61567,61569,61571</code></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <h2 id="to-start"><a class="toclink" href="#to-start">To Start</a></h2>
 <ul>
 <li>
 <p>Tutorial</p>
 <ul>
 <li>
-<p><a href="https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging">Debuting a Modern C++ API for Apache Kafka</a></p>
+<p>Confluent Blog <a href="https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging">Debuting a Modern C++ API for Apache Kafka</a></p>
 </li>
 <li>
 <p><a href="markdown/KafkaProducerQuickStart.html">KafkaProducer Quick Start</a></p>
@@ -274,6 +319,12 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </li>
 </ul>
 </li>
+<li>
+<p>Log level</p>
+<ul>
+<li>The default <code>log_level</code> is <code>NOTICE</code> (<code>5</code>) for all these clients</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -321,7 +372,7 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2021. 04. 16
+        Generated: 2021. 08. 31
       </footer>
       <hr/>
     </div>

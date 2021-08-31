@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['header_144',['Header',['../structKAFKA__API_1_1Header.html',1,'KAFKA_API']]]
+  ['error_149',['Error',['../classKAFKA__API_1_1Error.html',1,'KAFKA_API']]]
 ];

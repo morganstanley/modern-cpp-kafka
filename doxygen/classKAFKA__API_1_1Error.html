@@ -73,49 +73,124 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="classKAFKA__API_1_1Error.html" title="Error type with rich info.">Error</a> type with rich info.  
+<p>Unified error type.  
  <a href="classKAFKA__API_1_1Error.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="Error_8h_source.html">Error.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for KAFKA_API::Error:</div>
-<div class="dyncontent">
- <div class="center">
-  <img src="classKAFKA__API_1_1Error.png" usemap="#KAFKA_5FAPI::Error_map" alt=""/>
-  <map id="KAFKA_5FAPI::Error_map" name="KAFKA_5FAPI::Error_map">
-<area href="classKAFKA__API_1_1SimpleError.html" title="Error type only with brief info." alt="KAFKA_API::SimpleError" shape="rect" coords="0,56,218,80"/>
-<area href="structKAFKA__API_1_1Admin_1_1ListTopicsResult.html" title="The result of AdminClient::listTopics()." alt="KAFKA_API::Admin::ListTopicsResult" shape="rect" coords="0,112,218,136"/>
-  </map>
-</div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a50beb742fadaec91ecd1441f0deea3f0"><td class="memItemLeft" align="right" valign="top"><a id="a50beb742fadaec91ecd1441f0deea3f0"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_error_t *error=nullptr)</td></tr>
 <tr class="separator:a50beb742fadaec91ecd1441f0deea3f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a218f2af7a4e29940fa103f808488362a"><td class="memItemLeft" align="right" valign="top"><a id="a218f2af7a4e29940fa103f808488362a"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (const <a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;)=default</td></tr>
-<tr class="separator:a218f2af7a4e29940fa103f808488362a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fbda80cf7ae1dea6b36cd9c2c92b7c1"><td class="memItemLeft" align="right" valign="top"><a id="a7fbda80cf7ae1dea6b36cd9c2c92b7c1"></a>
-virtual std::error_code&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a7fbda80cf7ae1dea6b36cd9c2c92b7c1">errorCode</a> () const</td></tr>
-<tr class="memdesc:a7fbda80cf7ae1dea6b36cd9c2c92b7c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtains the underlying error code. <br /></td></tr>
-<tr class="separator:a7fbda80cf7ae1dea6b36cd9c2c92b7c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4cacc73752e4b14672026d91fcc06989"><td class="memItemLeft" align="right" valign="top"><a id="a4cacc73752e4b14672026d91fcc06989"></a>
-virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a4cacc73752e4b14672026d91fcc06989">message</a> () const</td></tr>
-<tr class="memdesc:a4cacc73752e4b14672026d91fcc06989"><td class="mdescLeft">&#160;</td><td class="mdescRight">Readable error string. <br /></td></tr>
-<tr class="separator:a4cacc73752e4b14672026d91fcc06989"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc500247dd9f0fcfc17023d79f364b6f"><td class="memItemLeft" align="right" valign="top"><a id="acc500247dd9f0fcfc17023d79f364b6f"></a>
-virtual std::optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#acc500247dd9f0fcfc17023d79f364b6f">isFatal</a> () const</td></tr>
-<tr class="memdesc:acc500247dd9f0fcfc17023d79f364b6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fatal error indicates that the client instance is no longer usable. <br /></td></tr>
-<tr class="separator:acc500247dd9f0fcfc17023d79f364b6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d72dcd1de467c4b5e3e7556047e1093"><td class="memItemLeft" align="right" valign="top"><a id="a1d72dcd1de467c4b5e3e7556047e1093"></a>
-virtual std::optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a1d72dcd1de467c4b5e3e7556047e1093">isRetriable</a> () const</td></tr>
-<tr class="memdesc:a1d72dcd1de467c4b5e3e7556047e1093"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show whether the operation may be retried. <br /></td></tr>
-<tr class="separator:a1d72dcd1de467c4b5e3e7556047e1093"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83085a3a3e989eb8d4fdc0b4c68ac87c"><td class="memItemLeft" align="right" valign="top"><a id="a83085a3a3e989eb8d4fdc0b4c68ac87c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_resp_err_t respErr)</td></tr>
+<tr class="separator:a83085a3a3e989eb8d4fdc0b4c68ac87c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03ee90831d06764ac732b61370bb2d9b"><td class="memItemLeft" align="right" valign="top"><a id="a03ee90831d06764ac732b61370bb2d9b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_resp_err_t respErr, std::string <a class="el" href="classKAFKA__API_1_1Error.html#a51a05ab818ddbd0335c28d8e98f5fcbd">message</a>)</td></tr>
+<tr class="separator:a03ee90831d06764ac732b61370bb2d9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2db119c0f9928b7f808782cb6b06607"><td class="memItemLeft" align="right" valign="top"><a id="aa2db119c0f9928b7f808782cb6b06607"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_resp_err_t respErr, std::string <a class="el" href="classKAFKA__API_1_1Error.html#a51a05ab818ddbd0335c28d8e98f5fcbd">message</a>, bool fatal)</td></tr>
+<tr class="separator:aa2db119c0f9928b7f808782cb6b06607"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bc3204e0ea24e585645435fff747dd3"><td class="memItemLeft" align="right" valign="top"><a id="a2bc3204e0ea24e585645435fff747dd3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const</td></tr>
+<tr class="separator:a2bc3204e0ea24e585645435fff747dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab643d99d7bc396e7475c6b69044d4910"><td class="memItemLeft" align="right" valign="top"><a id="ab643d99d7bc396e7475c6b69044d4910"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#ab643d99d7bc396e7475c6b69044d4910">operator std::error_code</a> () const</td></tr>
+<tr class="memdesc:ab643d99d7bc396e7475c6b69044d4910"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conversion to <code>std::error_code</code> <br /></td></tr>
+<tr class="separator:ab643d99d7bc396e7475c6b69044d4910"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84662868abb76bc956c8ec85fccca07c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a84662868abb76bc956c8ec85fccca07c">value</a> () const</td></tr>
+<tr class="memdesc:a84662868abb76bc956c8ec85fccca07c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtains the underlying error code value.  <a href="classKAFKA__API_1_1Error.html#a84662868abb76bc956c8ec85fccca07c">More...</a><br /></td></tr>
+<tr class="separator:a84662868abb76bc956c8ec85fccca07c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51a05ab818ddbd0335c28d8e98f5fcbd"><td class="memItemLeft" align="right" valign="top"><a id="a51a05ab818ddbd0335c28d8e98f5fcbd"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a51a05ab818ddbd0335c28d8e98f5fcbd">message</a> () const</td></tr>
+<tr class="memdesc:a51a05ab818ddbd0335c28d8e98f5fcbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Readable error string. <br /></td></tr>
+<tr class="separator:a51a05ab818ddbd0335c28d8e98f5fcbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeeb099f10e9a1c94cbc6eed7a09f47bc"><td class="memItemLeft" align="right" valign="top"><a id="aeeb099f10e9a1c94cbc6eed7a09f47bc"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#aeeb099f10e9a1c94cbc6eed7a09f47bc">toString</a> () const</td></tr>
+<tr class="memdesc:aeeb099f10e9a1c94cbc6eed7a09f47bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detailed error string. <br /></td></tr>
+<tr class="separator:aeeb099f10e9a1c94cbc6eed7a09f47bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43489ec4f7b8d19db0d422414754ea13"><td class="memItemLeft" align="right" valign="top"><a id="a43489ec4f7b8d19db0d422414754ea13"></a>
+Optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a43489ec4f7b8d19db0d422414754ea13">isFatal</a> () const</td></tr>
+<tr class="memdesc:a43489ec4f7b8d19db0d422414754ea13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fatal error indicates that the client instance is no longer usable. <br /></td></tr>
+<tr class="separator:a43489ec4f7b8d19db0d422414754ea13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95a021b323644341c523f9b164e90ee3"><td class="memItemLeft" align="right" valign="top"><a id="a95a021b323644341c523f9b164e90ee3"></a>
+Optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a95a021b323644341c523f9b164e90ee3">isRetriable</a> () const</td></tr>
+<tr class="memdesc:a95a021b323644341c523f9b164e90ee3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show whether the operation may be retried. <br /></td></tr>
+<tr class="separator:a95a021b323644341c523f9b164e90ee3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d35ce8d3210a03fa99d76f06b88b414"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a4d35ce8d3210a03fa99d76f06b88b414">transactionRequiresAbort</a> () const</td></tr>
+<tr class="memdesc:a4d35ce8d3210a03fa99d76f06b88b414"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show whether the error is an abortable transaction error.  <a href="classKAFKA__API_1_1Error.html#a4d35ce8d3210a03fa99d76f06b88b414">More...</a><br /></td></tr>
+<tr class="separator:a4d35ce8d3210a03fa99d76f06b88b414"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classKAFKA__API_1_1Error.html" title="Error type with rich info.">Error</a> type with rich info. </p>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
+<div class="textblock"><p>Unified error type. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4d35ce8d3210a03fa99d76f06b88b414"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d35ce8d3210a03fa99d76f06b88b414">&#9670;&nbsp;</a></span>transactionRequiresAbort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool KAFKA_API::Error::transactionRequiresAbort </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Show whether the error is an abortable transaction error. </p>
+<p>Note:</p><ol type="1">
+<li>Only valid for transactional API.</li>
+<li>If <code>true</code>, the producer must call <code>abortTransaction</code> and start a new transaction with <code>beginTransaction</code> to proceed with transactions. </li>
+</ol>
+
+</div>
+</div>
+<a id="a84662868abb76bc956c8ec85fccca07c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84662868abb76bc956c8ec85fccca07c">&#9670;&nbsp;</a></span>value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int KAFKA_API::Error::value </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Obtains the underlying error code value. </p>
+<p>Actually, it's the same as 'rd_kafka_resp_err_t', which is defined by librdkafka.</p><ol type="1">
+<li>The negative values are for internal errors.</li>
+<li>Non-negative values are for external errors. See the defination at,<ul>
+<li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a> </li>
+</ul>
+</li>
+</ol>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/runner/work/modern-cpp-kafka/modern-cpp-kafka/include/kafka/<a class="el" href="Error_8h_source.html">Error.h</a></li>
 </ul>
 </div><!-- contents -->

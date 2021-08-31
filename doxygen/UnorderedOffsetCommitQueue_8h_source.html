@@ -149,7 +149,7 @@ $(function() {
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keywordflow">if</span> (offset &lt; 0 || (!_offsetsReceived.empty() &amp;&amp; offset &lt;= _offsetsReceived.back()))</div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        {</div>
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="comment">// Invalid offset (might be fetched from the record which had no valid offset)</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            KAFKA_API_LOG(LOG_ERR, <span class="stringliteral">&quot;Got invalid offset to wait[%lld]! %s&quot;</span>, offset, (_partitionInfo.empty() ? <span class="stringliteral">&quot;&quot;</span> : _partitionInfo.c_str()));</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            KAFKA_API_LOG(Log::Level::Err, <span class="stringliteral">&quot;Got invalid offset to wait[%lld]! %s&quot;</span>, offset, (_partitionInfo.empty() ? <span class="stringliteral">&quot;&quot;</span> : _partitionInfo.c_str()));</div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            <span class="keywordflow">return</span>;</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        }</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
@@ -162,7 +162,7 @@ $(function() {
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        <span class="keywordflow">if</span> (offset &gt; maxOffsetReceived)</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        {</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;            <span class="comment">// Runtime error</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            KAFKA_API_LOG(LOG_ERR, <span class="stringliteral">&quot;Got invalid ack offset[%lld]! Even larger than all offsets received[%lld]! %s&quot;</span>, offset, maxOffsetReceived, (_partitionInfo.empty() ? <span class="stringliteral">&quot;&quot;</span> : _partitionInfo.c_str()));</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            KAFKA_API_LOG(Log::Level::Err, <span class="stringliteral">&quot;Got invalid ack offset[%lld]! Even larger than all offsets received[%lld]! %s&quot;</span>, offset, maxOffsetReceived, (_partitionInfo.empty() ? <span class="stringliteral">&quot;&quot;</span> : _partitionInfo.c_str()));</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        }</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160; </div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        _offsetsToCommit.push(offset);</div>
@@ -179,7 +179,7 @@ $(function() {
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (minOffsetToCommit &lt; expectedOffset)</div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;            {</div>
 <div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                <span class="comment">// Inconsist error (might be caused by duplicated ack)</span></div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                KAFKA_API_LOG(LOG_ERR, <span class="stringliteral">&quot;Got invalid ack offset[%lld]! Even smaller than expected[%lld]! %s&quot;</span>, minOffsetToCommit, expectedOffset, (_partitionInfo.empty() ? <span class="stringliteral">&quot;&quot;</span> : _partitionInfo.c_str()));</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                KAFKA_API_LOG(Log::Level::Err, <span class="stringliteral">&quot;Got invalid ack offset[%lld]! Even smaller than expected[%lld]! %s&quot;</span>, minOffsetToCommit, expectedOffset, (_partitionInfo.empty() ? <span class="stringliteral">&quot;&quot;</span> : _partitionInfo.c_str()));</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                _offsetsToCommit.pop_front();</div>
 <div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;            }</div>
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;            <span class="keywordflow">else</span></div>
