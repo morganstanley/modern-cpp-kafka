@@ -216,8 +216,6 @@ private:
     static const constexpr char* CLIENT_ID         = "client.id";
     static const constexpr char* LOG_LEVEL         = "log_level";
     static const constexpr char* DEBUG             = "debug";
-    static const constexpr char* SECURITY_PROTOCOL          = "security.protocol";
-    static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
 
 #if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
@@ -397,19 +395,6 @@ KafkaClient::validateAndReformProperties(const Properties& origProperties)
     if (!properties.getProperty(CLIENT_ID))
     {
         properties.put(CLIENT_ID, Utility::getRandomString());
-    }
-
-    // "sasl.kerberos.service.name" is mandatory for SASL connection
-    if (auto securityProtocol = properties.getProperty(SECURITY_PROTOCOL))
-    {
-        if (securityProtocol->find("sasl") != std::string::npos)
-        {
-            if (!properties.getProperty(SASL_KERBEROS_SERVICE_NAME))
-            {
-                KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                        "The \"sasl.kerberos.service.name\" property is mandatory for SASL connection!"));
-            }
-        }
     }
 
     // If no "log_level" configured, use Log::Level::Notice as default
