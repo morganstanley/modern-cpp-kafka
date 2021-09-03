@@ -72,7 +72,7 @@ public:
 
     /**
      * Maximum Kafka protocol request message size.
-     * Note: Should be coordinated with the bokers's configuration. Otherwise, any larger message would be rejected!
+     * Note: Should be coordinated with the brokers's configuration. Otherwise, any larger message would be rejected!
      * Default value: 1000000
      */
     static const constexpr char* MESSAGE_MAX_BYTES            = "message.max.bytes";
