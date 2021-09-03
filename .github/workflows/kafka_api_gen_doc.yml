@@ -69,6 +69,7 @@ jobs:
       - name: Deploy to Pages
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           branch: gh-pages
           folder: document
           clean: true
