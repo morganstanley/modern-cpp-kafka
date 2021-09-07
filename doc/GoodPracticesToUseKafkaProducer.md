@@ -2,23 +2,15 @@
 
 If we want to achieve high performance/availability, here're some rules of thumb.
 
-## Use a `KafkaAsyncProducer` for better throughput
+## Avoid using `syncSend` for better throughput
 
-You should not use a `KafkaSyncProducer` if you want to get a high throughput. The `Sync` means the `send` operation is a synchronous operation, and would not go on until the `acks` are received.
+You should never call `syncSend` if you want to get a high throughput. The `syncSend` is a synchronous operation, and would not go on until the `acks` are received.
 
 ## The `message.max.bytes` must be consistent with Kafka servers' setting
 
 * Default value: 1000,000
 
 * The default setting for brokers is `message.max.bytes = 1000012`, and do MAKE SURE the client side setting no larger than it. Otherwise, it might construct a MessageSet which would be rejected (error: INVALID_MESSAGE_SIZE) by brokers.
-
-## In most cases, the default value for `linger.ms` is good enough
-
-* It means the delay in milliseconds to wait for messages in the producer queue to accumulate before constructing MessageSets to transmit to brokers.
-
-    1.  For a `KafkaSyncProducer`, it sends the messages one by one (after `acks` response received), thus it could use `linger.ms=0` (as default) to eliminate the unnecessary waiting time.
-
-    2.  For a `KafkaAsyncProduer`, a larger `linger.ms` could be used to accumulate messages for MessageSets to improve the performance -- it should be the result of balancing between throughput and latency.
 
 ## Calculate `batch.num.messages` with the average message size
 
@@ -46,16 +38,6 @@ You should not use a `KafkaSyncProducer` if you want to get a high throughput. T
 
 * The `acks=all` setting will highly impact the throughput & latency, and it would be obvious if the traffic latency between kafka brokers is high. But it's mandatory if we want to achieve high availability.
 
-## Determine the default sending buffer (according to the latency)
-
-* Default queue.buffing setting,
-
-    * `queue.buffering.max.messages=1000000`
-
-    * `queue.buffering.max.kbytes=0x100000` (1GB)
-
-* Normally, the default settings should be good enough.
-
 ## How could a message miss after send?
 
 * The message might even not have been received by the partition leader! (with `acks=0`)
@@ -63,14 +45,4 @@ You should not use a `KafkaSyncProducer` if you want to get a high throughput. T
 * Once the message received by the partition leader, the leader crashed just after responding to the producer, but has no chance to synchronize the message to other replicas. (with `acks=1`)
 
 * Once the message received by the partition leader, the leader crashed just after responding to the producer, but with no in-sync replica to synchronize for the message. (with `acks=all`, while brokers are with `min.insync.replicas=1`)
-
-## How does message disordering happen? How to avoid it?
-
-* Take an example, -- a `KafkaAsyncProducer` just sent many messages, and a few of these messages (in the middle) failed to be delivered successfully. While the producer got the sending error, it might retry sending these messages again, thus causing the disordering.
-
-* To avoid it. Two options,
-
-    * Use a `KafkaSyncProducer`, but this would severely impact the throughput.
-
-    * Embed some `sequence number` (e.g, record id, part of the `key`, etc) in the `ProducerRecord`, for de-duplication.
 

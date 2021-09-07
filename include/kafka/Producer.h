@@ -33,7 +33,7 @@ namespace Producer
         RecordMetadata(const RecordMetadata& another) { *this = another; }
 
         // This is only called by the KafkaProducer::deliveryCallback (with a valid rkmsg pointer)
-        RecordMetadata(const rd_kafka_message_t* rkmsg, ProducerRecord::Id recordId)
+        RecordMetadata(const rd_kafka_message_t* rkmsg, Optional<ProducerRecord::Id> recordId)
             : _cachedInfo(), _rkmsg(rkmsg), _recordId(recordId) {}
 
         RecordMetadata& operator=(const RecordMetadata& another)
@@ -57,7 +57,7 @@ namespace Producer
         /**
          * The topic the record was appended to.
          */
-        std::string           topic()      const
+        std::string                  topic()      const
         {
             return _rkmsg ? (_rkmsg->rkt ? rd_kafka_topic_name(_rkmsg->rkt) : "") : _cachedInfo->topic;
         }
@@ -65,7 +65,7 @@ namespace Producer
         /**
          * The partition the record was sent to.
          */
-        Partition             partition()  const
+        Partition                    partition()  const
         {
             return _rkmsg ? _rkmsg->partition : _cachedInfo->partition;
         }
@@ -73,7 +73,7 @@ namespace Producer
         /**
          * The offset of the record in the topic/partition.
          */
-        Optional<Offset>      offset()     const
+        Optional<Offset>             offset()     const
         {
             auto offset = _rkmsg ? _rkmsg->offset : _cachedInfo->offset;
             return (offset != RD_KAFKA_OFFSET_INVALID) ? Optional<Offset>(offset) : Optional<Offset>();
@@ -82,7 +82,7 @@ namespace Producer
         /**
          * The recordId could be used to identify the acknowledged message.
          */
-        ProducerRecord::Id    recordId()   const
+        Optional<ProducerRecord::Id> recordId()   const
         {
             return _recordId;
         }
@@ -90,7 +90,7 @@ namespace Producer
         /**
          * The size of the key in bytes.
          */
-        KeySize               keySize()    const
+        KeySize                      keySize()    const
         {
             return _rkmsg ? _rkmsg->key_len : _cachedInfo->keySize;
         }
@@ -98,7 +98,7 @@ namespace Producer
         /**
          * The size of the value in bytes.
          */
-        ValueSize             valueSize()  const
+        ValueSize                    valueSize()  const
         {
             return _rkmsg ? _rkmsg->len : _cachedInfo->valueSize;
         }
@@ -106,7 +106,7 @@ namespace Producer
         /**
          * The timestamp of the record in the topic/partition.
          */
-        Timestamp             timestamp()  const
+        Timestamp                    timestamp()  const
         {
             return _rkmsg ? getMsgTimestamp(_rkmsg) : _cachedInfo->timestamp;
         }
@@ -114,20 +114,21 @@ namespace Producer
         /**
          * The persisted status of the record.
          */
-        PersistedStatus       persistedStatus()  const
+        PersistedStatus              persistedStatus()  const
         {
             return _rkmsg ? getMsgPersistedStatus(_rkmsg) : _cachedInfo->persistedStatus;
         }
 
-        std::string           persistedStatusString() const
+        std::string                  persistedStatusString() const
         {
             return getPersistedStatusString(persistedStatus());
         }
 
-        std::string toString() const
+        std::string                  toString() const
         {
             return topic() + "-" + std::to_string(partition()) + "@" + (offset() ? std::to_string(*offset()) : "NA")
-                   + ":id[" + std::to_string(recordId()) + "]," + timestamp().toString() + "," + persistedStatusString();
+                   + (recordId() ? (":id[" + std::to_string(*recordId()) + "],") : ",")
+                   + timestamp().toString() + "," + persistedStatusString();
         }
 
     private:
@@ -174,9 +175,9 @@ namespace Producer
             PersistedStatus persistedStatus;
         };
 
-        std::unique_ptr<CachedInfo> _cachedInfo;
-        const rd_kafka_message_t*   _rkmsg    = nullptr;
-        ProducerRecord::Id          _recordId = 0;
+        std::unique_ptr<CachedInfo>  _cachedInfo;
+        const rd_kafka_message_t*    _rkmsg    = nullptr;
+        Optional<ProducerRecord::Id> _recordId;
     };
 
     /**

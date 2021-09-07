@@ -23,7 +23,7 @@ int main(int argc, char **argv)
         });
 
         // Create a producer instance.
-        kafka::KafkaAsyncProducer producer(props);
+        kafka::KafkaProducer producer(props);
 
         // Read messages from stdin and produce to the broker.
         std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;

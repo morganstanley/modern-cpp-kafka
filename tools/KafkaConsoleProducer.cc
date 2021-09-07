@@ -107,7 +107,7 @@ int main (int argc, char **argv)
 
     // Create a sync-send producer
     Kafka::KafkaClient::setGlobalLogger(Kafka::Logger());
-    Kafka::KafkaSyncProducer producer(props);
+    Kafka::KafkaProducer producer(props);
 
     auto startPromptLine = []() { std::cout << "> "; };
 
@@ -126,7 +126,7 @@ int main (int argc, char **argv)
             std::cout << "Current Local Time [" << Kafka::Utility::getCurrentTime() << "]" << std::endl;
 
             // Note: might throw exceptions if with unknown topic, unknown partition, invalid message length, etc.
-            auto metadata = producer.send(record);
+            auto metadata = producer.syncSend(record);
 
             std::cout << "Just Sent Key[" << metadata.keySize()   << " B]/Value["  << metadata.valueSize() << " B]"
                 << " ==> " << metadata.topic() << "-" << std::to_string(metadata.partition()) << "@" <<  (metadata.offset() ? std::to_string(*metadata.offset()) : "NA")
