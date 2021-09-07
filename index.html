@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>About the `Modern C++ based Kafka API`</title>
+    <title>About the *Modern C++ Kafka API*</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" integrity="sha384-SI27wrMjH3ZZ89r4o+fGIJtnzkAnFs3E4qz9DIYioCQ5l9Rd/7UAa8DHcaL8jkWt" crossorigin="anonymous">
     <style>
       pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 0.6em 1em; }
@@ -15,11 +15,11 @@
   </head>
   <body>
     <div class="container">
-      <h1 id="about-the-modern-c-based-kafka-api"><a class="toclink" href="#about-the-modern-c-based-kafka-api">About the <code>Modern C++ based Kafka API</code></a></h1>
+      <h1 id="about-the-modern-c-kafka-api"><a class="toclink" href="#about-the-modern-c-kafka-api">About the <em>Modern C++ Kafka API</em></a></h1>
 <h2 id="introduction"><a class="toclink" href="#introduction">Introduction</a></h2>
-<p>The <code>Modern C++ based Kafka API</code> (<code>modern-cpp-kafka</code>) is a layer of C++ wrapper based on <a href="https://github.com/edenhill/librdkafka">librdkafka</a> (the C part), with high quality, but more friendly to users.</p>
+<p>The <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">Modern C++ Kafka API</a> is a layer of C++ wrapper based on <a href="https://github.com/edenhill/librdkafka">librdkafka</a> (the C part), with high quality, but more friendly to users.</p>
 <ul>
-<li>By now, <code>modern-cpp-kafka</code> is compatible with <code>librdkafka</code> <strong>v1.7.0</strong>.</li>
+<li>By now, <a href="https://github.com/morganstanley/modern-cpp-kafka">modern-cpp-kafka</a> is compatible with <a href="https://github.com/edenhill/librdkafka/releases/tag/v1.7.0">librdkafka v1.7.0</a>.</li>
 </ul>
 <div class="codehilite"><pre><span></span>KAFKA is a registered trademark of The Apache Software Foundation and
 
@@ -29,10 +29,10 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </pre></div>
 
 <h2 id="why-its-here"><a class="toclink" href="#why-its-here">Why it's here</a></h2>
-<p>The <code>librdkafka</code> is a robust high performance C/C++ library, widely used and well maintained.</p>
-<p>Unfortunately, to maintain C++98 compatibility, the C++ interface of <code>librdkafka</code> is not quite object-oriented or user-friendly.</p>
+<p>The <strong><em>librdkafka</em></strong> is a robust high performance C/C++ library, widely used and well maintained.</p>
+<p>Unfortunately, to maintain C++98 compatibility, the C++ interface of <strong><em>librdkafka</em></strong> is not quite object-oriented or user-friendly.</p>
 <p>Since C++ is evolving quickly, we want to take advantage of new C++ features, thus make the life easier for developers. And this led us to create a new C++ API for Kafka clients.</p>
-<p>Eventually, we worked out the <code>modern-cpp-kafka</code>, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.</p>
+<p>Eventually, we worked out the <strong><em>modern-cpp-kafka</em></strong>, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.</p>
 <h2 id="features"><a class="toclink" href="#features">Features</a></h2>
 <ul>
 <li>
@@ -54,7 +54,7 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 <p>RAII is used for lifetime management</p>
 </li>
 <li>
-<p>librdkafka's polling and queue management is now hidden</p>
+<p><strong><em>librdkafka</em></strong>'s polling and queue management is now hidden</p>
 </li>
 </ul>
 </li>
@@ -101,13 +101,13 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 <p>Specify library locations with environment variables</p>
 <ul>
 <li>
-<p><code>LIBRDKAFKA_ROOT</code>                 -- <code>librdkafka</code> headers and libraries</p>
+<p><code>LIBRDKAFKA_ROOT</code>                 -- <strong><em>librdkafka</em></strong> headers and libraries</p>
 </li>
 <li>
-<p><code>GTEST_ROOT</code>                      -- <code>googletest</code> headers and libraries</p>
+<p><code>GTEST_ROOT</code>                      -- <strong><em>googletest</em></strong> headers and libraries</p>
 </li>
 <li>
-<p><code>BOOST_ROOT</code>                      -- <code>boost</code> headers and libraries</p>
+<p><code>BOOST_ROOT</code>                      -- <strong><em>boost</em></strong> headers and libraries</p>
 </li>
 <li>
 <p><code>SASL_LIBRARYDIR</code>/<code>SASL_LIBRARY</code>  -- if SASL connection support is wanted</p>
@@ -142,7 +142,7 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 <p><code>BUILD_OPTION_GEN_DOC=ON</code>       -- Generate documentation as well</p>
 </li>
 <li>
-<p><code>BUILD_OPTION_DOC_ONLY=ON</code>       -- Only generate documentation</p>
+<p><code>BUILD_OPTION_DOC_ONLY=ON</code>      -- Only generate documentation</p>
 </li>
 <li>
 <p><code>BUILD_OPTION_GEN_COVERAGE=ON</code>  -- Generate test coverage, only support by clang currently</p>
@@ -163,7 +163,7 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 <p>Include the <code>include/kafka</code> directory in your project</p>
 </li>
 <li>
-<p>To work together with <code>modern-cpp-kafka</code> API, the compiler should support</p>
+<p>To work together with <strong><em>modern-cpp-kafka</em></strong> API, the compiler should support</p>
 <ul>
 <li>
 <p>Option 1: C++17</p>
@@ -172,7 +172,7 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 <p>Option 2: C++14 (with pre-requirements)</p>
 <ul>
 <li>
-<p>Need <code>boost</code> headers (for <code>boost::optional</code>)</p>
+<p>Need <strong><em>boost</em></strong> headers (for <code>boost::optional</code>)</p>
 </li>
 <li>
 <p>GCC only (with optimization, e.g. -O2)</p>
@@ -226,6 +226,22 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </li>
 </ul>
 </li>
+<li>
+<p>Additional settings for clients</p>
+<ul>
+<li>
+<p>The environment variable <code>KAFKA_CLIENT_ADDITIONAL_SETTINGS</code> could be used for customized test environment</p>
+<ul>
+<li>
+<p>Especially for Kafka cluster with SASL(or SSL) connections</p>
+</li>
+<li>
+<p>E.g. <code>export KAFKA_CLIENT_ADDITIONAL_SETTINGS="security.protocol=SASL_PLAINTEXT;sasl.kerberos.service.name=...;sasl.kerberos.keytab=...;sasl.kerberos.principal=..."</code></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <h2 id="to-start"><a class="toclink" href="#to-start">To Start</a></h2>
 <ul>
@@ -247,16 +263,13 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 <p>User's Manual</p>
 <ul>
 <li>
-<p>Kafka Client API</p>
-<ul>
-<li><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">modern-cpp-kafka API</a></li>
-</ul>
+<p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">Kafka Client API</a></p>
 </li>
 <li>
 <p>Kafka Client Properties</p>
 <ul>
 <li>
-<p>In most cases, the <code>Properties</code> setting in <code>modern-cpp-kafka</code> is identical with <a href="https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
+<p>In most cases, the <code>Properties</code> settings for <strong><em>modern-cpp-kafka</em></strong> are identical with <a href="https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
 </li>
 <li>
 <p>With following exceptions</p>
@@ -265,13 +278,24 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 <p>KafkaConsumer</p>
 <ul>
 <li>
-<p>More properties than <code>librdkafka</code></p>
+<p>Properties with random string as default</p>
+<ul>
+<li>
+<p><code>client.id</code></p>
+</li>
+<li>
+<p><code>group.id</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>More properties than <strong><em>librdkafka</em></strong></p>
 <ul>
 <li><code>max.poll.records</code> (default: <code>500</code>): The maxmum number of records that a single call to <code>poll()</code> would return</li>
 </ul>
 </li>
 <li>
-<p>Properties not supposed to be used (internally shadowed by <code>modern-cpp-kafka</code>)</p>
+<p>Properties not supposed to be used (internally shadowed by <strong><em>modern-cpp-kafka</em></strong>)</p>
 <ul>
 <li>
 <p><code>enable.auto.offset.store</code></p>
@@ -284,33 +308,11 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </li>
 </ul>
 </li>
-<li>
-<p>Properties with random string as default</p>
-<ul>
-<li>
-<p><code>client.id</code></p>
-</li>
-<li>
-<p><code>group.id</code></p>
-</li>
-</ul>
-</li>
 </ul>
 </li>
 <li>
 <p>KafkaProducer</p>
 <ul>
-<li>
-<p>Different default value from <code>librdkafka</code></p>
-<ul>
-<li>
-<p>KafkaSyncProducer</p>
-<ul>
-<li><code>linger.ms</code> (default: <code>0</code>)</li>
-</ul>
-</li>
-</ul>
-</li>
 <li>
 <p>Properties with random string as default</p>
 <ul>
@@ -372,7 +374,7 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2021. 09. 03
+        Generated: 2021. 09. 07
       </footer>
       <hr/>
     </div>

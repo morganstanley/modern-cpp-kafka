@@ -104,7 +104,7 @@
 </ul>
 <h3 id="how-to-guarantee-exactly-once"><a class="toclink" href="#how-to-guarantee-exactly-once">How to guarantee <code>Exactly Once</code></a></h3>
 <ul>
-<li>The <code>enable.idempotence</code> configuration would resolve such a problem. And this configuration is RECOMMENDED for both <code>KafkaSyncProducer</code> and <code>KafkaAsyncProducer</code>, as long as it's possible.</li>
+<li>The <code>enable.idempotence</code> configuration is RECOMMENDED.</li>
 </ul>
 <h2 id="about-ordering"><a class="toclink" href="#about-ordering">About <code>Ordering</code></a></h2>
 <h3 id="no-ordering-between-partitions"><a class="toclink" href="#no-ordering-between-partitions">No ordering between partitions</a></h3>
@@ -218,76 +218,12 @@
 </li>
 </ul>
 <h2 id="some-examples"><a class="toclink" href="#some-examples">Some examples</a></h2>
-<h3 id="kafkasyncproducer-demo"><a class="toclink" href="#kafkasyncproducer-demo"><code>KafkaSyncProducer</code> demo</a></h3>
-<div class="codehilite"><pre><span></span>    <span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-
-    <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-
-
-
-    <span class="n">KafkaSyncProducer</span> <span class="nf">producer</span><span class="p">(</span>
-
-        <span class="n">Properties</span><span class="p">({</span>
-
-            <span class="p">{</span> <span class="n">ProducerConfig</span><span class="o">::</span><span class="n">BOOTSTRAP_SERVERS</span><span class="p">,</span>  <span class="s">&quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span> <span class="p">},</span>
-
-            <span class="p">{</span> <span class="n">ProducerConfig</span><span class="o">::</span><span class="n">ENABLE_IDEMPOTENCE</span><span class="p">,</span> <span class="s">&quot;true&quot;</span> <span class="p">},</span>
-
-            <span class="p">{</span> <span class="n">ProducerConfig</span><span class="o">::</span><span class="n">MESSAGE_TIMEOUT_MS</span><span class="p">,</span> <span class="s">&quot;60000&quot;</span><span class="p">}</span>
-
-        <span class="p">})</span>
-
-    <span class="p">);</span>
-
-
-
-    <span class="k">while</span> <span class="p">(</span><span class="n">running</span><span class="p">)</span> <span class="p">{</span>
-
-        <span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">topMsgOfUpstream</span><span class="p">();</span>
-
-        <span class="k">try</span> <span class="p">{</span>
-
-            <span class="k">auto</span> <span class="n">record</span> <span class="o">=</span> <span class="n">ProducerRecord</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">);</span>
-
-            <span class="n">producer</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">);</span>
-
-            <span class="n">popMsgFromUpstream</span><span class="p">();</span>
-
-        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="n">KafkaException</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
-
-            <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Failed to send message! Reason: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">what</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>        
-
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">e</span><span class="p">.</span><span class="n">error</span><span class="p">();</span>
-
-            <span class="k">break</span><span class="p">;</span>
-
-        <span class="p">}</span>
-
-    <span class="p">}</span>
-
-
-
-    <span class="n">producer</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
-
-
-
-    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
-</pre></div>
-
-<ul>
-<li>
-<p>It's easy to use <code>KafkaSyncProducer</code>, since it sends messages one by one. </p>
-</li>
-<li>
-<p>The throughput performance would not be that good, since there's only 1 message (embedded in 1 message batch) on the flight.</p>
-</li>
-</ul>
-<h3 id="kafkaasyncproducer-demo"><a class="toclink" href="#kafkaasyncproducer-demo"><code>KafkaAsyncProducer</code> demo</a></h3>
+<h3 id="kafkaproducer-demo"><a class="toclink" href="#kafkaproducer-demo"><code>KafkaProducer</code> demo</a></h3>
 <div class="codehilite"><pre><span></span>    <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 
 
 
-    <span class="n">KafkaAsyncProducer</span> <span class="nf">producer</span><span class="p">(</span>
+    <span class="n">KafkaProducer</span> <span class="nf">producer</span><span class="p">(</span>
 
         <span class="n">Properties</span><span class="p">({</span>
 
@@ -343,7 +279,7 @@
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2021. 09. 03
+        Generated: 2021. 09. 07
       </footer>
       <hr/>
     </div>

@@ -74,7 +74,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The base class for <a class="el" href="classKAFKA__API_1_1KafkaAsyncProducer.html" title="A Kafka client that publishes records to the Kafka cluster asynchronously.">KafkaAsyncProducer</a> and <a class="el" href="classKAFKA__API_1_1KafkaSyncProducer.html" title="A Kafka client that publishes records to the Kafka cluster asynchronously.">KafkaSyncProducer</a>.  
+<p><a class="el" href="classKAFKA__API_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a> class.  
  <a href="classKAFKA__API_1_1KafkaProducer.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="KafkaProducer_8h_source.html">KafkaProducer.h</a>&gt;</code></p>
@@ -84,17 +84,16 @@ Inheritance diagram for KAFKA_API::KafkaProducer:</div>
  <div class="center">
   <img src="classKAFKA__API_1_1KafkaProducer.png" usemap="#KAFKA_5FAPI::KafkaProducer_map" alt=""/>
   <map id="KAFKA_5FAPI::KafkaProducer_map" name="KAFKA_5FAPI::KafkaProducer_map">
-<area href="classKAFKA__API_1_1KafkaClient.html" title="The base class for Kafka clients (i.e, KafkaConsumer, KafkaProducer, and AdminClient)." alt="KAFKA_API::KafkaClient" shape="rect" coords="109,0,317,24"/>
-<area href="classKAFKA__API_1_1KafkaAsyncProducer.html" title="A Kafka client that publishes records to the Kafka cluster asynchronously." alt="KAFKA_API::KafkaAsyncProducer" shape="rect" coords="0,112,208,136"/>
-<area href="classKAFKA__API_1_1KafkaSyncProducer.html" title="A Kafka client that publishes records to the Kafka cluster asynchronously." alt="KAFKA_API::KafkaSyncProducer" shape="rect" coords="218,112,426,136"/>
+<area href="classKAFKA__API_1_1KafkaClient.html" title="The base class for Kafka clients (i.e, KafkaConsumer, KafkaProducer, and AdminClient)." alt="KAFKA_API::KafkaClient" shape="rect" coords="0,0,172,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a18c869854930f62b63d76257d6da935b"><td class="memItemLeft" align="right" valign="top"><a id="a18c869854930f62b63d76257d6da935b"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>SendOption</b> { <b>NoCopyRecordValue</b>, 
+<tr class="memitem:a18c869854930f62b63d76257d6da935b"><td class="memItemLeft" align="right" valign="top"><a id="a18c869854930f62b63d76257d6da935b"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a18c869854930f62b63d76257d6da935b">SendOption</a> { <b>NoCopyRecordValue</b>, 
 <b>ToCopyRecordValue</b>
  }</td></tr>
+<tr class="memdesc:a18c869854930f62b63d76257d6da935b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Options for sending messages. <br /></td></tr>
 <tr class="separator:a18c869854930f62b63d76257d6da935b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_types_classKAFKA__API_1_1KafkaClient"><td colspan="2" onclick="javascript:toggleInherit('pub_types_classKAFKA__API_1_1KafkaClient')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classKAFKA__API_1_1KafkaClient.html">KAFKA_API::KafkaClient</a></td></tr>
 <tr class="memitem:ae735fbad46953a0c5b57e40d810a3450 inherit pub_types_classKAFKA__API_1_1KafkaClient"><td class="memItemLeft" align="right" valign="top"><a id="ae735fbad46953a0c5b57e40d810a3450"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>EventsPollingOption</b> { <b>Manual</b>, 
@@ -104,9 +103,28 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a20bf644b121565acab584a5764427d62"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a20bf644b121565acab584a5764427d62">KafkaProducer</a> (const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;<a class="el" href="classKAFKA__API_1_1KafkaClient.html#a79f54433b395e4e306a11bb10be53e28">properties</a>, EventsPollingOption pollOption=EventsPollingOption::Auto)</td></tr>
+<tr class="memdesc:a20bf644b121565acab584a5764427d62"><td class="mdescLeft">&#160;</td><td class="mdescRight">The constructor for <a class="el" href="classKAFKA__API_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a>.  <a href="classKAFKA__API_1_1KafkaProducer.html#a20bf644b121565acab584a5764427d62">More...</a><br /></td></tr>
+<tr class="separator:a20bf644b121565acab584a5764427d62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5086b1698c1b9c3cb5a389b3a7a6eede"><td class="memItemLeft" align="right" valign="top"><a id="a5086b1698c1b9c3cb5a389b3a7a6eede"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a5086b1698c1b9c3cb5a389b3a7a6eede">~KafkaProducer</a> () override</td></tr>
+<tr class="memdesc:a5086b1698c1b9c3cb5a389b3a7a6eede"><td class="mdescLeft">&#160;</td><td class="mdescRight">The destructor for <a class="el" href="classKAFKA__API_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a>. <br /></td></tr>
+<tr class="separator:a5086b1698c1b9c3cb5a389b3a7a6eede"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59ca7f95b7ee46cff81e4e424c8fbb9e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Error.html">Error</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a59ca7f95b7ee46cff81e4e424c8fbb9e">flush</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
 <tr class="memdesc:a59ca7f95b7ee46cff81e4e424c8fbb9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invoking this method makes all buffered records immediately available to send, and blocks on the completion of the requests associated with these records.  <a href="classKAFKA__API_1_1KafkaProducer.html#a59ca7f95b7ee46cff81e4e424c8fbb9e">More...</a><br /></td></tr>
 <tr class="separator:a59ca7f95b7ee46cff81e4e424c8fbb9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a15c20d4305fd259e14903205b559bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Error.html">Error</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a1a15c20d4305fd259e14903205b559bf">close</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
+<tr class="memdesc:a1a15c20d4305fd259e14903205b559bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close this producer.  <a href="classKAFKA__API_1_1KafkaProducer.html#a1a15c20d4305fd259e14903205b559bf">More...</a><br /></td></tr>
+<tr class="separator:a1a15c20d4305fd259e14903205b559bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a596c6a3478e967d933d8dda91b53f39f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a596c6a3478e967d933d8dda91b53f39f">send</a> (const <a class="el" href="classKAFKA__API_1_1ProducerRecord.html">ProducerRecord</a> &amp;record, const <a class="el" href="namespaceKAFKA__API_1_1Producer.html#a34690307f24a037a99f68c85d99060d9">Producer::Callback</a> &amp;deliveryCb, <a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a18c869854930f62b63d76257d6da935b">SendOption</a> option=SendOption::NoCopyRecordValue)</td></tr>
+<tr class="memdesc:a596c6a3478e967d933d8dda91b53f39f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously send a record to a topic.  <a href="classKAFKA__API_1_1KafkaProducer.html#a596c6a3478e967d933d8dda91b53f39f">More...</a><br /></td></tr>
+<tr class="separator:a596c6a3478e967d933d8dda91b53f39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cea4f8d56c034d01ccc9b695d84c573"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a5cea4f8d56c034d01ccc9b695d84c573">send</a> (const <a class="el" href="classKAFKA__API_1_1ProducerRecord.html">ProducerRecord</a> &amp;record, const <a class="el" href="namespaceKAFKA__API_1_1Producer.html#a34690307f24a037a99f68c85d99060d9">Producer::Callback</a> &amp;deliveryCb, <a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;error, <a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a18c869854930f62b63d76257d6da935b">SendOption</a> option=SendOption::NoCopyRecordValue)</td></tr>
+<tr class="memdesc:a5cea4f8d56c034d01ccc9b695d84c573"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously send a record to a topic.  <a href="classKAFKA__API_1_1KafkaProducer.html#a5cea4f8d56c034d01ccc9b695d84c573">More...</a><br /></td></tr>
+<tr class="separator:a5cea4f8d56c034d01ccc9b695d84c573"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f9e921ef8d8dcfb9585129c171f593a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Producer_1_1RecordMetadata.html">Producer::RecordMetadata</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a8f9e921ef8d8dcfb9585129c171f593a">syncSend</a> (const <a class="el" href="classKAFKA__API_1_1ProducerRecord.html">ProducerRecord</a> &amp;record)</td></tr>
+<tr class="memdesc:a8f9e921ef8d8dcfb9585129c171f593a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronously send a record to a topic.  <a href="classKAFKA__API_1_1KafkaProducer.html#a8f9e921ef8d8dcfb9585129c171f593a">More...</a><br /></td></tr>
+<tr class="separator:a8f9e921ef8d8dcfb9585129c171f593a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45b1cab681ba80008e1f792e912aa72b"><td class="memItemLeft" align="right" valign="top"><a id="a45b1cab681ba80008e1f792e912aa72b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a45b1cab681ba80008e1f792e912aa72b">initTransactions</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds(KafkaProducer::DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS))</td></tr>
 <tr class="memdesc:a45b1cab681ba80008e1f792e912aa72b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Needs to be called before any other methods when the transactional.id is set in the configuration. <br /></td></tr>
@@ -127,6 +145,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a77c2d7fade529da94460cb8f652df8e9">sendOffsetsToTransaction</a> (const TopicPartitionOffsets &amp;topicPartitionOffsets, const <a class="el" href="classKAFKA__API_1_1Consumer_1_1ConsumerGroupMetadata.html">Consumer::ConsumerGroupMetadata</a> &amp;groupMetadata, std::chrono::milliseconds timeout)</td></tr>
 <tr class="memdesc:a77c2d7fade529da94460cb8f652df8e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a list of specified offsets to the consumer group coodinator, and also marks those offsets as part of the current transaction. <br /></td></tr>
 <tr class="separator:a77c2d7fade529da94460cb8f652df8e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c014f723bc8ebe9eb67eba44e81caf5"><td class="memItemLeft" align="right" valign="top"><a id="a5c014f723bc8ebe9eb67eba44e81caf5"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a5c014f723bc8ebe9eb67eba44e81caf5">pollEvents</a> (std::chrono::milliseconds timeout)</td></tr>
+<tr class="memdesc:a5c014f723bc8ebe9eb67eba44e81caf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call the MessageDelivery callbacks (if any) Note: The <a class="el" href="classKAFKA__API_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a> MUST be constructed with option <code>EventsPollingOption::Manual</code>. <br /></td></tr>
+<tr class="separator:a5c014f723bc8ebe9eb67eba44e81caf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classKAFKA__API_1_1KafkaClient"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classKAFKA__API_1_1KafkaClient')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classKAFKA__API_1_1KafkaClient.html">KAFKA_API::KafkaClient</a></td></tr>
 <tr class="memitem:a5805d4319254f3029b673c8bb9dd23e3 inherit pub_methods_classKAFKA__API_1_1KafkaClient"><td class="memItemLeft" align="right" valign="top"><a id="a5805d4319254f3029b673c8bb9dd23e3"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>KafkaClient</b> (ClientType clientType, const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;<a class="el" href="classKAFKA__API_1_1KafkaClient.html#a79f54433b395e4e306a11bb10be53e28">properties</a>, const ConfigCallbacksRegister &amp;registerCallbacks=ConfigCallbacksRegister(), const std::set&lt; std::string &gt; &amp;privatePropertyKeys={})</td></tr>
@@ -187,8 +209,84 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 <tr class="separator:a3f12df50cd662eb7770cd099d65a6f6b inherit pub_static_methods_classKAFKA__API_1_1KafkaClient"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The base class for <a class="el" href="classKAFKA__API_1_1KafkaAsyncProducer.html" title="A Kafka client that publishes records to the Kafka cluster asynchronously.">KafkaAsyncProducer</a> and <a class="el" href="classKAFKA__API_1_1KafkaSyncProducer.html" title="A Kafka client that publishes records to the Kafka cluster asynchronously.">KafkaSyncProducer</a>. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+<div class="textblock"><p><a class="el" href="classKAFKA__API_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a> class. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a20bf644b121565acab584a5764427d62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20bf644b121565acab584a5764427d62">&#9670;&nbsp;</a></span>KafkaProducer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">KAFKA_API::KafkaProducer::KafkaProducer </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;&#160;</td>
+          <td class="paramname"><em>properties</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">EventsPollingOption&#160;</td>
+          <td class="paramname"><em>pollOption</em> = <code>EventsPollingOption::Auto</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The constructor for <a class="el" href="classKAFKA__API_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a>. </p>
+<p>Options:</p><ul>
+<li>EventsPollingOption::Auto (default) : An internal thread would be started for MessageDelivery callbacks handling.</li>
+<li>EventsPollingOption::Manual : User have to call the member function <code><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a5c014f723bc8ebe9eb67eba44e81caf5" title="Call the MessageDelivery callbacks (if any) Note: The KafkaProducer MUST be constructed with option E...">pollEvents()</a></code> to trigger MessageDelivery callbacks.</li>
+</ul>
+<p>Throws <a class="el" href="classKAFKA__API_1_1KafkaException.html" title="Specific exception for Kafka clients.">KafkaException</a> with errors:</p><ul>
+<li>RD_KAFKA_RESP_ERR__INVALID_ARG : Invalid BOOTSTRAP_SERVERS property</li>
+<li>RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads </li>
+</ul>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a1a15c20d4305fd259e14903205b559bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a15c20d4305fd259e14903205b559bf">&#9670;&nbsp;</a></span>close()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classKAFKA__API_1_1Error.html">Error</a> KAFKA_API::KafkaProducer::close </td>
+          <td>(</td>
+          <td class="paramtype">std::chrono::milliseconds&#160;</td>
+          <td class="paramname"><em>timeout</em> = <code>std::chrono::milliseconds::max()</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Close this producer. </p>
+<p>This method waits up to timeout for the producer to complete the sending of all incomplete requests. </p>
+
+</div>
+</div>
 <a id="a59ca7f95b7ee46cff81e4e424c8fbb9e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a59ca7f95b7ee46cff81e4e424c8fbb9e">&#9670;&nbsp;</a></span>flush()</h2>
 
@@ -216,6 +314,161 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 <p>Invoking this method makes all buffered records immediately available to send, and blocks on the completion of the requests associated with these records. </p>
 <p>Possible error values:</p><ul>
 <li>RD_KAFKA_RESP_ERR__TIMED_OUT: The <code>timeout</code> was reached before all outstanding requests were completed. </li>
+</ul>
+
+</div>
+</div>
+<a id="a5cea4f8d56c034d01ccc9b695d84c573"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5cea4f8d56c034d01ccc9b695d84c573">&#9670;&nbsp;</a></span>send() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void KAFKA_API::KafkaProducer::send </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classKAFKA__API_1_1ProducerRecord.html">ProducerRecord</a> &amp;&#160;</td>
+          <td class="paramname"><em>record</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespaceKAFKA__API_1_1Producer.html#a34690307f24a037a99f68c85d99060d9">Producer::Callback</a> &amp;&#160;</td>
+          <td class="paramname"><em>deliveryCb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;&#160;</td>
+          <td class="paramname"><em>error</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a18c869854930f62b63d76257d6da935b">SendOption</a>&#160;</td>
+          <td class="paramname"><em>option</em> = <code>SendOption::NoCopyRecordValue</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Asynchronously send a record to a topic. </p>
+<p>Note:</p><ul>
+<li>If a callback is provided, it's guaranteed to be triggered (before closing the producer).</li>
+<li>The input reference parameter <code>error</code> will be set if an error occurred.</li>
+<li>Make sure the memory block (for <a class="el" href="classKAFKA__API_1_1ProducerRecord.html" title="A key/value pair to be sent to Kafka.">ProducerRecord</a>'s value) is valid until the delivery callback finishes; Otherwise, should be with option <code>KafkaProducer::SendOption::ToCopyRecordValue</code>.</li>
+</ul>
+<p>Possible errors: Local errors,</p><ul>
+<li>RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC: The topic doesn't exist</li>
+<li>RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION: The partition doesn't exist</li>
+<li>RD_KAFKA_RESP_ERR__INVALID_ARG: Invalid topic(topic is null, or the length is too long (&gt; 512)</li>
+<li>RD_KAFKA_RESP_ERR__MSG_TIMED_OUT: No ack received within the time limit</li>
+<li>RD_KAFKA_RESP_ERR__QUEUE_FULL: The message buffing queue is full Broker errors,</li>
+<li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a> </li>
+</ul>
+
+</div>
+</div>
+<a id="a596c6a3478e967d933d8dda91b53f39f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a596c6a3478e967d933d8dda91b53f39f">&#9670;&nbsp;</a></span>send() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void KAFKA_API::KafkaProducer::send </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classKAFKA__API_1_1ProducerRecord.html">ProducerRecord</a> &amp;&#160;</td>
+          <td class="paramname"><em>record</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespaceKAFKA__API_1_1Producer.html#a34690307f24a037a99f68c85d99060d9">Producer::Callback</a> &amp;&#160;</td>
+          <td class="paramname"><em>deliveryCb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a18c869854930f62b63d76257d6da935b">SendOption</a>&#160;</td>
+          <td class="paramname"><em>option</em> = <code>SendOption::NoCopyRecordValue</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Asynchronously send a record to a topic. </p>
+<p>Note:</p><ul>
+<li>If a callback is provided, it's guaranteed to be triggered (before closing the producer).</li>
+<li>If any error occured, an exception would be thrown.</li>
+<li>Make sure the memory block (for <a class="el" href="classKAFKA__API_1_1ProducerRecord.html" title="A key/value pair to be sent to Kafka.">ProducerRecord</a>'s value) is valid until the delivery callback finishes; Otherwise, should be with option <code>KafkaProducer::SendOption::ToCopyRecordValue</code>.</li>
+</ul>
+<p>Possible errors: Local errors,</p><ul>
+<li>RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC: The topic doesn't exist</li>
+<li>RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION: The partition doesn't exist</li>
+<li>RD_KAFKA_RESP_ERR__INVALID_ARG: Invalid topic(topic is null, or the length is too long (&gt; 512)</li>
+<li>RD_KAFKA_RESP_ERR__MSG_TIMED_OUT: No ack received within the time limit</li>
+<li>RD_KAFKA_RESP_ERR__QUEUE_FULL: The message buffing queue is full Broker errors,</li>
+<li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a> </li>
+</ul>
+
+</div>
+</div>
+<a id="a8f9e921ef8d8dcfb9585129c171f593a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f9e921ef8d8dcfb9585129c171f593a">&#9670;&nbsp;</a></span>syncSend()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classKAFKA__API_1_1Producer_1_1RecordMetadata.html">Producer::RecordMetadata</a> KAFKA_API::KafkaProducer::syncSend </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classKAFKA__API_1_1ProducerRecord.html">ProducerRecord</a> &amp;&#160;</td>
+          <td class="paramname"><em>record</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Synchronously send a record to a topic. </p>
+<p>Throws <a class="el" href="classKAFKA__API_1_1KafkaException.html" title="Specific exception for Kafka clients.">KafkaException</a> with errors: Local errors,</p><ul>
+<li>RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC: The topic doesn't exist</li>
+<li>RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION: The partition doesn't exist</li>
+<li>RD_KAFKA_RESP_ERR__INVALID_ARG: Invalid topic(topic is null, or the length is too long (&gt; 512)</li>
+<li>RD_KAFKA_RESP_ERR__MSG_TIMED_OUT: No ack received within the time limit Broker errors,</li>
+<li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a> </li>
 </ul>
 
 </div>

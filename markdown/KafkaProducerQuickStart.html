@@ -18,92 +18,11 @@
       <h1 id="kafkaproducer-quick-start"><a class="toclink" href="#kafkaproducer-quick-start">KafkaProducer Quick Start</a></h1>
 <p>Generally speaking, The <code>Modern C++ based Kafka API</code> is quite similar to the <a href="https://kafka.apache.org/10/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html">Kafka Java's API</a>.</p>
 <p>We'd recommend users to cross-reference them, --especially the examples.</p>
-<p>Unlike Java's KafkaProducer, here we introduce two derived classes, -- <code>KafkaSyncProducer</code> and <code>KafkaAsyncProducer</code> --depending on different <code>send</code> behaviors (synchronous/asynchronous).</p>
-<h2 id="kafkasyncproducer"><a class="toclink" href="#kafkasyncproducer">KafkaSyncProducer</a></h2>
+<h2 id="kafkaproducer"><a class="toclink" href="#kafkaproducer">KafkaProducer</a></h2>
 <ul>
-<li>The "Sync" (in the name) means <code>send</code> is a blocking operation, and it will immediately get the RecordMetadata while the function returns. If anything wrong occurs, an exception would be thrown.</li>
+<li>The <code>send</code> is an unblocking operation, and the result (including errors) could only be got from the delivery callback.</li>
 </ul>
 <h3 id="example"><a class="toclink" href="#example">Example</a></h3>
-<div class="codehilite"><pre><span></span>        <span class="c1">// Create configuration object</span>
-
-        <span class="n">kafka</span><span class="o">::</span><span class="n">Properties</span> <span class="n">props</span><span class="p">({</span>
-
-            <span class="p">{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span>  <span class="n">brokers</span><span class="p">},</span>
-
-            <span class="p">{</span><span class="s">&quot;enable.idempotence&quot;</span><span class="p">,</span> <span class="s">&quot;true&quot;</span><span class="p">},</span>
-
-        <span class="p">});</span>
-
-
-
-        <span class="c1">// Create a producer instance.</span>
-
-        <span class="n">kafka</span><span class="o">::</span><span class="n">KafkaSyncProducer</span> <span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span>
-
-
-
-        <span class="c1">// Read messages from stdin and produce to the broker.</span>
-
-        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% Type message value and hit enter to produce message. (empty line to quit)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-
-
-
-        <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">line</span><span class="p">;</span> <span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span><span class="p">,</span> <span class="n">line</span><span class="p">);)</span> <span class="p">{</span>
-
-            <span class="c1">// The ProducerRecord doesn&#39;t own `line`, it is just a thin wrapper</span>
-
-            <span class="k">auto</span> <span class="n">record</span> <span class="o">=</span> <span class="n">kafka</span><span class="o">::</span><span class="n">ProducerRecord</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span>
-
-                                                <span class="n">kafka</span><span class="o">::</span><span class="n">NullKey</span><span class="p">,</span>
-
-                                                <span class="n">kafka</span><span class="o">::</span><span class="n">Value</span><span class="p">(</span><span class="n">line</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="n">line</span><span class="p">.</span><span class="n">size</span><span class="p">()));</span>
-
-
-
-            <span class="c1">// Send the message.</span>
-
-            <span class="k">try</span> <span class="p">{</span>
-
-                <span class="n">kafka</span><span class="o">::</span><span class="n">Producer</span><span class="o">::</span><span class="n">RecordMetadata</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">producer</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">);</span>
-
-                <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% Message delivered: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">metadata</span><span class="p">.</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-
-            <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="n">kafka</span><span class="o">::</span><span class="n">KafkaException</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
-
-                <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;% Message delivery failed: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">e</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">message</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-
-            <span class="p">}</span>
-
-
-
-            <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="k">break</span><span class="p">;</span>
-
-        <span class="p">};</span>
-
-
-
-        <span class="c1">// producer.close(); // No explicit close is needed, RAII will take care of it</span>
-</pre></div>
-
-<ul>
-<li>
-<p><code>ProducerConfig::BOOTSTRAP_SERVERS</code> is mandatory for ProducerConfig.</p>
-</li>
-<li>
-<p><code>ProducerRecord</code> would not take any ownership for the <code>key</code> or <code>value</code>. Thus, the user must guarantee the memory block (pointed by <code>key</code> or <code>value</code>) is valid until being <code>send</code>.</p>
-</li>
-<li>
-<p>Since <code>send</code> is a blocking operation, the throughput will be highly impacted, but it is easier to make sure of the message delivery and logically it is simpler.</p>
-</li>
-<li>
-<p>At the end, the user could call <code>close</code> manually, or just leave it to the destructor (<code>close</code> would be called anyway).</p>
-</li>
-</ul>
-<h2 id="kafkaasyncproducer"><a class="toclink" href="#kafkaasyncproducer">KafkaAsyncProducer</a></h2>
-<ul>
-<li>The <code>Async</code> (in the name) means <code>send</code> is an unblocking operation, and the result (including errors) could only be got from the delivery callback.</li>
-</ul>
-<h3 id="example_1"><a class="toclink" href="#example_1">Example</a></h3>
 <div class="codehilite"><pre><span></span>        <span class="c1">// Create configuration object</span>
 
         <span class="n">kafka</span><span class="o">::</span><span class="n">Properties</span> <span class="n">props</span> <span class="p">({</span>
@@ -118,7 +37,7 @@
 
         <span class="c1">// Create a producer instance.</span>
 
-        <span class="n">kafka</span><span class="o">::</span><span class="n">KafkaAsyncProducer</span> <span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span>
+        <span class="n">kafka</span><span class="o">::</span><span class="n">KafkaProducer</span> <span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span>
 
 
 
@@ -171,7 +90,7 @@
 
 <ul>
 <li>
-<p>Same with KafkaSyncProducer, the user must guarantee the memory block for <code>ProducerRecord</code>'s <code>key</code> is valid until being <code>send</code>.</p>
+<p>User must guarantee the memory block for <code>ProducerRecord</code>'s <code>key</code> is valid until being <code>send</code>.</p>
 </li>
 <li>
 <p>By default, the memory block for <code>ProducerRecord</code>'s <code>value</code> must be valid until the delivery callback is called; Otherwise, the <code>send</code> should be with option <code>KafkaProducer::SendOption::ToCopyRecordValue</code>.</p>
@@ -180,17 +99,17 @@
 <p>It's guaranteed that the delivery callback would be triggered anyway after <code>send</code>, -- a producer would even be waiting for it before <code>close</code>. So, it's a good way to release these memory resources in the <code>Producer::Callback</code> function.</p>
 </li>
 </ul>
-<h2 id="kafkaasyncproducer-with-kafkaclienteventspollingoptionmanual"><a class="toclink" href="#kafkaasyncproducer-with-kafkaclienteventspollingoptionmanual">KafkaAsyncProducer with <code>KafkaClient::EventsPollingOption::Manual</code></a></h2>
-<p>While we construct a <code>KafkaAsyncProducer</code> with option <code>KafkaClient::EventsPollingOption::Auto</code> (default), an internal thread would be created for <code>MessageDelivery</code> callbacks handling. </p>
+<h2 id="kafkaproducer-with-kafkaclienteventspollingoptionmanual"><a class="toclink" href="#kafkaproducer-with-kafkaclienteventspollingoptionmanual"><code>KafkaProducer</code> with <code>KafkaClient::EventsPollingOption::Manual</code></a></h2>
+<p>While we construct a <code>KafkaProducer</code> with option <code>KafkaClient::EventsPollingOption::Auto</code> (default), an internal thread would be created for <code>MessageDelivery</code> callbacks handling.</p>
 <p>This might not be what you want, since then you have to use 2 different threads to send the messages and handle the <code>MessageDelivery</code> responses.</p>
 <p>Here we have another choice, -- using <code>KafkaClient::EventsPollingOption::Manual</code>, thus the <code>MessageDelivery</code> callbacks would be called within member function <code>pollEvents()</code>.</p>
 <ul>
-<li>Note, if you constructed the <code>KafkaAsyncProducer</code> with <code>EventsPollingOption::Manual</code>, the <code>send()</code> would be an <code>unblocked</code> operation.</li>
+<li>Note, if you constructed the <code>KafkaProducer</code> with <code>EventsPollingOption::Manual</code>, the <code>send()</code> would be an <code>unblocked</code> operation.</li>
 </ul>
 <p>I.e, once the <code>message buffering queue</code> becomes full, the <code>send()</code> operation would throw an exception (or return an <code>error code</code> with the input reference parameter), -- instead of blocking there.</p>
 <p>This makes sense, since you might want to call <code>pollEvents()</code> later, thus delivery-callback could be called for some messages (which could then be removed from the <code>message buffering queue</code>).</p>
-<h3 id="example_2"><a class="toclink" href="#example_2">Example</a></h3>
-<div class="codehilite"><pre><span></span>    <span class="n">kafak</span><span class="o">::</span><span class="n">KafkaAsyncProducer</span> <span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="n">KafkaClient</span><span class="o">::</span><span class="n">EventsPollingOption</span><span class="o">::</span><span class="n">Manual</span><span class="p">);</span>
+<h3 id="example_1"><a class="toclink" href="#example_1">Example</a></h3>
+<div class="codehilite"><pre><span></span>    <span class="n">kafak</span><span class="o">::</span><span class="n">KafkaProducer</span> <span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="n">KafkaClient</span><span class="o">::</span><span class="n">EventsPollingOption</span><span class="o">::</span><span class="n">Manual</span><span class="p">);</span>
 
 
 
@@ -250,8 +169,8 @@
 </ul>
 </li>
 </ul>
-<h3 id="example_3"><a class="toclink" href="#example_3">Example</a></h3>
-<div class="codehilite"><pre><span></span>    <span class="n">kafak</span><span class="o">::</span><span class="n">KafkaAsyncProducer</span> <span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span>
+<h3 id="example_2"><a class="toclink" href="#example_2">Example</a></h3>
+<div class="codehilite"><pre><span></span>    <span class="n">kafak</span><span class="o">::</span><span class="n">KafkaProducer</span> <span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span>
 
 
 
@@ -301,13 +220,13 @@
 </pre></div>
 
 <h2 id="error-handling"><a class="toclink" href="#error-handling">Error handling</a></h2>
-<p>Once an error occurs during <code>send()</code>, <code>KafkaSyncProducer</code> and <code>KafkaAsyncProducer</code> behave differently.</p>
+<p><code>Error</code> might occur at different places while sending a message,</p>
 <ol>
 <li>
-<p><code>KafkaSyncProducer</code> gets <code>std::error_code</code> by catching exceptions (with <code>error()</code> member function).</p>
+<p>A <code>KafkaException</code> would be triggered if <code>KafkaProducer</code> failed to trigger the send operation.</p>
 </li>
 <li>
-<p><code>KafkaAsyncProducer</code> gets <code>std::error_code</code> with delivery-callback (with a parameter of the callback function).</p>
+<p>Delivery <code>Error</code> would be passed through the delivery-callback.</p>
 </li>
 </ol>
 <p>There are 2 kinds of possible errors,</p>
@@ -349,8 +268,6 @@
 <h3 id="about-the-automatic-topic-creation"><a class="toclink" href="#about-the-automatic-topic-creation">About the automatic <code>topic creation</code></a></h3>
 <p>If the cluster's configuration is with <code>auto.create.topics.enable=true</code>, the producer/consumer could trigger the brokers to create a new topic (with <code>send</code>, <code>subscribe</code>, etc)</p>
 <p>Note, the default created topic may be not what you want (e.g, with <code>default.replication.factor=1</code> configuration as default, etc), thus causing other unexpected problems.</p>
-<h3 id="what-will-happen-after-ack-timeout"><a class="toclink" href="#what-will-happen-after-ack-timeout">What will happen after <code>ack</code> timeout?</a></h3>
-<p>If an ack failed to be received within <code>MESSAGE_TIMEOUT_MS</code>, an exception would be thrown for a KafkaSyncSend, or, an error code would be received by the delivery callback for a KafkaAsyncProducer.</p>
 <h3 id="how-to-enhance-the-sending-performance"><a class="toclink" href="#how-to-enhance-the-sending-performance">How to enhance the sending performance?</a></h3>
 <p>Enlarging the default <code>BATCH_NUM_MESSAGES</code> and <code>LINGER_MS</code> might improve message batching, thus enhancing the throughput.</p>
 <p>While, on the other hand, <code>LINGER_MS</code> would highly impact the latency.</p>
@@ -365,7 +282,7 @@
 <p>The Kafka cluster should be configured with <code>min.insync.replicas = 2</code> at least</p>
 </li>
 <li>
-<p>Use a <code>KafkaSyncProducer</code> (with configuration <code>{ProducerConfig::ACKS, "all"}</code>); or use a <code>KafkaAsyncProducer</code> (with configuration <code>{ProducerConfig::ENABLE_IDEMPOTENCE, "true"}</code>), together with proper error-handling within the delivery callbacks. </p>
+<p>Configure the <code>KafkaProducer</code> with property <code>{ProducerConfig::ENABLE_IDEMPOTENCE, "true"}</code>, together with proper error-handling (within the delivery callback).</p>
 </li>
 </ol>
 </li>
@@ -377,7 +294,7 @@
 </li>
 </ul>
 <h3 id="how-many-threads-would-be-created-by-a-kafkaproducer"><a class="toclink" href="#how-many-threads-would-be-created-by-a-kafkaproducer">How many threads would be created by a KafkaProducer?</a></h3>
-<p>Excluding the user's main thread, KafkaSyncProducer would start another (N + 2) threads in the background, while <code>KafkaAsyncProducer</code> would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)</p>
+<p>Excluding the user's main thread, <code>KafkaProducer</code> would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)</p>
 <p>Most of these background threads are started internally by librdkafka.</p>
 <p>Here is a brief introduction what they're used for,</p>
 <ol>
@@ -388,17 +305,16 @@
 <p>Another 2 background threads would handle internal operations and kinds of timers, etc.</p>
 </li>
 <li>
-<p><code>KafkaAsyncProducer</code> has one more background thread to keep polling the delivery callback event.</p>
+<p>One more background thread to keep polling the delivery callback event.</p>
 </li>
 </ol>
-<p>E.g, if a KafkaSyncProducer was created with property of <code>BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890</code>, it would take 6 threads in total (including the main thread).</p>
+<p>E.g, if a <code>KafkaProducer</code> was created with property of <code>BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890</code>, it would take 7 threads in total (including the main thread).</p>
 <h3 id="which-one-of-these-threads-will-handle-the-callbacks"><a class="toclink" href="#which-one-of-these-threads-will-handle-the-callbacks">Which one of these threads will handle the callbacks</a></h3>
-<p>The <code>Producer::Callback</code> is only available for a <code>KafkaAsyncProducer</code>.</p>
 <p>It will be handled by a background thread, not by the user's thread.</p>
-<p>Note, should be careful if both the <code>KafkaAsyncProducer::send()</code> and the <code>Producer::Callback</code> might access the same container at the same time.</p>
+<p>Note, should be careful if both the <code>KafkaProducer::send()</code> and the <code>Producer::Callback</code> might access the same container at the same time.</p>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2021. 09. 03
+        Generated: 2021. 09. 07
       </footer>
       <hr/>
     </div>

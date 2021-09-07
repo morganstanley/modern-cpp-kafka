@@ -17,8 +17,8 @@
     <div class="container">
       <h1 id="good-practices-to-use-a-kafkaproducer"><a class="toclink" href="#good-practices-to-use-a-kafkaproducer">Good Practices to Use a KafkaProducer</a></h1>
 <p>If we want to achieve high performance/availability, here're some rules of thumb.</p>
-<h2 id="use-a-kafkaasyncproducer-for-better-throughput"><a class="toclink" href="#use-a-kafkaasyncproducer-for-better-throughput">Use a <code>KafkaAsyncProducer</code> for better throughput</a></h2>
-<p>You should not use a <code>KafkaSyncProducer</code> if you want to get a high throughput. The <code>Sync</code> means the <code>send</code> operation is a synchronous operation, and would not go on until the <code>acks</code> are received.</p>
+<h2 id="avoid-using-syncsend-for-better-throughput"><a class="toclink" href="#avoid-using-syncsend-for-better-throughput">Avoid using <code>syncSend</code> for better throughput</a></h2>
+<p>You should never call <code>syncSend</code> if you want to get a high throughput. The <code>syncSend</code> is a synchronous operation, and would not go on until the <code>acks</code> are received.</p>
 <h2 id="the-messagemaxbytes-must-be-consistent-with-kafka-servers-setting"><a class="toclink" href="#the-messagemaxbytes-must-be-consistent-with-kafka-servers-setting">The <code>message.max.bytes</code> must be consistent with Kafka servers' setting</a></h2>
 <ul>
 <li>
@@ -26,20 +26,6 @@
 </li>
 <li>
 <p>The default setting for brokers is <code>message.max.bytes = 1000012</code>, and do MAKE SURE the client side setting no larger than it. Otherwise, it might construct a MessageSet which would be rejected (error: INVALID_MESSAGE_SIZE) by brokers.</p>
-</li>
-</ul>
-<h2 id="in-most-cases-the-default-value-for-lingerms-is-good-enough"><a class="toclink" href="#in-most-cases-the-default-value-for-lingerms-is-good-enough">In most cases, the default value for <code>linger.ms</code> is good enough</a></h2>
-<ul>
-<li>
-<p>It means the delay in milliseconds to wait for messages in the producer queue to accumulate before constructing MessageSets to transmit to brokers.</p>
-<ol>
-<li>
-<p>For a <code>KafkaSyncProducer</code>, it sends the messages one by one (after <code>acks</code> response received), thus it could use <code>linger.ms=0</code> (as default) to eliminate the unnecessary waiting time.</p>
-</li>
-<li>
-<p>For a <code>KafkaAsyncProduer</code>, a larger <code>linger.ms</code> could be used to accumulate messages for MessageSets to improve the performance -- it should be the result of balancing between throughput and latency.</p>
-</li>
-</ol>
 </li>
 </ul>
 <h2 id="calculate-batchnummessages-with-the-average-message-size"><a class="toclink" href="#calculate-batchnummessages-with-the-average-message-size">Calculate <code>batch.num.messages</code> with the average message size</a></h2>
@@ -77,23 +63,6 @@
 <p>The <code>acks=all</code> setting will highly impact the throughput &amp; latency, and it would be obvious if the traffic latency between kafka brokers is high. But it's mandatory if we want to achieve high availability.</p>
 </li>
 </ul>
-<h2 id="determine-the-default-sending-buffer-according-to-the-latency"><a class="toclink" href="#determine-the-default-sending-buffer-according-to-the-latency">Determine the default sending buffer (according to the latency)</a></h2>
-<ul>
-<li>
-<p>Default queue.buffing setting,</p>
-<ul>
-<li>
-<p><code>queue.buffering.max.messages=1000000</code></p>
-</li>
-<li>
-<p><code>queue.buffering.max.kbytes=0x100000</code> (1GB)</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Normally, the default settings should be good enough.</p>
-</li>
-</ul>
 <h2 id="how-could-a-message-miss-after-send"><a class="toclink" href="#how-could-a-message-miss-after-send">How could a message miss after send?</a></h2>
 <ul>
 <li>
@@ -106,26 +75,9 @@
 <p>Once the message received by the partition leader, the leader crashed just after responding to the producer, but with no in-sync replica to synchronize for the message. (with <code>acks=all</code>, while brokers are with <code>min.insync.replicas=1</code>)</p>
 </li>
 </ul>
-<h2 id="how-does-message-disordering-happen-how-to-avoid-it"><a class="toclink" href="#how-does-message-disordering-happen-how-to-avoid-it">How does message disordering happen? How to avoid it?</a></h2>
-<ul>
-<li>
-<p>Take an example, -- a <code>KafkaAsyncProducer</code> just sent many messages, and a few of these messages (in the middle) failed to be delivered successfully. While the producer got the sending error, it might retry sending these messages again, thus causing the disordering.</p>
-</li>
-<li>
-<p>To avoid it. Two options,</p>
-<ul>
-<li>
-<p>Use a <code>KafkaSyncProducer</code>, but this would severely impact the throughput.</p>
-</li>
-<li>
-<p>Embed some <code>sequence number</code> (e.g, record id, part of the <code>key</code>, etc) in the <code>ProducerRecord</code>, for de-duplication.</p>
-</li>
-</ul>
-</li>
-</ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2021. 09. 03
+        Generated: 2021. 09. 07
       </footer>
       <hr/>
     </div>
