@@ -4,57 +4,9 @@ Generally speaking, The `Modern C++ based Kafka API` is quite similar to the [Ka
 
 We'd recommend users to cross-reference them, --especially the examples.
 
-Unlike Java's KafkaProducer, here we introduce two derived classes, -- `KafkaSyncProducer` and `KafkaAsyncProducer` --depending on different `send` behaviors (synchronous/asynchronous).
+## KafkaProducer
 
-## KafkaSyncProducer
-
-* The "Sync" (in the name) means `send` is a blocking operation, and it will immediately get the RecordMetadata while the function returns. If anything wrong occurs, an exception would be thrown.
-
-### Example
-```cpp
-        // Create configuration object
-        kafka::Properties props({
-            {"bootstrap.servers",  brokers},
-            {"enable.idempotence", "true"},
-        });
-
-        // Create a producer instance.
-        kafka::KafkaSyncProducer producer(props);
-
-        // Read messages from stdin and produce to the broker.
-        std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;
-
-        for (std::string line; std::getline(std::cin, line);) {
-            // The ProducerRecord doesn't own `line`, it is just a thin wrapper
-            auto record = kafka::ProducerRecord(topic,
-                                                kafka::NullKey,
-                                                kafka::Value(line.c_str(), line.size()));
-
-            // Send the message.
-            try {
-                kafka::Producer::RecordMetadata metadata = producer.send(record);
-                std::cout << "% Message delivered: " << metadata.toString() << std::endl;
-            } catch (const kafka::KafkaException& e) {
-                std::cerr << "% Message delivery failed: " << e.error().message() << std::endl;
-            }
-
-            if (line.empty()) break;
-        };
-
-        // producer.close(); // No explicit close is needed, RAII will take care of it
-```
-
-* `ProducerConfig::BOOTSTRAP_SERVERS` is mandatory for ProducerConfig.
-
-* `ProducerRecord` would not take any ownership for the `key` or `value`. Thus, the user must guarantee the memory block (pointed by `key` or `value`) is valid until being `send`.
-
-* Since `send` is a blocking operation, the throughput will be highly impacted, but it is easier to make sure of the message delivery and logically it is simpler.
-
-* At the end, the user could call `close` manually, or just leave it to the destructor (`close` would be called anyway).
-
-## KafkaAsyncProducer
-
-* The `Async` (in the name) means `send` is an unblocking operation, and the result (including errors) could only be got from the delivery callback.
+* The `send` is an unblocking operation, and the result (including errors) could only be got from the delivery callback.
 
 ### Example
 ```cpp
@@ -65,7 +17,7 @@ Unlike Java's KafkaProducer, here we introduce two derived classes, -- `KafkaSyn
         });
 
         // Create a producer instance.
-        kafka::KafkaAsyncProducer producer(props);
+        kafka::KafkaProducer producer(props);
 
         // Read messages from stdin and produce to the broker.
         std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;
@@ -92,27 +44,27 @@ Unlike Java's KafkaProducer, here we introduce two derived classes, -- `KafkaSyn
         }
 ```
 
-* Same with KafkaSyncProducer, the user must guarantee the memory block for `ProducerRecord`'s `key` is valid until being `send`.
+* User must guarantee the memory block for `ProducerRecord`'s `key` is valid until being `send`.
 
 * By default, the memory block for `ProducerRecord`'s `value` must be valid until the delivery callback is called; Otherwise, the `send` should be with option `KafkaProducer::SendOption::ToCopyRecordValue`.
 
 * It's guaranteed that the delivery callback would be triggered anyway after `send`, -- a producer would even be waiting for it before `close`. So, it's a good way to release these memory resources in the `Producer::Callback` function.
 
-## KafkaAsyncProducer with `KafkaClient::EventsPollingOption::Manual`
+## `KafkaProducer` with `KafkaClient::EventsPollingOption::Manual`
 
-While we construct a `KafkaAsyncProducer` with option `KafkaClient::EventsPollingOption::Auto` (default), an internal thread would be created for `MessageDelivery` callbacks handling. 
+While we construct a `KafkaProducer` with option `KafkaClient::EventsPollingOption::Auto` (default), an internal thread would be created for `MessageDelivery` callbacks handling.
 
 This might not be what you want, since then you have to use 2 different threads to send the messages and handle the `MessageDelivery` responses.
 
 Here we have another choice, -- using `KafkaClient::EventsPollingOption::Manual`, thus the `MessageDelivery` callbacks would be called within member function `pollEvents()`.
 
-* Note, if you constructed the `KafkaAsyncProducer` with `EventsPollingOption::Manual`, the `send()` would be an `unblocked` operation.
+* Note, if you constructed the `KafkaProducer` with `EventsPollingOption::Manual`, the `send()` would be an `unblocked` operation.
 I.e, once the `message buffering queue` becomes full, the `send()` operation would throw an exception (or return an `error code` with the input reference parameter), -- instead of blocking there.
 This makes sense, since you might want to call `pollEvents()` later, thus delivery-callback could be called for some messages (which could then be removed from the `message buffering queue`).
 
 ### Example
 ```cpp
-    kafak::KafkaAsyncProducer producer(props, KafkaClient::EventsPollingOption::Manual);
+    kafak::KafkaProducer producer(props, KafkaClient::EventsPollingOption::Manual);
 
     // Prepare "msgsToBeSent"
     auto std::map<int, std::pair<Key, Value>> msgsToBeSent = ...;
@@ -147,7 +99,7 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 
 ### Example
 ```cpp
-    kafak::KafkaAsyncProducer producer(props);
+    kafak::KafkaProducer producer(props);
 
     auto record = kafka::ProducerRecord(topic, partition, Key(), Value());
 
@@ -175,11 +127,11 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 
 ## Error handling
 
-Once an error occurs during `send()`, `KafkaSyncProducer` and `KafkaAsyncProducer` behave differently.
+`Error` might occur at different places while sending a message,
 
-1. `KafkaSyncProducer` gets `std::error_code` by catching exceptions (with `error()` member function).
+1. A `KafkaException` would be triggered if `KafkaProducer` failed to trigger the send operation.
 
-2. `KafkaAsyncProducer` gets `std::error_code` with delivery-callback (with a parameter of the callback function).
+2. Delivery `Error` would be passed through the delivery-callback.
 
 There are 2 kinds of possible errors,
 
@@ -211,10 +163,6 @@ If the cluster's configuration is with `auto.create.topics.enable=true`, the pro
 
 Note, the default created topic may be not what you want (e.g, with `default.replication.factor=1` configuration as default, etc), thus causing other unexpected problems.
 
-### What will happen after `ack` timeout?
-
-If an ack failed to be received within `MESSAGE_TIMEOUT_MS`, an exception would be thrown for a KafkaSyncSend, or, an error code would be received by the delivery callback for a KafkaAsyncProducer.
-
 ### How to enhance the sending performance?
 
 Enlarging the default `BATCH_NUM_MESSAGES` and `LINGER_MS` might improve message batching, thus enhancing the throughput.
@@ -231,7 +179,7 @@ Larger `QUEUE_BUFFERING_MAX_MESSAGES`/`QUEUE_BUFFERING_MAX_KBYTES` might help to
 
     1. The Kafka cluster should be configured with `min.insync.replicas = 2` at least
 
-    2. Use a `KafkaSyncProducer` (with configuration `{ProducerConfig::ACKS, "all"}`); or use a `KafkaAsyncProducer` (with configuration `{ProducerConfig::ENABLE_IDEMPOTENCE, "true"}`), together with proper error-handling within the delivery callbacks. 
+    2. Configure the `KafkaProducer` with property `{ProducerConfig::ENABLE_IDEMPOTENCE, "true"}`, together with proper error-handling (within the delivery callback).
 
 * Complete Answer,
 
@@ -239,7 +187,7 @@ Larger `QUEUE_BUFFERING_MAX_MESSAGES`/`QUEUE_BUFFERING_MAX_KBYTES` might help to
 
 ### How many threads would be created by a KafkaProducer?
 
-Excluding the user's main thread, KafkaSyncProducer would start another (N + 2) threads in the background, while `KafkaAsyncProducer` would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)
+Excluding the user's main thread, `KafkaProducer` would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)
 
 Most of these background threads are started internally by librdkafka.
 
@@ -249,15 +197,13 @@ Here is a brief introduction what they're used for,
 
 2. Another 2 background threads would handle internal operations and kinds of timers, etc.
 
-3. `KafkaAsyncProducer` has one more background thread to keep polling the delivery callback event.
+3. One more background thread to keep polling the delivery callback event.
 
-E.g, if a KafkaSyncProducer was created with property of `BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890`, it would take 6 threads in total (including the main thread).
+E.g, if a `KafkaProducer` was created with property of `BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890`, it would take 7 threads in total (including the main thread).
 
 ### Which one of these threads will handle the callbacks
 
-The `Producer::Callback` is only available for a `KafkaAsyncProducer`.
-
 It will be handled by a background thread, not by the user's thread.
 
-Note, should be careful if both the `KafkaAsyncProducer::send()` and the `Producer::Callback` might access the same container at the same time.
+Note, should be careful if both the `KafkaProducer::send()` and the `Producer::Callback` might access the same container at the same time.
 

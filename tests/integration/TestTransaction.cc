@@ -19,7 +19,7 @@ TEST(Transaction, CommitTransaction)
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
         std::cout << "[" << Utility::getCurrentTime() << "] Producer created." << std::endl;
 
         producer.initTransactions(std::chrono::seconds(10));
@@ -153,7 +153,7 @@ TEST(Transaction, CatchException)
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
 
         EXPECT_KAFKA_THROW(producer.initTransactions(), RD_KAFKA_RESP_ERR__NOT_CONFIGURED);
     }
@@ -164,7 +164,7 @@ TEST(Transaction, CatchException)
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
 
         EXPECT_KAFKA_THROW(producer.beginTransaction(), RD_KAFKA_RESP_ERR__STATE);
     }
@@ -175,7 +175,7 @@ TEST(Transaction, CatchException)
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -189,7 +189,7 @@ TEST(Transaction, CatchException)
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
 
         EXPECT_KAFKA_THROW(producer.abortTransaction(), RD_KAFKA_RESP_ERR__STATE);
     }
@@ -200,7 +200,7 @@ TEST(Transaction, CatchException)
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -213,7 +213,7 @@ TEST(Transaction, CatchException)
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -228,7 +228,7 @@ TEST(Transaction, CatchException)
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
         props.put(ProducerConfig::TRANSACTIONAL_ID, Utility::getRandomString());
 
-        KafkaAsyncProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -248,8 +248,8 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Start a producer to send the message, but fail to commit
     {
-        KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                      .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
+        KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                 .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
 
         producer.initTransactions();
 
@@ -268,7 +268,7 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Start another producer, continue to send the message (with the same transaction.id)
     {
-        KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+        KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
                                       .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
 
         producer.initTransactions();

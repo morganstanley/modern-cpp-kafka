@@ -45,7 +45,7 @@ bool checkProperties(const std::string& description, const Kafka::KafkaClient& c
 TEST(KafkaClient, KafkaProducerDefaultProperties)
 {
     {
-        Kafka::KafkaAsyncProducer producer(commonProps);
+        Kafka::KafkaProducer producer(commonProps);
 
         const KVMap expectedKVs =
         {
@@ -64,7 +64,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
             { Kafka::ProducerConfig::ENABLE_IDEMPOTENCE,            "false"     },
         };
 
-        EXPECT_TRUE(checkProperties("KafkaAsyncProducer", producer, expectedKVs));
+        EXPECT_TRUE(checkProperties("KafkaProducer", producer, expectedKVs));
     }
 
     KafkaTestUtility::PrintDividingLine();
@@ -72,7 +72,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
     {
         auto props = commonProps.put(Kafka::ProducerConfig::ENABLE_IDEMPOTENCE, "true");
 
-        Kafka::KafkaAsyncProducer producer(props);
+        Kafka::KafkaProducer producer(props);
 
         const KVMap expectedKVs =
         {
@@ -80,22 +80,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
             { Kafka::ProducerConfig::ENABLE_IDEMPOTENCE,  "true" },
         };
 
-        EXPECT_TRUE(checkProperties("KafkaAsyncProducer(idempotence enabled)", producer, expectedKVs));
-    }
-
-    KafkaTestUtility::PrintDividingLine();
-
-    {
-        Kafka::KafkaSyncProducer producer(commonProps);
-        const KVMap expectedKVs =
-        {
-            { Kafka::ProducerConfig::LINGER_MS, "0" },
-        };
-
-        EXPECT_TRUE(checkProperties("KafkaSyncProducer", producer, expectedKVs));
-
-        // Query for an invalid property
-        EXPECT_FALSE(producer.getProperty("invalid"));
+        EXPECT_TRUE(checkProperties("KafkaProducer(idempotence enabled)", producer, expectedKVs));
     }
 }
 

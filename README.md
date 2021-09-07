@@ -166,6 +166,12 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library t
 
             * KafkaConsumer
 
+                * Properties with random string as default
+
+                    * `client.id`
+
+                    * `group.id`
+
                 * More properties than ***librdkafka***
 
                     * `max.poll.records` (default: `500`): The maxmum number of records that a single call to `poll()` would return
@@ -178,19 +184,7 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library t
 
                     * `auto.commit.interval.ms`
 
-                * Properties with random string as default
-
-                    * `client.id`
-
-                    * `group.id`
-
             * KafkaProducer
-
-                * Different default value from ***librdkafka***
-
-                    * KafkaSyncProducer
-
-                        * `linger.ms` (default: `0`)
 
                 * Properties with random string as default
 

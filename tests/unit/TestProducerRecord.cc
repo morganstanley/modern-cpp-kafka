@@ -19,13 +19,13 @@ TEST(ProducerRecord, WithSpecificPartition)
     record.headers().emplace_back("hk1", Kafka::Header::Value(headerValue1.c_str(), headerValue1.size()));
     record.headers().emplace_back("hk2", Kafka::Header::Value(headerValue2.c_str(), headerValue2.size()));
 
-    EXPECT_EQ("topic1-1:0, headers[hk1:hv1,hk2:hv2], key1/hello world", record.toString());
+    EXPECT_EQ("topic1-1: headers[hk1:hv1,hk2:hv2], key1/hello world", record.toString());
 
     std::string payload2 = "it has been changed";
     record.setValue(Kafka::Value(payload2.c_str(), payload2.size()));
     record.headers().clear();
 
-    EXPECT_EQ("topic1-1:0, key1/it has been changed", record.toString());
+    EXPECT_EQ("topic1-1: key1/it has been changed", record.toString());
 }
 
 TEST(ProducerRecord, WithNoSpecificPartition)

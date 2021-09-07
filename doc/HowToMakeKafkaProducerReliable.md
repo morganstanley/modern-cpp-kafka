@@ -64,7 +64,7 @@ Here we'd focus on `KafkaProducer`, together with the `idempotence` feature. Let
 
 ### How to guarantee `Exactly Once`
 
-* The `enable.idempotence` configuration would resolve such a problem. And this configuration is RECOMMENDED for both `KafkaSyncProducer` and `KafkaAsyncProducer`, as long as it's possible.
+* The `enable.idempotence` configuration is RECOMMENDED.
 
 
 ## About `Ordering`
@@ -150,48 +150,12 @@ The `msgid` is used, (along with a base `msgid` value stored at the time the `PI
 
 ## Some examples
 
-### `KafkaSyncProducer` demo
-
-```cpp
-    int ret = 0;
-    std::atomic<bool> running = true;
-
-    KafkaSyncProducer producer(
-        Properties({
-            { ProducerConfig::BOOTSTRAP_SERVERS,  "192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092" },
-            { ProducerConfig::ENABLE_IDEMPOTENCE, "true" },
-            { ProducerConfig::MESSAGE_TIMEOUT_MS, "60000"}
-        })
-    );
-
-    while (running) {
-        const auto& msg = topMsgOfUpstream();
-        try {
-            auto record = ProducerRecord(topic, msg.key, msg.value);
-            producer.send(record);
-            popMsgFromUpstream();
-        } catch (const KafkaException& e) {
-            std::cerr << "Failed to send message! Reason: " << e.what() << std::endl;        
-            ret = e.error();
-            break;
-        }
-    }
-
-    producer.close();
-
-    return ret;
-```
-
-* It's easy to use `KafkaSyncProducer`, since it sends messages one by one. 
-
-* The throughput performance would not be that good, since there's only 1 message (embedded in 1 message batch) on the flight.
-
-### `KafkaAsyncProducer` demo
+### `KafkaProducer` demo
 
 ```cpp
     std::atomic<bool> running = true;
 
-    KafkaAsyncProducer producer(
+    KafkaProducer producer(
         Properties({
             { ProducerConfig::BOOTSTRAP_SERVERS,  "192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092" },
             { ProducerConfig::ENABLE_IDEMPOTENCE, "true" },

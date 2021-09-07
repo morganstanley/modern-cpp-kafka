@@ -23,9 +23,9 @@ TEST(Transaction, DeliveryFailure)
     {
         auto record = ProducerRecord(topic, NullKey, Value(messageToSent.c_str(), messageToSent.size()));
 
-        KafkaAsyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                      .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")  // The delivery would fail in a short timeout
-                                      .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
+        KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                 .put(ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")  // The delivery would fail in a short timeout
+                                 .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
         producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         std::cout << "[" << Utility::getCurrentTime() << "] Producer created." << std::endl;

@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         });
 
         // Create a producer instance.
-        kafka::KafkaSyncProducer producer(props);
+        kafka::KafkaProducer producer(props);
 
         // Read messages from stdin and produce to the broker.
         std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
             // Send the message.
             try {
-                kafka::Producer::RecordMetadata metadata = producer.send(record);
+                kafka::Producer::RecordMetadata metadata = producer.syncSend(record);
                 std::cout << "% Message delivered: " << metadata.toString() << std::endl;
             } catch (const kafka::KafkaException& e) {
                 std::cerr << "% Message delivery failed: " << e.error().message() << std::endl;

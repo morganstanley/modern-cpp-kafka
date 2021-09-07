@@ -1559,21 +1559,21 @@ TEST(KafkaManualCommitConsumer, OffsetsForTime)
 
     std::cout << "Produce messages:" << std::endl;
     {
-        Kafka::KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        Kafka::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
         for (int i = 0; i < MESSAGES_NUM; ++i)
         {
             checkPoints.emplace_back(system_clock::now());
 
             TopicPartitionOffsets expected;
 
-            auto metadata1 = producer.send(Kafka::ProducerRecord(topic1, partition1, Kafka::NullKey, Kafka::NullValue));
+            auto metadata1 = producer.syncSend(Kafka::ProducerRecord(topic1, partition1, Kafka::NullKey, Kafka::NullValue));
             std::cout << "[" << Utility::getCurrentTime() << "] Just send a message, metadata: " << metadata1.toString() << std::endl;
             if (auto offset = metadata1.offset())
             {
                 expected[{topic1, partition1}] = *offset;
             }
 
-            auto metadata2 = producer.send(Kafka::ProducerRecord(topic2, partition2, Kafka::NullKey, Kafka::NullValue));
+            auto metadata2 = producer.syncSend(Kafka::ProducerRecord(topic2, partition2, Kafka::NullKey, Kafka::NullValue));
             std::cout << "[" << Utility::getCurrentTime() << "] Just send a message, metadata: " << metadata2.toString() << std::endl;
             if (auto offset = metadata2.offset())
             {
@@ -1673,14 +1673,14 @@ TEST(KafkaManualCommitConsumer, RecoverByTime)
 
     // Send the messages
     {
-        Kafka::KafkaSyncProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        Kafka::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
         for (const auto& msg: messages)
         {
             auto record = Kafka::ProducerRecord(topic,
                                                 partition,
                                                 Kafka::Key(msg.first.c_str(), msg.first.size()),
                                                 Kafka::Value(msg.second.c_str(), msg.second.size()));
-            auto metadata = producer.send(record);
+            auto metadata = producer.syncSend(record);
 
             std::cout << "[" << Utility::getCurrentTime() << "] Just sent a message: " << record.toString() << ", metadata: " << metadata.toString() << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
