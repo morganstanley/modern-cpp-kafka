@@ -1,6 +1,6 @@
 # KafkaConsumer Quick Start
 
-Generally speaking, The `Modern C++ based Kafka API` is quite similar with [Kafka Java's API](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
+Generally speaking, The `Modern C++ Kafka API` is quite similar with [Kafka Java's API](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
 
 We'd recommend users to cross-reference them, --especially the examples.
 

@@ -54,7 +54,7 @@ TEST(KafkaProducer, RecordTimestamp)
         std::cout << "[" << Utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
-        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+        Kafka::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
         consumer.subscribe({topic});
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         ASSERT_EQ(1, records.size());
@@ -84,7 +84,7 @@ TEST(KafkaProducer, RecordTimestamp)
         std::cout << "[" << Utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
-        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+        Kafka::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
         consumer.subscribe({topic});
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         ASSERT_EQ(1, records.size());
@@ -228,7 +228,7 @@ TEST(KafkaProducer, BrokerStopWhileSendingMessages)
     ASSERT_EQ(messages.size(), deliveryCount);
 
     // Fetch & check all messages
-    Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+    Kafka::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
     consumer.subscribe({topic});
     auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
     EXPECT_EQ(messages.size(), records.size());

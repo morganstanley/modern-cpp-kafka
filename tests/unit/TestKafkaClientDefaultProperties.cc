@@ -17,7 +17,7 @@ namespace Kafka = KAFKA_API;
 namespace {
 
 // Here we even don't need a valid bootstrap server address
-Kafka::Properties commonProps({{"bootstrap.servers", "127.0.0.1:9092"}, {"log_level", "0"}});
+const Kafka::Properties commonProps({{"bootstrap.servers", "127.0.0.1:9092"}, {"log_level", "0"}});
 
 using KVMap = std::vector<std::pair<std::string, std::string>>;
 
@@ -70,8 +70,8 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
     KafkaTestUtility::PrintDividingLine();
 
     {
-        auto props = commonProps.put(Kafka::ProducerConfig::ENABLE_IDEMPOTENCE, "true");
-
+        auto props = commonProps;
+        props.put(Kafka::ProducerConfig::ENABLE_IDEMPOTENCE, "true");
         Kafka::KafkaProducer producer(props);
 
         const KVMap expectedKVs =
@@ -80,29 +80,32 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
             { Kafka::ProducerConfig::ENABLE_IDEMPOTENCE,  "true" },
         };
 
-        EXPECT_TRUE(checkProperties("KafkaProducer(idempotence enabled)", producer, expectedKVs));
+        EXPECT_TRUE(checkProperties("KafkaProducer[enable.idempotence=true]", producer, expectedKVs));
     }
 }
 
 TEST(KafkaClient, KafkaConsumerDefaultProperties)
 {
     {
-        Kafka::KafkaAutoCommitConsumer consumer(commonProps);
+        auto props = commonProps;
+        props.put(Kafka::ConsumerConfig::ENABLE_AUTO_COMMIT, "true");
+        Kafka::KafkaConsumer consumer(props);
 
         const KVMap expectedKVs =
         {
+            { Kafka::ConsumerConfig::ENABLE_AUTO_COMMIT,    "true"       },
             { Kafka::ConsumerConfig::ENABLE_PARTITION_EOF,  "false"      },
             { Kafka::ConsumerConfig::MAX_POLL_RECORDS,      "500"        },
             { Kafka::ConsumerConfig::QUEUED_MIN_MESSAGES,   "100000"     },
             { Kafka::ConsumerConfig::SESSION_TIMEOUT_MS,    "45000"      },
             { Kafka::ConsumerConfig::SOCKET_TIMEOUT_MS,     "60000"      },
             { Kafka::ConsumerConfig::SECURITY_PROTOCOL,     "plaintext"  },
-            { "enable.auto.commit",                         "false"      },
+            { Kafka::ConsumerConfig::ENABLE_AUTO_COMMIT,    "true"       },
             { "auto.commit.interval.ms",                    "0"          },
-            { "enable.auto.offset.store",                   "false"      }
+            { "enable.auto.offset.store",                   "true"       }
         };
 
-        EXPECT_TRUE(checkProperties("KakfaAutoCommitConsumer", consumer, expectedKVs));
+        EXPECT_TRUE(checkProperties("KakfaConsumer[enable.auto.commit=true]", consumer, expectedKVs));
 
         // Interesting, -- no default for AUTO_OFFSET_RESET within librdkafka
         EXPECT_FALSE(consumer.getProperty(Kafka::ConsumerConfig::AUTO_OFFSET_RESET));
@@ -111,13 +114,13 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
     KafkaTestUtility::PrintDividingLine();
 
     {
-        Kafka::KafkaManualCommitConsumer consumer(commonProps);
+        Kafka::KafkaConsumer consumer(commonProps);
 
         const KVMap expectedKVs =
         {
-            { "enable.auto.offset.store", "true" }
+            { Kafka::ConsumerConfig::ENABLE_AUTO_COMMIT,    "false"       },
         };
-        EXPECT_TRUE(checkProperties("KakfaManualCommitConsumer", consumer, expectedKVs));
+        EXPECT_TRUE(checkProperties("KakfaConsumer[enable.auto.commit=false]", consumer, expectedKVs));
     }
 }
 

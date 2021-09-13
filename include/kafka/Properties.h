@@ -39,6 +39,14 @@ public:
     }
 
     /**
+     * Remove the property (if one exists).
+     */
+    void remove(const std::string& key)
+    {
+        _kvMap.erase(key);
+    }
+
+    /**
      * Get a property.
      * If the map previously contained a mapping for the key, the old value is replaced by the specified value.
      */

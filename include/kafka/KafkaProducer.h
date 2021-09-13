@@ -39,7 +39,7 @@ public:
      *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
      */
     explicit KafkaProducer(const Properties&   properties,
-                           EventsPollingOption pollOption = EventsPollingOption::Auto);
+                           EventsPollingOption eventsPollingOption = EventsPollingOption::Auto);
 
     /**
      * The destructor for KafkaProducer.
@@ -148,19 +148,10 @@ public:
                                   const Consumer::ConsumerGroupMetadata& groupMetadata,
                                   std::chrono::milliseconds              timeout);
 
-    /**
-     * Call the MessageDelivery callbacks (if any)
-     * Note: The KafkaProducer MUST be constructed with option `EventsPollingOption::Manual`.
-     */
-    void pollEvents(std::chrono::milliseconds timeout);
-
 private:
-    std::unique_ptr<Pollable>   _pollable;
-    std::unique_ptr<PollThread> _pollThread;
-
-    static void pollCallbacks(KafkaProducer* producer, int timeoutMs)
+    void pollCallbacks(int timeoutMs)
     {
-        rd_kafka_poll(producer->getClientHandle(), timeoutMs);
+        rd_kafka_poll(getClientHandle(), timeoutMs);
     }
 
     // Define datatypes for "opaque" (as an input for rd_kafka_produceva), in order to handle the delivery callback
@@ -192,7 +183,7 @@ private:
 #endif
 
     // Validate properties (and fix it if necesary)
-    static Properties validateAndReformProperties(const Properties& origProperties);
+    static Properties validateAndReformProperties(const Properties& properties);
 
     // Delivery Callback (for librdkafka)
     static void deliveryCallback(rd_kafka_t* rk, const rd_kafka_message_t* rkmsg, void* opaque);
@@ -224,16 +215,16 @@ private:
 };
 
 inline
-KafkaProducer::KafkaProducer(const Properties& properties, EventsPollingOption pollOption)
-    : KafkaClient(ClientType::KafkaProducer, validateAndReformProperties(properties), registerConfigCallbacks)
+KafkaProducer::KafkaProducer(const Properties& properties, EventsPollingOption eventsPollingOption)
+    : KafkaClient(ClientType::KafkaProducer,
+                  validateAndReformProperties(properties),
+                  registerConfigCallbacks,
+                  eventsPollingOption)
 {
-    _pollable = std::make_unique<KafkaClient::PollableCallback<KafkaProducer>>(this, pollCallbacks);
-    if (pollOption == EventsPollingOption::Auto)
-    {
-        _pollThread = std::make_unique<PollThread>(*_pollable);
-    }
+    // Start background polling (if needed)
+    startBackgroundPollingIfNecessary([this](int timeoutMs){ pollCallbacks(timeoutMs); });
 
-    auto propStr = properties.toString();
+    const auto propStr = KafkaClient::properties().toString();
     KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propStr.c_str());
 }
 
@@ -264,14 +255,14 @@ KafkaProducer::registerConfigCallbacks(rd_kafka_conf_t* conf)
 }
 
 inline Properties
-KafkaProducer::validateAndReformProperties(const Properties& origProperties)
+KafkaProducer::validateAndReformProperties(const Properties& properties)
 {
     // Let the base class validate first
-    Properties properties = KafkaClient::validateAndReformProperties(origProperties);
+    auto newProperties = KafkaClient::validateAndReformProperties(properties);
 
     // Check whether it's an available partitioner
     const std::set<std::string> availPartitioners = {"murmur2_random", "murmur2", "random", "consistent", "consistent_random", "fnv1a", "fnv1a_random"};
-    auto partitioner = properties.getProperty(ProducerConfig::PARTITIONER);
+    auto partitioner = newProperties.getProperty(ProducerConfig::PARTITIONER);
     if (partitioner && !availPartitioners.count(*partitioner))
     {
         std::string errMsg = "Invalid partitioner [" + *partitioner + "]! Valid options: ";
@@ -287,10 +278,10 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
 
     // For "idempotence" feature
     constexpr int KAFKA_IDEMP_MAX_INFLIGHT = 5;
-    const auto enableIdempotence = properties.getProperty(ProducerConfig::ENABLE_IDEMPOTENCE);
+    const auto enableIdempotence = newProperties.getProperty(ProducerConfig::ENABLE_IDEMPOTENCE);
     if (enableIdempotence && *enableIdempotence == "true")
     {
-        if (const auto maxInFlight = properties.getProperty(ProducerConfig::MAX_IN_FLIGHT))
+        if (const auto maxInFlight = newProperties.getProperty(ProducerConfig::MAX_IN_FLIGHT))
         {
             if (std::stoi(*maxInFlight) > KAFKA_IDEMP_MAX_INFLIGHT)
             {
@@ -299,7 +290,7 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
             }
         }
 
-        if (const auto acks = properties.getProperty(ProducerConfig::ACKS))
+        if (const auto acks = newProperties.getProperty(ProducerConfig::ACKS))
         {
             if (*acks != "all" && *acks != "-1")
             {
@@ -309,7 +300,7 @@ KafkaProducer::validateAndReformProperties(const Properties& origProperties)
         }
     }
 
-    return properties;
+    return newProperties;
 }
 
 // Delivery Callback (for librdkafka)
@@ -329,7 +320,7 @@ KafkaProducer::send(const ProducerRecord&             record,
                     SendOption                        option)
 {
     auto deliveryCbOpaque = std::make_unique<DeliveryCbOpaque>(record.id(), deliveryCb);
-    auto queueFullAction  = (_pollThread ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
+    auto queueFullAction  = (isWithAutoEventsPolling() ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
 
     const auto* topic     = record.topic().c_str();
     const auto  partition = record.partition();
@@ -443,15 +434,14 @@ KafkaProducer::close(std::chrono::milliseconds timeout)
 {
     _opened = false;
 
-    _pollThread.reset(); // Join the polling thread (in case it's running)
-    _pollable.reset();
+    stopBackgroundPollingIfNecessary();
 
-    auto error = flush(timeout);
+    Error result = flush(timeout);
 
-    std::string errMsg = error.message();
-    KAFKA_API_DO_LOG(Log::Level::Info, "closed [%s]", errMsg.c_str());
+    std::string resultMsg = result.message();
+    KAFKA_API_DO_LOG(Log::Level::Info, "closed [%s]", resultMsg.c_str());
 
-    return error;
+    return result;
 }
 
 inline void
@@ -493,14 +483,6 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           t
                                                        groupMetadata.rawHandle(),
                                                        static_cast<int>(timeout.count())) };            // NOLINT
     KAFKA_THROW_IF_WITH_ERROR(result);
-}
-
-inline void
-KafkaProducer::pollEvents(std::chrono::milliseconds timeout)
-{
-    assert(!_pollThread);
-
-    _pollable->poll(convertMsDurationToInt(timeout));
 }
 
 } // end of KAFKA_API

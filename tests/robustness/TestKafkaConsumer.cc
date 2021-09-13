@@ -17,7 +17,7 @@
 using namespace KAFKA_API;
 
 
-TEST(KafkaManualCommitConsumer, AlwaysFinishClosing_ManuallyPollEvents)
+TEST(KafkaConsumer, AlwaysFinishClosing_ManuallyPollEvents)
 {
     Topic     topic     = Utility::getRandomString();
     Partition partition = 0;
@@ -41,7 +41,7 @@ TEST(KafkaManualCommitConsumer, AlwaysFinishClosing_ManuallyPollEvents)
     volatile std::size_t commitCbCount = 0;
     {
         // Start a consumer (which need to call `pollEvents()` to trigger the commit callback)
-        KafkaManualCommitConsumer consumer(props, KafkaClient::EventsPollingOption::Manual);
+        KafkaConsumer consumer(props, KafkaClient::EventsPollingOption::Manual);
         consumer.setErrorCallback(KafkaTestUtility::DumpError);
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
@@ -84,7 +84,7 @@ TEST(KafkaManualCommitConsumer, AlwaysFinishClosing_ManuallyPollEvents)
     KafkaTestUtility::ResumeBrokers();
 }
 
-TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
+TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
 {
     const Topic     topic     = Utility::getRandomString();
     const Partition partition = 0;
@@ -106,7 +106,7 @@ TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
     volatile std::size_t commitCbCount = 0;
     {
         // Start a consumer
-        KafkaManualCommitConsumer consumer(props);
+        KafkaConsumer consumer(props);
         consumer.setErrorCallback(KafkaTestUtility::DumpError);
         std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
@@ -152,7 +152,7 @@ TEST(KafkaManualCommitConsumer, CommitOffsetWhileBrokersStop)
     KafkaTestUtility::ResumeBrokers();
 }
 
-TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
+TEST(KafkaConsumer, BrokerStopBeforeConsumerStart)
 {
     const Topic topic = Utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
@@ -166,7 +166,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
                             .put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
 
     // Start the consumer
-    KafkaAutoCommitConsumer consumer(props);
+    KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
@@ -203,7 +203,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeConsumerStart)
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
 }
 
-TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
+TEST(KafkaConsumer, BrokerStopBeforeSubscription)
 {
     const Topic topic = Utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
@@ -214,7 +214,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
                             .put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
 
     // Start the consumer
-    KafkaAutoCommitConsumer consumer(props);
+    KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
@@ -252,7 +252,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSubscription)
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
 }
 
-TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
+TEST(KafkaConsumer, BrokerStopBeforeSeek)
 {
     const Topic topic = Utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
@@ -263,7 +263,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
                             .put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
 
     // Start the consumer
-    KafkaAutoCommitConsumer consumer(props);
+    KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
@@ -307,7 +307,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopBeforeSeek)
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
 }
 
-TEST(KafkaAutoCommitConsumer, BrokerStopDuringMsgPoll)
+TEST(KafkaConsumer, BrokerStopDuringMsgPoll)
 {
     const Topic topic  = Utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
@@ -328,7 +328,7 @@ TEST(KafkaAutoCommitConsumer, BrokerStopDuringMsgPoll)
                             .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest"); // Seek to the very beginning
 
     // Start the consumer
-    KafkaAutoCommitConsumer consumer(props);
+    KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
     std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 

@@ -68,9 +68,9 @@ TEST(Transaction, DeliveryFailure)
 
     // Check all received messages (incluing uncommitted)
     {
-        KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                           .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
-                                           .put(ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
+        KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                               .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                               .put(ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));

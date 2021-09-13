@@ -21,7 +21,7 @@ int main(int argc, char **argv)
         });
 
         // Create a consumer instance.
-        kafka::KafkaManualCommitConsumer consumer(props);
+        kafka::KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});
