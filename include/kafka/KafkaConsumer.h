@@ -20,43 +20,38 @@
 namespace KAFKA_API {
 
 /**
- * The base class for KafkaAutoCommitConsumer and KafkaManualCommitConsumer.
+ * KafkaConsumer class.
  */
 class KafkaConsumer: public KafkaClient
 {
-protected:
+public:
     // Default value for property "max.poll.records" (which is same with Java API)
     static const constexpr char* DEFAULT_MAX_POLL_RECORDS_VALUE = "500";
 
-    enum class OffsetCommitOption { Auto, Manual };
+    /**
+     * The constructor for KafkaConsumer.
+     *
+     * Options:
+     *   - EventsPollingOption::Auto (default) : An internal thread would be started for OffsetCommit callbacks handling.
+     *   - EventsPollingOption::Maunal         : User have to call the member function `pollEvents()` to trigger OffsetCommit callbacks.
+     *
+     * Throws KafkaException with errors:
+     *   - RD_KAFKA_RESP_ERR__INVALID_ARG      : Invalid BOOTSTRAP_SERVERS property
+     *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
+     */
+    explicit KafkaConsumer(const Properties&   properties,
+                           EventsPollingOption eventsPollingOption = EventsPollingOption::Auto);
 
-    // Constructor
-    KafkaConsumer(const Properties& properties, KafkaConsumer::OffsetCommitOption offsetCommitOption)
-        : KafkaClient(ClientType::KafkaConsumer, properties, registerConfigCallbacks, {ConsumerConfig::MAX_POLL_RECORDS}),
-          _offsetCommitOption(offsetCommitOption)
-    {
-        auto propStr = properties.toString();
-        KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propStr.c_str());
+    /**
+     * The destructor for KafkaConsumer.
+     */
+    ~KafkaConsumer() override { if (_opened) close(); }
 
-        // Pick up the MAX_POLL_RECORDS configuration
-        auto maxPollRecords = properties.getProperty(ConsumerConfig::MAX_POLL_RECORDS);
-        assert(maxPollRecords);
-        _maxPollRecords = std::stoi(*maxPollRecords);
+    /**
+     * Close the consumer, waiting for any needed cleanup.
+     */
+    void close();
 
-        // Fetch groupId from configuration
-        auto groupId = properties.getProperty(ConsumerConfig::GROUP_ID);
-        assert(groupId);
-        setGroupId(*groupId);
-
-        // Redirect the reply queue (to the client group queue)
-        Error result{ rd_kafka_poll_set_consumer(getClientHandle()) };
-        KAFKA_THROW_IF_WITH_ERROR(result);
-
-        // Initialize message-fetching queue
-        _rk_queue.reset(rd_kafka_queue_get_consumer(getClientHandle()));
-    }
-
-public:
     /**
      * To get group ID.
      */
@@ -165,6 +160,39 @@ public:
                                                     std::chrono::milliseconds                          timeout = std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const;
 
     /**
+     * Commit offsets returned on the last poll() for all the subscribed list of topics and partitions.
+     */
+    void commitSync();
+
+    /**
+     * Commit the specified offsets for the specified records
+     */
+    void commitSync(const ConsumerRecord& record);
+
+    /**
+     * Commit the specified offsets for the specified list of topics and partitions.
+     */
+    void commitSync(const TopicPartitionOffsets& topicPartitionOffsets);
+
+    /**
+     * Commit offsets returned on the last poll() for all the subscribed list of topics and partition.
+     * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
+     */
+    void commitAsync(const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
+
+    /**
+     * Commit the specified offsets for the specified records
+     * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
+     */
+    void commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
+
+    /**
+     * Commit the specified offsets for the specified list of topics and partitions to Kafka.
+     * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
+     */
+    void commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
+
+    /**
      * Get the last committed offset for the given partition (whether the commit happened by this process or another).This offset will be used as the position for the consumer in the event of a failure.
      * This call will block to do a remote call to get the latest committed offsets from the server.
      * Throws KafkaException with errors:
@@ -220,9 +248,8 @@ public:
      */
     Consumer::ConsumerGroupMetadata groupMetadata();
 
-protected:
+private:
     static const constexpr char* ENABLE_AUTO_OFFSET_STORE = "enable.auto.offset.store";
-    static const constexpr char* ENABLE_AUTO_COMMIT       = "enable.auto.commit";
     static const constexpr char* AUTO_COMMIT_INTERVAL_MS  = "auto.commit.interval.ms";
 
 #if COMPILER_SUPPORTS_CPP_17
@@ -239,20 +266,15 @@ protected:
     enum { SEEK_RETRY_INTERVAL_MS         = 5000  };
 #endif
 
-    const OffsetCommitOption _offsetCommitOption;
-
     enum class CommitType { Sync, Async };
     void commit(const TopicPartitionOffsets& topicPartitionOffsets, CommitType type);
-
-    void close();
 
     // Offset Commit Callback (for librdkafka)
     static void offsetCommitCallback(rd_kafka_t* rk, rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* rk_tpos, void* opaque);
 
     // Validate properties (and fix it if necesary)
-    static Properties validateAndReformProperties(const Properties& origProperties);
+    static Properties validateAndReformProperties(Properties properties);
 
-private:
     void commitStoredOffsetsIfNecessary(CommitType type);
     void storeOffsetsIfNecessary(const std::vector<ConsumerRecord>& records);
 
@@ -264,7 +286,8 @@ private:
 
     std::string  _groupId;
 
-    unsigned int _maxPollRecords = 500; // Default value for batch-poll
+    unsigned int _maxPollRecords   = 500;   // From "max.poll.records" property, and here is the default for batch-poll
+    bool         _enableAutoCommit = false; // From "enable.auto.commit" property
 
     rd_kafka_queue_unique_ptr _rk_queue;
 
@@ -299,33 +322,41 @@ private:
     void onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* rk_partitions);
 
     Consumer::RebalanceCallback _rebalanceCb;
+
+    rd_kafka_queue_t* getCommitCbQueue() { return _rk_commit_cb_queue.get(); }
+
+    rd_kafka_queue_unique_ptr _rk_commit_cb_queue;
+
+    void pollCallbacks(int timeoutMs)
+    {
+        rd_kafka_queue_t* queue = getCommitCbQueue();
+        rd_kafka_queue_poll_callback(queue, timeoutMs);
+    }
 };
 
 
 // Validate properties (and fix it if necesary)
 inline Properties
-KafkaConsumer::validateAndReformProperties(const Properties& origProperties)
+KafkaConsumer::validateAndReformProperties(Properties properties)
 {
+    // Don't pass the "max.poll.records" property to librdkafka
+    properties.remove(ConsumerConfig::MAX_POLL_RECORDS);
+
     // Let the base class validate first
-    Properties properties = KafkaClient::validateAndReformProperties(origProperties);
+    auto newProperties = KafkaClient::validateAndReformProperties(properties);
 
     // If no "group.id" configured, generate a random one for user
-    if (!properties.getProperty(ConsumerConfig::GROUP_ID))
+    if (!newProperties.getProperty(ConsumerConfig::GROUP_ID))
     {
-        properties.put(ConsumerConfig::GROUP_ID, Utility::getRandomString());
+        newProperties.put(ConsumerConfig::GROUP_ID, Utility::getRandomString());
     }
 
-    // If no "max.poll.records" configured, use a default value
-    if (!properties.getProperty(ConsumerConfig::MAX_POLL_RECORDS))
-    {
-        properties.put(ConsumerConfig::MAX_POLL_RECORDS, DEFAULT_MAX_POLL_RECORDS_VALUE);
-    }
+    // Disable the internal auto-commit from librdkafka, since we want to customize the behavior
+    newProperties.put(ConsumerConfig::ENABLE_AUTO_COMMIT,  "false");
+    newProperties.put(AUTO_COMMIT_INTERVAL_MS,             "0");
+    newProperties.put(ENABLE_AUTO_OFFSET_STORE,            "true");
 
-    // We want to customize the auto-commit behavior, with librdkafka's configuration disabled
-    properties.put(ENABLE_AUTO_COMMIT,       "false");
-    properties.put(AUTO_COMMIT_INTERVAL_MS,  "0");
-
-    return properties;
+    return newProperties;
 }
 
 // Register Callbacks for rd_kafka_conf_t
@@ -337,14 +368,70 @@ KafkaConsumer::registerConfigCallbacks(rd_kafka_conf_t* conf)
     rd_kafka_conf_set_rebalance_cb(conf, KafkaConsumer::rebalanceCallback);
 }
 
+inline
+KafkaConsumer::KafkaConsumer(const Properties &properties, EventsPollingOption eventsPollingOption)
+    : KafkaClient(ClientType::KafkaConsumer,
+                  validateAndReformProperties(properties),
+                  registerConfigCallbacks,
+                  eventsPollingOption)
+{
+    // Pick up the "max.poll.records" property
+    if (auto maxPollRecordsProperty = properties.getProperty(ConsumerConfig::MAX_POLL_RECORDS))
+    {
+        const std::string maxPollRecords = *maxPollRecordsProperty;
+        _maxPollRecords = std::stoi(maxPollRecords);
+    }
+    _properties.put(ConsumerConfig::MAX_POLL_RECORDS, std::to_string(_maxPollRecords));
+
+    // Pick up the "enable.auto.commit" property
+    if (auto enableAutoCommitProperty = properties.getProperty(ConsumerConfig::ENABLE_AUTO_COMMIT))
+    {
+        const std::string enableAutoCommit = *enableAutoCommitProperty;
+
+        auto isTrue  = [](const std::string& str) { return str == "1" || str == "true"; };
+        auto isFalse = [](const std::string& str) { return str == "0" || str == "false"; };
+
+        if (!isTrue(enableAutoCommit) && !isFalse(enableAutoCommit))
+        {
+            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid property[enable.auto.commit=").append(enableAutoCommit).append("], which MUST be true(1) or false(0)!")));
+        }
+
+        _enableAutoCommit = isTrue(enableAutoCommit);
+    }
+    _properties.put(ConsumerConfig::ENABLE_AUTO_COMMIT, (_enableAutoCommit ? "true" : "false"));
+
+    // Fetch groupId from reformed configuration
+    auto groupId = _properties.getProperty(ConsumerConfig::GROUP_ID);
+    assert(groupId);
+    setGroupId(*groupId);
+
+    // Redirect the reply queue (to the client group queue)
+    Error result{ rd_kafka_poll_set_consumer(getClientHandle()) };
+    KAFKA_THROW_IF_WITH_ERROR(result);
+
+    // Initialize message-fetching queue
+    _rk_queue.reset(rd_kafka_queue_get_consumer(getClientHandle()));
+
+    // Initialize commit-callback queue
+    _rk_commit_cb_queue.reset(rd_kafka_queue_new(getClientHandle()));
+
+    // Start background polling (if needed)
+    startBackgroundPollingIfNecessary([this](int timeoutMs){ pollCallbacks(timeoutMs); });
+
+    const auto propsStr = KafkaClient::properties().toString();
+    KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propsStr.c_str());
+}
+
 inline void
 KafkaConsumer::close()
 {
     _opened = false;
 
+    stopBackgroundPollingIfNecessary();
+
     try
     {
-        // Commit the offsets for these messages which had been polled last time (for KafkaAutoCommitConsumer)
+        // Commit the offsets for these messages which had been polled last time (for `enable.auto.commit=true` case.)
         commitStoredOffsetsIfNecessary(CommitType::Sync);
     }
     catch(const KafkaException& e)
@@ -357,6 +444,12 @@ KafkaConsumer::close()
     while (rd_kafka_outq_len(getClientHandle()))
     {
         rd_kafka_poll(getClientHandle(), KafkaClient::TIMEOUT_INFINITE);
+    }
+
+    rd_kafka_queue_t* queue = getCommitCbQueue();
+    while (rd_kafka_queue_length(queue))
+    {
+        rd_kafka_queue_poll_callback(queue, TIMEOUT_INFINITE);
     }
 
     KAFKA_API_DO_LOG(Log::Level::Info, "closed");
@@ -686,7 +779,7 @@ KafkaConsumer::committed(const TopicPartition& topicPartition)
 inline void
 KafkaConsumer::commitStoredOffsetsIfNecessary(CommitType type)
 {
-    if (_offsetCommitOption == OffsetCommitOption::Auto && !_offsetsToStore.empty())
+    if (_enableAutoCommit && !_offsetsToStore.empty())
     {
         for (auto& o: _offsetsToStore)
         {
@@ -701,7 +794,7 @@ KafkaConsumer::commitStoredOffsetsIfNecessary(CommitType type)
 inline void
 KafkaConsumer::storeOffsetsIfNecessary(const std::vector<ConsumerRecord>& records)
 {
-    if (_offsetCommitOption == OffsetCommitOption::Auto)
+    if (_enableAutoCommit)
     {
         for (const auto& record: records)
         {
@@ -714,7 +807,7 @@ KafkaConsumer::storeOffsetsIfNecessary(const std::vector<ConsumerRecord>& record
 inline void
 KafkaConsumer::pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output)
 {
-    // Commit the offsets for these messages which had been polled last time (for KafkaAutoCommitConsumer)
+    // Commit the offsets for these messages which had been polled last time (for "enable.auto.commit=true" case)
     commitStoredOffsetsIfNecessary(CommitType::Async);
 
     // Poll messages with librdkafka's API
@@ -726,7 +819,7 @@ KafkaConsumer::pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output)
     output.reserve(msgReceived);
     std::for_each(&msgPtrArray[0], &msgPtrArray[msgReceived], [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
 
-    // Store the offsets for all these polled messages (for KafkaAutoCommitConsumer)
+    // Store the offsets for all these polled messages (for "enable.auto.commit=true" case)
     storeOffsetsIfNecessary(output);
 }
 
@@ -894,172 +987,16 @@ KafkaConsumer::groupMetadata()
     return Consumer::ConsumerGroupMetadata{rd_kafka_consumer_group_metadata(getClientHandle())};
 }
 
-/**
- * Automatic-Commit consumer.
- * Whenever you poll, the consumer checks if it is time to commit, and if it is, it will commit the offsets it returned in the last poll.
- */
-class KafkaAutoCommitConsumer: public KafkaConsumer
-{
-public:
-    /**
-     * The constructor for KafkaAutoCommitConsumer.
-     * Throws KafkaException with errors:
-     *   - RD_KAFKA_RESP_ERR__INVALID_ARG:       Invalid BOOTSTRAP_SERVERS property
-     *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
-     */
-    explicit KafkaAutoCommitConsumer(const Properties& properties)
-        : KafkaConsumer(KafkaAutoCommitConsumer::validateAndReformProperties(properties), OffsetCommitOption::Auto)
-    {
-    }
 
-    ~KafkaAutoCommitConsumer() override { if (_opened) close(); }
-
-    /**
-     * Close the consumer, waiting for any needed cleanup.
-     */
-    void close()
-    {
-        KafkaConsumer::close();
-    }
-
-private:
-    // Validate properties (and fix it if necesary)
-    static Properties validateAndReformProperties(const Properties& origProperties)
-    {
-        // Let the base class validate first
-        Properties properties = KafkaConsumer::validateAndReformProperties(origProperties);
-
-        // Don't "auto-store" offsets (librdkafka's configuration)
-        properties.put(ENABLE_AUTO_OFFSET_STORE, "false");
-
-        return properties;
-    }
-};
-
-/**
- * Manual-Commit consumer.
- * User must use commitSync/commitAsync to commit the offsets manually.
- */
-class KafkaManualCommitConsumer: public KafkaConsumer
-{
-public:
-    /**
-     * The constructor for KafkaManualCommitConsumer.
-     *
-     * Options:
-     *   - EventsPollingOption::Auto (default) : An internal thread would be started for OffsetCommit callbacks handling.
-     *   - EventsPollingOption::Maunal         : User have to call the member function `pollEvents()` to trigger OffsetCommit callbacks.
-     *
-     * Throws KafkaException with errors:
-     *   - RD_KAFKA_RESP_ERR__INVALID_ARG      : Invalid BOOTSTRAP_SERVERS property
-     *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
-     */
-    explicit KafkaManualCommitConsumer(const Properties&   properties,
-                                       EventsPollingOption pollOption = EventsPollingOption::Auto)
-        : KafkaConsumer(KafkaManualCommitConsumer::validateAndReformProperties(properties), OffsetCommitOption::Manual)
-    {
-        _rk_commit_cb_queue.reset(rd_kafka_queue_new(getClientHandle()));
-
-        _pollable = std::make_unique<KafkaClient::PollableCallback<KafkaManualCommitConsumer>>(this, pollCallbacks);
-        if (pollOption == EventsPollingOption::Auto)
-        {
-            _pollThread = std::make_unique<PollThread>(*_pollable);
-        }
-    }
-
-    ~KafkaManualCommitConsumer() override { if (_opened) close(); }
-
-    /**
-     * Close the consumer, waiting for any needed cleanup.
-     */
-    void close()
-    {
-        _pollThread.reset(); // Join the polling thread (in case it's running)
-        _pollable.reset();
-
-        KafkaConsumer::close();
-
-        rd_kafka_queue_t* queue = getCommitCbQueue();
-        while (rd_kafka_queue_length(queue))
-        {
-            rd_kafka_queue_poll_callback(queue, TIMEOUT_INFINITE);
-        }
-    }
-
-    /**
-     * Commit offsets returned on the last poll() for all the subscribed list of topics and partitions.
-     */
-    void commitSync();
-    /**
-     * Commit the specified offsets for the specified records
-     */
-    void commitSync(const ConsumerRecord& record);
-    /**
-     * Commit the specified offsets for the specified list of topics and partitions.
-     */
-    void commitSync(const TopicPartitionOffsets& topicPartitionOffsets);
-    /**
-     * Commit offsets returned on the last poll() for all the subscribed list of topics and partition.
-     * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
-     */
-    void commitAsync(const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
-    /**
-     * Commit the specified offsets for the specified records
-     * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
-     */
-    void commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
-    /**
-     * Commit the specified offsets for the specified list of topics and partitions to Kafka.
-     * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
-     */
-    void commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
-
-    /**
-     * Call the OffsetCommit callbacks (if any)
-     * Note: The KafkaManualCommitConsumer MUST be constructed with option `EventsPollingOption::Manual`.
-     */
-    void pollEvents(std::chrono::milliseconds timeout)
-    {
-        assert(!_pollThread);
-
-        _pollable->poll(convertMsDurationToInt(timeout));
-    }
-
-private:
-    rd_kafka_queue_t* getCommitCbQueue() { return _rk_commit_cb_queue.get(); }
-
-    rd_kafka_queue_unique_ptr _rk_commit_cb_queue;
-
-    std::unique_ptr<Pollable>   _pollable;
-    std::unique_ptr<PollThread> _pollThread;
-
-    static void pollCallbacks(KafkaManualCommitConsumer* consumer, int timeoutMs)
-    {
-        rd_kafka_queue_t* queue = consumer->getCommitCbQueue();
-        rd_kafka_queue_poll_callback(queue, timeoutMs);
-    }
-
-    // Validate properties (and fix it if necesary)
-    static Properties validateAndReformProperties(const Properties& origProperties)
-    {
-        // Let the base class validate first
-        Properties properties = KafkaConsumer::validateAndReformProperties(origProperties);
-
-        // Automatically store offset of last message provided to application
-        properties.put(ENABLE_AUTO_OFFSET_STORE, "true");
-
-        return properties;
-    }
-};
 
 inline void
-KafkaManualCommitConsumer::commitSync()
+KafkaConsumer::commitSync()
 {
     commit(TopicPartitionOffsets(), CommitType::Sync);
 }
 
 inline void
-KafkaManualCommitConsumer::commitSync(const ConsumerRecord& record)
+KafkaConsumer::commitSync(const ConsumerRecord& record)
 {
     TopicPartitionOffsets tpos;
     // committed offset should be "current-received-offset + 1"
@@ -1069,13 +1006,13 @@ KafkaManualCommitConsumer::commitSync(const ConsumerRecord& record)
 }
 
 inline void
-KafkaManualCommitConsumer::commitSync(const TopicPartitionOffsets& topicPartitionOffsets)
+KafkaConsumer::commitSync(const TopicPartitionOffsets& topicPartitionOffsets)
 {
     commit(topicPartitionOffsets, CommitType::Sync);
 }
 
 inline void
-KafkaManualCommitConsumer::commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const Consumer::OffsetCommitCallback& offsetCommitCallback)
+KafkaConsumer::commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const Consumer::OffsetCommitCallback& offsetCommitCallback)
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(topicPartitionOffsets.empty() ? nullptr : createRkTopicPartitionList(topicPartitionOffsets));
 
@@ -1088,7 +1025,7 @@ KafkaManualCommitConsumer::commitAsync(const TopicPartitionOffsets& topicPartiti
 }
 
 inline void
-KafkaManualCommitConsumer::commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& offsetCommitCallback)
+KafkaConsumer::commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& offsetCommitCallback)
 {
     TopicPartitionOffsets tpos;
     // committed offset should be "current received record's offset" + 1
@@ -1097,7 +1034,7 @@ KafkaManualCommitConsumer::commitAsync(const ConsumerRecord& record, const Consu
 }
 
 inline void
-KafkaManualCommitConsumer::commitAsync(const Consumer::OffsetCommitCallback& offsetCommitCallback)
+KafkaConsumer::commitAsync(const Consumer::OffsetCommitCallback& offsetCommitCallback)
 {
     commitAsync(TopicPartitionOffsets(), offsetCommitCallback);
 }

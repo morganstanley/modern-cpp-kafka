@@ -176,11 +176,13 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library t
 
                     * `max.poll.records` (default: `500`): The maxmum number of records that a single call to `poll()` would return
 
+                * Property which overrides the one from ***librdkafka***
+
+                    * `enable.auto.commit` (default: `false`): To automatically commit the previously polled offsets on each `poll` operation
+
                 * Properties not supposed to be used (internally shadowed by ***modern-cpp-kafka***)
 
                     * `enable.auto.offset.store`
-
-                    * `enable.auto.commit`
 
                     * `auto.commit.interval.ms`
 

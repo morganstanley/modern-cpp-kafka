@@ -143,7 +143,7 @@ TEST(AdminClient, DeleteRecords)
 
     KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
 
-    Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+    Kafka::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     {
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         EXPECT_EQ(0, records.size());

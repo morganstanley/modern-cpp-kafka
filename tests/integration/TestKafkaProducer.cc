@@ -41,7 +41,7 @@ TEST(KafkaProducer, SendMessagesWithAcks1)
     }
 
     // Prepare a consumer
-    Kafka::KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+    Kafka::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
     consumer.setLogLevel(Kafka::Log::Level::Crit);
     consumer.subscribe({topic});
 
@@ -88,7 +88,7 @@ TEST(KafkaProducer, SendMessagesWithAcksAll)
 
     // Prepare a consumer
     const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(Kafka::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
-    Kafka::KafkaAutoCommitConsumer consumer(consumerProps);
+    Kafka::KafkaConsumer consumer(consumerProps);
     consumer.setLogLevel(Kafka::Log::Level::Crit);
     consumer.subscribe({topic});
 
@@ -273,8 +273,8 @@ TEST(KafkaProducer, RecordWithEmptyOrNullFields)
         sendMessages(producerRecord, 10, partitioner);
 
         // The auto-commit consumer
-        KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                         .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+        KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                               .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
         // Subscribe topics
         consumer.subscribe({topic});
 
@@ -580,7 +580,7 @@ TEST(KafkaProducer, CopyRecordValueWithinSend)
     // Poll all messages & check
     {
         // Prepare a consumer
-        Kafka::KafkaManualCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
+        Kafka::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig().put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
         consumer.setLogLevel(Kafka::Log::Level::Crit);
         consumer.subscribe({topic});
 

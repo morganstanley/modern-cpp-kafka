@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION "3.8")
 
-project("Modern C++ based Kafka API" VERSION 1.0.0)
+project("Modern C++ Kafka API" VERSION 1.0.0)
 
 include(CTest)
 include(CheckCXXCompilerFlag)

@@ -89,7 +89,8 @@ class AdminClient: public KafkaClient
 {
 public:
     explicit AdminClient(const Properties& properties)
-        : KafkaClient(ClientType::AdminClient, KafkaClient::validateAndReformProperties(properties))
+        : KafkaClient(ClientType::AdminClient,
+                      KafkaClient::validateAndReformProperties(properties))
     {
     }
 

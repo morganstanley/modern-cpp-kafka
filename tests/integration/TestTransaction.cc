@@ -58,7 +58,7 @@ TEST(Transaction, CommitTransaction)
         props.put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
         props.put(ConsumerConfig::ISOLATION_LEVEL,   isolationConf);
 
-        Kafka::KafkaManualCommitConsumer consumer(props);
+        Kafka::KafkaConsumer consumer(props);
         consumer.setLogLevel(Kafka::Log::Level::Crit);
         consumer.subscribe({topic});
 
@@ -249,7 +249,7 @@ TEST(Transaction, ContinueTheTransaction)
     // Start a producer to send the message, but fail to commit
     {
         KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                 .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
+                               .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
 
         producer.initTransactions();
 
@@ -269,7 +269,7 @@ TEST(Transaction, ContinueTheTransaction)
     // Start another producer, continue to send the message (with the same transaction.id)
     {
         KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                      .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
+                               .put(ProducerConfig::TRANSACTIONAL_ID, transactionId));
 
         producer.initTransactions();
 
@@ -290,9 +290,9 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Check all received messages (committed only)
     {
-        KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                           .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
-                                           .put(ConsumerConfig::ISOLATION_LEVEL,   "read_committed"));
+        KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                               .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                               .put(ConsumerConfig::ISOLATION_LEVEL,   "read_committed"));
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
@@ -306,9 +306,9 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Check all received messages (incluing uncommitted)
     {
-        KafkaAutoCommitConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                           .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
-                                           .put(ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
+        KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                               .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                               .put(ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);

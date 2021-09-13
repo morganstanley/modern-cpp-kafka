@@ -36,6 +36,11 @@ public:
     static const constexpr char* CLIENT_ID               = "client.id";
 
     /**
+     * Automatically commits previously polled offsets on each `poll` operation.
+     */
+    static const constexpr char* ENABLE_AUTO_COMMIT      = "enable.auto.commit";
+
+    /**
      * This property controls the behavior of the consumer when it starts reading a partition for which it doesn't have a valid committed offset.
      * The "latest" means the consumer will begin reading the newest records written after the consumer started. While "earliest" means that the consumer will read from the very beginning.
      * Available options: latest, earliest

@@ -86,7 +86,7 @@ void RunConsumer(const std::string& topic, const Kafka::ConsumerConfig& props)
 {
     // Create a manual-commit consumer
     Kafka::KafkaClient::setGlobalLogger(Kafka::Logger());
-    Kafka::KafkaManualCommitConsumer consumer(props);
+    Kafka::KafkaConsumer consumer(props);
 
     // Subscribe to topic
     consumer.subscribe({topic});

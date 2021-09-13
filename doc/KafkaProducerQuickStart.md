@@ -1,6 +1,6 @@
 # KafkaProducer Quick Start
 
-Generally speaking, The `Modern C++ based Kafka API` is quite similar to the [Kafka Java's API](https://kafka.apache.org/10/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html).
+Generally speaking, The `Modern C++ Kafka API` is quite similar to the [Kafka Java's API](https://kafka.apache.org/10/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html).
 
 We'd recommend users to cross-reference them, --especially the examples.
 
