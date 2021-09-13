@@ -295,13 +295,16 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </ul>
 </li>
 <li>
+<p>Property which overrides the one from <strong><em>librdkafka</em></strong></p>
+<ul>
+<li><code>enable.auto.commit</code> (default: <code>false</code>): To automatically commit the previously polled offsets on each <code>poll</code> operation</li>
+</ul>
+</li>
+<li>
 <p>Properties not supposed to be used (internally shadowed by <strong><em>modern-cpp-kafka</em></strong>)</p>
 <ul>
 <li>
 <p><code>enable.auto.offset.store</code></p>
-</li>
-<li>
-<p><code>enable.auto.commit</code></p>
 </li>
 <li>
 <p><code>auto.commit.interval.ms</code></p>
@@ -374,7 +377,7 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2021. 09. 07
+        Generated: 2021. 09. 13
       </footer>
       <hr/>
     </div>

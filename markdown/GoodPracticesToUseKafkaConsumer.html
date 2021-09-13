@@ -38,15 +38,15 @@
 <h2 id="how-to-avoid-polling-duplicated-messages"><a class="toclink" href="#how-to-avoid-polling-duplicated-messages">How to avoid polling duplicated messages</a></h2>
 <ul>
 <li>
-<p>A <code>KafkaManualCommitConsumer</code> could help to commit the offsets more frequently (e.g, always do commit after finishing processing a message).</p>
+<p>To commit the offsets more frequently (e.g, always do commit after finishing processing a message).</p>
 </li>
 <li>
-<p>Don't use quite a large <code>MAX_POLL_RECORDS</code> for a <code>KafkaAutoCommitConsumer</code>, -- you might fail to commit all these messages before crash, thus more duplications with the next <code>poll</code>.</p>
+<p>Don't use quite a large <code>MAX_POLL_RECORDS</code> for a <code>KafkaConsumer</code> (with <code>enable.auto.commit=true</code>) -- you might fail to commit all these messages before crash, thus more duplications with the next <code>poll</code>.</p>
 </li>
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2021. 09. 07
+        Generated: 2021. 09. 13
       </footer>
       <hr/>
     </div>

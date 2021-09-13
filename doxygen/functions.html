@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Modern C++ based Kafka API: Class Members</title>
+<title>Modern C++ Kafka API: Class Members</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,7 +21,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Modern C++ based Kafka API
+   <div id="projectname">Modern C++ Kafka API
    </div>
   </td>
  </tr>
@@ -114,16 +114,18 @@ $(function() {
 : <a class="el" href="classKAFKA__API_1_1ConsumerConfig.html#ab6be3b1c1a0f988936c52dfa18d928cf">KAFKA_API::ConsumerConfig</a>
 , <a class="el" href="classKAFKA__API_1_1ProducerConfig.html#a5fed09277f35dc7bd571b617d151a5f6">KAFKA_API::ProducerConfig</a>
 </li>
+<li>clientId()
+: <a class="el" href="classKAFKA__API_1_1KafkaClient.html#a0f4691ad28928c2077de2f2eefc0bec4">KAFKA_API::KafkaClient</a>
+</li>
 <li>close()
-: <a class="el" href="classKAFKA__API_1_1KafkaAutoCommitConsumer.html#a553694fbe4eedbb74818c8b43a396324">KAFKA_API::KafkaAutoCommitConsumer</a>
-, <a class="el" href="classKAFKA__API_1_1KafkaManualCommitConsumer.html#ab470bfb11e1ef3d6d5ed421cbe432974">KAFKA_API::KafkaManualCommitConsumer</a>
+: <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#a7459745f44bbf0a60fe77970f004eef6">KAFKA_API::KafkaConsumer</a>
 , <a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a1a15c20d4305fd259e14903205b559bf">KAFKA_API::KafkaProducer</a>
 </li>
 <li>commitAsync()
-: <a class="el" href="classKAFKA__API_1_1KafkaManualCommitConsumer.html#ab6f1e492bc42ffb80ea65c4b5bf02352">KAFKA_API::KafkaManualCommitConsumer</a>
+: <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#a9e3492e2a7cf8ffc0d5d1c1684e4e72e">KAFKA_API::KafkaConsumer</a>
 </li>
 <li>commitSync()
-: <a class="el" href="classKAFKA__API_1_1KafkaManualCommitConsumer.html#a3804c40f739bc455050a3985d4bf5e21">KAFKA_API::KafkaManualCommitConsumer</a>
+: <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#a262e585c416237b756239cc0a675941a">KAFKA_API::KafkaConsumer</a>
 </li>
 <li>committed()
 : <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#a07cff68afa5f924b710f1768327660e2">KAFKA_API::KafkaConsumer</a>
@@ -148,6 +150,9 @@ $(function() {
 
 
 <h3><a id="index_e"></a>- e -</h3><ul>
+<li>ENABLE_AUTO_COMMIT
+: <a class="el" href="classKAFKA__API_1_1ConsumerConfig.html#a8ca2e1c4c50fc6aabd2fd0a8fed8f50e">KAFKA_API::ConsumerConfig</a>
+</li>
 <li>ENABLE_IDEMPOTENCE
 : <a class="el" href="classKAFKA__API_1_1ProducerConfig.html#a1732ad5e0516859050bd126c5a120064">KAFKA_API::ProducerConfig</a>
 </li>
@@ -167,6 +172,12 @@ $(function() {
 , <a class="el" href="structKAFKA__API_1_1Admin_1_1ListTopicsResult.html#a72af017f0320b6865032fe1428b144fb">KAFKA_API::Admin::ListTopicsResult</a>
 , <a class="el" href="classKAFKA__API_1_1ConsumerRecord.html#a64f0cf07177e206e02d70d8f0ec7771b">KAFKA_API::ConsumerRecord</a>
 , <a class="el" href="classKAFKA__API_1_1KafkaException.html#ae1f83cd75df715037fe962b5791cda52">KAFKA_API::KafkaException</a>
+</li>
+<li>ErrorCallback
+: <a class="el" href="classKAFKA__API_1_1KafkaClient.html#ae2bf56030bc25d64cc7dc3e44f368d7a">KAFKA_API::KafkaClient</a>
+</li>
+<li>EventsPollingOption
+: <a class="el" href="classKAFKA__API_1_1KafkaClient.html#ae735fbad46953a0c5b57e40d810a3450">KAFKA_API::KafkaClient</a>
 </li>
 </ul>
 
@@ -236,14 +247,11 @@ $(function() {
 
 
 <h3><a id="index_k"></a>- k -</h3><ul>
-<li>KafkaAutoCommitConsumer()
-: <a class="el" href="classKAFKA__API_1_1KafkaAutoCommitConsumer.html#a8b9ce1eb0e5f9d54c597d6138f6922bc">KAFKA_API::KafkaAutoCommitConsumer</a>
-</li>
-<li>KafkaManualCommitConsumer()
-: <a class="el" href="classKAFKA__API_1_1KafkaManualCommitConsumer.html#ac9511e1437c1080fd5cd6085710f44af">KAFKA_API::KafkaManualCommitConsumer</a>
+<li>KafkaConsumer()
+: <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#a2c44eca677adf4966e89f26278047dfd">KAFKA_API::KafkaConsumer</a>
 </li>
 <li>KafkaProducer()
-: <a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a20bf644b121565acab584a5764427d62">KAFKA_API::KafkaProducer</a>
+: <a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a881935a4a843d58869c4b82b252f42b7">KAFKA_API::KafkaProducer</a>
 </li>
 <li>key()
 : <a class="el" href="classKAFKA__API_1_1ConsumerRecord.html#ade44e44726250dfe7c3ddf60dfc8a27a">KAFKA_API::ConsumerRecord</a>
@@ -300,6 +308,9 @@ $(function() {
 
 
 <h3><a id="index_n"></a>- n -</h3><ul>
+<li>name()
+: <a class="el" href="classKAFKA__API_1_1KafkaClient.html#a81e5b798d26194dbcb8812b5e180076c">KAFKA_API::KafkaClient</a>
+</li>
 <li>nodes()
 : <a class="el" href="structKAFKA__API_1_1BrokerMetadata.html#ac0f821ba872b0fd31f0332b99e5d5caa">KAFKA_API::BrokerMetadata</a>
 </li>
@@ -342,8 +353,7 @@ $(function() {
 : <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#af2cf4c8f017064009d960c3a7a414ff6">KAFKA_API::KafkaConsumer</a>
 </li>
 <li>pollEvents()
-: <a class="el" href="classKAFKA__API_1_1KafkaManualCommitConsumer.html#a6c21b7e915483241aed9317c92c842a9">KAFKA_API::KafkaManualCommitConsumer</a>
-, <a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a5c014f723bc8ebe9eb67eba44e81caf5">KAFKA_API::KafkaProducer</a>
+: <a class="el" href="classKAFKA__API_1_1KafkaClient.html#aa0a2b8ad8caf941705e1ef9fbf461603">KAFKA_API::KafkaClient</a>
 </li>
 <li>popOffsetToCommit()
 : <a class="el" href="classKAFKA__API_1_1UnorderedOffsetCommitQueue.html#a73a16af827a862db84916f364031bb7d">KAFKA_API::UnorderedOffsetCommitQueue</a>
@@ -379,6 +389,9 @@ $(function() {
 <h3><a id="index_r"></a>- r -</h3><ul>
 <li>recordId()
 : <a class="el" href="classKAFKA__API_1_1Producer_1_1RecordMetadata.html#a0d9038f7690394311e6e02e4ed1b9b0a">KAFKA_API::Producer::RecordMetadata</a>
+</li>
+<li>remove()
+: <a class="el" href="classKAFKA__API_1_1Properties.html#a841d1bd2d346a610dee0c14bac25e29f">KAFKA_API::Properties</a>
 </li>
 <li>replicas
 : <a class="el" href="structKAFKA__API_1_1BrokerMetadata_1_1PartitionInfo.html#a0b14628f7214efb724eb47b9207598de">KAFKA_API::BrokerMetadata::PartitionInfo</a>
@@ -465,6 +478,9 @@ $(function() {
 <li>SOCKET_TIMEOUT_MS
 : <a class="el" href="classKAFKA__API_1_1ConsumerConfig.html#a8649b9ad1c9285196eb79669df6d0593">KAFKA_API::ConsumerConfig</a>
 </li>
+<li>StatsCallback
+: <a class="el" href="classKAFKA__API_1_1KafkaClient.html#ac84ddd7796b8ca83bd7a9f08b34835df">KAFKA_API::KafkaClient</a>
+</li>
 <li>subscribe()
 : <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#a776bd221cddc3d4c89191ba9bdd4c48a">KAFKA_API::KafkaConsumer</a>
 </li>
@@ -544,6 +560,9 @@ $(function() {
 
 
 <h3><a id="index__7E"></a>- ~ -</h3><ul>
+<li>~KafkaConsumer()
+: <a class="el" href="classKAFKA__API_1_1KafkaConsumer.html#ad6993873a2a0701539ec662e0b46e8d9">KAFKA_API::KafkaConsumer</a>
+</li>
 <li>~KafkaProducer()
 : <a class="el" href="classKAFKA__API_1_1KafkaProducer.html#a5086b1698c1b9c3cb5a389b3a7a6eede">KAFKA_API::KafkaProducer</a>
 </li>

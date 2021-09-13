@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Modern C++ based Kafka API: KAFKA_API::ConsumerConfig Class Reference</title>
+<title>Modern C++ Kafka API: KAFKA_API::ConsumerConfig Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,7 +21,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Modern C++ based Kafka API
+   <div id="projectname">Modern C++ Kafka API
    </div>
   </td>
  </tr>
@@ -109,6 +109,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const
 <tr class="memitem:a862e5c8422e86168105c40a34dc1136d inherit pub_methods_classKAFKA__API_1_1Properties"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#a862e5c8422e86168105c40a34dc1136d">put</a> (const std::string &amp;key, const std::string &amp;value)</td></tr>
 <tr class="memdesc:a862e5c8422e86168105c40a34dc1136d inherit pub_methods_classKAFKA__API_1_1Properties"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a property.  <a href="classKAFKA__API_1_1Properties.html#a862e5c8422e86168105c40a34dc1136d">More...</a><br /></td></tr>
 <tr class="separator:a862e5c8422e86168105c40a34dc1136d inherit pub_methods_classKAFKA__API_1_1Properties"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a841d1bd2d346a610dee0c14bac25e29f inherit pub_methods_classKAFKA__API_1_1Properties"><td class="memItemLeft" align="right" valign="top"><a id="a841d1bd2d346a610dee0c14bac25e29f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#a841d1bd2d346a610dee0c14bac25e29f">remove</a> (const std::string &amp;key)</td></tr>
+<tr class="memdesc:a841d1bd2d346a610dee0c14bac25e29f inherit pub_methods_classKAFKA__API_1_1Properties"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the property (if one exists). <br /></td></tr>
+<tr class="separator:a841d1bd2d346a610dee0c14bac25e29f inherit pub_methods_classKAFKA__API_1_1Properties"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0d7b3f2251e97333d7e543d4794f5af inherit pub_methods_classKAFKA__API_1_1Properties"><td class="memItemLeft" align="right" valign="top">Optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">getProperty</a> (const std::string &amp;key) const</td></tr>
 <tr class="memdesc:af0d7b3f2251e97333d7e543d4794f5af inherit pub_methods_classKAFKA__API_1_1Properties"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a property.  <a href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">More...</a><br /></td></tr>
 <tr class="separator:af0d7b3f2251e97333d7e543d4794f5af inherit pub_methods_classKAFKA__API_1_1Properties"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,6 +140,10 @@ Static Public Attributes</h2></td></tr>
 static const constexpr char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1ConsumerConfig.html#ab6be3b1c1a0f988936c52dfa18d928cf">CLIENT_ID</a> = &quot;client.id&quot;</td></tr>
 <tr class="memdesc:ab6be3b1c1a0f988936c52dfa18d928cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Client identifier. <br /></td></tr>
 <tr class="separator:ab6be3b1c1a0f988936c52dfa18d928cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ca2e1c4c50fc6aabd2fd0a8fed8f50e"><td class="memItemLeft" align="right" valign="top"><a id="a8ca2e1c4c50fc6aabd2fd0a8fed8f50e"></a>
+static const constexpr char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1ConsumerConfig.html#a8ca2e1c4c50fc6aabd2fd0a8fed8f50e">ENABLE_AUTO_COMMIT</a> = &quot;enable.auto.commit&quot;</td></tr>
+<tr class="memdesc:a8ca2e1c4c50fc6aabd2fd0a8fed8f50e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Automatically commits previously polled offsets on each <code>poll</code> operation. <br /></td></tr>
+<tr class="separator:a8ca2e1c4c50fc6aabd2fd0a8fed8f50e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac66f00cbd4e88487bbd311a56868f57"><td class="memItemLeft" align="right" valign="top">static const constexpr char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1ConsumerConfig.html#aac66f00cbd4e88487bbd311a56868f57">AUTO_OFFSET_RESET</a> = &quot;auto.offset.reset&quot;</td></tr>
 <tr class="memdesc:aac66f00cbd4e88487bbd311a56868f57"><td class="mdescLeft">&#160;</td><td class="mdescRight">This property controls the behavior of the consumer when it starts reading a partition for which it doesn't have a valid committed offset.  <a href="classKAFKA__API_1_1ConsumerConfig.html#aac66f00cbd4e88487bbd311a56868f57">More...</a><br /></td></tr>
 <tr class="separator:aac66f00cbd4e88487bbd311a56868f57"><td class="memSeparator" colspan="2">&#160;</td></tr>

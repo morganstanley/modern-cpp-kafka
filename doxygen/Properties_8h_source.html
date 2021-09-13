@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Modern C++ based Kafka API: /home/runner/work/modern-cpp-kafka/modern-cpp-kafka/include/kafka/Properties.h Source File</title>
+<title>Modern C++ Kafka API: /home/runner/work/modern-cpp-kafka/modern-cpp-kafka/include/kafka/Properties.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,7 +21,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Modern C++ based Kafka API
+   <div id="projectname">Modern C++ Kafka API
    </div>
   </td>
  </tr>
@@ -102,46 +102,52 @@ $(function() {
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    }</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">   45</a></span>&#160;    Optional&lt;std::string&gt; <a class="code" href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">getProperty</a>(<span class="keyword">const</span> std::string&amp; key)<span class="keyword"> const</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">    </span>{</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        Optional&lt;std::string&gt; ret;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keyword">auto</span> search = _kvMap.find(key);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keywordflow">if</span> (search != _kvMap.end())</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        {</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            ret = search-&gt;second;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        }</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd">   59</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd">eraseProperty</a>(<span class="keyword">const</span> std::string&amp; key)</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    {</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      _kvMap.erase(key);</div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1Properties.html#a841d1bd2d346a610dee0c14bac25e29f">   44</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classKAFKA__API_1_1Properties.html#a841d1bd2d346a610dee0c14bac25e29f">remove</a>(<span class="keyword">const</span> std::string&amp; key)</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        _kvMap.erase(key);</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    }</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">   53</a></span>&#160;    Optional&lt;std::string&gt; <a class="code" href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">getProperty</a>(<span class="keyword">const</span> std::string&amp; key)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keyword">    </span>{</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        Optional&lt;std::string&gt; ret;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">auto</span> search = _kvMap.find(key);</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keywordflow">if</span> (search != _kvMap.end())</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        {</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            ret = search-&gt;second;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        }</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keywordflow">return</span> ret;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    }</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    std::string toString()<span class="keyword"> const</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keyword">    </span>{</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        std::string ret;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        std::for_each(_kvMap.cbegin(), _kvMap.cend(),</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                      [&amp;ret](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; kv) {</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                          ret.append(ret.empty() ? <span class="stringliteral">&quot;&quot;</span> : <span class="stringliteral">&quot;|&quot;</span>).append(kv.first).append(<span class="stringliteral">&quot;=&quot;</span>).append(kv.second);</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                      });</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keywordflow">return</span> ret;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    }</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">   77</a></span>&#160;    <span class="keyword">const</span> PropertiesMap&amp; <a class="code" href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">map</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _kvMap; }</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    PropertiesMap _kvMap;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;};</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;} <span class="comment">// end of KAFKA_API</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd">   67</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd">eraseProperty</a>(<span class="keyword">const</span> std::string&amp; key)</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    {</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;      _kvMap.erase(key);</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    }</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    std::string toString()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="keyword">    </span>{</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        std::string ret;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        std::for_each(_kvMap.cbegin(), _kvMap.cend(),</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                      [&amp;ret](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; kv) {</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                          ret.append(ret.empty() ? <span class="stringliteral">&quot;&quot;</span> : <span class="stringliteral">&quot;|&quot;</span>).append(kv.first).append(<span class="stringliteral">&quot;=&quot;</span>).append(kv.second);</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                      });</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    }</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">   85</a></span>&#160;    <span class="keyword">const</span> PropertiesMap&amp; <a class="code" href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">map</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _kvMap; }</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    PropertiesMap _kvMap;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;};</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;} <span class="comment">// end of KAFKA_API</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aclassKAFKA__API_1_1Properties_html_a6ed8b1d3ed286def5273f0317e783ebd"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd">KAFKA_API::Properties::eraseProperty</a></div><div class="ttdeci">void eraseProperty(const std::string &amp;key)</div><div class="ttdoc">Remove a property.</div><div class="ttdef"><b>Definition:</b> Properties.h:59</div></div>
-<div class="ttc" id="aclassKAFKA__API_1_1Properties_html_ae0f7e7a3c5e2790e9431efdb3868cb79"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">KAFKA_API::Properties::map</a></div><div class="ttdeci">const PropertiesMap &amp; map() const</div><div class="ttdoc">Get all properties with a map.</div><div class="ttdef"><b>Definition:</b> Properties.h:77</div></div>
+<div class="ttc" id="aclassKAFKA__API_1_1Properties_html_a6ed8b1d3ed286def5273f0317e783ebd"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd">KAFKA_API::Properties::eraseProperty</a></div><div class="ttdeci">void eraseProperty(const std::string &amp;key)</div><div class="ttdoc">Remove a property.</div><div class="ttdef"><b>Definition:</b> Properties.h:67</div></div>
+<div class="ttc" id="aclassKAFKA__API_1_1Properties_html_ae0f7e7a3c5e2790e9431efdb3868cb79"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">KAFKA_API::Properties::map</a></div><div class="ttdeci">const PropertiesMap &amp; map() const</div><div class="ttdoc">Get all properties with a map.</div><div class="ttdef"><b>Definition:</b> Properties.h:85</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1Properties_html"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html">KAFKA_API::Properties</a></div><div class="ttdoc">The properties for Kafka clients.</div><div class="ttdef"><b>Definition:</b> Properties.h:17</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1Properties_html_a862e5c8422e86168105c40a34dc1136d"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#a862e5c8422e86168105c40a34dc1136d">KAFKA_API::Properties::put</a></div><div class="ttdeci">Properties &amp; put(const std::string &amp;key, const std::string &amp;value)</div><div class="ttdoc">Set a property.</div><div class="ttdef"><b>Definition:</b> Properties.h:35</div></div>
-<div class="ttc" id="aclassKAFKA__API_1_1Properties_html_af0d7b3f2251e97333d7e543d4794f5af"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">KAFKA_API::Properties::getProperty</a></div><div class="ttdeci">Optional&lt; std::string &gt; getProperty(const std::string &amp;key) const</div><div class="ttdoc">Get a property.</div><div class="ttdef"><b>Definition:</b> Properties.h:45</div></div>
+<div class="ttc" id="aclassKAFKA__API_1_1Properties_html_af0d7b3f2251e97333d7e543d4794f5af"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">KAFKA_API::Properties::getProperty</a></div><div class="ttdeci">Optional&lt; std::string &gt; getProperty(const std::string &amp;key) const</div><div class="ttdoc">Get a property.</div><div class="ttdef"><b>Definition:</b> Properties.h:53</div></div>
+<div class="ttc" id="aclassKAFKA__API_1_1Properties_html_a841d1bd2d346a610dee0c14bac25e29f"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#a841d1bd2d346a610dee0c14bac25e29f">KAFKA_API::Properties::remove</a></div><div class="ttdeci">void remove(const std::string &amp;key)</div><div class="ttdoc">Remove the property (if one exists).</div><div class="ttdef"><b>Definition:</b> Properties.h:44</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">
