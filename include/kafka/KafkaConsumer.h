@@ -431,20 +431,31 @@ KafkaConsumer::close()
 
     try
     {
+
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << ", ************** about to commit before close" << std::endl;
+
         // Commit the offsets for these messages which had been polled last time (for `enable.auto.commit=true` case.)
         commitStoredOffsetsIfNecessary(CommitType::Sync);
+
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << ", ************** just finished committing before close" << std::endl;
     }
     catch(const KafkaException& e)
     {
         KAFKA_API_DO_LOG(Log::Level::Err, "met error[%s] while closing", e.what());
     }
 
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << ", ************** about to call consumer_close" << std::endl;
+
     rd_kafka_consumer_close(getClientHandle());
+
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << ", ************** just called consumer_close" << std::endl;
 
     while (rd_kafka_outq_len(getClientHandle()))
     {
         rd_kafka_poll(getClientHandle(), KafkaClient::TIMEOUT_INFINITE);
     }
+
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << ", ************** outq_len is 0 now"  << std::endl;
 
     rd_kafka_queue_t* queue = getCommitCbQueue();
     while (rd_kafka_queue_length(queue))

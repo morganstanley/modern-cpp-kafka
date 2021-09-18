@@ -17,7 +17,7 @@
 using namespace KAFKA_API;
 
 
-TEST(KafkaConsumer, AlwaysFinishClosing_ManuallyPollEvents)
+TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
 {
     Topic     topic     = Utility::getRandomString();
     Partition partition = 0;
@@ -135,6 +135,8 @@ TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
                 EXPECT_EQ(std::get<1>(messages[i]), records[i].key().toString());
                 EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
 
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << "************  about to commitAsync" << std::endl;
+
                 // Try to commit the offsets
                 Offset expectedOffset = records[i].offset() + 1;
                 consumer.commitAsync(records[i],
@@ -143,9 +145,15 @@ TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
                                          EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
                                          ++commitCbCount;
                                      });
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << "************  after commitAsync" << std::endl;
             }
         }
+
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << "************  about to destruct consumer" << std::endl;
+
     }
+
+        std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << "************  after destrcting consumer" << std::endl;
 
     EXPECT_EQ(messages.size(), commitCbCount);
 
