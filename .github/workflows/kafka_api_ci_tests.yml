@@ -193,7 +193,7 @@ jobs:
 
       - name: Test
         if: matrix.test-labels
-        timeout-minutes: 20
+        timeout-minutes: 15
         run: |
           cd ${BUILD_SUB_DIR}
 
@@ -215,7 +215,14 @@ jobs:
             source test.env
           fi
 
-          # run tests
+          # Install gtest-parallel
+          if [[ ${TEST_LABELS} == *'IT'* ]]; then
+            wget https://github.com/google/gtest-parallel/archive/refs/heads/master.zip
+            unzip master.zip
+            export PATH=`pwd`/gtest-parallel-master:$PATH
+          fi
+
+          # Run tests
           ctest -VV -L "${TEST_LABELS}"
 
           # Stop Kafka cluster for integration test & regression test
