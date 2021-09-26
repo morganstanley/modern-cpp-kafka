@@ -4,7 +4,6 @@
 
 #include <regex>
 
-namespace Kafka = KAFKA_API;
 
 #define EXPECT_KAFKA_THROW(expr, err)           \
     do {                                        \
@@ -31,10 +30,10 @@ TEST(KafkaException, Basic)
     // Try KafkaException with no specified error message
     try
     {
-        throw Kafka::KafkaException("some_filename", 100, Kafka::Error{RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT});
+        throw kafka::KafkaException("some_filename", 100, kafka::Error{RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT});
         EXPECT_FALSE(true);
     }
-    catch (const Kafka::KafkaException& e)
+    catch (const kafka::KafkaException& e)
     {
         std::regex reMatch(R"(.*Broker: Request timed out \[7\] \(some_filename:100\))");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
@@ -43,10 +42,10 @@ TEST(KafkaException, Basic)
     // Try KafkaException with specified error message
     try
     {
-        throw Kafka::KafkaException("some_filename", 100, Kafka::Error{RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, "something wrong here"});
+        throw kafka::KafkaException("some_filename", 100, kafka::Error{RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, "something wrong here"});
         EXPECT_FALSE(true);
     }
-    catch (const Kafka::KafkaException& e)
+    catch (const kafka::KafkaException& e)
     {
         std::regex reMatch(R"(.*Broker: Request timed out \[7\] \| something wrong here \(some_filename:100\))");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
@@ -56,21 +55,21 @@ TEST(KafkaException, Basic)
 
 TEST(KafkaException, Macros)
 {
-    using Kafka::KafkaException;
+    using kafka::KafkaException;
 
     // Try KAFKA_THROW_IF_WITH_ERROR (with no error)
-    EXPECT_KAFKA_NO_THROW(KAFKA_THROW_IF_WITH_ERROR(Kafka::Error(RD_KAFKA_RESP_ERR_NO_ERROR)));
+    EXPECT_KAFKA_NO_THROW(KAFKA_THROW_IF_WITH_ERROR(kafka::Error(RD_KAFKA_RESP_ERR_NO_ERROR)));
 
     // Try KAFKA_THROW_IF_WITH_ERROR (with error)
-    EXPECT_KAFKA_THROW(KAFKA_THROW_IF_WITH_ERROR(Kafka::Error(RD_KAFKA_RESP_ERR__TIMED_OUT)), RD_KAFKA_RESP_ERR__TIMED_OUT);
+    EXPECT_KAFKA_THROW(KAFKA_THROW_IF_WITH_ERROR(kafka::Error(RD_KAFKA_RESP_ERR__TIMED_OUT)), RD_KAFKA_RESP_ERR__TIMED_OUT);
 
     // Try KAFKA_THROW_ERROR (with no specified error message)
     try
     {
-        KAFKA_THROW_IF_WITH_ERROR(Kafka::Error(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT));
+        KAFKA_THROW_IF_WITH_ERROR(kafka::Error(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT));
         EXPECT_FALSE(true);
     }
-    catch (const Kafka::KafkaException& e)
+    catch (const kafka::KafkaException& e)
     {
         std::regex reMatch(".*Broker: Request timed out.*TestKafkaException\\.cc.*");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
@@ -79,10 +78,10 @@ TEST(KafkaException, Macros)
     // Try KAFKA_THROW_ERROR (with specified error message)
     try
     {
-        KAFKA_THROW_ERROR(Kafka::Error(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, "something wrong here"));
+        KAFKA_THROW_ERROR(kafka::Error(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, "something wrong here"));
         EXPECT_FALSE(true);
     }
-    catch (const Kafka::KafkaException& e)
+    catch (const kafka::KafkaException& e)
     {
         std::regex reMatch(".*something wrong here.*TestKafkaException\\.cc.*");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));

@@ -5,12 +5,11 @@
 
 #include "gtest/gtest.h"
 
-namespace Kafka = KAFKA_API;
 
 TEST(Properties, Basic)
 {
     // Construct properties
-    Kafka::Properties props;
+    kafka::Properties props;
     props.put("bootstrap.servers", "127.0.0.1:9000,127.0.0.1:9001");
     props.put("auto.offset.reset", "earliest");
     props.put("max.poll.records",  "500");
@@ -32,7 +31,7 @@ TEST(Properties, Basic)
     EXPECT_EQ(2, m.size());
 
     // Initialize with initializer list
-    Kafka::Properties anotherProps
+    kafka::Properties anotherProps
     {{
         { "bootstrap.servers", "127.0.0.1:9000,127.0.0.1:9001" },
         { "auto.offset.reset", "earliest"                      },
@@ -47,11 +46,13 @@ TEST(Properties, Basic)
 
 TEST(Properties, ConsumerConfig)
 {
-    Kafka::ConsumerConfig props
+    using namespace kafka::clients::consumer;
+
+    Config props
     {{
-        { Kafka::ConsumerConfig::BOOTSTRAP_SERVERS,    "127.0.0.1:9000,127.0.0.1:9001" },
-        { Kafka::ConsumerConfig::AUTO_OFFSET_RESET,    "earliest"                      },
-        { Kafka::ConsumerConfig::ENABLE_PARTITION_EOF, "false"                         }
+        { Config::BOOTSTRAP_SERVERS,    "127.0.0.1:9000,127.0.0.1:9001" },
+        { Config::AUTO_OFFSET_RESET,    "earliest"                      },
+        { Config::ENABLE_PARTITION_EOF, "false"                         }
     }};
 
     EXPECT_EQ("auto.offset.reset=earliest|bootstrap.servers=127.0.0.1:9000,127.0.0.1:9001|enable.partition.eof=false", props.toString());
@@ -59,11 +60,13 @@ TEST(Properties, ConsumerConfig)
 
 TEST(Properties, ProducerConfig)
 {
-    Kafka::ProducerConfig props
+    using namespace kafka::clients::producer;
+
+    Config props
     {{
-        { Kafka::ProducerConfig::BOOTSTRAP_SERVERS,  "127.0.0.1:9000,127.0.0.1:9001" },
-        { Kafka::ProducerConfig::LINGER_MS,          "20"                            },
-        { Kafka::ProducerConfig::ENABLE_IDEMPOTENCE, "true"                          }
+        { Config::BOOTSTRAP_SERVERS,  "127.0.0.1:9000,127.0.0.1:9001" },
+        { Config::LINGER_MS,          "20"                            },
+        { Config::ENABLE_IDEMPOTENCE, "true"                          }
     }};
 
     EXPECT_EQ("bootstrap.servers=127.0.0.1:9000,127.0.0.1:9001|enable.idempotence=true|linger.ms=20", props.toString());
@@ -71,10 +74,11 @@ TEST(Properties, ProducerConfig)
 
 TEST(Properties, AdminClientConfig)
 {
-    Kafka::AdminClientConfig props
+    using namespace kafka::clients::admin;
+    Config props
     {{
-        { Kafka::AdminClientConfig::BOOTSTRAP_SERVERS, "127.0.0.1:9000,127.0.0.1:9001" },
-        { Kafka::AdminClientConfig::SECURITY_PROTOCOL, "SASL_PLAINTEXT"                }
+        { Config::BOOTSTRAP_SERVERS, "127.0.0.1:9000,127.0.0.1:9001" },
+        { Config::SECURITY_PROTOCOL, "SASL_PLAINTEXT"                }
     }};
 
     EXPECT_EQ("bootstrap.servers=127.0.0.1:9000,127.0.0.1:9001|security.protocol=SASL_PLAINTEXT", props.toString());

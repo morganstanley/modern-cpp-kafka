@@ -5,17 +5,17 @@
 #include "kafka/Properties.h"
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::consumer {
 
 /**
  * Configuration for the Kafka Consumer.
  */
-class ConsumerConfig: public Properties
+class Config: public Properties
 {
 public:
-    ConsumerConfig() = default;
-    ConsumerConfig(const ConsumerConfig&) = default;
-    explicit ConsumerConfig(const PropertiesMap& kvMap): Properties(kvMap) {}
+    Config() = default;
+    Config(const Config&) = default;
+    explicit Config(const PropertiesMap& kvMap): Properties(kvMap) {}
 
     /**
      * The string contains host:port pairs of brokers (splitted by ",") that the consumer will use to establish initial connection to the Kafka cluster.
@@ -111,5 +111,5 @@ public:
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
 };
 
-}
+} // end of KAFKA_API::clients::consumer
 

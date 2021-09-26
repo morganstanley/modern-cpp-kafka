@@ -75,7 +75,7 @@ using Logger = std::function<void(int, const char*, int, const char* msg)>;
 
 inline void DefaultLogger(int level, const char* /*filename*/, int /*lineno*/, const char* msg)
 {
-    std::cout << "[" << Utility::getCurrentTime() << "]" << Log::levelString(level) << " " << msg;
+    std::cout << "[" << utility::getCurrentTime() << "]" << Log::levelString(level) << " " << msg;
     std::cout << std::endl;
 }
 
