@@ -2,7 +2,7 @@
 
 #include "kafka/Project.h"
 
-#include "kafka/Consumer.h"
+#include "kafka/ConsumerCommon.h"
 #include "kafka/ConsumerConfig.h"
 #include "kafka/ConsumerRecord.h"
 #include "kafka/Error.h"
@@ -17,7 +17,7 @@
 #include <memory>
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients {
 
 /**
  * KafkaConsumer class.
@@ -67,8 +67,8 @@ public:
      * An exception would be thrown if assign is called previously (without a subsequent call to unsubscribe())
      */
     void subscribe(const Topics&               topics,
-                   Consumer::RebalanceCallback rebalanceCallback = Consumer::NullRebalanceCallback,
-                   std::chrono::milliseconds   timeout = std::chrono::milliseconds(DEFAULT_SUBSCRIBE_TIMEOUT_MS));
+                   consumer::RebalanceCallback rebalanceCallback = consumer::NullRebalanceCallback,
+                   std::chrono::milliseconds   timeout           = std::chrono::milliseconds(DEFAULT_SUBSCRIBE_TIMEOUT_MS));
     /**
      * Get the current subscription.
      */
@@ -167,7 +167,7 @@ public:
     /**
      * Commit the specified offsets for the specified records
      */
-    void commitSync(const ConsumerRecord& record);
+    void commitSync(const consumer::ConsumerRecord& record);
 
     /**
      * Commit the specified offsets for the specified list of topics and partitions.
@@ -178,19 +178,19 @@ public:
      * Commit offsets returned on the last poll() for all the subscribed list of topics and partition.
      * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
      */
-    void commitAsync(const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
+    void commitAsync(const consumer::OffsetCommitCallback& offsetCommitCallback = consumer::NullOffsetCommitCallback);
 
     /**
      * Commit the specified offsets for the specified records
      * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
      */
-    void commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
+    void commitAsync(const consumer::ConsumerRecord& record, const consumer::OffsetCommitCallback& offsetCommitCallback = consumer::NullOffsetCommitCallback);
 
     /**
      * Commit the specified offsets for the specified list of topics and partitions to Kafka.
      * Note: If a callback is provided, it's guaranteed to be triggered (before closing the consumer).
      */
-    void commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const Consumer::OffsetCommitCallback& offsetCommitCallback = Consumer::NullOffsetCommitCallback);
+    void commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const consumer::OffsetCommitCallback& offsetCommitCallback = consumer::NullOffsetCommitCallback);
 
     /**
      * Get the last committed offset for the given partition (whether the commit happened by this process or another).This offset will be used as the position for the consumer in the event of a failure.
@@ -206,7 +206,7 @@ public:
      * Note: 1) The result could be fetched through ConsumerRecord (with member function `error`).
      *       2) Make sure the `ConsumerRecord` be destructed before the `KafkaConsumer.close()`.
      */
-    std::vector<ConsumerRecord> poll(std::chrono::milliseconds timeout);
+    std::vector<consumer::ConsumerRecord> poll(std::chrono::milliseconds timeout);
 
     /**
      * Fetch data for the topics or partitions specified using one of the subscribe/assign APIs.
@@ -214,7 +214,7 @@ public:
      * Note: 1) The result could be fetched through ConsumerRecord (with member function `error`).
      *       2) Make sure the `ConsumerRecord` be destructed before the `KafkaConsumer.close()`.
      */
-    std::size_t poll(std::chrono::milliseconds timeout, std::vector<ConsumerRecord>& output);
+    std::size_t poll(std::chrono::milliseconds timeout, std::vector<consumer::ConsumerRecord>& output);
 
     /**
      * Suspend fetching from the requested partitions. Future calls to poll() will not return any records from these partitions until they have been resumed using resume().
@@ -246,7 +246,7 @@ public:
     /**
      * Return the current group metadata associated with this consumer.
      */
-    Consumer::ConsumerGroupMetadata groupMetadata();
+    consumer::ConsumerGroupMetadata groupMetadata();
 
 private:
     static const constexpr char* ENABLE_AUTO_OFFSET_STORE = "enable.auto.offset.store";
@@ -276,7 +276,7 @@ private:
     static Properties validateAndReformProperties(Properties properties);
 
     void commitStoredOffsetsIfNecessary(CommitType type);
-    void storeOffsetsIfNecessary(const std::vector<ConsumerRecord>& records);
+    void storeOffsetsIfNecessary(const std::vector<consumer::ConsumerRecord>& records);
 
     void seekToBeginningOrEnd(const TopicPartitions& topicPartitions, bool toBeginning, std::chrono::milliseconds timeout);
     std::map<TopicPartition, Offset> getOffsets(const TopicPartitions& topicPartitions, bool atBeginning) const;
@@ -311,7 +311,7 @@ private:
     // Register Callbacks for rd_kafka_conf_t
     static void registerConfigCallbacks(rd_kafka_conf_t* conf);
 
-    void pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output);
+    void pollMessages(int timeoutMs, std::vector<consumer::ConsumerRecord>& output);
 
     enum class PauseOrResumeOperation { Pause, Resume };
     void pauseOrResumePartitions(const TopicPartitions& topicPartitions, PauseOrResumeOperation op);
@@ -321,7 +321,7 @@ private:
     // Rebalance Callback (for class instance)
     void onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* rk_partitions);
 
-    Consumer::RebalanceCallback _rebalanceCb;
+    consumer::RebalanceCallback _rebalanceCb;
 
     rd_kafka_queue_t* getCommitCbQueue() { return _rk_commit_cb_queue.get(); }
 
@@ -340,21 +340,21 @@ inline Properties
 KafkaConsumer::validateAndReformProperties(Properties properties)
 {
     // Don't pass the "max.poll.records" property to librdkafka
-    properties.remove(ConsumerConfig::MAX_POLL_RECORDS);
+    properties.remove(consumer::Config::MAX_POLL_RECORDS);
 
     // Let the base class validate first
     auto newProperties = KafkaClient::validateAndReformProperties(properties);
 
     // If no "group.id" configured, generate a random one for user
-    if (!newProperties.getProperty(ConsumerConfig::GROUP_ID))
+    if (!newProperties.getProperty(consumer::Config::GROUP_ID))
     {
-        newProperties.put(ConsumerConfig::GROUP_ID, Utility::getRandomString());
+        newProperties.put(consumer::Config::GROUP_ID, utility::getRandomString());
     }
 
     // Disable the internal auto-commit from librdkafka, since we want to customize the behavior
-    newProperties.put(ConsumerConfig::ENABLE_AUTO_COMMIT,  "false");
-    newProperties.put(AUTO_COMMIT_INTERVAL_MS,             "0");
-    newProperties.put(ENABLE_AUTO_OFFSET_STORE,            "true");
+    newProperties.put(consumer::Config::ENABLE_AUTO_COMMIT, "false");
+    newProperties.put(AUTO_COMMIT_INTERVAL_MS,              "0");
+    newProperties.put(ENABLE_AUTO_OFFSET_STORE,             "true");
 
     return newProperties;
 }
@@ -376,15 +376,15 @@ KafkaConsumer::KafkaConsumer(const Properties &properties, EventsPollingOption e
                   eventsPollingOption)
 {
     // Pick up the "max.poll.records" property
-    if (auto maxPollRecordsProperty = properties.getProperty(ConsumerConfig::MAX_POLL_RECORDS))
+    if (auto maxPollRecordsProperty = properties.getProperty(consumer::Config::MAX_POLL_RECORDS))
     {
         const std::string maxPollRecords = *maxPollRecordsProperty;
         _maxPollRecords = std::stoi(maxPollRecords);
     }
-    _properties.put(ConsumerConfig::MAX_POLL_RECORDS, std::to_string(_maxPollRecords));
+    _properties.put(consumer::Config::MAX_POLL_RECORDS, std::to_string(_maxPollRecords));
 
     // Pick up the "enable.auto.commit" property
-    if (auto enableAutoCommitProperty = properties.getProperty(ConsumerConfig::ENABLE_AUTO_COMMIT))
+    if (auto enableAutoCommitProperty = properties.getProperty(consumer::Config::ENABLE_AUTO_COMMIT))
     {
         const std::string enableAutoCommit = *enableAutoCommitProperty;
 
@@ -398,10 +398,10 @@ KafkaConsumer::KafkaConsumer(const Properties &properties, EventsPollingOption e
 
         _enableAutoCommit = isTrue(enableAutoCommit);
     }
-    _properties.put(ConsumerConfig::ENABLE_AUTO_COMMIT, (_enableAutoCommit ? "true" : "false"));
+    _properties.put(consumer::Config::ENABLE_AUTO_COMMIT, (_enableAutoCommit ? "true" : "false"));
 
     // Fetch groupId from reformed configuration
-    auto groupId = _properties.getProperty(ConsumerConfig::GROUP_ID);
+    auto groupId = _properties.getProperty(consumer::Config::GROUP_ID);
     assert(groupId);
     setGroupId(*groupId);
 
@@ -458,7 +458,7 @@ KafkaConsumer::close()
 
 // Subscription
 inline void
-KafkaConsumer::subscribe(const Topics& topics, Consumer::RebalanceCallback rebalanceCallback, std::chrono::milliseconds timeout)
+KafkaConsumer::subscribe(const Topics& topics, consumer::RebalanceCallback rebalanceCallback, std::chrono::milliseconds timeout)
 {
     if (!_userAssignment.empty())
     {
@@ -792,7 +792,7 @@ KafkaConsumer::commitStoredOffsetsIfNecessary(CommitType type)
 
 // Store offsets
 inline void
-KafkaConsumer::storeOffsetsIfNecessary(const std::vector<ConsumerRecord>& records)
+KafkaConsumer::storeOffsetsIfNecessary(const std::vector<consumer::ConsumerRecord>& records)
 {
     if (_enableAutoCommit)
     {
@@ -805,7 +805,7 @@ KafkaConsumer::storeOffsetsIfNecessary(const std::vector<ConsumerRecord>& record
 
 // Fetch messages (internally used)
 inline void
-KafkaConsumer::pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output)
+KafkaConsumer::pollMessages(int timeoutMs, std::vector<consumer::ConsumerRecord>& output)
 {
     // Commit the offsets for these messages which had been polled last time (for "enable.auto.commit=true" case)
     commitStoredOffsetsIfNecessary(CommitType::Async);
@@ -824,17 +824,17 @@ KafkaConsumer::pollMessages(int timeoutMs, std::vector<ConsumerRecord>& output)
 }
 
 // Fetch messages (return via return value)
-inline std::vector<ConsumerRecord>
+inline std::vector<consumer::ConsumerRecord>
 KafkaConsumer::poll(std::chrono::milliseconds timeout)
 {
-    std::vector<ConsumerRecord> result;
+    std::vector<consumer::ConsumerRecord> result;
     poll(timeout, result);
     return result;
 }
 
 // Fetch messages (return via input parameter)
 inline std::size_t
-KafkaConsumer::poll(std::chrono::milliseconds timeout, std::vector<ConsumerRecord>& output)
+KafkaConsumer::poll(std::chrono::milliseconds timeout, std::vector<consumer::ConsumerRecord>& output)
 {
     pollMessages(convertMsDurationToInt(timeout), output);
     return output.size();
@@ -942,7 +942,7 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
 
     if (_rebalanceCb)
     {
-        _rebalanceCb(err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? Consumer::RebalanceEventType::PartitionsAssigned : Consumer::RebalanceEventType::PartitionsRevoked,
+        _rebalanceCb(err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? consumer::RebalanceEventType::PartitionsAssigned : consumer::RebalanceEventType::PartitionsRevoked,
                      tps);
     }
 
@@ -973,7 +973,7 @@ KafkaConsumer::offsetCommitCallback(rd_kafka_t* rk, rd_kafka_resp_err_t err, rd_
         kafkaClient(rk).KAFKA_API_DO_LOG(Log::Level::Err, "invoked offset-commit callback. offsets[%s], result[%s]", tposStr.c_str(), rd_kafka_err2str(err));
     }
 
-    auto* cb = static_cast<Consumer::OffsetCommitCallback*>(opaque);
+    auto* cb = static_cast<consumer::OffsetCommitCallback*>(opaque);
     if (cb && *cb)
     {
         (*cb)(tpos, Error(err));
@@ -981,10 +981,10 @@ KafkaConsumer::offsetCommitCallback(rd_kafka_t* rk, rd_kafka_resp_err_t err, rd_
     delete cb;
 }
 
-inline Consumer::ConsumerGroupMetadata
+inline consumer::ConsumerGroupMetadata
 KafkaConsumer::groupMetadata()
 {
-    return Consumer::ConsumerGroupMetadata{rd_kafka_consumer_group_metadata(getClientHandle())};
+    return consumer::ConsumerGroupMetadata{rd_kafka_consumer_group_metadata(getClientHandle())};
 }
 
 
@@ -996,7 +996,7 @@ KafkaConsumer::commitSync()
 }
 
 inline void
-KafkaConsumer::commitSync(const ConsumerRecord& record)
+KafkaConsumer::commitSync(const consumer::ConsumerRecord& record)
 {
     TopicPartitionOffsets tpos;
     // committed offset should be "current-received-offset + 1"
@@ -1012,7 +1012,7 @@ KafkaConsumer::commitSync(const TopicPartitionOffsets& topicPartitionOffsets)
 }
 
 inline void
-KafkaConsumer::commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const Consumer::OffsetCommitCallback& offsetCommitCallback)
+KafkaConsumer::commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, const consumer::OffsetCommitCallback& offsetCommitCallback)
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(topicPartitionOffsets.empty() ? nullptr : createRkTopicPartitionList(topicPartitionOffsets));
 
@@ -1020,12 +1020,12 @@ KafkaConsumer::commitAsync(const TopicPartitionOffsets& topicPartitionOffsets, c
                                        rk_tpos.get(),
                                        getCommitCbQueue(),
                                        &KafkaConsumer::offsetCommitCallback,
-                                       new Consumer::OffsetCommitCallback(offsetCommitCallback)) };
+                                       new consumer::OffsetCommitCallback(offsetCommitCallback)) };
     KAFKA_THROW_IF_WITH_ERROR(error);
 }
 
 inline void
-KafkaConsumer::commitAsync(const ConsumerRecord& record, const Consumer::OffsetCommitCallback& offsetCommitCallback)
+KafkaConsumer::commitAsync(const consumer::ConsumerRecord& record, const consumer::OffsetCommitCallback& offsetCommitCallback)
 {
     TopicPartitionOffsets tpos;
     // committed offset should be "current received record's offset" + 1
@@ -1034,10 +1034,10 @@ KafkaConsumer::commitAsync(const ConsumerRecord& record, const Consumer::OffsetC
 }
 
 inline void
-KafkaConsumer::commitAsync(const Consumer::OffsetCommitCallback& offsetCommitCallback)
+KafkaConsumer::commitAsync(const consumer::OffsetCommitCallback& offsetCommitCallback)
 {
     commitAsync(TopicPartitionOffsets(), offsetCommitCallback);
 }
 
-} // end of KAFKA_API
+} // end of KAFKA_API::clients
 

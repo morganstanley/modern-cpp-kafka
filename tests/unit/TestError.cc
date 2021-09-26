@@ -6,7 +6,6 @@
 
 #include <sstream>
 
-namespace Kafka = KAFKA_API;
 
 namespace {
 
@@ -19,7 +18,7 @@ std::string getStringFromStream(std::error_code ec)
 
 std::error_code getErrorCode(int errNo = 0)
 {
-    return {errNo, Kafka::ErrorCategory::Global<>::category};
+    return {errNo, kafka::ErrorCategory::Global<>::category};
 }
 
 
@@ -51,22 +50,22 @@ TEST(Error, ErrorCode)
 
 TEST(Error, KafkaError)
 {
-    const auto defaultError = Kafka::Error{};
+    const auto defaultError = kafka::Error{};
     EXPECT_EQ(RD_KAFKA_RESP_ERR_NO_ERROR, defaultError.value());
     EXPECT_EQ("Success", defaultError.message());
     EXPECT_EQ(getErrorCode(), static_cast<std::error_code>(defaultError));
 
-    const auto noError = Kafka::Error{RD_KAFKA_RESP_ERR_NO_ERROR};
+    const auto noError = kafka::Error{RD_KAFKA_RESP_ERR_NO_ERROR};
     EXPECT_EQ(RD_KAFKA_RESP_ERR_NO_ERROR, noError.value());
     EXPECT_EQ("Success", noError.message());
     EXPECT_EQ(getErrorCode(0), static_cast<std::error_code>(noError));
 
-    const auto localError = Kafka::Error{RD_KAFKA_RESP_ERR__TIMED_OUT};
+    const auto localError = kafka::Error{RD_KAFKA_RESP_ERR__TIMED_OUT};
     EXPECT_EQ(RD_KAFKA_RESP_ERR__TIMED_OUT, localError.value());
     EXPECT_EQ("Local: Timed out", localError.message());
     EXPECT_EQ(getErrorCode(RD_KAFKA_RESP_ERR__TIMED_OUT), static_cast<std::error_code>(localError));
 
-    const auto  brokerError = Kafka::Error{RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT};
+    const auto  brokerError = kafka::Error{RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT};
     EXPECT_EQ(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, brokerError.value());
     EXPECT_EQ("Broker: Request timed out", brokerError.message());
     EXPECT_EQ(getErrorCode(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT), static_cast<std::error_code>(brokerError));

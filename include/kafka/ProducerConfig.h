@@ -5,17 +5,17 @@
 #include "kafka/Types.h"
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::producer {
 
 /**
  * Configuration for the Kafka Producer.
  */
-class ProducerConfig: public Properties
+class Config: public Properties
 {
 public:
-    ProducerConfig() = default;
-    ProducerConfig(const ProducerConfig&) = default;
-    explicit ProducerConfig(const PropertiesMap& kvMap): Properties(kvMap) {}
+    Config() = default;
+    Config(const Config&) = default;
+    explicit Config(const PropertiesMap& kvMap): Properties(kvMap) {}
 
     /**
      * The string contains host:port pairs of brokers (splitted by ",") that the producer will use to establish initial connection to the Kafka cluster.
@@ -146,5 +146,5 @@ public:
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME   = "sasl.kerberos.service.name";
 };
 
-}
+} // end of KAFKA_API::clients::producer
 

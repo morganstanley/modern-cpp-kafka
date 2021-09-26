@@ -183,5 +183,5 @@ BrokerMetadata::toString() const
     return oss.str();
 }
 
-}
+} // end of KAFKA_API
 

@@ -11,10 +11,8 @@
 #include <functional>
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::consumer {
 
-namespace Consumer
-{
     /**
      * To identify which kind of re-balance event is handling, when the set of partitions assigned to the consumer changes.
      * It's guaranteed that rebalance callback will be called twice (first with PartitionsRevoked, and then with PartitionsAssigned).
@@ -63,7 +61,5 @@ namespace Consumer
         rd_kafka_consumer_group_metadata_unique_ptr _rkConsumerGroupMetadata;
     };
 
-} // end of Consumer
-
-} // end of KAFKA_API
+} // end of KAFKA_API::clients::consumer
 

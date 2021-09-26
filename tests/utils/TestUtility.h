@@ -20,7 +20,7 @@
     do {                                                                \
         try {                                                           \
             expr;                                                       \
-        } catch (const KafkaException& e) {                             \
+        } catch (const kafka::KafkaException& e) {                      \
             std::cout << "Exception caught: " << e.what() << std::endl; \
             EXPECT_EQ(err, e.error().value());                          \
             break;                                                      \
@@ -32,7 +32,7 @@
 #define EXPECT_KAFKA_NO_THROW(expr)                                 \
     try {                                                           \
         expr;                                                       \
-    } catch (const KafkaException& e) {                             \
+    } catch (const kafka::KafkaException& e) {                      \
         std::cerr << "Exception caught: " << e.what() << std::endl; \
         EXPECT_FALSE(true);                                         \
     }
@@ -42,7 +42,7 @@
         try {                                                                   \
             expr;                                                               \
             break;                                                              \
-        } catch (const KafkaException& e) {                                     \
+        } catch (const kafka::KafkaException& e) {                              \
             if (e.error().value() == errToRetry && cnt != maxRetries) continue; \
             throw;                                                              \
         }                                                                       \
@@ -53,7 +53,7 @@
         try {                                                       \
             expr;                                                   \
             break;                                                  \
-        } catch (const KafkaException& e) {                         \
+        } catch (const kafka::KafkaException& e) {                  \
             std::cerr << "Met error: " << e.what() << std::endl;    \
             if (cnt != maxRetries) continue;                        \
             throw;                                                  \
@@ -61,15 +61,13 @@
     }
 
 
-namespace Kafka = KAFKA_API;
-
 namespace KafkaTestUtility {
 
 inline void
-DumpError(const Kafka::Error& error)
+DumpError(const kafka::Error& error)
 {
     // https://en.wikipedia.org/wiki/ANSI_escape_code
-    std::cerr << "\033[1;31m" << "[" << Kafka::Utility::getCurrentTime() << "] ==> Met Error: " << "\033[0m";
+    std::cerr << "\033[1;31m" << "[" << kafka::utility::getCurrentTime() << "] ==> Met Error: " << "\033[0m";
     std::cerr << "\033[4;35m" << error.toString() << "\033[0m" << std::endl;
 };
 
@@ -90,14 +88,14 @@ GetEnvVar(const std::string& name)
     return Optional<std::string>{};
 }
 
-inline Kafka::Properties
+inline kafka::Properties
 GetKafkaClientCommonConfig()
 {
     auto kafkaBrokerListEnv = GetEnvVar("KAFKA_BROKER_LIST");
     EXPECT_TRUE(kafkaBrokerListEnv);
-    if (!kafkaBrokerListEnv) return Kafka::Properties{};
+    if (!kafkaBrokerListEnv) return kafka::Properties{};
 
-    Kafka::Properties props;
+    kafka::Properties props;
     props.put("bootstrap.servers", *kafkaBrokerListEnv);
 
     if (auto additionalSettingsEnv = GetEnvVar("KAFKA_CLIENT_ADDITIONAL_SETTINGS"))
@@ -135,11 +133,11 @@ const auto MAX_POLL_MESSAGES_TIMEOUT = std::chrono::seconds(5);
 const auto MAX_OFFSET_COMMIT_TIMEOUT = std::chrono::seconds(15);
 const auto MAX_DELIVERY_TIMEOUT      = std::chrono::seconds(5);
 
-inline std::vector<Kafka::ConsumerRecord>
-ConsumeMessagesUntilTimeout(Kafka::KafkaConsumer& consumer,
-                            std::chrono::milliseconds timeout = MAX_POLL_MESSAGES_TIMEOUT)
+inline std::vector<kafka::clients::consumer::ConsumerRecord>
+ConsumeMessagesUntilTimeout(kafka::clients::KafkaConsumer& consumer,
+                            std::chrono::milliseconds      timeout = MAX_POLL_MESSAGES_TIMEOUT)
 {
-    std::vector<Kafka::ConsumerRecord> records;
+    std::vector<kafka::clients::consumer::ConsumerRecord> records;
 
     const auto end = std::chrono::steady_clock::now() + timeout;
     do
@@ -151,14 +149,14 @@ ConsumeMessagesUntilTimeout(Kafka::KafkaConsumer& consumer,
             auto error = record.error();
             if (!error || error.value() == RD_KAFKA_RESP_ERR__PARTITION_EOF) continue;
 
-            std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] met " << record.toString() << " while polling messages!" << std::endl;
+            std::cerr << "[" << kafka::utility::getCurrentTime() << "] met " << record.toString() << " while polling messages!" << std::endl;
             EXPECT_FALSE(error);
         }
 
         records.insert(records.end(), std::make_move_iterator(polled.begin()), std::make_move_iterator(polled.end()));
     } while (std::chrono::steady_clock::now() < end);
 
-    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << consumer.name() << " polled "  << records.size() << " messages" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " polled "  << records.size() << " messages" << std::endl;
 
     return records;
 }
@@ -176,31 +174,31 @@ WaitUntil(const std::function<bool()>& checkDone, std::chrono::milliseconds time
     }
 }
 
-inline std::vector<Kafka::Producer::RecordMetadata>
-ProduceMessages(const std::string& topic, int partition, const std::vector<std::tuple<Kafka::Headers, std::string, std::string>>& msgs)
+inline std::vector<kafka::clients::producer::RecordMetadata>
+ProduceMessages(const std::string& topic, int partition, const std::vector<std::tuple<kafka::Headers, std::string, std::string>>& msgs)
 {
-    Kafka::KafkaProducer producer(GetKafkaClientCommonConfig());
-    producer.setLogLevel(Kafka::Log::Level::Crit);
+    kafka::clients::KafkaProducer producer(GetKafkaClientCommonConfig());
+    producer.setLogLevel(kafka::Log::Level::Crit);
 
-    std::vector<Kafka::Producer::RecordMetadata> ret;
+    std::vector<kafka::clients::producer::RecordMetadata> ret;
     for (const auto& msg: msgs)
     {
-        auto record = Kafka::ProducerRecord(topic, partition, Kafka::Key(std::get<1>(msg).c_str(), std::get<1>(msg).size()), Kafka::Value(std::get<2>(msg).c_str(), std::get<2>(msg).size()));
+        auto record = kafka::clients::producer::ProducerRecord(topic, partition, kafka::Key(std::get<1>(msg).c_str(), std::get<1>(msg).size()), kafka::Value(std::get<2>(msg).c_str(), std::get<2>(msg).size()));
         record.headers() = std::get<0>(msg);
         auto metadata = producer.syncSend(record);
         ret.emplace_back(metadata);
     }
 
-    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": " << msgs.size() << " messages have been sent to " << topic << "-" << partition << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << __FUNCTION__ << ": " << msgs.size() << " messages have been sent to " << topic << "-" << partition << std::endl;
     return ret;
 }
 
 inline void
-CreateKafkaTopic(const Kafka::Topic& topic, int numPartitions, int replicationFactor)
+CreateKafkaTopic(const kafka::Topic& topic, int numPartitions, int replicationFactor)
 {
-    Kafka::AdminClient adminClient(GetKafkaClientCommonConfig());
+    kafka::clients::AdminClient adminClient(GetKafkaClientCommonConfig());
     auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
-    std::cout << "[" << Kafka::Utility::getCurrentTime() << "] " << __FUNCTION__ << ": create topic[" << topic << "] "
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << __FUNCTION__ << ": create topic[" << topic << "] "
        << "with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]. Result: " << createResult.error.message() << std::endl;
     ASSERT_FALSE(createResult.error);
     std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -244,11 +242,11 @@ signalToAllBrokers(int sig)
 
     if (sig == SIGSTOP)
     {
-        std::cout << "[" << Kafka::Utility::getCurrentTime() << "] Brokers paused"  << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] Brokers paused"  << std::endl;
     }
     else if (sig == SIGCONT)
     {
-        std::cout << "[" << Kafka::Utility::getCurrentTime() << "] Brokers resumed"  << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] Brokers resumed"  << std::endl;
     }
 }
 #endif
@@ -260,7 +258,7 @@ PauseBrokers()
 #if !defined(WIN32)
     signalToAllBrokers(SIGSTOP);
 #else
-    std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] Can't pause brokers (doesn't support yet) on windows!"  << std::endl;
+    std::cerr << "[" << kafka::utility::getCurrentTime() << "] Can't pause brokers (doesn't support yet) on windows!"  << std::endl;
 #endif
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_AFTER_PAUSE_MS));
 }
@@ -272,7 +270,7 @@ ResumeBrokers()
 #if !defined(WIN32)
     signalToAllBrokers(SIGCONT);
 #else
-    std::cerr << "[" << Kafka::Utility::getCurrentTime() << "] Can't resume brokers (doesn't support yet) on windows!"  << std::endl;
+    std::cerr << "[" << kafka::utility::getCurrentTime() << "] Can't resume brokers (doesn't support yet) on windows!"  << std::endl;
 #endif
     std::this_thread::sleep_for(std::chrono::seconds(WAIT_AFTER_RESUME_SEC));
 }

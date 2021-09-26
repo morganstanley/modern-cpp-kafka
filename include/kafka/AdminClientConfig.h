@@ -5,17 +5,17 @@
 #include "kafka/Properties.h"
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::admin {
 
 /**
  * Configuration for the Kafka Consumer.
  */
-class AdminClientConfig: public Properties
+class Config: public Properties
 {
 public:
-    AdminClientConfig() = default;
-    AdminClientConfig(const AdminClientConfig&) = default;
-    explicit AdminClientConfig(const PropertiesMap& kvMap): Properties(kvMap) {}
+    Config() = default;
+    Config(const Config&) = default;
+    explicit Config(const PropertiesMap& kvMap): Properties(kvMap) {}
 
     /**
      * The string contains host:port pairs of brokers (splitted by ",") that the administrative client will use to establish initial connection to the Kafka cluster.
@@ -40,5 +40,5 @@ public:
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
 };
 
-}
+} // end of KAFKA_API::clients::admin
 

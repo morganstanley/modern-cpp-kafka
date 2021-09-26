@@ -2,15 +2,14 @@
 
 #include "gtest/gtest.h"
 
-namespace Kafka = KAFKA_API;
 
 TEST(BrokerMetadata, Node)
 {
-    const Kafka::BrokerMetadata::Node::Id id     = 1;
-    const Kafka::BrokerMetadata::Node::Host host = "127.0.0.1";
-    const Kafka::BrokerMetadata::Node::Port port = 9000;
+    const kafka::BrokerMetadata::Node::Id id     = 1;
+    const kafka::BrokerMetadata::Node::Host host = "127.0.0.1";
+    const kafka::BrokerMetadata::Node::Port port = 9000;
 
-    Kafka::BrokerMetadata::Node node(id, host, port);
+    kafka::BrokerMetadata::Node node(id, host, port);
 
     EXPECT_EQ(id,   node.id);
     EXPECT_EQ(host, node.host);
@@ -20,12 +19,12 @@ TEST(BrokerMetadata, Node)
 
 TEST(BrokerMetadata, Basic)
 {
-    const Kafka::Topic topic("topicName");
-    const std::vector<Kafka::BrokerMetadata::Node> nodes = {{1, "server1", 9000}, {2, "server2", 9000}, {3, "server3", 9000}};
+    const kafka::Topic topic("topicName");
+    const std::vector<kafka::BrokerMetadata::Node> nodes = {{1, "server1", 9000}, {2, "server2", 9000}, {3, "server3", 9000}};
     const std::size_t numNode      = nodes.size();
     const std::size_t numPartition = numNode;
 
-    Kafka::BrokerMetadata metadata(topic);
+    kafka::BrokerMetadata metadata(topic);
     metadata.setOrigNodeName(nodes[0].host);
 
     // Add nodes
@@ -37,9 +36,9 @@ TEST(BrokerMetadata, Basic)
     EXPECT_EQ(nodes.size(), metadata.nodes().size());
 
     // Add info for partitions
-    for (Kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
+    for (kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
     {
-        Kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
+        kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
         for (const auto& node: nodes)
         {
             partitionInfo.addReplica(node.id);
@@ -51,7 +50,7 @@ TEST(BrokerMetadata, Basic)
     EXPECT_EQ(topic, metadata.topic());
     EXPECT_EQ(numPartition, metadata.partitions().size());
 
-    for (Kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
+    for (kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
     {
         const auto& partitionInfo = metadata.partitions().at(partition);
         EXPECT_EQ(nodes[partition].id,   partitionInfo.leader);
@@ -68,21 +67,21 @@ TEST(BrokerMetadata, Basic)
 
 TEST(BrokerMetadata, IncompleteInfo)
 {
-    const Kafka::Topic topic("topicName");
-    const std::vector<Kafka::BrokerMetadata::Node> nodes = {{1, "server1", 9000}, {2, "server2", 9000}, {3, "server3", 9000}};
+    const kafka::Topic topic("topicName");
+    const std::vector<kafka::BrokerMetadata::Node> nodes = {{1, "server1", 9000}, {2, "server2", 9000}, {3, "server3", 9000}};
     const std::size_t numNode      = nodes.size();
     const std::size_t numPartition = numNode;
 
-    Kafka::BrokerMetadata metadata(topic);
+    kafka::BrokerMetadata metadata(topic);
     metadata.setOrigNodeName(nodes[0].host);
 
     // Add nodes (not complete)
     metadata.addNode(nodes[0].id, nodes[0].host, nodes[0].port);
 
     // Add info for partitions
-    for (Kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
+    for (kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
     {
-        Kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
+        kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
         for (const auto& node: nodes)
         {
             partitionInfo.addReplica(node.id);
