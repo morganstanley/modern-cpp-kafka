@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['max_5fin_5fflight_276',['MAX_IN_FLIGHT',['../classKAFKA__API_1_1ProducerConfig.html#a0520c881bbc004f44e710840bf8d6c0d',1,'KAFKA_API::ProducerConfig']]],
-  ['max_5fpoll_5frecords_277',['MAX_POLL_RECORDS',['../classKAFKA__API_1_1ConsumerConfig.html#a6534d7f10da6b34c8483ae0f2566ea1e',1,'KAFKA_API::ConsumerConfig']]],
-  ['message_5fmax_5fbytes_278',['MESSAGE_MAX_BYTES',['../classKAFKA__API_1_1ProducerConfig.html#af6edb6bac3f170f776bbfae1f9b51260',1,'KAFKA_API::ProducerConfig']]],
-  ['message_5ftimeout_5fms_279',['MESSAGE_TIMEOUT_MS',['../classKAFKA__API_1_1ProducerConfig.html#abb5ec895055a8f17440eec257bc8eb35',1,'KAFKA_API::ProducerConfig']]],
-  ['mssinceepoch_280',['msSinceEpoch',['../structKAFKA__API_1_1Timestamp.html#a8519b2ba460d285cc1e630b49618ca9d',1,'KAFKA_API::Timestamp']]]
+  ['max_5fin_5fflight_269',['MAX_IN_FLIGHT',['../classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a2bb6082dc842768f3b890d5adf94b0b2',1,'KAFKA_API::clients::producer::Config']]],
+  ['max_5fpoll_5frecords_270',['MAX_POLL_RECORDS',['../classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a0010e8d0c2c19ecd01dc6fee6d01de44',1,'KAFKA_API::clients::consumer::Config']]],
+  ['message_5fmax_5fbytes_271',['MESSAGE_MAX_BYTES',['../classKAFKA__API_1_1clients_1_1producer_1_1Config.html#ad192078d6b00a641b95374d3114c96c2',1,'KAFKA_API::clients::producer::Config']]],
+  ['message_5ftimeout_5fms_272',['MESSAGE_TIMEOUT_MS',['../classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a1ec451c5d10d9c65db1ea27a98ebeeba',1,'KAFKA_API::clients::producer::Config']]],
+  ['mssinceepoch_273',['msSinceEpoch',['../structKAFKA__API_1_1Timestamp.html#a8519b2ba460d285cc1e630b49618ca9d',1,'KAFKA_API::Timestamp']]]
 ];

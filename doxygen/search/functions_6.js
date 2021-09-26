@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['getgroupid_193',['getGroupId',['../classKAFKA__API_1_1KafkaConsumer.html#a579d4bd53c624ba64204f9ae110e0739',1,'KAFKA_API::KafkaConsumer']]],
-  ['getnodedescription_194',['getNodeDescription',['../structKAFKA__API_1_1BrokerMetadata.html#aaaebcaed60344642304bee6c45dafcd9',1,'KAFKA_API::BrokerMetadata']]],
-  ['getproperty_195',['getProperty',['../classKAFKA__API_1_1KafkaClient.html#a4a7ea0e2f4e1a321866e6f7ec1abc70e',1,'KAFKA_API::KafkaClient::getProperty()'],['../classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af',1,'KAFKA_API::Properties::getProperty()']]],
-  ['groupmetadata_196',['groupMetadata',['../classKAFKA__API_1_1KafkaConsumer.html#a0afd47c7fa5df32b1690d67ae4352a4d',1,'KAFKA_API::KafkaConsumer']]]
+  ['getgroupid_186',['getGroupId',['../classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a41ca13b700009634dbd8d2a6e54273b0',1,'KAFKA_API::clients::KafkaConsumer']]],
+  ['getnodedescription_187',['getNodeDescription',['../structKAFKA__API_1_1BrokerMetadata.html#aaaebcaed60344642304bee6c45dafcd9',1,'KAFKA_API::BrokerMetadata']]],
+  ['getproperty_188',['getProperty',['../classKAFKA__API_1_1clients_1_1KafkaClient.html#a73e70f6afaa93f7dc6b930b16d05ad35',1,'KAFKA_API::clients::KafkaClient::getProperty()'],['../classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af',1,'KAFKA_API::Properties::getProperty()']]],
+  ['groupmetadata_189',['groupMetadata',['../classKAFKA__API_1_1clients_1_1KafkaConsumer.html#ad415ffa88343298fc270ac80b7d357e2',1,'KAFKA_API::clients::KafkaConsumer']]]
 ];

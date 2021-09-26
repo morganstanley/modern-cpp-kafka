@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unsubscribe_252',['unsubscribe',['../classKAFKA__API_1_1KafkaConsumer.html#aaa51b87ec1827273962efee985d20058',1,'KAFKA_API::KafkaConsumer']]]
+  ['unsubscribe_245',['unsubscribe',['../classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a0b8b107a395da5c5dc6ad88dc0513376',1,'KAFKA_API::clients::KafkaConsumer']]]
 ];

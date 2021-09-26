@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['group_5fid_269',['GROUP_ID',['../classKAFKA__API_1_1ConsumerConfig.html#a8aa2be16852c526aaac51495ac6c6a31',1,'KAFKA_API::ConsumerConfig']]]
+  ['group_5fid_262',['GROUP_ID',['../classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a362d5461adc73d05ea7dfcb8fdea494d',1,'KAFKA_API::clients::consumer::Config']]]
 ];

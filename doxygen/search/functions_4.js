@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['endoffsets_188',['endOffsets',['../classKAFKA__API_1_1KafkaConsumer.html#ab811060615fa9430b0a3359209126126',1,'KAFKA_API::KafkaConsumer']]],
-  ['eraseproperty_189',['eraseProperty',['../classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd',1,'KAFKA_API::Properties']]],
-  ['error_190',['error',['../classKAFKA__API_1_1ConsumerRecord.html#a64f0cf07177e206e02d70d8f0ec7771b',1,'KAFKA_API::ConsumerRecord::error()'],['../classKAFKA__API_1_1KafkaException.html#ae1f83cd75df715037fe962b5791cda52',1,'KAFKA_API::KafkaException::error()']]]
+  ['endoffsets_181',['endOffsets',['../classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a6b883d6e579965f70fc380b88445946a',1,'KAFKA_API::clients::KafkaConsumer']]],
+  ['eraseproperty_182',['eraseProperty',['../classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd',1,'KAFKA_API::Properties']]],
+  ['error_183',['error',['../classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html#af7fc0a1e7f2a51772dc5ccca3c20c567',1,'KAFKA_API::clients::consumer::ConsumerRecord::error()'],['../classKAFKA__API_1_1KafkaException.html#ae1f83cd75df715037fe962b5791cda52',1,'KAFKA_API::KafkaException::error()']]]
 ];

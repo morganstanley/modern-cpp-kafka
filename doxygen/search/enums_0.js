@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['eventspollingoption_300',['EventsPollingOption',['../classKAFKA__API_1_1KafkaClient.html#ae735fbad46953a0c5b57e40d810a3450',1,'KAFKA_API::KafkaClient']]]
+  ['eventspollingoption_292',['EventsPollingOption',['../classKAFKA__API_1_1clients_1_1KafkaClient.html#ae7891e26da12ecc9564de418655e576c',1,'KAFKA_API::clients::KafkaClient']]]
 ];

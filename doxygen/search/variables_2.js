@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['client_5fid_264',['CLIENT_ID',['../classKAFKA__API_1_1ConsumerConfig.html#ab6be3b1c1a0f988936c52dfa18d928cf',1,'KAFKA_API::ConsumerConfig::CLIENT_ID()'],['../classKAFKA__API_1_1ProducerConfig.html#a5fed09277f35dc7bd571b617d151a5f6',1,'KAFKA_API::ProducerConfig::CLIENT_ID()']]]
+  ['client_5fid_257',['CLIENT_ID',['../classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#add67101e5082cead95088e0ac604057f',1,'KAFKA_API::clients::consumer::Config::CLIENT_ID()'],['../classKAFKA__API_1_1clients_1_1producer_1_1Config.html#ac866faf37cf17665274fe4b5a1833796',1,'KAFKA_API::clients::producer::Config::CLIENT_ID()']]]
 ];

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['queue_5fbuffering_5fmax_5fkbytes_283',['QUEUE_BUFFERING_MAX_KBYTES',['../classKAFKA__API_1_1ProducerConfig.html#ac05d5e1186b683ed59989c5b1c28fb28',1,'KAFKA_API::ProducerConfig']]],
-  ['queue_5fbuffering_5fmax_5fmessages_284',['QUEUE_BUFFERING_MAX_MESSAGES',['../classKAFKA__API_1_1ProducerConfig.html#ae4889b474579fdfc87bc144ec2d20602',1,'KAFKA_API::ProducerConfig']]],
-  ['queued_5fmin_5fmessages_285',['QUEUED_MIN_MESSAGES',['../classKAFKA__API_1_1ConsumerConfig.html#ac29f79f973665dbf76001eae0ee7e486',1,'KAFKA_API::ConsumerConfig']]]
+  ['queue_5fbuffering_5fmax_5fkbytes_276',['QUEUE_BUFFERING_MAX_KBYTES',['../classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a8553e078aa77a9faa3393a471ffb1477',1,'KAFKA_API::clients::producer::Config']]],
+  ['queue_5fbuffering_5fmax_5fmessages_277',['QUEUE_BUFFERING_MAX_MESSAGES',['../classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a673ecedaff702b5ed6b1d80f31950779',1,'KAFKA_API::clients::producer::Config']]],
+  ['queued_5fmin_5fmessages_278',['QUEUED_MIN_MESSAGES',['../classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#aed18c18e69302c0d8aae75cd10e9f5fc',1,'KAFKA_API::clients::consumer::Config']]]
 ];

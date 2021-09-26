@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['headers_197',['headers',['../classKAFKA__API_1_1ConsumerRecord.html#a4b2edcc084b2f2b3e23d74e710d67be4',1,'KAFKA_API::ConsumerRecord::headers()'],['../classKAFKA__API_1_1ProducerRecord.html#ae65514d3ef7945d124c785b1c5f6d8ea',1,'KAFKA_API::ProducerRecord::headers() const'],['../classKAFKA__API_1_1ProducerRecord.html#a3f44f96731de2d127c2fa538a9cd4486',1,'KAFKA_API::ProducerRecord::headers()']]]
+  ['headers_190',['headers',['../classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html#aea760a59a466e76d8d0a30fb67b37040',1,'KAFKA_API::clients::consumer::ConsumerRecord::headers()'],['../classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html#afc198eaa09eb7e217ce71f803de9c44e',1,'KAFKA_API::clients::producer::ProducerRecord::headers() const'],['../classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html#a76b15b2fee7735953770808cfbee1376',1,'KAFKA_API::clients::producer::ProducerRecord::headers()']]]
 ];

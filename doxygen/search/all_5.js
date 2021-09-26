@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['fetchbrokermetadata_39',['fetchBrokerMetadata',['../classKAFKA__API_1_1KafkaClient.html#aad7e46aad5007f3fe95800cb3b8d3c73',1,'KAFKA_API::KafkaClient']]],
-  ['flush_40',['flush',['../classKAFKA__API_1_1KafkaProducer.html#a59ca7f95b7ee46cff81e4e424c8fbb9e',1,'KAFKA_API::KafkaProducer']]]
+  ['fetchbrokermetadata_37',['fetchBrokerMetadata',['../classKAFKA__API_1_1clients_1_1KafkaClient.html#a012ecf14a8328f7349f7fc886ba8d090',1,'KAFKA_API::clients::KafkaClient']]],
+  ['flush_38',['flush',['../classKAFKA__API_1_1clients_1_1KafkaProducer.html#adb0fd51cba445e41e648d8648d305ffa',1,'KAFKA_API::clients::KafkaProducer']]]
 ];
