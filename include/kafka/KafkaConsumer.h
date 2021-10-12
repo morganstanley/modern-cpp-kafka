@@ -419,7 +419,7 @@ KafkaConsumer::KafkaConsumer(const Properties &properties, EventsPollingOption e
     startBackgroundPollingIfNecessary([this](int timeoutMs){ pollCallbacks(timeoutMs); });
 
     const auto propsStr = KafkaClient::properties().toString();
-    KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propsStr.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Notice, "initialized with properties[%s]", propsStr.c_str());
 }
 
 inline void
@@ -452,7 +452,7 @@ KafkaConsumer::close()
         rd_kafka_queue_poll_callback(queue, TIMEOUT_INFINITE);
     }
 
-    KAFKA_API_DO_LOG(Log::Level::Info, "closed");
+    KAFKA_API_DO_LOG(Log::Level::Notice, "closed");
 }
 
 
@@ -492,7 +492,7 @@ KafkaConsumer::subscribe(const Topics& topics, consumer::RebalanceCallback rebal
 
         if (!_pendingEvent)
         {
-            KAFKA_API_DO_LOG(Log::Level::Info, "subscribed, topics[%s]", topicsStr.c_str());
+            KAFKA_API_DO_LOG(Log::Level::Notice, "subscribed, topics[%s]", topicsStr.c_str());
             return;
         }
     }
@@ -519,7 +519,7 @@ KafkaConsumer::unsubscribe(std::chrono::milliseconds timeout)
                          _userAssignment);
         _userAssignment.clear();
 
-        KAFKA_API_DO_LOG(Log::Level::Info, "unsubscribed (the previously assigned partitions)");
+        KAFKA_API_DO_LOG(Log::Level::Notice, "unsubscribed (the previously assigned partitions)");
         return;
     }
 
@@ -537,7 +537,7 @@ KafkaConsumer::unsubscribe(std::chrono::milliseconds timeout)
 
         if (!_pendingEvent)
         {
-            KAFKA_API_DO_LOG(Log::Level::Info, "unsubscribed");
+            KAFKA_API_DO_LOG(Log::Level::Notice, "unsubscribed");
             return;
         }
     }
@@ -860,7 +860,7 @@ KafkaConsumer::pauseOrResumePartitions(const TopicPartitions& topicPartitions, P
         }
         else
         {
-            KAFKA_API_DO_LOG(Log::Level::Info, "%sd topic-partition[%s-%d]", opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));
+            KAFKA_API_DO_LOG(Log::Level::Notice, "%sd topic-partition[%s-%d]", opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));
             ++cnt;
         }
     }
@@ -918,7 +918,7 @@ KafkaConsumer::onRebalance(rd_kafka_resp_err_t err, rd_kafka_topic_partition_lis
         }
     }
 
-    KAFKA_API_DO_LOG(Log::Level::Info, "re-balance event triggered[%s], cooperative[%s], topic-partitions[%s]",
+    KAFKA_API_DO_LOG(Log::Level::Notice, "re-balance event triggered[%s], cooperative[%s], topic-partitions[%s]",
                      err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? "ASSIGN_PARTITIONS" : "REVOKE_PARTITIONS",
                      isCooperativeEnabled() ? "enabled" : "disabled",
                      tpsStr.c_str());
