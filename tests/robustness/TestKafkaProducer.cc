@@ -151,26 +151,27 @@ TEST(KafkaProducer, NoMissedDeliveryCallback)
     EXPECT_EQ(0, sizeOfIdsInFlight());
 }
 
-TEST(KafkaProducer, MightMissDeliveryCallbackIfCloseWithLimitedTimeout)
+TEST(KafkaProducer, DeliveryCallbackTriggeredByPurgeWithinClose)
 {
     const kafka::Topic topic = kafka::utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
-    std::size_t deliveryCount = 0;
+    constexpr int NUM_OF_MESSAGES = 10;
+
+    std::size_t deliveryCbTriggeredCount = 0;
     {
         kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
         producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         KafkaTestUtility::PauseBrokers();
 
-        constexpr int NUM_OF_MESSAGES = 10;
         for (std::size_t i = 0; i < NUM_OF_MESSAGES; ++i)
         {
             auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::NullValue, i);
             producer.send(record,
-                          [&deliveryCount](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                          [&deliveryCbTriggeredCount](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
                                   std::cout << "[" << kafka::utility::getCurrentTime() << "] Delivery callback: metadata[" << metadata.toString() << "], result[" << error.message() << "]" << std::endl;
-                                  ++deliveryCount;
+                                  ++deliveryCbTriggeredCount;
                           });
             std::cout << "[" << kafka::utility::getCurrentTime() << "] Message was just sent: " << record.toString() << std::endl;
         }
@@ -180,15 +181,14 @@ TEST(KafkaProducer, MightMissDeliveryCallbackIfCloseWithLimitedTimeout)
         EXPECT_EQ(RD_KAFKA_RESP_ERR__TIMED_OUT, error.value());
         std::cout << "[" << kafka::utility::getCurrentTime() << "] producer flush result[" << error.message() << "]" << std::endl;
 
-        // Still fail since no response from brokers
-        error = producer.close(std::chrono::seconds(1));
-        EXPECT_EQ(RD_KAFKA_RESP_ERR__TIMED_OUT, error.value());
-        std::cout << "[" << kafka::utility::getCurrentTime() << "] producer close result[" << error.message() << "]" << std::endl;
+        // The in-flight messages would be purged within `close()` (thus trigger the delivery callbacks)
+        producer.close(std::chrono::seconds(1));
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] producer closed" << std::endl;
     }
 
-    KafkaTestUtility::ResumeBrokers();
+    EXPECT_EQ(NUM_OF_MESSAGES, deliveryCbTriggeredCount);
 
-    EXPECT_EQ(0, deliveryCount); // No message delivery callback was called
+    KafkaTestUtility::ResumeBrokers();
 }
 
 TEST(KafkaProducer, BrokerStopWhileSendingMessages)

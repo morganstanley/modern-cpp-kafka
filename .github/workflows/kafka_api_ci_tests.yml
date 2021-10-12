@@ -270,8 +270,8 @@ jobs:
           vcpkg install boost-program-options
 
           cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options-vc140-mt.lib" "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options.lib"
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_76.dll" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.dll"
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_76.pdb" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.pdb"
+          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.dll" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.dll"
+          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.pdb" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.pdb"
 
           vcpkg integrate install
 

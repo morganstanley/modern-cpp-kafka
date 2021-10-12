@@ -55,9 +55,14 @@ public:
     Error flush(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     /**
-     * Close this producer. This method waits up to timeout for the producer to complete the sending of all incomplete requests.
+     * Purge messages currently handled by the KafkaProducer.
      */
-    Error close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
+    Error purge();
+
+    /**
+     * Close this producer. This method would wait up to timeout for the producer to complete the sending of all incomplete requests (before purging them).
+     */
+    void close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     /**
      * Options for sending messages.
@@ -225,7 +230,7 @@ KafkaProducer::KafkaProducer(const Properties& properties, EventsPollingOption e
     startBackgroundPollingIfNecessary([this](int timeoutMs){ pollCallbacks(timeoutMs); });
 
     const auto propStr = KafkaClient::properties().toString();
-    KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propStr.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Notice, "initializes with properties[%s]", propStr.c_str());
 }
 
 inline void
@@ -430,6 +435,13 @@ KafkaProducer::flush(std::chrono::milliseconds timeout)
 }
 
 inline Error
+KafkaProducer::purge()
+{
+    return Error{rd_kafka_purge(getClientHandle(),
+                                (static_cast<unsigned>(RD_KAFKA_PURGE_F_QUEUE) | static_cast<unsigned>(RD_KAFKA_PURGE_F_INFLIGHT)))};
+}
+
+inline void
 KafkaProducer::close(std::chrono::milliseconds timeout)
 {
     _opened = false;
@@ -437,11 +449,16 @@ KafkaProducer::close(std::chrono::milliseconds timeout)
     stopBackgroundPollingIfNecessary();
 
     Error result = flush(timeout);
+    if (result.value() == RD_KAFKA_RESP_ERR__TIMED_OUT)
+    {
+        KAFKA_API_DO_LOG(Log::Level::Notice, "purge messages before close, outQLen[%d]", rd_kafka_outq_len(getClientHandle()));
+        purge();
+    }
 
-    std::string resultMsg = result.message();
-    KAFKA_API_DO_LOG(Log::Level::Info, "closed [%s]", resultMsg.c_str());
+    rd_kafka_poll(getClientHandle(), 0);
 
-    return result;
+    KAFKA_API_DO_LOG(Log::Level::Notice, "closed");
+
 }
 
 inline void
