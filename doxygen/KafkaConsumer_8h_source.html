@@ -338,7 +338,7 @@ $(function() {
 <div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    startBackgroundPollingIfNecessary([<span class="keyword">this</span>](<span class="keywordtype">int</span> timeoutMs){ pollCallbacks(timeoutMs); });</div>
 <div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160; </div>
 <div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> propsStr = <a class="code" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a4f96f756ee68fc0f4c8ee935360a3018">KafkaClient::properties</a>().toString();</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;    KAFKA_API_DO_LOG(Log::Level::Info, <span class="stringliteral">&quot;initializes with properties[%s]&quot;</span>, propsStr.c_str());</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;    KAFKA_API_DO_LOG(Log::Level::Notice, <span class="stringliteral">&quot;initialized with properties[%s]&quot;</span>, propsStr.c_str());</div>
 <div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;}</div>
 <div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160; </div>
 <div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
@@ -371,7 +371,7 @@ $(function() {
 <div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;        rd_kafka_queue_poll_callback(queue, TIMEOUT_INFINITE);</div>
 <div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    }</div>
 <div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160; </div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;    KAFKA_API_DO_LOG(Log::Level::Info, <span class="stringliteral">&quot;closed&quot;</span>);</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;    KAFKA_API_DO_LOG(Log::Level::Notice, <span class="stringliteral">&quot;closed&quot;</span>);</div>
 <div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;}</div>
 <div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160; </div>
 <div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160; </div>
@@ -411,7 +411,7 @@ $(function() {
 <div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160; </div>
 <div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;        <span class="keywordflow">if</span> (!_pendingEvent)</div>
 <div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;        {</div>
-<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;            KAFKA_API_DO_LOG(Log::Level::Info, <span class="stringliteral">&quot;subscribed, topics[%s]&quot;</span>, topicsStr.c_str());</div>
+<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;            KAFKA_API_DO_LOG(Log::Level::Notice, <span class="stringliteral">&quot;subscribed, topics[%s]&quot;</span>, topicsStr.c_str());</div>
 <div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;            <span class="keywordflow">return</span>;</div>
 <div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;        }</div>
 <div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;    }</div>
@@ -438,7 +438,7 @@ $(function() {
 <div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;                         _userAssignment);</div>
 <div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;        _userAssignment.clear();</div>
 <div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160; </div>
-<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;        KAFKA_API_DO_LOG(Log::Level::Info, <span class="stringliteral">&quot;unsubscribed (the previously assigned partitions)&quot;</span>);</div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;        KAFKA_API_DO_LOG(Log::Level::Notice, <span class="stringliteral">&quot;unsubscribed (the previously assigned partitions)&quot;</span>);</div>
 <div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;        <span class="keywordflow">return</span>;</div>
 <div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;    }</div>
 <div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160; </div>
@@ -456,7 +456,7 @@ $(function() {
 <div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160; </div>
 <div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;        <span class="keywordflow">if</span> (!_pendingEvent)</div>
 <div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;        {</div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;            KAFKA_API_DO_LOG(Log::Level::Info, <span class="stringliteral">&quot;unsubscribed&quot;</span>);</div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;            KAFKA_API_DO_LOG(Log::Level::Notice, <span class="stringliteral">&quot;unsubscribed&quot;</span>);</div>
 <div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;            <span class="keywordflow">return</span>;</div>
 <div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;        }</div>
 <div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;    }</div>
@@ -779,7 +779,7 @@ $(function() {
 <div class="line"><a name="l00860"></a><span class="lineno">  860</span>&#160;        }</div>
 <div class="line"><a name="l00861"></a><span class="lineno">  861</span>&#160;        <span class="keywordflow">else</span></div>
 <div class="line"><a name="l00862"></a><span class="lineno">  862</span>&#160;        {</div>
-<div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160;            KAFKA_API_DO_LOG(Log::Level::Info, <span class="stringliteral">&quot;%sd topic-partition[%s-%d]&quot;</span>, opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));</div>
+<div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160;            KAFKA_API_DO_LOG(Log::Level::Notice, <span class="stringliteral">&quot;%sd topic-partition[%s-%d]&quot;</span>, opString, rk_tp.topic, rk_tp.partition, rd_kafka_err2str(rk_tp.err));</div>
 <div class="line"><a name="l00864"></a><span class="lineno">  864</span>&#160;            ++cnt;</div>
 <div class="line"><a name="l00865"></a><span class="lineno">  865</span>&#160;        }</div>
 <div class="line"><a name="l00866"></a><span class="lineno">  866</span>&#160;    }</div>
@@ -837,7 +837,7 @@ $(function() {
 <div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;        }</div>
 <div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160;    }</div>
 <div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160; </div>
-<div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;    KAFKA_API_DO_LOG(Log::Level::Info, <span class="stringliteral">&quot;re-balance event triggered[%s], cooperative[%s], topic-partitions[%s]&quot;</span>,</div>
+<div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;    KAFKA_API_DO_LOG(Log::Level::Notice, <span class="stringliteral">&quot;re-balance event triggered[%s], cooperative[%s], topic-partitions[%s]&quot;</span>,</div>
 <div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160;                     err == RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS ? <span class="stringliteral">&quot;ASSIGN_PARTITIONS&quot;</span> : <span class="stringliteral">&quot;REVOKE_PARTITIONS&quot;</span>,</div>
 <div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;                     isCooperativeEnabled() ? <span class="stringliteral">&quot;enabled&quot;</span> : <span class="stringliteral">&quot;disabled&quot;</span>,</div>
 <div class="line"><a name="l00924"></a><span class="lineno">  924</span>&#160;                     tpsStr.c_str());</div>

@@ -122,9 +122,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adb0fd51cba445e41e648d8648d305ffa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Error.html">Error</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#adb0fd51cba445e41e648d8648d305ffa">flush</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
 <tr class="memdesc:adb0fd51cba445e41e648d8648d305ffa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invoking this method makes all buffered records immediately available to send, and blocks on the completion of the requests associated with these records.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#adb0fd51cba445e41e648d8648d305ffa">More...</a><br /></td></tr>
 <tr class="separator:adb0fd51cba445e41e648d8648d305ffa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91a40354842c3237ba9c5af3bc71f3ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Error.html">Error</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a91a40354842c3237ba9c5af3bc71f3ab">close</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
-<tr class="memdesc:a91a40354842c3237ba9c5af3bc71f3ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close this producer.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a91a40354842c3237ba9c5af3bc71f3ab">More...</a><br /></td></tr>
-<tr class="separator:a91a40354842c3237ba9c5af3bc71f3ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b768d703690bdc10323bf1bac32c4f2"><td class="memItemLeft" align="right" valign="top"><a id="a2b768d703690bdc10323bf1bac32c4f2"></a>
+<a class="el" href="classKAFKA__API_1_1Error.html">Error</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a2b768d703690bdc10323bf1bac32c4f2">purge</a> ()</td></tr>
+<tr class="memdesc:a2b768d703690bdc10323bf1bac32c4f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Purge messages currently handled by the <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a>. <br /></td></tr>
+<tr class="separator:a2b768d703690bdc10323bf1bac32c4f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb1e2e4f8ed541b4d6a679f01e7cf17f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#afb1e2e4f8ed541b4d6a679f01e7cf17f">close</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
+<tr class="memdesc:afb1e2e4f8ed541b4d6a679f01e7cf17f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close this producer.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#afb1e2e4f8ed541b4d6a679f01e7cf17f">More...</a><br /></td></tr>
+<tr class="separator:afb1e2e4f8ed541b4d6a679f01e7cf17f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a106ebf697eaef836ce2310c6f34e6e3b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a106ebf697eaef836ce2310c6f34e6e3b">send</a> (const <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">producer::ProducerRecord</a> &amp;record, const producer::Callback &amp;deliveryCb, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a90515d0d2cadfaf5e0f9f42c17b6ca22">SendOption</a> option=SendOption::NoCopyRecordValue)</td></tr>
 <tr class="memdesc:a106ebf697eaef836ce2310c6f34e6e3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously send a record to a topic.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a106ebf697eaef836ce2310c6f34e6e3b">More...</a><br /></td></tr>
 <tr class="separator:a106ebf697eaef836ce2310c6f34e6e3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -265,8 +269,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a91a40354842c3237ba9c5af3bc71f3ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a91a40354842c3237ba9c5af3bc71f3ab">&#9670;&nbsp;</a></span>close()</h2>
+<a id="afb1e2e4f8ed541b4d6a679f01e7cf17f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb1e2e4f8ed541b4d6a679f01e7cf17f">&#9670;&nbsp;</a></span>close()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -275,7 +279,7 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classKAFKA__API_1_1Error.html">Error</a> KAFKA_API::clients::KafkaProducer::close </td>
+          <td class="memname">void KAFKA_API::clients::KafkaProducer::close </td>
           <td>(</td>
           <td class="paramtype">std::chrono::milliseconds&#160;</td>
           <td class="paramname"><em>timeout</em> = <code>std::chrono::milliseconds::max()</code></td><td>)</td>
@@ -290,7 +294,7 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 </div><div class="memdoc">
 
 <p>Close this producer. </p>
-<p>This method waits up to timeout for the producer to complete the sending of all incomplete requests. </p>
+<p>This method would wait up to timeout for the producer to complete the sending of all incomplete requests (before purging them). </p>
 
 </div>
 </div>

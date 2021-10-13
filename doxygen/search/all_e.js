@@ -13,5 +13,6 @@ var searchData=
   ['position_88',['position',['../classKAFKA__API_1_1clients_1_1KafkaConsumer.html#ae27d9234efe3bf99b36b62b413fcebb8',1,'KAFKA_API::clients::KafkaConsumer']]],
   ['producerrecord_89',['ProducerRecord',['../classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html',1,'KAFKA_API::clients::producer']]],
   ['properties_90',['Properties',['../classKAFKA__API_1_1Properties.html',1,'KAFKA_API::Properties'],['../classKAFKA__API_1_1clients_1_1KafkaClient.html#a4f96f756ee68fc0f4c8ee935360a3018',1,'KAFKA_API::clients::KafkaClient::properties()']]],
-  ['put_91',['put',['../classKAFKA__API_1_1Properties.html#a862e5c8422e86168105c40a34dc1136d',1,'KAFKA_API::Properties']]]
+  ['purge_91',['purge',['../classKAFKA__API_1_1clients_1_1KafkaProducer.html#a2b768d703690bdc10323bf1bac32c4f2',1,'KAFKA_API::clients::KafkaProducer']]],
+  ['put_92',['put',['../classKAFKA__API_1_1Properties.html#a862e5c8422e86168105c40a34dc1136d',1,'KAFKA_API::Properties']]]
 ];
