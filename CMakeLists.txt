@@ -83,6 +83,14 @@ endif ()
 
 
 #---------------------------
+# Build Option: UT stubs
+#---------------------------
+if (BUILD_OPTION_ENABLE_UT_STUBS)
+    add_definitions(-DKAFKA_API_ENABLE_UNIT_TEST_STUBS)
+endif ()
+
+
+#---------------------------
 # Build Option: clang-tidy
 #---------------------------
 option(BUILD_OPTION_CLANG_TIDY "Build with clang-tidy enabled" OFF)
