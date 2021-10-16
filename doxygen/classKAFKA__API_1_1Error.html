@@ -86,14 +86,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a83085a3a3e989eb8d4fdc0b4c68ac87c"><td class="memItemLeft" align="right" valign="top"><a id="a83085a3a3e989eb8d4fdc0b4c68ac87c"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_resp_err_t respErr)</td></tr>
 <tr class="separator:a83085a3a3e989eb8d4fdc0b4c68ac87c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03ee90831d06764ac732b61370bb2d9b"><td class="memItemLeft" align="right" valign="top"><a id="a03ee90831d06764ac732b61370bb2d9b"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_resp_err_t respErr, std::string <a class="el" href="classKAFKA__API_1_1Error.html#a51a05ab818ddbd0335c28d8e98f5fcbd">message</a>)</td></tr>
-<tr class="separator:a03ee90831d06764ac732b61370bb2d9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa2db119c0f9928b7f808782cb6b06607"><td class="memItemLeft" align="right" valign="top"><a id="aa2db119c0f9928b7f808782cb6b06607"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_resp_err_t respErr, std::string <a class="el" href="classKAFKA__API_1_1Error.html#a51a05ab818ddbd0335c28d8e98f5fcbd">message</a>, bool fatal)</td></tr>
-<tr class="separator:aa2db119c0f9928b7f808782cb6b06607"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab03f380ff581dc47d931aba4870e0ed0"><td class="memItemLeft" align="right" valign="top"><a id="ab03f380ff581dc47d931aba4870e0ed0"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (rd_kafka_resp_err_t respErr, std::string <a class="el" href="classKAFKA__API_1_1Error.html#a51a05ab818ddbd0335c28d8e98f5fcbd">message</a>, bool fatal=false)</td></tr>
+<tr class="separator:ab03f380ff581dc47d931aba4870e0ed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acff81995eed15c5d04a0e3f5594b8221"><td class="memItemLeft" align="right" valign="top"><a id="acff81995eed15c5d04a0e3f5594b8221"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Error</b> (const <a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;error)</td></tr>
+<tr class="separator:acff81995eed15c5d04a0e3f5594b8221"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cae01f241c99ecb996cc7e136048080"><td class="memItemLeft" align="right" valign="top"><a id="a9cae01f241c99ecb996cc7e136048080"></a>
+<a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;error)</td></tr>
+<tr class="separator:a9cae01f241c99ecb996cc7e136048080"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2bc3204e0ea24e585645435fff747dd3"><td class="memItemLeft" align="right" valign="top"><a id="a2bc3204e0ea24e585645435fff747dd3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a2bc3204e0ea24e585645435fff747dd3">operator bool</a> () const</td></tr>
+<tr class="memdesc:a2bc3204e0ea24e585645435fff747dd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the error is valid. <br /></td></tr>
 <tr class="separator:a2bc3204e0ea24e585645435fff747dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab643d99d7bc396e7475c6b69044d4910"><td class="memItemLeft" align="right" valign="top"><a id="ab643d99d7bc396e7475c6b69044d4910"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#ab643d99d7bc396e7475c6b69044d4910">operator std::error_code</a> () const</td></tr>
@@ -110,10 +114,10 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#aeeb099f10e9a1c94cbc6eed7a09f47bc">toString</a> () const</td></tr>
 <tr class="memdesc:aeeb099f10e9a1c94cbc6eed7a09f47bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detailed error string. <br /></td></tr>
 <tr class="separator:aeeb099f10e9a1c94cbc6eed7a09f47bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43489ec4f7b8d19db0d422414754ea13"><td class="memItemLeft" align="right" valign="top"><a id="a43489ec4f7b8d19db0d422414754ea13"></a>
-Optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a43489ec4f7b8d19db0d422414754ea13">isFatal</a> () const</td></tr>
-<tr class="memdesc:a43489ec4f7b8d19db0d422414754ea13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fatal error indicates that the client instance is no longer usable. <br /></td></tr>
-<tr class="separator:a43489ec4f7b8d19db0d422414754ea13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26b6deb2495f65266b73347b1aac80f5"><td class="memItemLeft" align="right" valign="top"><a id="a26b6deb2495f65266b73347b1aac80f5"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a26b6deb2495f65266b73347b1aac80f5">isFatal</a> () const</td></tr>
+<tr class="memdesc:a26b6deb2495f65266b73347b1aac80f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fatal error indicates that the client instance is no longer usable. <br /></td></tr>
+<tr class="separator:a26b6deb2495f65266b73347b1aac80f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a95a021b323644341c523f9b164e90ee3"><td class="memItemLeft" align="right" valign="top"><a id="a95a021b323644341c523f9b164e90ee3"></a>
 Optional&lt; bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Error.html#a95a021b323644341c523f9b164e90ee3">isRetriable</a> () const</td></tr>
 <tr class="memdesc:a95a021b323644341c523f9b164e90ee3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Show whether the operation may be retried. <br /></td></tr>
