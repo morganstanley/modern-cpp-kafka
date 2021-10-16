@@ -35,6 +35,7 @@ TEST(KafkaException, Basic)
     }
     catch (const kafka::KafkaException& e)
     {
+        std::cout << e.what() << std::endl;
         std::regex reMatch(R"(.*Broker: Request timed out \[7\] \(some_filename:100\))");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
     }
@@ -47,6 +48,7 @@ TEST(KafkaException, Basic)
     }
     catch (const kafka::KafkaException& e)
     {
+        std::cout << e.what() << std::endl;
         std::regex reMatch(R"(.*Broker: Request timed out \[7\] \| something wrong here \(some_filename:100\))");
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
     }

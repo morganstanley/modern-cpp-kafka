@@ -153,6 +153,14 @@ public:
                                   const consumer::ConsumerGroupMetadata& groupMetadata,
                                   std::chrono::milliseconds              timeout);
 
+#if COMPILER_SUPPORTS_CPP_17
+    static constexpr int DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000;
+    static constexpr int DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000;
+#else
+    enum { DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000 };
+    enum { DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000 };
+#endif
+
 private:
     void pollCallbacks(int timeoutMs)
     {
@@ -176,16 +184,6 @@ private:
     };
 
     enum class ActionWhileQueueIsFull { Block, NoBlock };
-
-    static constexpr int CALLBACK_POLLING_INTERVAL_MS = 10;
-
-#if COMPILER_SUPPORTS_CPP_17
-    static constexpr int DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000;
-    static constexpr int DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000;
-#else
-    enum { DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000 };
-    enum { DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000 };
-#endif
 
     // Validate properties (and fix it if necesary)
     static Properties validateAndReformProperties(const Properties& properties);
@@ -252,7 +250,7 @@ KafkaProducer::registerConfigCallbacks(rd_kafka_conf_t* conf)
         }
         else
         {
-            assert(clientPtrSize == sizeof(client));
+            assert(clientPtrSize == sizeof(client));                                                // NOLINT
             client->KAFKA_API_DO_LOG(Log::Level::Err, "failed to stub ut_handle_ProduceResponse! error[%s]", errInfo.c_str());
         }
     }

@@ -13,7 +13,7 @@ namespace KAFKA_API::clients::admin {
  */
 struct CreateTopicsResult
 {
-    explicit CreateTopicsResult(Error err): error(std::move(err)) {}
+    explicit CreateTopicsResult(const Error& err): error(err) {}
 
     /**
      * The result error.
@@ -26,7 +26,7 @@ struct CreateTopicsResult
  */
 struct DeleteTopicsResult
 {
-    explicit DeleteTopicsResult(Error err): error(std::move(err)) {}
+    explicit DeleteTopicsResult(const Error& err): error(err) {}
 
     /**
      * The result error.
@@ -39,7 +39,7 @@ struct DeleteTopicsResult
  */
 struct DeleteRecordsResult
 {
-    explicit DeleteRecordsResult(Error err): error(std::move(err)) {}
+    explicit DeleteRecordsResult(const Error& err): error(err) {}
 
     /**
      * The result error.
@@ -52,7 +52,7 @@ struct DeleteRecordsResult
  */
 struct ListTopicsResult
 {
-    explicit ListTopicsResult(Error err):    error(std::move(err))    {}
+    explicit ListTopicsResult(const Error& err): error(err) {}
     explicit ListTopicsResult(Topics names): topics(std::move(names)) {}
 
     /**
