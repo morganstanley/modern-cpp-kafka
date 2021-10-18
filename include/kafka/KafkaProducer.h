@@ -70,6 +70,11 @@ public:
     enum class SendOption { NoCopyRecordValue, ToCopyRecordValue };
 
     /**
+     * Choose the action while the sending buffer is full.
+     */
+    enum class ActionWhileQueueIsFull { Block, NoBlock };
+
+    /**
      * Asynchronously send a record to a topic.
      *
      * Note:
@@ -87,7 +92,10 @@ public:
      *   Broker errors,
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    void send(const producer::ProducerRecord& record, const producer::Callback& deliveryCb, SendOption option = SendOption::NoCopyRecordValue);
+    void send(const producer::ProducerRecord& record,
+              const producer::Callback&       deliveryCb,
+              SendOption                      option = SendOption::NoCopyRecordValue,
+              ActionWhileQueueIsFull          action = ActionWhileQueueIsFull::Block);
 
     /**
      * Asynchronously send a record to a topic.
@@ -107,9 +115,13 @@ public:
      *   Broker errors,
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    void send(const producer::ProducerRecord& record, const producer::Callback& deliveryCb, Error& error, SendOption option = SendOption::NoCopyRecordValue)
+    void send(const producer::ProducerRecord& record,
+              const producer::Callback&       deliveryCb,
+              Error&                          error,
+              SendOption                      option = SendOption::NoCopyRecordValue,
+              ActionWhileQueueIsFull          action = ActionWhileQueueIsFull::Block)
     {
-        try { send(record, deliveryCb, option); } catch (const KafkaException& e) { error = e.error(); }
+        try { send(record, deliveryCb, option, action); } catch (const KafkaException& e) { error = e.error(); }
     }
 
     /**
@@ -182,8 +194,6 @@ private:
         const Optional<producer::ProducerRecord::Id> _recordId;
         const producer::Callback                     _deliveryCb;
     };
-
-    enum class ActionWhileQueueIsFull { Block, NoBlock };
 
     // Validate properties (and fix it if necesary)
     static Properties validateAndReformProperties(const Properties& properties);
@@ -320,10 +330,11 @@ KafkaProducer::deliveryCallback(rd_kafka_t* rk, const rd_kafka_message_t* rkmsg,
 inline void
 KafkaProducer::send(const producer::ProducerRecord& record,
                     const producer::Callback&       deliveryCb,
-                    SendOption                      option)
+                    SendOption                      option,
+                    ActionWhileQueueIsFull          action)
 {
     auto deliveryCbOpaque = std::make_unique<DeliveryCbOpaque>(record.id(), deliveryCb);
-    auto queueFullAction  = (isWithAutoEventsPolling() ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
+    auto queueFullAction  = (isWithAutoEventsPolling() ? action : ActionWhileQueueIsFull::NoBlock);
 
     const auto* topic     = record.topic().c_str();
     const auto  partition = record.partition();

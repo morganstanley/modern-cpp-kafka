@@ -205,14 +205,14 @@ public:
      *   Broker errors,
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    void send(const producer::ProducerRecord& record,
-              const producer::Callback&       deliveryCb,
-              KafkaProducer::SendOption       option = KafkaProducer::SendOption::NoCopyRecordValue)
+    void send(const producer::ProducerRecord&       record,
+              const producer::Callback&             deliveryCb,
+              KafkaProducer::SendOption             option = KafkaProducer::SendOption::NoCopyRecordValue,
+              KafkaProducer::ActionWhileQueueIsFull action = KafkaProducer::ActionWhileQueueIsFull::Block)
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
-        _producer->send(record, deliveryCb, option);
-
+        _producer->send(record, deliveryCb, option, action);
     }
 
     /**
@@ -234,14 +234,15 @@ public:
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
 
-    void send(const producer::ProducerRecord& record,
-              const producer::Callback&       deliveryCb,
-              Error&                          error,
-              KafkaProducer::SendOption       option = KafkaProducer::SendOption::NoCopyRecordValue)
+    void send(const producer::ProducerRecord&       record,
+              const producer::Callback&             deliveryCb,
+              Error&                                error,
+              KafkaProducer::SendOption             option = KafkaProducer::SendOption::NoCopyRecordValue,
+              KafkaProducer::ActionWhileQueueIsFull action = KafkaProducer::ActionWhileQueueIsFull::Block)
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
-        _producer->send(record, deliveryCb, error, option);
+        _producer->send(record, deliveryCb, error, option, action);
     }
 
     /**
