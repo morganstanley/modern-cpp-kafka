@@ -21,6 +21,7 @@ jobs:
       BUILD_CXX:         ${{ matrix.build-cxx }}
       BUILD_TYPE:        ${{ matrix.build-type }}
       CXX_STANDARD:      ${{ matrix.cxx-standard }}
+      ENABLE_UT_STUBS:   ${{ matrix.enable-ut-stubs }}
       CHECK_OPTION:      ${{ matrix.check-option }}
       GENERATE_DOC:      ${{ matrix.generate-doc }}
       WITH_INSTALLATION: ${{ matrix.with-installation }}
@@ -29,58 +30,60 @@ jobs:
     strategy:
       matrix:
         include:
-          - os:           macos-10.15
-            build-cxx:    clang++
-            test-labels:  UT|IT
+          - os:                macos-10.15
+            build-cxx:         clang++
+            test-labels:       UT|IT
 
-          - os:           ubuntu-20.04
-            build-cxx:    g++
-            build-type:   Debug
-            test-labels:  UT|IT
+          - os:                ubuntu-20.04
+            build-cxx:         g++
+            build-type:        Debug
+            test-labels:       UT|IT
+            enable-ut-stubs:   true
 
-          - os:           ubuntu-20.04
-            build-cxx:    g++
-            build-type:   Release
-            test-labels:  RT
+          - os:                ubuntu-20.04
+            build-cxx:         g++
+            build-type:        Release
+            test-labels:       RT
 
-          - os:           ubuntu-20.04
-            build-cxx:    g++
-            build-type:   Release
-            cxx-standard: 14
-            test-labels:  UT|IT
+          - os:                ubuntu-20.04
+            build-cxx:         g++
+            build-type:        Release
+            cxx-standard:      14
+            test-labels:       UT|IT
 
-          - os:           ubuntu-20.04
-            build-cxx:    g++
-            check-option: asan
-            test-labels:  UT|IT
+          - os:                ubuntu-20.04
+            build-cxx:         g++
+            check-option:      asan
+            test-labels:       UT|IT
 
-          - os:           ubuntu-18.04
-            build-cxx:    g++
-            check-option: tsan
-            test-labels:  UT|IT
+          - os:                ubuntu-18.04
+            build-cxx:         g++
+            check-option:      tsan
+            test-labels:       UT|IT
 
-          - os:           ubuntu-20.04
-            build-cxx:    g++
-            check-option: ubsan
-            test-labels:  UT|IT
+          - os:                ubuntu-20.04
+            build-cxx:         g++
+            check-option:      ubsan
+            test-labels:       UT|IT
 
-          - os:           ubuntu-20.04
-            build-cxx:    clang++
-            test-labels:  UT|IT
+          - os:                ubuntu-20.04
+            build-cxx:         clang++
+            test-labels:       UT|IT
             generate-doc:      true
             with-installation: true
 
-          - os:           ubuntu-20.04
-            build-cxx:    clang++
-            check-option: clang-tidy
+          - os:                ubuntu-20.04
+            build-cxx:         clang++
+            check-option:      clang-tidy
+            enable-ut-stubs:   true
 
-          - os:           ubuntu-18.04
-            build-cxx:    g++
-            test-labels:  UT|IT
+          - os:                ubuntu-18.04
+            build-cxx:         g++
+            test-labels:       UT|IT
 
-          - os:           ubuntu-18.04
-            build-cxx:    clang++
-            test-labels:  RT
+          - os:                ubuntu-18.04
+            build-cxx:         clang++
+            test-labels:       RT
 
     steps:
       - uses: actions/checkout@v2
@@ -157,8 +160,12 @@ jobs:
             export CMAKE_BUILD_TYPE=""
           fi
 
+          if [[ ${ENABLE_UT_STUBS} ]]; then
+            export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_ENABLE_UT_STUBS=ON"
+          fi
+
           if [[ ${CHECK_OPTION} == 'clang-tidy' ]]; then
-            export BUILD_OPTION='-DBUILD_OPTION_CLANG_TIDY=ON'
+            export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_CLANG_TIDY=ON"
           fi
 
           if [[ ${CHECK_OPTION} == 'asan' ]]; then
@@ -270,8 +277,8 @@ jobs:
           vcpkg install boost-program-options
 
           cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options-vc140-mt.lib" "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options.lib"
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_76.dll" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.dll"
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_76.pdb" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.pdb"
+          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.dll" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.dll"
+          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.pdb" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.pdb"
 
           vcpkg integrate install
 

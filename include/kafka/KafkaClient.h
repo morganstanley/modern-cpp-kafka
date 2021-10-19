@@ -22,7 +22,7 @@
 #include <thread>
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients {
 
 /**
  * The base class for Kafka clients.
@@ -154,6 +154,12 @@ public:
  */
 #define KAFKA_API_LOG(lvl, ...) KafkaClient::doGlobalLog(lvl, __FILE__, __LINE__, ##__VA_ARGS__)
 
+#if COMPILER_SUPPORTS_CPP_17
+    static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
+#else
+    enum { DEFAULT_METADATA_TIMEOUT_MS = 10000 };
+#endif
+
 protected:
     // There're 3 derived classes: KafkaConsumer, KafkaProducer, AdminClient
     enum class ClientType { KafkaConsumer, KafkaProducer, AdminClient };
@@ -246,12 +252,6 @@ private:
     static const constexpr char* CLIENT_ID         = "client.id";
     static const constexpr char* LOG_LEVEL         = "log_level";
     static const constexpr char* DEBUG             = "debug";
-
-#if COMPILER_SUPPORTS_CPP_17
-    static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
-#else
-    enum { DEFAULT_METADATA_TIMEOUT_MS = 10000 };
-#endif
 
 protected:
     struct Pollable
@@ -437,7 +437,7 @@ KafkaClient::validateAndReformProperties(const Properties& properties)
     // If no "client.id" configured, generate a random one for user
     if (!newProperties.getProperty(CLIENT_ID))
     {
-        newProperties.put(CLIENT_ID, Utility::getRandomString());
+        newProperties.put(CLIENT_ID, utility::getRandomString());
     }
 
     // If no "log_level" configured, use Log::Level::Notice as default
@@ -623,5 +623,5 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
 }
 
 
-} // end of KAFKA_API
+} // end of KAFKA_API::clients
 

@@ -8,7 +8,7 @@
 #include "librdkafka/rdkafka.h"
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::producer {
 
 /**
  * A key/value pair to be sent to Kafka.
@@ -105,5 +105,5 @@ private:
     Optional<Id> _id;
 };
 
-}
+} // end of KAFKA_API::clients::producer
 

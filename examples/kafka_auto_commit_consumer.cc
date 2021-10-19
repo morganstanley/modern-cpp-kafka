@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         });
 
         // Create a consumer instance.
-        kafka::KafkaConsumer consumer(props);
+        kafka::clients::KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});

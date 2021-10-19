@@ -7,13 +7,12 @@
 #include <string>
 #include <vector>
 
-namespace Kafka = KAFKA_API;
 
 struct Arguments
 {
     std::vector<std::string>   brokerList;
     std::string                topic;
-    Optional<Kafka::Partition> partition;
+    Optional<kafka::Partition> partition;
     std::map<std::string, std::string> props;
 };
 
@@ -47,7 +46,7 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
     if (vm.count("help") || argc == 1)
     {
         std::cout << "Read data from the standard input and send it to the given Kafka topic" << std::endl;
-        std::cout << "    (with librdkafka v" << Kafka::Utility::getLibRdKafkaVersion() << ")" << std::endl;
+        std::cout << "    (with librdkafka v" << kafka::utility::getLibRdKafkaVersion() << ")" << std::endl;
         std::cout << desc << std::endl;
         return nullptr;
     }
@@ -93,12 +92,13 @@ int main (int argc, char **argv)
     }
 
     // Prepare consumer properties
-    Kafka::ProducerConfig props;
-    props.put(Kafka::ProducerConfig::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
+    using namespace kafka::clients;
+    producer::Config props;
+    props.put(producer::Config::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
     // Get client id
     std::ostringstream oss;
     oss << "producer-" << std::this_thread::get_id();
-    props.put(Kafka::ProducerConfig::CLIENT_ID, oss.str());
+    props.put(producer::Config::CLIENT_ID, oss.str());
     // For other properties user assigned
     for (const auto& prop: args->props)
     {
@@ -106,8 +106,8 @@ int main (int argc, char **argv)
     }
 
     // Create a sync-send producer
-    Kafka::KafkaClient::setGlobalLogger(Kafka::Logger());
-    Kafka::KafkaProducer producer(props);
+    KafkaClient::setGlobalLogger(kafka::Logger());
+    KafkaProducer producer(props);
 
     auto startPromptLine = []() { std::cout << "> "; };
 
@@ -117,13 +117,13 @@ int main (int argc, char **argv)
     std::string line;
     while (std::getline(std::cin, line))
     {
-        Kafka::Key   key;
-        Kafka::Value value(line.c_str(), line.size());
-        Kafka::ProducerRecord record =
-            (args->partition ? Kafka::ProducerRecord(args->topic, *args->partition, key, value) : Kafka::ProducerRecord(args->topic, key, value));
+        kafka::Key   key;
+        kafka::Value value(line.c_str(), line.size());
+        producer::ProducerRecord record =
+            (args->partition ? producer::ProducerRecord(args->topic, *args->partition, key, value) : producer::ProducerRecord(args->topic, key, value));
         try
         {
-            std::cout << "Current Local Time [" << Kafka::Utility::getCurrentTime() << "]" << std::endl;
+            std::cout << "Current Local Time [" << kafka::utility::getCurrentTime() << "]" << std::endl;
 
             // Note: might throw exceptions if with unknown topic, unknown partition, invalid message length, etc.
             auto metadata = producer.syncSend(record);
@@ -132,7 +132,7 @@ int main (int argc, char **argv)
                 << " ==> " << metadata.topic() << "-" << std::to_string(metadata.partition()) << "@" <<  (metadata.offset() ? std::to_string(*metadata.offset()) : "NA")
                 << ", " << metadata.timestamp().toString() << ", " << metadata.persistedStatusString() << std::endl;
         }
-        catch (const Kafka::KafkaException& e)
+        catch (const kafka::KafkaException& e)
         {
             std::cerr << "Exception thrown by producer: " << e.what() << std::endl;
         }

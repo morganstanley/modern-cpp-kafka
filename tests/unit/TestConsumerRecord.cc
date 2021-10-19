@@ -4,11 +4,10 @@
 
 #include <cstring>
 
-namespace Kafka = KAFKA_API;
 
 namespace {
 
-inline rd_kafka_message_t* mockRdKafkaMessage(Kafka::Partition partition, Kafka::Offset offset,
+inline rd_kafka_message_t* mockRdKafkaMessage(kafka::Partition partition, kafka::Offset offset,
                                               const std::string& key, const std::string& value,
                                               rd_kafka_resp_err_t respErr = RD_KAFKA_RESP_ERR_NO_ERROR)
 {
@@ -42,14 +41,14 @@ inline rd_kafka_message_t* mockRdKafkaMessage(Kafka::Partition partition, Kafka:
 
 TEST(ConsumerRecord, Basic)
 {
-    Kafka::Partition partition = 1;
-    Kafka::Offset    offset    = 100;
+    kafka::Partition partition = 1;
+    kafka::Offset    offset    = 100;
     std::string      key       = "some key";
     std::string      value     = "some value";
 
     rd_kafka_message_t* rkMsg = mockRdKafkaMessage(partition, offset, key, value);
     // Here the ConsumerRecord will take over the ownership
-    Kafka::ConsumerRecord record(rkMsg);
+    kafka::clients::consumer::ConsumerRecord record(rkMsg);
 
     EXPECT_FALSE(record.error());
     EXPECT_EQ(partition, record.partition());
@@ -60,13 +59,13 @@ TEST(ConsumerRecord, Basic)
 
 TEST(ConsumerRecord, WithError)
 {
-    Kafka::Partition partition = 2;
-    Kafka::Offset    offset    = 200;
+    kafka::Partition partition = 2;
+    kafka::Offset    offset    = 200;
     rd_kafka_resp_err_t err    = RD_KAFKA_RESP_ERR_UNKNOWN;
 
     rd_kafka_message_t* rkMsg = mockRdKafkaMessage(partition, offset, "", "", err);
     // Here the ConsumerRecord will take over the ownership
-    Kafka::ConsumerRecord record(rkMsg);
+    kafka::clients::consumer::ConsumerRecord record(rkMsg);
 
     EXPECT_EQ(RD_KAFKA_RESP_ERR_UNKNOWN, record.error().value());
     EXPECT_EQ(partition, record.partition());
@@ -77,13 +76,13 @@ TEST(ConsumerRecord, WithError)
 
 TEST(ConsumerRecord, EndOfPartition)
 {
-    Kafka::Partition    partition = 1;
-    Kafka::Offset       offset    = 100;
+    kafka::Partition    partition = 1;
+    kafka::Offset       offset    = 100;
     rd_kafka_resp_err_t err       = RD_KAFKA_RESP_ERR__PARTITION_EOF;
 
     rd_kafka_message_t* rkMsg = mockRdKafkaMessage(partition, offset, "", "", err);
     // Here the ConsumerRecord will take over the ownership
-    Kafka::ConsumerRecord record(rkMsg);
+    kafka::clients::consumer::ConsumerRecord record(rkMsg);
 
     EXPECT_EQ(RD_KAFKA_RESP_ERR__PARTITION_EOF, record.error().value());
     EXPECT_EQ(partition, record.partition());

@@ -6,18 +6,10 @@
 #include <chrono>
 #include <vector>
 
-#if defined(WIN32)
-#ifdef min
-#undef min
-#endif
-#endif
-
-
-namespace Kafka = KAFKA_API;
 
 TEST(UnorderedOffsetCommitQueue, Functionality)
 {
-    Kafka::UnorderedOffsetCommitQueue queue;
+    kafka::clients::consumer::UnorderedOffsetCommitQueue queue;
 
     // Suppose consumer received some records with a sigle `poll`, and forwarded them to several handlers
     queue.waitOffset(1);
@@ -81,7 +73,7 @@ TEST(UnorderedOffsetCommitQueue, Functionality)
 
 TEST(UnorderedOffsetCommitQueue, AbnormalCases)
 {
-    Kafka::UnorderedOffsetCommitQueue queue("some-topic", 2);
+    kafka::clients::consumer::UnorderedOffsetCommitQueue queue("some-topic", 2);
 
     queue.waitOffset(1);
     queue.waitOffset(2);
@@ -128,15 +120,15 @@ namespace {
 
 auto checkTimeMsConsumedToSortOffsets(std::size_t testNum, std::size_t step)
 {
-    Kafka::UnorderedOffsetCommitQueue queue;
+    kafka::clients::consumer::UnorderedOffsetCommitQueue queue;
 
-    std::vector<Kafka::Offset> waitSequence(testNum);
+    std::vector<kafka::Offset> waitSequence(testNum);
     for (std::size_t i = 0 ; i < testNum; ++i)
     {
         waitSequence[i] = i;
     }
 
-    std::vector<Kafka::Offset> ackSequence = waitSequence;
+    std::vector<kafka::Offset> ackSequence = waitSequence;
     std::random_device rd;
     std::mt19937 g(rd());
     for (std::size_t iBegin = 0; iBegin < ackSequence.size(); iBegin += step)

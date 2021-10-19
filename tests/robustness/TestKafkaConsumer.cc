@@ -14,36 +14,34 @@
 #include <thread>
 
 
-using namespace KAFKA_API;
 
-
-TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
+TEST(KafkaConsumer, AlwaysFinishClosing_ManuallyPollEvents)
 {
-    Topic     topic     = Utility::getRandomString();
-    Partition partition = 0;
+    const kafka::Topic     topic     = kafka::utility::getRandomString();
+    const kafka::Partition partition = 0;
 
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Producer some messages
-    std::vector<std::tuple<Headers, std::string, std::string>> messages = {
-        {Headers{}, "key1", "value1"},
-        {Headers{}, "key2", "value2"},
-        {Headers{}, "key3", "value3"},
+    std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
+        {kafka::Headers{}, "key1", "value1"},
+        {kafka::Headers{}, "key2", "value2"},
+        {kafka::Headers{}, "key3", "value3"},
     };
     KafkaTestUtility::ProduceMessages(topic, partition, messages);
 
     // Consumer properties
     auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-    props.put(ConsumerConfig::MAX_POLL_RECORDS,  "1");        // Only poll 1 message each time
-    props.put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
-    props.put(ConsumerConfig::SOCKET_TIMEOUT_MS, "2000");
+    props.put(kafka::clients::consumer::Config::MAX_POLL_RECORDS,  "1");        // Only poll 1 message each time
+    props.put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
+    props.put(kafka::clients::consumer::Config::SOCKET_TIMEOUT_MS, "2000");
 
     volatile std::size_t commitCbCount = 0;
     {
         // Start a consumer (which need to call `pollEvents()` to trigger the commit callback)
-        KafkaConsumer consumer(props, KafkaClient::EventsPollingOption::Manual);
+        kafka::clients::KafkaConsumer consumer(props, kafka::clients::KafkaClient::EventsPollingOption::Manual);
         consumer.setErrorCallback(KafkaTestUtility::DumpError);
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
         // Subscribe the topic
         consumer.subscribe({topic});
@@ -61,10 +59,10 @@ TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
             EXPECT_EQ(std::get<1>(messages[i]), records[i].key().toString());
             EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
 
-            Offset expectedOffset = records[i].offset() + 1;
+            kafka::Offset expectedOffset = records[i].offset() + 1;
             consumer.commitAsync(records[i],
-                                 [expectedOffset, topic, partition, &commitCbCount](const TopicPartitionOffsets& tpos, const Error& error){
-                                     std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << error.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
+                                 [expectedOffset, topic, partition, &commitCbCount](const kafka::TopicPartitionOffsets& tpos, const kafka::Error& error){
+                                     std::cout << "[" << kafka::utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << error.message() << "], tpos[" << kafka::toString(tpos) << "]" << std::endl;
                                      EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
                                      ++commitCbCount;
                                  });
@@ -74,10 +72,10 @@ TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
         KafkaTestUtility::PauseBrokers();
 
         // Don't wait for the offset-commit callback (to be triggered)
-        std::cout << "[" << Utility::getCurrentTime() << "] Before closing the consumer, committed callback count[" << commitCbCount << "]" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] Before closing the consumer, committed callback count[" << commitCbCount << "]" << std::endl;
     }
 
-    std::cout << "[" << Utility::getCurrentTime() << "] After closing the consumer, committed callback count[" << commitCbCount << "]" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] After closing the consumer, committed callback count[" << commitCbCount << "]" << std::endl;
     EXPECT_EQ(messages.size(), commitCbCount);
 
     // resume the brokers
@@ -86,35 +84,35 @@ TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
 
 TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
 {
-    const Topic     topic     = Utility::getRandomString();
-    const Partition partition = 0;
+    const kafka::Topic     topic     = kafka::utility::getRandomString();
+    const kafka::Partition partition = 0;
 
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Producer some messages
-    std::vector<std::tuple<Headers, std::string, std::string>> messages = {
-        {Headers{}, "key1", "value1"}
+    std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
+        {kafka::Headers{}, "key1", "value1"}
     };
     KafkaTestUtility::ProduceMessages(topic, partition, messages);
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(ConsumerConfig::MAX_POLL_RECORDS,  "1")         // Only poll 1 message each time
-                            .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
-                            .put(ConsumerConfig::SOCKET_TIMEOUT_MS, "2000");     // Just don't want to wait too long for the commit-offset callback.
+                            .put(kafka::clients::consumer::Config::MAX_POLL_RECORDS,  "1")         // Only poll 1 message each time
+                            .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
+                            .put(kafka::clients::consumer::Config::SOCKET_TIMEOUT_MS, "2000");     // Just don't want to wait too long for the commit-offset callback.
 
     volatile std::size_t commitCbCount = 0;
     {
         // Start a consumer
-        KafkaConsumer consumer(props);
+        kafka::clients::KafkaConsumer consumer(props);
         consumer.setErrorCallback(KafkaTestUtility::DumpError);
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
         // Subscribe th topic
         consumer.subscribe({topic},
-                           [](Consumer::RebalanceEventType et, const TopicPartitions&  /*unused*/) {
-                               std::cout << "[" << Utility::getCurrentTime() << "] rebalance-event triggered, event type["
-                                   << (et == Consumer::RebalanceEventType::PartitionsAssigned ? "PartitionAssigned" : "PartitionRevolked") << "]" << std::endl;
+                           [](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions&  /*unused*/) {
+                               std::cout << "[" << kafka::utility::getCurrentTime() << "] rebalance-event triggered, event type["
+                                   << (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned ? "PartitionAssigned" : "PartitionRevolked") << "]" << std::endl;
                             });
         EXPECT_FALSE(consumer.subscription().empty());
 
@@ -123,7 +121,7 @@ TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
             auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
             ASSERT_TRUE(std::none_of(records.cbegin(), records.cend(), [](const auto& record){ return record.error(); }));
             ASSERT_EQ(messages.size(), records.size());
-            std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled "  << records.size() << " messages" << std::endl;
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " polled "  << records.size() << " messages" << std::endl;
 
             // Pause the brokers before committing the offsets
             KafkaTestUtility::PauseBrokers();
@@ -138,10 +136,10 @@ TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
         std::cout << "[" << Utility::getCurrentTime() << "] " << __LINE__ << "************  about to commitAsync" << std::endl;
 
                 // Try to commit the offsets
-                Offset expectedOffset = records[i].offset() + 1;
+                kafka::Offset expectedOffset = records[i].offset() + 1;
                 consumer.commitAsync(records[i],
-                                     [expectedOffset, topic, partition, &commitCbCount](const TopicPartitionOffsets& tpos, const Error& error){
-                                         std::cout << "[" << Utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], result[" << error.message() << "], tpos[" << toString(tpos) << "]" << std::endl;
+                                     [expectedOffset, topic, partition, &commitCbCount](const kafka::TopicPartitionOffsets& tpos, const kafka::Error& error){
+                                         std::cout << "[" << kafka::utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], result[" << error.message() << "], tpos[" << kafka::toString(tpos) << "]" << std::endl;
                                          EXPECT_EQ(expectedOffset, tpos.at({topic, partition}));
                                          ++commitCbCount;
                                      });
@@ -162,7 +160,7 @@ TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
 
 TEST(KafkaConsumer, BrokerStopBeforeConsumerStart)
 {
-    const Topic topic = Utility::getRandomString();
+    const kafka::Topic topic = kafka::utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Pause the brokers for a while
@@ -170,37 +168,37 @@ TEST(KafkaConsumer, BrokerStopBeforeConsumerStart)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
-                            .put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
+                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS,   "30000")
+                            .put(kafka::clients::consumer::Config::ENABLE_PARTITION_EOF, "true");
 
     // Start the consumer
-    KafkaConsumer consumer(props);
+    kafka::clients::KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
 
-    TopicPartitions assignment;
+    kafka::TopicPartitions assignment;
     // In some corner cases, the assigned partitions might be empty (due to "Local: Broker node update" error), and we'll retry
     while (assignment.empty())
     {
         // Subscribe the topic
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
         consumer.subscribe({topic},
-                            [&consumer, &assignment](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
-                                if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+                            [&consumer, &assignment](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions& tps) {
+                                if (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned) {
                                     assignment = tps;
-                                    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << toString(tps) << std::endl;
-                                } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
-                                    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << toString(tps) << std::endl;
+                                    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << kafka::toString(tps) << std::endl;
+                                } else if (et == kafka::clients::consumer::RebalanceEventType::PartitionsRevoked) {
+                                    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << kafka::toString(tps) << std::endl;
                                 }
                             });
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
     }
 
     // Fetch the broker metadata
     if (auto metadata = consumer.fetchBrokerMetadata(topic))
     {
-        std::cout << "[" << Utility::getCurrentTime() << "] topic[" << topic << "], metadata[" << metadata->toString() << "]" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] topic[" << topic << "], metadata[" << metadata->toString() << "]" << std::endl;
     }
 
     // Fetch all these EOFs
@@ -208,48 +206,48 @@ TEST(KafkaConsumer, BrokerStopBeforeConsumerStart)
     EXPECT_FALSE(records.empty());
     ASSERT_TRUE(std::all_of(records.cbegin(), records.cend(), [](const auto& record){ return record.error().value() == RD_KAFKA_RESP_ERR__PARTITION_EOF; }));
 
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
 }
 
 TEST(KafkaConsumer, BrokerStopBeforeSubscription)
 {
-    const Topic topic = Utility::getRandomString();
+    const kafka::Topic topic = kafka::utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
-                            .put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
+                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS,   "30000")
+                            .put(kafka::clients::consumer::Config::ENABLE_PARTITION_EOF, "true");
 
     // Start the consumer
-    KafkaConsumer consumer(props);
+    kafka::clients::KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
-    TopicPartitions assignment;
+    kafka::TopicPartitions assignment;
     // In some corner cases, the assigned partitions might be empty (due to "Local: Broker node update" error), and we'll retry
     while (assignment.empty())
     {
         // Subscribe the topic
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
         consumer.subscribe({topic},
-                            [&consumer, &assignment](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
-                                if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
+                            [&consumer, &assignment](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions& tps) {
+                                if (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned) {
                                     assignment = tps;
-                                    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << toString(tps) << std::endl;
-                                } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
-                                    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << toString(tps) << std::endl;
+                                    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << kafka::toString(tps) << std::endl;
+                                } else if (et == kafka::clients::consumer::RebalanceEventType::PartitionsRevoked) {
+                                    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << kafka::toString(tps) << std::endl;
                                 }
                             });
-        std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
     }
 
     // Fetch the broker metadata
     if (auto metadata = consumer.fetchBrokerMetadata(topic))
     {
-        std::cout << "[" << Utility::getCurrentTime() << "] topic[" << topic << "], metadata[" << metadata->toString() << "]" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] topic[" << topic << "], metadata[" << metadata->toString() << "]" << std::endl;
     }
 
     // Fetch all these EOFs
@@ -257,35 +255,35 @@ TEST(KafkaConsumer, BrokerStopBeforeSubscription)
     EXPECT_FALSE(records.empty());
     ASSERT_TRUE(std::all_of(records.cbegin(), records.cend(), [](const auto& record){ return record.error().value() == RD_KAFKA_RESP_ERR__PARTITION_EOF; }));
 
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
 }
 
 TEST(KafkaConsumer, BrokerStopBeforeSeek)
 {
-    const Topic topic = Utility::getRandomString();
+    const kafka::Topic topic = kafka::utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
-                            .put(ConsumerConfig::ENABLE_PARTITION_EOF, "true");
+                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS,   "30000")
+                            .put(kafka::clients::consumer::Config::ENABLE_PARTITION_EOF, "true");
 
     // Start the consumer
-    KafkaConsumer consumer(props);
+    kafka::clients::KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe the topic
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
     consumer.subscribe({topic},
-                        [&consumer](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
-                            if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
-                                std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << toString(tps) << std::endl;
-                            } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
-                                std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << toString(tps) << std::endl;
+                        [&consumer](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions& tps) {
+                            if (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned) {
+                                std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << kafka::toString(tps) << std::endl;
+                            } else if (et == kafka::clients::consumer::RebalanceEventType::PartitionsRevoked) {
+                                std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << kafka::toString(tps) << std::endl;
                             }
                         });
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
 
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -296,12 +294,12 @@ TEST(KafkaConsumer, BrokerStopBeforeSeek)
     {
         try
         {
-            std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " will seek to end" << std::endl;
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " will seek to end" << std::endl;
             consumer.seekToEnd();
-            std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " seeked to end" << std::endl;
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " seeked to end" << std::endl;
             break;
         }
-        catch (const KafkaException& e)
+        catch (const kafka::KafkaException& e)
         {
             std::cout << "Exception caught: " << e.what() << std::endl;
         }
@@ -312,19 +310,19 @@ TEST(KafkaConsumer, BrokerStopBeforeSeek)
     EXPECT_FALSE(records.empty());
     ASSERT_TRUE(std::all_of(records.cbegin(), records.cend(), [](const auto& record){ return record.error().value() == RD_KAFKA_RESP_ERR__PARTITION_EOF; }));
 
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " EOFs" << std::endl;
 }
 
 TEST(KafkaConsumer, BrokerStopDuringMsgPoll)
 {
-    const Topic topic  = Utility::getRandomString();
+    const kafka::Topic topic  = kafka::utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // Prepare messages to test
-    const std::vector<std::tuple<Headers, std::string, std::string>> messages = {
-        {Headers{}, "key1", "value1"},
-        {Headers{}, "key2", "value2"},
-        {Headers{}, "key3", "value3"},
+    const std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
+        {kafka::Headers{}, "key1", "value1"},
+        {kafka::Headers{}, "key2", "value2"},
+        {kafka::Headers{}, "key3", "value3"},
     };
 
     // Produce some messages (with a producer)
@@ -332,25 +330,25 @@ TEST(KafkaConsumer, BrokerStopDuringMsgPoll)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
-                            .put(ConsumerConfig::AUTO_OFFSET_RESET,  "earliest"); // Seek to the very beginning
+                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS, "30000")
+                            .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET,  "earliest"); // Seek to the very beginning
 
     // Start the consumer
-    KafkaConsumer consumer(props);
+    kafka::clients::KafkaConsumer consumer(props);
     consumer.setErrorCallback(KafkaTestUtility::DumpError);
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe the topic
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " will subscribe" << std::endl;
     consumer.subscribe({topic},
-                        [&consumer](Consumer::RebalanceEventType et, const TopicPartitions& tps) {
-                            if (et == Consumer::RebalanceEventType::PartitionsAssigned) {
-                                std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << toString(tps) << std::endl;
-                            } else if (et == Consumer::RebalanceEventType::PartitionsRevoked) {
-                                std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << toString(tps) << std::endl;
+                        [&consumer](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions& tps) {
+                            if (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned) {
+                                std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsAssigned: " << kafka::toString(tps) << std::endl;
+                            } else if (et == kafka::clients::consumer::RebalanceEventType::PartitionsRevoked) {
+                                std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " PartitionsRevoked: " << kafka::toString(tps) << std::endl;
                             }
                         });
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " subscribed" << std::endl;
 
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -360,6 +358,6 @@ TEST(KafkaConsumer, BrokerStopDuringMsgPoll)
     EXPECT_EQ(messages.size(), records.size());
     EXPECT_TRUE(std::none_of(records.cbegin(), records.cend(), [](const auto& record){ return record.error(); }));
 
-    std::cout << "[" << Utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " messages" << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " polled " << records.size() << " messages" << std::endl;
 }
 

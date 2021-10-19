@@ -36,11 +36,30 @@ public:
     // The error with brief info
     explicit Error(rd_kafka_resp_err_t respErr): _respErr(respErr) {}
     // The error with detailed message
-    Error(rd_kafka_resp_err_t respErr, std::string message)
-        : _respErr(respErr), _message(std::move(message)) {}
-    Error(rd_kafka_resp_err_t respErr, std::string message, bool fatal)
-        : _respErr(respErr), _message(std::move(message)), _fatal(fatal) {}
+    Error(rd_kafka_resp_err_t respErr, std::string message, bool fatal = false)
+        : _respErr(respErr), _message(std::move(message)), _isFatal(fatal) {}
+    // Copy constructor
+    Error(const Error& error) { *this = error; }
 
+    // Assignment operator
+    Error& operator=(const Error& error)
+    {
+        if (this == &error) return *this;
+
+        _rkError.reset();
+
+        _respErr          = static_cast<rd_kafka_resp_err_t>(error.value());
+        _message          = error._message;
+        _isFatal          = error.isFatal();
+        _txnRequiresAbort = error.transactionRequiresAbort();
+        _isRetriable      = error.isRetriable();
+
+        return *this;
+    }
+
+    /**
+     * Check if the error is valid.
+     */
     explicit operator bool() const { return static_cast<bool>(value()); }
 
     /**
@@ -80,9 +99,7 @@ public:
     {
         std::ostringstream oss;
 
-        oss << rd_kafka_err2str(static_cast<rd_kafka_resp_err_t>(value())) << " [" << value() << "]";
-
-        if (auto fatal = isFatal())         oss << " | " << (*fatal ? "fatal" : "non-fatal");
+        oss << rd_kafka_err2str(static_cast<rd_kafka_resp_err_t>(value())) << " [" << value() << "]" << (isFatal() ? " fatal" : "");
         if (transactionRequiresAbort())     oss << " | transaction-requires-abort";
         if (auto retriable = isRetriable()) oss << " | " << (*retriable ? "retriable" : "non-retriable");
         if (_message)                       oss << " | " << *_message;
@@ -93,9 +110,9 @@ public:
     /**
      * Fatal error indicates that the client instance is no longer usable.
      */
-    Optional<bool>  isFatal()     const
+    bool            isFatal()     const
     {
-        return  _rkError ? rd_kafka_error_is_fatal(_rkError.get()) : _fatal;
+        return  _rkError ? rd_kafka_error_is_fatal(_rkError.get()) : _isFatal;
     }
 
     /**
@@ -103,7 +120,7 @@ public:
      */
     Optional<bool>  isRetriable() const
     {
-        return _rkError ? rd_kafka_error_is_retriable(_rkError.get()) : Optional<bool>{};
+        return _rkError ? rd_kafka_error_is_retriable(_rkError.get()) : _isRetriable;
     }
 
     /**
@@ -122,7 +139,9 @@ private:
     rd_kafka_error_shared_ptr _rkError;     // For error with rich info
     rd_kafka_resp_err_t       _respErr{};   // For error with a simple response code
     Optional<std::string>     _message;     // Additional detailed message (if any)
-    Optional<bool>            _fatal;       // Fatal flag (if any)
+    bool                      _isFatal          = false;
+    bool                      _txnRequiresAbort = false;
+    Optional<bool>            _isRetriable; // Retriable flag (if any)
 };
 
 } // end of KAFKA_API

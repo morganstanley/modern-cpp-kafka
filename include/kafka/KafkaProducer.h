@@ -2,9 +2,9 @@
 
 #include "kafka/Project.h"
 
-#include "kafka/Consumer.h"
+#include "kafka/ConsumerCommon.h"
 #include "kafka/KafkaClient.h"
-#include "kafka/Producer.h"
+#include "kafka/ProducerCommon.h"
 #include "kafka/ProducerConfig.h"
 #include "kafka/ProducerRecord.h"
 #include "kafka/Timestamp.h"
@@ -19,7 +19,7 @@
 #include <unordered_map>
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients {
 
 /**
  * KafkaProducer class.
@@ -55,9 +55,14 @@ public:
     Error flush(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     /**
-     * Close this producer. This method waits up to timeout for the producer to complete the sending of all incomplete requests.
+     * Purge messages currently handled by the KafkaProducer.
      */
-    Error close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
+    Error purge();
+
+    /**
+     * Close this producer. This method would wait up to timeout for the producer to complete the sending of all incomplete requests (before purging them).
+     */
+    void close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     /**
      * Options for sending messages.
@@ -82,7 +87,7 @@ public:
      *   Broker errors,
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    void send(const ProducerRecord& record, const Producer::Callback& deliveryCb, SendOption option = SendOption::NoCopyRecordValue);
+    void send(const producer::ProducerRecord& record, const producer::Callback& deliveryCb, SendOption option = SendOption::NoCopyRecordValue);
 
     /**
      * Asynchronously send a record to a topic.
@@ -102,7 +107,7 @@ public:
      *   Broker errors,
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    void send(const ProducerRecord& record, const Producer::Callback& deliveryCb, Error& error, SendOption option = SendOption::NoCopyRecordValue)
+    void send(const producer::ProducerRecord& record, const producer::Callback& deliveryCb, Error& error, SendOption option = SendOption::NoCopyRecordValue)
     {
         try { send(record, deliveryCb, option); } catch (const KafkaException& e) { error = e.error(); }
     }
@@ -118,7 +123,7 @@ public:
      *   Broker errors,
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    Producer::RecordMetadata syncSend(const ProducerRecord& record);
+    producer::RecordMetadata syncSend(const producer::ProducerRecord& record);
 
     /**
      * Needs to be called before any other methods when the transactional.id is set in the configuration.
@@ -145,8 +150,16 @@ public:
      * Send a list of specified offsets to the consumer group coodinator, and also marks those offsets as part of the current transaction.
      */
     void sendOffsetsToTransaction(const TopicPartitionOffsets&           topicPartitionOffsets,
-                                  const Consumer::ConsumerGroupMetadata& groupMetadata,
+                                  const consumer::ConsumerGroupMetadata& groupMetadata,
                                   std::chrono::milliseconds              timeout);
+
+#if COMPILER_SUPPORTS_CPP_17
+    static constexpr int DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000;
+    static constexpr int DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000;
+#else
+    enum { DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000 };
+    enum { DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000 };
+#endif
 
 private:
     void pollCallbacks(int timeoutMs)
@@ -158,29 +171,19 @@ private:
     class DeliveryCbOpaque
     {
     public:
-        DeliveryCbOpaque(Optional<ProducerRecord::Id> id, Producer::Callback cb): _recordId(id), _deliveryCb(std::move(cb)) {}
+        DeliveryCbOpaque(Optional<producer::ProducerRecord::Id> id, producer::Callback cb): _recordId(id), _deliveryCb(std::move(cb)) {}
 
         void operator()(rd_kafka_t* /*rk*/, const rd_kafka_message_t* rkmsg)
         {
-            _deliveryCb(Producer::RecordMetadata{rkmsg, _recordId}, Error{rkmsg->err});
+            _deliveryCb(producer::RecordMetadata{rkmsg, _recordId}, Error{rkmsg->err});
         }
 
     private:
-        const Optional<ProducerRecord::Id> _recordId;
-        const Producer::Callback           _deliveryCb;
+        const Optional<producer::ProducerRecord::Id> _recordId;
+        const producer::Callback                     _deliveryCb;
     };
 
     enum class ActionWhileQueueIsFull { Block, NoBlock };
-
-    static constexpr int CALLBACK_POLLING_INTERVAL_MS = 10;
-
-#if COMPILER_SUPPORTS_CPP_17
-    static constexpr int DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000;
-    static constexpr int DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000;
-#else
-    enum { DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000 };
-    enum { DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000 };
-#endif
 
     // Validate properties (and fix it if necesary)
     static Properties validateAndReformProperties(const Properties& properties);
@@ -225,7 +228,7 @@ KafkaProducer::KafkaProducer(const Properties& properties, EventsPollingOption e
     startBackgroundPollingIfNecessary([this](int timeoutMs){ pollCallbacks(timeoutMs); });
 
     const auto propStr = KafkaClient::properties().toString();
-    KAFKA_API_DO_LOG(Log::Level::Info, "initializes with properties[%s]", propStr.c_str());
+    KAFKA_API_DO_LOG(Log::Level::Notice, "initializes with properties[%s]", propStr.c_str());
 }
 
 inline void
@@ -247,7 +250,7 @@ KafkaProducer::registerConfigCallbacks(rd_kafka_conf_t* conf)
         }
         else
         {
-            assert(clientPtrSize == sizeof(client));
+            assert(clientPtrSize == sizeof(client));                                                // NOLINT
             client->KAFKA_API_DO_LOG(Log::Level::Err, "failed to stub ut_handle_ProduceResponse! error[%s]", errInfo.c_str());
         }
     }
@@ -262,7 +265,7 @@ KafkaProducer::validateAndReformProperties(const Properties& properties)
 
     // Check whether it's an available partitioner
     const std::set<std::string> availPartitioners = {"murmur2_random", "murmur2", "random", "consistent", "consistent_random", "fnv1a", "fnv1a_random"};
-    auto partitioner = newProperties.getProperty(ProducerConfig::PARTITIONER);
+    auto partitioner = newProperties.getProperty(producer::Config::PARTITIONER);
     if (partitioner && !availPartitioners.count(*partitioner))
     {
         std::string errMsg = "Invalid partitioner [" + *partitioner + "]! Valid options: ";
@@ -278,10 +281,10 @@ KafkaProducer::validateAndReformProperties(const Properties& properties)
 
     // For "idempotence" feature
     constexpr int KAFKA_IDEMP_MAX_INFLIGHT = 5;
-    const auto enableIdempotence = newProperties.getProperty(ProducerConfig::ENABLE_IDEMPOTENCE);
+    const auto enableIdempotence = newProperties.getProperty(producer::Config::ENABLE_IDEMPOTENCE);
     if (enableIdempotence && *enableIdempotence == "true")
     {
-        if (const auto maxInFlight = newProperties.getProperty(ProducerConfig::MAX_IN_FLIGHT))
+        if (const auto maxInFlight = newProperties.getProperty(producer::Config::MAX_IN_FLIGHT))
         {
             if (std::stoi(*maxInFlight) > KAFKA_IDEMP_MAX_INFLIGHT)
             {
@@ -290,7 +293,7 @@ KafkaProducer::validateAndReformProperties(const Properties& properties)
             }
         }
 
-        if (const auto acks = newProperties.getProperty(ProducerConfig::ACKS))
+        if (const auto acks = newProperties.getProperty(producer::Config::ACKS))
         {
             if (*acks != "all" && *acks != "-1")
             {
@@ -315,9 +318,9 @@ KafkaProducer::deliveryCallback(rd_kafka_t* rk, const rd_kafka_message_t* rkmsg,
 }
 
 inline void
-KafkaProducer::send(const ProducerRecord&             record,
-                    const Producer::Callback&         deliveryCb,
-                    SendOption                        option)
+KafkaProducer::send(const producer::ProducerRecord& record,
+                    const producer::Callback&       deliveryCb,
+                    SendOption                      option)
 {
     auto deliveryCbOpaque = std::make_unique<DeliveryCbOpaque>(record.id(), deliveryCb);
     auto queueFullAction  = (isWithAutoEventsPolling() ? ActionWhileQueueIsFull::Block : ActionWhileQueueIsFull::NoBlock);
@@ -396,15 +399,15 @@ KafkaProducer::send(const ProducerRecord&             record,
     deliveryCbOpaque.release();
 }
 
-inline Producer::RecordMetadata
-KafkaProducer::syncSend(const ProducerRecord& record)
+inline producer::RecordMetadata
+KafkaProducer::syncSend(const producer::ProducerRecord& record)
 {
     Optional<Error>          deliveryResult;
-    Producer::RecordMetadata recordMetadata;
+    producer::RecordMetadata recordMetadata;
     std::mutex               mtx;
     std::condition_variable  delivered;
 
-    auto deliveryCb = [&deliveryResult, &recordMetadata, &mtx, &delivered] (const Producer::RecordMetadata& metadata, const Error& error) {
+    auto deliveryCb = [&deliveryResult, &recordMetadata, &mtx, &delivered] (const producer::RecordMetadata& metadata, const Error& error) {
         std::lock_guard<std::mutex> guard(mtx);
 
         deliveryResult = error;
@@ -430,6 +433,13 @@ KafkaProducer::flush(std::chrono::milliseconds timeout)
 }
 
 inline Error
+KafkaProducer::purge()
+{
+    return Error{rd_kafka_purge(getClientHandle(),
+                                (static_cast<unsigned>(RD_KAFKA_PURGE_F_QUEUE) | static_cast<unsigned>(RD_KAFKA_PURGE_F_INFLIGHT)))};
+}
+
+inline void
 KafkaProducer::close(std::chrono::milliseconds timeout)
 {
     _opened = false;
@@ -437,11 +447,16 @@ KafkaProducer::close(std::chrono::milliseconds timeout)
     stopBackgroundPollingIfNecessary();
 
     Error result = flush(timeout);
+    if (result.value() == RD_KAFKA_RESP_ERR__TIMED_OUT)
+    {
+        KAFKA_API_DO_LOG(Log::Level::Notice, "purge messages before close, outQLen[%d]", rd_kafka_outq_len(getClientHandle()));
+        purge();
+    }
 
-    std::string resultMsg = result.message();
-    KAFKA_API_DO_LOG(Log::Level::Info, "closed [%s]", resultMsg.c_str());
+    rd_kafka_poll(getClientHandle(), 0);
 
-    return result;
+    KAFKA_API_DO_LOG(Log::Level::Notice, "closed");
+
 }
 
 inline void
@@ -474,7 +489,7 @@ KafkaProducer::abortTransaction(std::chrono::milliseconds timeout)
 
 inline void
 KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           topicPartitionOffsets,
-                                        const Consumer::ConsumerGroupMetadata& groupMetadata,
+                                        const consumer::ConsumerGroupMetadata& groupMetadata,
                                         std::chrono::milliseconds              timeout)
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(createRkTopicPartitionList(topicPartitionOffsets));
@@ -485,5 +500,5 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           t
     KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
-} // end of KAFKA_API
+} // end of KAFKA_API::clients
 

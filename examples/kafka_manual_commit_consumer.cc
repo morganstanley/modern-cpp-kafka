@@ -21,7 +21,7 @@ int main(int argc, char **argv)
         });
 
         // Create a consumer instance.
-        kafka::KafkaConsumer consumer(props);
+        kafka::clients::KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
                 auto now = std::chrono::steady_clock::now();
                 if (now - lastTimeCommitted > std::chrono::seconds(1)) {
                     // Commit offsets for messages polled
-                    std::cout << "% syncCommit offsets: " << kafka::Utility::getCurrentTime() << std::endl;
+                    std::cout << "% syncCommit offsets: " << kafka::utility::getCurrentTime() << std::endl;
                     consumer.commitSync(); // or commitAsync()
 
                     lastTimeCommitted = now;
