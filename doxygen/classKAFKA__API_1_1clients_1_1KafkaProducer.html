@@ -95,6 +95,11 @@ Public Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a90515d0d2cadfaf5e0f9f42c17b6ca22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Options for sending messages. <br /></td></tr>
 <tr class="separator:a90515d0d2cadfaf5e0f9f42c17b6ca22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d556d5bb639c9dc3fbb33ce469a6a5c"><td class="memItemLeft" align="right" valign="top"><a id="a3d556d5bb639c9dc3fbb33ce469a6a5c"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a3d556d5bb639c9dc3fbb33ce469a6a5c">ActionWhileQueueIsFull</a> { <b>Block</b>, 
+<b>NoBlock</b>
+ }</td></tr>
+<tr class="memdesc:a3d556d5bb639c9dc3fbb33ce469a6a5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Choose the action while the sending buffer is full. <br /></td></tr>
+<tr class="separator:a3d556d5bb639c9dc3fbb33ce469a6a5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed9a6a3e812693e14eba3b151d68a9a4"><td class="memItemLeft" align="right" valign="top"><a id="aed9a6a3e812693e14eba3b151d68a9a4"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <b>DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS</b> = 10000
  }</td></tr>
 <tr class="separator:aed9a6a3e812693e14eba3b151d68a9a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,12 +143,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:afb1e2e4f8ed541b4d6a679f01e7cf17f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#afb1e2e4f8ed541b4d6a679f01e7cf17f">close</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
 <tr class="memdesc:afb1e2e4f8ed541b4d6a679f01e7cf17f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close this producer.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#afb1e2e4f8ed541b4d6a679f01e7cf17f">More...</a><br /></td></tr>
 <tr class="separator:afb1e2e4f8ed541b4d6a679f01e7cf17f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a106ebf697eaef836ce2310c6f34e6e3b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a106ebf697eaef836ce2310c6f34e6e3b">send</a> (const <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">producer::ProducerRecord</a> &amp;record, const producer::Callback &amp;deliveryCb, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a90515d0d2cadfaf5e0f9f42c17b6ca22">SendOption</a> option=SendOption::NoCopyRecordValue)</td></tr>
-<tr class="memdesc:a106ebf697eaef836ce2310c6f34e6e3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously send a record to a topic.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a106ebf697eaef836ce2310c6f34e6e3b">More...</a><br /></td></tr>
-<tr class="separator:a106ebf697eaef836ce2310c6f34e6e3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a275166de5a6e6c611c51ce3735458e50"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a275166de5a6e6c611c51ce3735458e50">send</a> (const <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">producer::ProducerRecord</a> &amp;record, const producer::Callback &amp;deliveryCb, <a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;error, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a90515d0d2cadfaf5e0f9f42c17b6ca22">SendOption</a> option=SendOption::NoCopyRecordValue)</td></tr>
-<tr class="memdesc:a275166de5a6e6c611c51ce3735458e50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously send a record to a topic.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a275166de5a6e6c611c51ce3735458e50">More...</a><br /></td></tr>
-<tr class="separator:a275166de5a6e6c611c51ce3735458e50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86c6fb1f91a7ba1e553b9962a3d51a34"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a86c6fb1f91a7ba1e553b9962a3d51a34">send</a> (const <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">producer::ProducerRecord</a> &amp;record, const producer::Callback &amp;deliveryCb, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a90515d0d2cadfaf5e0f9f42c17b6ca22">SendOption</a> option=SendOption::NoCopyRecordValue, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a3d556d5bb639c9dc3fbb33ce469a6a5c">ActionWhileQueueIsFull</a> action=ActionWhileQueueIsFull::Block)</td></tr>
+<tr class="memdesc:a86c6fb1f91a7ba1e553b9962a3d51a34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously send a record to a topic.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a86c6fb1f91a7ba1e553b9962a3d51a34">More...</a><br /></td></tr>
+<tr class="separator:a86c6fb1f91a7ba1e553b9962a3d51a34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bc544b0a9560052c3d0d8540d4040a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a0bc544b0a9560052c3d0d8540d4040a4">send</a> (const <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">producer::ProducerRecord</a> &amp;record, const producer::Callback &amp;deliveryCb, <a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;error, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a90515d0d2cadfaf5e0f9f42c17b6ca22">SendOption</a> option=SendOption::NoCopyRecordValue, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a3d556d5bb639c9dc3fbb33ce469a6a5c">ActionWhileQueueIsFull</a> action=ActionWhileQueueIsFull::Block)</td></tr>
+<tr class="memdesc:a0bc544b0a9560052c3d0d8540d4040a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously send a record to a topic.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a0bc544b0a9560052c3d0d8540d4040a4">More...</a><br /></td></tr>
+<tr class="separator:a0bc544b0a9560052c3d0d8540d4040a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a412dbaaeda7b3a59a0106774f7093055"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1RecordMetadata.html">producer::RecordMetadata</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a412dbaaeda7b3a59a0106774f7093055">syncSend</a> (const <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">producer::ProducerRecord</a> &amp;record)</td></tr>
 <tr class="memdesc:a412dbaaeda7b3a59a0106774f7093055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronously send a record to a topic.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a412dbaaeda7b3a59a0106774f7093055">More...</a><br /></td></tr>
 <tr class="separator:a412dbaaeda7b3a59a0106774f7093055"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -338,8 +343,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 
 </div>
 </div>
-<a id="a275166de5a6e6c611c51ce3735458e50"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a275166de5a6e6c611c51ce3735458e50">&#9670;&nbsp;</a></span>send() <span class="overload">[1/2]</span></h2>
+<a id="a0bc544b0a9560052c3d0d8540d4040a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bc544b0a9560052c3d0d8540d4040a4">&#9670;&nbsp;</a></span>send() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -369,7 +374,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a90515d0d2cadfaf5e0f9f42c17b6ca22">SendOption</a>&#160;</td>
-          <td class="paramname"><em>option</em> = <code>SendOption::NoCopyRecordValue</code>&#160;</td>
+          <td class="paramname"><em>option</em> = <code>SendOption::NoCopyRecordValue</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a3d556d5bb639c9dc3fbb33ce469a6a5c">ActionWhileQueueIsFull</a>&#160;</td>
+          <td class="paramname"><em>action</em> = <code>ActionWhileQueueIsFull::Block</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -401,8 +412,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 
 </div>
 </div>
-<a id="a106ebf697eaef836ce2310c6f34e6e3b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a106ebf697eaef836ce2310c6f34e6e3b">&#9670;&nbsp;</a></span>send() <span class="overload">[2/2]</span></h2>
+<a id="a86c6fb1f91a7ba1e553b9962a3d51a34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86c6fb1f91a7ba1e553b9962a3d51a34">&#9670;&nbsp;</a></span>send() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -426,7 +437,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a90515d0d2cadfaf5e0f9f42c17b6ca22">SendOption</a>&#160;</td>
-          <td class="paramname"><em>option</em> = <code>SendOption::NoCopyRecordValue</code>&#160;</td>
+          <td class="paramname"><em>option</em> = <code>SendOption::NoCopyRecordValue</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a3d556d5bb639c9dc3fbb33ce469a6a5c">ActionWhileQueueIsFull</a>&#160;</td>
+          <td class="paramname"><em>action</em> = <code>ActionWhileQueueIsFull::Block</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
