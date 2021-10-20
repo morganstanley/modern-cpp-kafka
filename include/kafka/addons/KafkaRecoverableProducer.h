@@ -52,7 +52,8 @@ public:
      */
     const std::string& name() const
     {
-        // lock
+        std::lock_guard<std::mutex> lock(_producerMutex);
+
         return _producer->name();
     }
 
@@ -312,7 +313,8 @@ private:
             _producer->pollEvents(std::chrono::milliseconds(1));
             if (_fatalError)
             {
-                KAFKA_API_LOG(Log::Level::Notice, "met fatal error[%s], would re-initialze the internal producer");
+                const std::string errStr = _fatalError->toString();
+                KAFKA_API_LOG(Log::Level::Notice, "met fatal error[%s], will re-initialize the internal producer", errStr.c_str());
 
                 std::lock_guard<std::mutex> lock(_producerMutex);
 
