@@ -133,6 +133,7 @@ TEST(KafkaRecoverableProducer, MockFatalError)
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
+    EXPECT_EQ(sendCount, deliveryCount);
 
     // Prepare a consumer
     const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
