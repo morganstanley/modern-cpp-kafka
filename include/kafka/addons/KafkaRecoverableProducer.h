@@ -31,10 +31,10 @@ public:
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
-        _producer->close();
-
         _running = false;
         if (_pollThread.joinable()) _pollThread.join();
+
+        _producer->close();
     }
 
     /**
