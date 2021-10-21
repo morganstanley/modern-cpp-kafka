@@ -29,12 +29,7 @@ public:
 
     ~KafkaRecoverableProducer()
     {
-        std::lock_guard<std::mutex> lock(_producerMutex);
-
-        _running = false;
-        if (_pollThread.joinable()) _pollThread.join();
-
-        _producer->close();
+        if (_running) close();
     }
 
     /**
@@ -166,6 +161,9 @@ public:
     void close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
+
+        _running = false;
+        if (_pollThread.joinable()) _pollThread.join();
 
         _producer->close(timeout);
     }

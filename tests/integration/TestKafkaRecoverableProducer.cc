@@ -20,53 +20,59 @@ TEST(KafkaRecoverableProducer, SendMessages)
 
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
-    // Properties for the producer
-    const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::producer::Config::ACKS, "all");
-
-    // Recoverable producer
-    kafka::clients::KafkaRecoverableProducer producer(props);
-
-    // Send messages
-    kafka::clients::producer::ProducerRecord::Id id = 0;
-    for (const auto& msg: messages)
     {
-        auto record = kafka::clients::producer::ProducerRecord(topic, partition,
-                                                               kafka::Key(msg.first.c_str(), msg.first.size()),
-                                                               kafka::Value(msg.second.c_str(), msg.second.size()),
-                                                               id++);
-        std::cout << "[" <<kafka::utility::getCurrentTime() << "] ProducerRecord: " << record.toString() << std::endl;
+        // Properties for the producer
+        const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::producer::Config::ACKS, "all");
 
-        // sync-send
+        // Recoverable producer
+        kafka::clients::KafkaRecoverableProducer producer(props);
+
+        // Send messages
+        kafka::clients::producer::ProducerRecord::Id id = 0;
+        for (const auto& msg: messages)
         {
-            auto metadata = producer.syncSend(record);
-            std::cout << "[" <<kafka::utility::getCurrentTime() << "] Message sync-sent. Metadata: " << metadata.toString() << std::endl;
+            auto record = kafka::clients::producer::ProducerRecord(topic, partition,
+                                                                   kafka::Key(msg.first.c_str(), msg.first.size()),
+                                                                   kafka::Value(msg.second.c_str(), msg.second.size()),
+                                                                   id++);
+            std::cout << "[" <<kafka::utility::getCurrentTime() << "] ProducerRecord: " << record.toString() << std::endl;
+
+            // sync-send
+            {
+                auto metadata = producer.syncSend(record);
+                std::cout << "[" <<kafka::utility::getCurrentTime() << "] Message sync-sent. Metadata: " << metadata.toString() << std::endl;
+            }
+
+            // async-send
+            {
+                producer.send(record,
+                              [] (const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                                    EXPECT_FALSE(error);
+                                    std::cout << "[" <<kafka::utility::getCurrentTime() << "] Message async-sent. Metadata: " << metadata.toString() << std::endl;
+                              });
+            }
         }
 
-        // async-send
-        {
-            producer.send(record,
-                          [] (const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
-                                EXPECT_FALSE(error);
-                                std::cout << "[" <<kafka::utility::getCurrentTime() << "] Message async-sent. Metadata: " << metadata.toString() << std::endl;
-                          });
-        }
+        producer.close();
     }
 
-    // Prepare a consumer
-    const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
-    kafka::clients::KafkaConsumer consumer(consumerProps);
-    consumer.setLogLevel(kafka::Log::Level::Crit);
-    consumer.subscribe({topic});
-
-    // Poll these messages
-    auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
-
-    // Check the messages
-    EXPECT_EQ(messages.size() * 2, records.size());
-    for (std::size_t i = 0; i < records.size(); ++i)
     {
-        EXPECT_EQ(messages[i/2].first,  std::string(static_cast<const char*>(records[i].key().data()), records[i].key().size()));
-        EXPECT_EQ(messages[i/2].second, std::string(static_cast<const char*>(records[i].value().data()), records[i].value().size()));
+        // Prepare a consumer
+        const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
+        kafka::clients::KafkaConsumer consumer(consumerProps);
+        consumer.setLogLevel(kafka::Log::Level::Crit);
+        consumer.subscribe({topic});
+
+        // Poll these messages
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+
+        // Check the messages
+        EXPECT_EQ(messages.size() * 2, records.size());
+        for (std::size_t i = 0; i < records.size(); ++i)
+        {
+            EXPECT_EQ(messages[i/2].first,  std::string(static_cast<const char*>(records[i].key().data()), records[i].key().size()));
+            EXPECT_EQ(messages[i/2].second, std::string(static_cast<const char*>(records[i].value().data()), records[i].value().size()));
+        }
     }
 }
 
