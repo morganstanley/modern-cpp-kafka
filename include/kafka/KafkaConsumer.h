@@ -817,7 +817,7 @@ KafkaConsumer::pollMessages(int timeoutMs, std::vector<consumer::ConsumerRecord>
     // Wrap messages with ConsumerRecord
     output.clear();
     output.reserve(msgReceived);
-    std::for_each(msgPtrArray.begin(), msgPtrArray.begin(), [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
+    std::for_each(msgPtrArray.begin(), msgPtrArray.end(), [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
 
     // Store the offsets for all these polled messages (for "enable.auto.commit=true" case)
     storeOffsetsIfNecessary(output);
