@@ -117,8 +117,8 @@ $(function() {
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    std::string <a class="code" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html#a9914c1cda618d8fc276cd8a4e5a33383">toString</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keyword">using</span> rd_kafka_message_unique_ptr = std::unique_ptr&lt;rd_kafka_message_t, void(*)(rd_kafka_message_t*)&gt;;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    rd_kafka_message_unique_ptr _rk_msg;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keyword">using</span> rd_kafka_message_shared_ptr = std::shared_ptr&lt;rd_kafka_message_t&gt;;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    rd_kafka_message_shared_ptr _rk_msg;</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;};</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="keyword">inline</span> Headers</div>
