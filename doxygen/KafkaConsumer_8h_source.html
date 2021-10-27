@@ -736,7 +736,7 @@ $(function() {
 <div class="line"><a name="l00817"></a><span class="lineno">  817</span>&#160;    <span class="comment">// Wrap messages with ConsumerRecord</span></div>
 <div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;    output.clear();</div>
 <div class="line"><a name="l00819"></a><span class="lineno">  819</span>&#160;    output.reserve(msgReceived);</div>
-<div class="line"><a name="l00820"></a><span class="lineno">  820</span>&#160;    std::for_each(&amp;msgPtrArray[0], &amp;msgPtrArray[msgReceived], [&amp;output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });</div>
+<div class="line"><a name="l00820"></a><span class="lineno">  820</span>&#160;    std::for_each(msgPtrArray.begin(), msgPtrArray.begin() + msgReceived, [&amp;output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });</div>
 <div class="line"><a name="l00821"></a><span class="lineno">  821</span>&#160; </div>
 <div class="line"><a name="l00822"></a><span class="lineno">  822</span>&#160;    <span class="comment">// Store the offsets for all these polled messages (for &quot;enable.auto.commit=true&quot; case)</span></div>
 <div class="line"><a name="l00823"></a><span class="lineno">  823</span>&#160;    storeOffsetsIfNecessary(output);</div>
