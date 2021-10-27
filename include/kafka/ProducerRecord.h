@@ -13,13 +13,13 @@ namespace KAFKA_API::clients::producer {
 /**
  * A key/value pair to be sent to Kafka.
  * This consists of a topic name to which the record is being sent, an optional partition number, and an optional key and value.
+ * Note: `ProducerRecord` would not take the ownership from the memory block of `Value`.
  */
 class ProducerRecord
 {
 public:
     using Id  = std::uint64_t;
 
-    // Note: ProducerRecord would not take the ownership from these parameters,
     ProducerRecord(Topic topic, Partition partition, const Key& key, const Value& value)
        : _topic(std::move(topic)), _partition(partition), _key(key), _value(value) {}
 

@@ -87,8 +87,8 @@ public:
     std::string toString() const;
 
 private:
-    using rd_kafka_message_unique_ptr = std::unique_ptr<rd_kafka_message_t, void(*)(rd_kafka_message_t*)>;
-    rd_kafka_message_unique_ptr _rk_msg;
+    using rd_kafka_message_shared_ptr = std::shared_ptr<rd_kafka_message_t>;
+    rd_kafka_message_shared_ptr _rk_msg;
 };
 
 inline Headers
