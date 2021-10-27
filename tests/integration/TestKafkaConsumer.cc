@@ -60,6 +60,12 @@ TEST(KafkaConsumer, BasicPoll)
     records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
     EXPECT_EQ(messages.size(), records.size());
 
+    // Copyable ConsumerRecord
+    {
+        auto recordsCopy = records;
+        recordsCopy.clear();
+    }
+
     // Check messages
     std::size_t rcvMsgCount = 0;
     for (auto& record: records)
