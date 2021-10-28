@@ -56,7 +56,7 @@ jobs:
             check-option:      asan
             test-labels:       UT|IT
 
-          - os:                ubuntu-18.04
+          - os:                ubuntu-20.04
             build-cxx:         g++
             check-option:      tsan
             test-labels:       UT|IT
