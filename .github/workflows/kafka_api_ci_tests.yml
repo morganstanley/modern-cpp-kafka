@@ -293,7 +293,7 @@ jobs:
           $Env:LD_LIBRARY_PATH='C:\VCPKG\INSTALLED\x86-windows\lib\'
           echo $Env:LD_LIBRARY_PATH
 
-          cmake -B ./ -A Win32 -S ../.. "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake -B ./ -A Win32 -S ../.. -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build
         run: |
