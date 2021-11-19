@@ -14,7 +14,9 @@ target_link_libraries(${PROJECT_NAME} INTERFACE rdkafka)
 #---------------------------
 # pthread
 #---------------------------
-target_link_libraries(${PROJECT_NAME} INTERFACE pthread)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    target_link_libraries(${PROJECT_NAME} INTERFACE pthread)
+endif ()
 
 #---------------------------
 # sasl (if required)

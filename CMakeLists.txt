@@ -32,13 +32,15 @@ message(STATUS "librdkafka library directory: ${LIBRDKAFKA_LIBRARY_DIR}")
 
 
 #---------------------------
-# Check pthread library
+# Check pthread library (for linux only)
 #---------------------------
-find_library(PTHREAD_LIB pthread)
-if (PTHREAD_LIB)
-    message(STATUS "pthread library: ${PTHREAD_LIB}")
-else ()
-    message(FATAL_ERROR "Could not find library: pthread!")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    find_library(PTHREAD_LIB pthread)
+    if (PTHREAD_LIB)
+        message(STATUS "pthread library: ${PTHREAD_LIB}")
+    else ()
+        message(FATAL_ERROR "Could not find library: pthread!")
+    endif ()
 endif ()
 
 
