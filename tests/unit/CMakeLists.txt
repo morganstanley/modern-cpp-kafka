@@ -1,7 +1,24 @@
 project("kafka-unit-test")
 
+#---------------------------
+# rapidjson
+#---------------------------
+if (DEFINED ENV{RAPIDJSON_INCLUDE_DIRS})
+    set(RAPIDJSON_INCLUDE_DIRS $ENV{RAPIDJSON_INCLUDE_DIRS})
+else ()
+    find_package(rapidjson REQUIRED)
+    if (NOT RAPIDJSON_INCLUDE_DIRS)
+        message(FATAL_ERROR "Rapidjson not found!")
+    endif ()
+endif ()
+
+message(STATUS "rapidjson include directory: ${RAPIDJSON_INCLUDE_DIRS}")
+
+
 # Target
 file(GLOB TEST_SRCS *.cc)
+
+include_directories(${PROJECT_NAME} SYSTEM INTERFACE ${RAPIDJSON_INCLUDE_DIRS})
 
 add_executable("${PROJECT_NAME}" ${TEST_SRCS})
 target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api gtest gtest_main)
