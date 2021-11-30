@@ -7,7 +7,7 @@ on:
       - master
 
 env:
-  KAFKA_SRC_LINK:     https://apache.newfountain.nl/kafka/2.7.1/kafka_2.13-2.7.1.tgz
+  KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
   CPU_CORE_NUM:       2
   LIBRDKAFKA_VERSION: 1.7.0
   BUILD_SUB_DIR:      build/sub-build
@@ -134,7 +134,11 @@ jobs:
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
 
-          # 5. Install tools to generate document
+          # 5. Install rapidjson (for `addons/KafkaMetrics.h`)
+          wget -nv https://github.com/Tencent/rapidjson/archive/refs/tags/v1.1.0.tar.gz
+          tar -xzf v1.1.0.tar.gz
+
+          # 6. Install tools to generate document
           if [ ${GENERATE_DOC} ]; then
             sudo apt install -y python3-pip
             sudo pip3 install markdown
@@ -184,11 +188,13 @@ jobs:
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_GEN_DOC=ON"
           fi
 
+          export RAPIDJSON_INCLUDE_DIRS=`pwd`/rapidjson-1.1.0/include
           env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_STANDARD} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION}
 
       - name: Build
         run: |
           cd ${BUILD_SUB_DIR}
+
           make -j${CPU_CORE_NUM} VERBOSE=1
 
       - name: Install
@@ -275,6 +281,9 @@ jobs:
           cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.dll" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.dll"
           cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.pdb" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.pdb"
 
+          # Install rapidjson
+          vcpkg install rapidjson
+
           vcpkg integrate install
 
       - name: Config
@@ -303,8 +312,8 @@ jobs:
           tree "tests"
 
           # Install kafka
-          Invoke-WebRequest -Uri $Env:KAFKA_SRC_LINK -OutFile kafka_2.13-2.7.1.tgz
-          tar xvzf kafka_2.13-2.7.1.tgz
+          Invoke-WebRequest -Uri $Env:KAFKA_SRC_LINK -OutFile kafka_2.13-2.8.1.tgz
+          tar xvzf kafka_2.13-2.8.1.tgz
 
           ctest -VV -L $Env:TEST_LABELS
 

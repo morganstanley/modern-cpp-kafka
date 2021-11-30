@@ -71,6 +71,8 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library t
 
         * `SASL_LIBRARYDIR`/`SASL_LIBRARY`  -- if SASL connection support is wanted
 
+        * `RAPIDJSON_INCLUDE_DIRS`          -- `addons/KafkaMetrics` requires **rapidjson** headers
+
     * Create an empty directory for the build, and `cd` to it
 
     * Build commands
