@@ -12,7 +12,7 @@
 #include <time.h>
 
 
-namespace KAFKA_API::utility {
+namespace KAFKA_API { namespace utility {
 
 /**
  * Get local time as string.
@@ -75,5 +75,5 @@ inline int getLibRdKafkaThreadCount()
     return rd_kafka_thread_cnt();
 }
 
-} // end of KAFKA_API::utility
+} } // end of KAFKA_API::utility
 

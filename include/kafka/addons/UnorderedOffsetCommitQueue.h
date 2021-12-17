@@ -8,7 +8,7 @@
 #include <deque>
 #include <vector>
 
-namespace KAFKA_API::clients::consumer {
+namespace KAFKA_API { namespace clients { namespace consumer {
 
 template <typename T>
 class Heap
@@ -174,5 +174,5 @@ private:
     static constexpr Offset INVALID_OFFSET = -1;
 };
 
-} // end of KAFKA_API::clients::consumer
+} } } // end of KAFKA_API::clients::consumer
 

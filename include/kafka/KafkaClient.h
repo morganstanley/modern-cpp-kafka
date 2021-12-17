@@ -22,7 +22,7 @@
 #include <thread>
 
 
-namespace KAFKA_API::clients {
+namespace KAFKA_API { namespace clients {
 
 /**
  * The base class for Kafka clients.
@@ -623,5 +623,5 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
 }
 
 
-} // end of KAFKA_API::clients
+} } // end of KAFKA_API::clients
 

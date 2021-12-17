@@ -17,7 +17,7 @@
 #include <memory>
 
 
-namespace KAFKA_API::clients {
+namespace KAFKA_API { namespace clients {
 
 /**
  * KafkaConsumer class.
@@ -1039,5 +1039,5 @@ KafkaConsumer::commitAsync(const consumer::OffsetCommitCallback& offsetCommitCal
     commitAsync(TopicPartitionOffsets(), offsetCommitCallback);
 }
 
-} // end of KAFKA_API::clients
+} } // end of KAFKA_API::clients
 

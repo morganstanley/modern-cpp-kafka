@@ -18,7 +18,7 @@
 #include <vector>
 
 
-namespace KAFKA_API::clients {
+namespace KAFKA_API { namespace clients {
 
 /**
  * The administrative client for Kafka, which supports managing and inspecting topics, etc.
@@ -341,5 +341,5 @@ AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
     return admin::DeleteRecordsResult(combineErrors(errors));
 }
 
-} // end of KAFKA_API::clients
+} } // end of KAFKA_API::clients
 
