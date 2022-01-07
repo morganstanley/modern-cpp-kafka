@@ -6,42 +6,50 @@ We'd recommend users to cross-reference them, --especially the examples.
 
 ## KafkaProducer
 
-* The `send` is an unblocking operation, and the result (including errors) could only be got from the delivery callback.
+* The `send` is an unblock operation, and the result (including errors) could only be got from the delivery callback.
 
 ### Example
 ```cpp
+        using namespace kafka::clients;
+
         // Create configuration object
         kafka::Properties props ({
             {"bootstrap.servers",  brokers},
             {"enable.idempotence", "true"},
         });
 
-        // Create a producer instance.
-        kafka::KafkaProducer producer(props);
+        // Create a producer instance
+        KafkaProducer producer(props);
 
-        // Read messages from stdin and produce to the broker.
+        // Read messages from stdin and produce to the broker
         std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;
 
-        for (std::string line; std::getline(std::cin, line);) {
+        for (auto line = std::make_shared<std::string>();
+             std::getline(std::cin, *line);
+             line = std::make_shared<std::string>()) {
             // The ProducerRecord doesn't own `line`, it is just a thin wrapper
-            auto record = kafka::ProducerRecord(topic,
-                                                kafka::NullKey,
-                                                kafka::Value(line.c_str(), line.size()));
-            // Send the message.
+            auto record = producer::ProducerRecord(topic,
+                                                   kafka::NullKey,
+                                                   kafka::Value(line->c_str(), line->size()));
+
+            // Send the message
             producer.send(record,
                           // The delivery report handler
-                          [](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
-                              if (!ec) {
+                          // Note: Here we capture the shared_pointer of `line`,
+                          //       which holds the content for `record.value()`.
+                          //       It makes sure the memory block is valid until the lambda finishes.
+                          [line](const producer::RecordMetadata& metadata, const kafka::Error& error) {
+                              if (!error) {
                                   std::cout << "% Message delivered: " << metadata.toString() << std::endl;
                               } else {
-                                  std::cerr << "% Message delivery failed: " << ec.message() << std::endl;
+                                  std::cerr << "% Message delivery failed: " << error.message() << std::endl;
                               }
-                          },
-                          // The memory block given by record.value() would be copied
-                          kafka::KafkaProducer::SendOption::ToCopyRecordValue);
+                          });
 
-            if (line.empty()) break;
+            if (line->empty()) break;
         }
+
+        // producer.close(); // No explicit close is needed, RAII will take care of it
 ```
 
 * User must guarantee the memory block for `ProducerRecord`'s `key` is valid until being `send`.
@@ -50,13 +58,13 @@ We'd recommend users to cross-reference them, --especially the examples.
 
 * It's guaranteed that the delivery callback would be triggered anyway after `send`, -- a producer would even be waiting for it before `close`. So, it's a good way to release these memory resources in the `Producer::Callback` function.
 
-## `KafkaProducer` with `KafkaClient::EventsPollingOption::Manual`
+## `KafkaProducer` with `kafka::clients::KafkaClient::EventsPollingOption`
 
-While we construct a `KafkaProducer` with option `KafkaClient::EventsPollingOption::Auto` (default), an internal thread would be created for `MessageDelivery` callbacks handling.
+While we construct a `KafkaProducer` with `kafka::clients::KafkaClient::EventsPollingOption::Auto` (the default option), an internal thread would be created for `MessageDelivery` callbacks handling.
 
 This might not be what you want, since then you have to use 2 different threads to send the messages and handle the `MessageDelivery` responses.
 
-Here we have another choice, -- using `KafkaClient::EventsPollingOption::Manual`, thus the `MessageDelivery` callbacks would be called within member function `pollEvents()`.
+Here we have another choice, -- using `kafka::clients::KafkaClient::EventsPollingOption::Manual`, thus the `MessageDelivery` callbacks would be called within member function `pollEvents()`.
 
 * Note, if you constructed the `KafkaProducer` with `EventsPollingOption::Manual`, the `send()` would be an `unblocked` operation.
 I.e, once the `message buffering queue` becomes full, the `send()` operation would throw an exception (or return an `error code` with the input reference parameter), -- instead of blocking there.
@@ -64,26 +72,28 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 
 ### Example
 ```cpp
-    kafak::KafkaProducer producer(props, KafkaClient::EventsPollingOption::Manual);
+    using namespace kafka::clients;
+
+    KafkaProducer producer(props, KafkaClient::EventsPollingOption::Manual);
 
     // Prepare "msgsToBeSent"
     auto std::map<int, std::pair<Key, Value>> msgsToBeSent = ...;
     
     for (const auto& msg : msgsToBeSent) {
-        auto record = kafak::ProducerRecord(topic, partition, msg.second.first, msg.second.second, msg.first);
-        std::error_code ec;
-        producer.send(ec,
+        auto record = producer::ProducerRecord(topic, partition, msg.second.first, msg.second.second, msg.first);
+        kafka::Error sendError;
+        producer.send(sendError,
                       record,
                       // Ack callback
-                      [&msg](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
+                      [&msg](const producer::RecordMetadata& metadata, const kafka::Error& deliveryError) {
                            // the message could be identified by `metadata.recordId()`
-                           if (ec)  {
-                               LOG_ERROR("Cannot send out message with recordId={0}", metadata.recordId());
+                           if (deliveryError)  {
+                               std::cerr << "% Message delivery failed: " << deliveryError.message() << std::endl;
                            } else {
                                msgsToBeSend.erase(metadata.recordId()); // Quite safe here
                            }
                        });
-        if (ec) break;
+        if (sendError) break;
     }
     
     // Here we call the `MessageDelivery` callbacks
@@ -99,9 +109,11 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 
 ### Example
 ```cpp
+    using namespace kafka::clients;
+
     kafak::KafkaProducer producer(props);
 
-    auto record = kafka::ProducerRecord(topic, partition, Key(), Value());
+    auto record = producer::ProducerRecord(topic, partition, Key(), Value());
 
     for (const auto& msg : msgsToBeSent) {
         // Prepare record headers
@@ -117,9 +129,9 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 
         producer.send(record,
                       // Ack callback
-                      [&msg](const kafka::Producer::RecordMetadata& metadata, std::error_code ec) {
-                           if (ec)  {
-                               LOG_ERROR("Cannot send out message: {0}, err: {1}", metadata.toString(), ec);
+                      [&msg](const kafka::Producer::RecordMetadata& metadata, , const kafka::Error& error) {
+                           if (error)  {
+                               std::cerr << "% Message delivery failed: " << error.message() << std::endl;
                            }
                        });
     }
@@ -133,17 +145,17 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 
 2. Delivery `Error` would be passed through the delivery-callback.
 
-There are 2 kinds of possible errors,
+About `Error`'s `value()`s, there are 2 cases
 
 1. Local errors,
 
-    - RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC      -- The topic doesn't exist
+    - `RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC`      -- The topic doesn't exist
 
-    - RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION  -- The partition doesn't exist
+    - `RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION`  -- The partition doesn't exist
 
-    - RD_KAFKA_RESP_ERR__INVALID_ARG        -- Invalid topic (topic is null or the length is too long (>512))
+    - `RD_KAFKA_RESP_ERR__INVALID_ARG`        -- Invalid topic (topic is null or the length is too long (>512))
 
-    - RD_KAFKA_RESP_ERR__MSG_TIMED_OUT      -- No ack received within the time limit
+    - `RD_KAFKA_RESP_ERR__MSG_TIMED_OUT`      -- No ack received within the time limit
 
 2. Broker errors,
 
@@ -205,5 +217,5 @@ E.g, if a `KafkaProducer` was created with property of `BOOTSTRAP_SERVERS=127.0.
 
 It will be handled by a background thread, not by the user's thread.
 
-Note, should be careful if both the `KafkaProducer::send()` and the `Producer::Callback` might access the same container at the same time.
+Note, should be careful if both the `KafkaProducer::send()` and the `producer::Callback` might access the same container at the same time.
 

@@ -20,7 +20,7 @@ int main(int argc, char **argv)
             {"bootstrap.servers", brokers},
         });
 
-        // Create a consumer instance.
+        // Create a consumer instance
         kafka::clients::KafkaConsumer consumer(props);
 
         // Subscribe to topics
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
         auto lastTimeCommitted = std::chrono::steady_clock::now();
 
-        // Read messages from the topic.
+        // Read messages from the topic
         std::cout << "% Reading messages from topic: " << topic << std::endl;
         bool allCommitted = true;
         bool running      = true;

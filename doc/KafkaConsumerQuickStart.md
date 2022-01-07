@@ -6,27 +6,27 @@ We'd recommend users to cross-reference them, --especially the examples.
 
 Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAutoCommitConsumer and KafkaManualCommitConsumer, --depending on whether users should call `commit` manually.
 
-## KafkaAutoCommitConsumer
+## KafkaConsumer (`enable.auto.commit=true`)
 
-* Friendly for users, --would not care about when to commit the offsets for these received messages.
+* Automatically commits previously polled offsets on each `poll` (and the final `close`) operations.
 
-* Internally, it would commit the offsets (for received records) within the next `poll` and the final `close`.
-Note, each internal `commit` would "try its best", but "not guaranteed to succeed", -- it's supposed to be called periodically, thus occasional failure doesn't matter.
+    * Note, the internal `offset commit` is asynchronous, and is not guaranteed to succeed. It's supposed to be triggered (within each `poll` operation) periodically, thus the occasional failure doesn't quite matter.
 
 ### Example
 ```cpp
         // Create configuration object
         kafka::Properties props ({
-            {"bootstrap.servers", brokers},
+            {"bootstrap.servers",  brokers},
+            {"enable.auto.commit", "true"}
         });
 
-        // Create a consumer instance.
-        kafka::KafkaAutoCommitConsumer consumer(props);
+        // Create a consumer instance
+        kafka::clients::KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});
 
-        // Read messages from the topic.
+        // Read messages from the topic
         std::cout << "% Reading messages from topic: " << topic << std::endl;
         while (true) {
             auto records = consumer.poll(std::chrono::milliseconds(100));
@@ -48,17 +48,19 @@ Note, each internal `commit` would "try its best", but "not guaranteed to succee
                 }
             }
         }
+        
+        // consumer.close(); // No explicit close is needed, RAII will take care of it
 ```
 
-* `ConsumerConfig::BOOTSTRAP_SERVERS` is mandatory for `ConsumerConfig`.
+* `bootstrap.servers` property is mandatory for a Kafka client.
 
-* `subscribe` could take a topic list. And it's a blocking operation, -- would return after the rebalance event triggered callback was executed.
+* `subscribe` could take a topic list. It's a block operation, would wait the consumer to get partitions assigned.
 
-* `poll` must be periodically called, and it would trigger kinds of callback handling internally. As in this example, just put it in a "while loop" would be OK.
+* `poll` must be called periodically, thus to trigger kinds of callback handling internally. In practice, it could be put in a "while loop".
 
-* At the end, the user could `close` the consumer manually, or just leave it to the destructor (which would `close` anyway).
+* At the end, we could `close` the consumer explicitly, or just leave it to the destructor.
 
-## KafkaManualCommitConsumer
+## KafkaConsumer (`enable.auto.commit=false`)
 
 * Users must commit the offsets for received records manually.
 
@@ -69,15 +71,15 @@ Note, each internal `commit` would "try its best", but "not guaranteed to succee
             {"bootstrap.servers", brokers},
         });
 
-        // Create a consumer instance.
-        kafka::KafkaManualCommitConsumer consumer(props);
+        // Create a consumer instance
+        kafka::clients::KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});
 
         auto lastTimeCommitted = std::chrono::steady_clock::now();
 
-        // Read messages from the topic.
+        // Read messages from the topic
         std::cout << "% Reading messages from topic: " << topic << std::endl;
         bool allCommitted = true;
         bool running      = true;
@@ -110,7 +112,7 @@ Note, each internal `commit` would "try its best", but "not guaranteed to succee
                 auto now = std::chrono::steady_clock::now();
                 if (now - lastTimeCommitted > std::chrono::seconds(1)) {
                     // Commit offsets for messages polled
-                    std::cout << "% syncCommit offsets: " << kafka::Utility::getCurrentTime() << std::endl;
+                    std::cout << "% syncCommit offsets: " << kafka::utility::getCurrentTime() << std::endl;
                     consumer.commitSync(); // or commitAsync()
 
                     lastTimeCommitted = now;
@@ -118,23 +120,25 @@ Note, each internal `commit` would "try its best", but "not guaranteed to succee
                 }
             }
         }
+
+        // consumer.close(); // No explicit close is needed, RAII will take care of it
 ```
 
 * The example is quite similar with the KafkaAutoCommitConsumer, with only 1 more line added for manual-commit.
 
 * `commitSync` and `commitAsync` are both available for a KafkaManualConsumer. Normally, use `commitSync` to guarantee the commitment, or use `commitAsync`(with `OffsetCommitCallback`) to get a better performance.
 
-## KafkaManualCommitConsumer with `KafkaClient::EventsPollingOption::Manual`
+## `KafkaConsumer` with `kafka::clients::KafkaClient::EventsPollingOption`
 
-While we construct a `KafkaManualCommitConsumer` with option `KafkaClient::EventsPollingOption::AUTO` (default), an internal thread would be created for `OffsetCommit` callbacks handling.
+While we construct a `KafkaConsumer` with `kafka::clients::KafkaClient::EventsPollingOption::Auto` (i.e. the default option), an internal thread would be created for `OffsetCommit` callbacks handling.
 
 This might not be what you want, since then you have to use 2 different threads to process the messages and handle the `OffsetCommit` responses.
 
-Here we have another choice, -- using `KafkaClient::EventsPollingOption::Manual`, thus the `OffsetCommit` callbacks would be called within member function `pollEvents()`.
+Here we have another choice, -- using `kafka::clients::KafkaClient::EventsPollingOption::Manual`, thus the `OffsetCommit` callbacks would be called within member function `pollEvents()`.
 
 ### Example
 ```cpp
-    KafkaManualCommitConsumer consumer(props, KafkaClient::EventsPollingOption::Manual);
+    KafkaConsumer consumer(props, kafka::clients::KafkaClient::EventsPollingOption::Manual);
 
     consumer.subscribe({"topic1", "topic2"});
 
@@ -156,17 +160,17 @@ Here we have another choice, -- using `KafkaClient::EventsPollingOption::Manual`
 
 ## Error handling
 
-No exception would be thrown by `KafkaProducer::poll()`.
+No exception would be thrown from a consumer's `poll` operation.
 
-Once an error occurs, the `ErrorCode` would be embedded in the `Consumer::ConsumerRecord`.
+Instead, once an error occurs, the `Error` would be embedded in the `Consumer::ConsumerRecord`.
 
-There're 2 cases,
+About `Error`'s `value()`s, there are 2 cases
 
 1. Success
 
-    - RD_KAFKA_RESP_ERR__NO_ERROR (0),    -- got a message successfully
+    - `RD_KAFKA_RESP_ERR__NO_ERROR` (`0`),  -- got a message successfully
 
-    - RD_KAFKA_RESP_ERR__PARTITION_EOF,   -- reached the end of a partition (no message got)
+    - `RD_KAFKA_RESP_ERR__PARTITION_EOF`,   -- reached the end of a partition (no message got)
 
 2. Failure
 
@@ -187,15 +191,15 @@ There're 2 cases,
 
 * How many threads would be created by a KafkaConsumer?
 
-    Excluding the user's main thread, `KafkaAutoCommitConsumer` would start another (N + 2) threads in the background, while `KafkaManualConsumer` would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)
+    Excluding the user's main thread, if `enable.auto.commit` is `false`, the `KafkaConsumer` would start another (N + 2) threads in the background; otherwise, the `KafkaConsumer` would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)
 
     1. Each broker (in the list of BOOTSTRAP_SERVERS) would take a seperate thread to transmit messages towards a kafka cluster server.
 
     2. Another 3 threads will handle internal operations, consumer group operations, and kinds of timers, etc.
 
-    3. KafkaManualConsumer has one more thread, which keeps polling the offset-commit callback event.
+    3. To enable the auto commit, one more thread would be create, which keeps polling/processing the offset-commit callback event.
 
-    E.g, if a KafkaAutoCommitConsumer was created with property of `BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890`, it would take 6 threads in total (including the main thread).
+    E.g, if a KafkaConsumer was created with property of `BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890`, it would take 6 threads in total (including the main thread).
 
 * Which one of these threads will handle the callbacks?
 
@@ -203,5 +207,4 @@ There're 2 cases,
 
     1. `RebalanceCallback` will be triggered internally by the user's thread, -- within the `poll` function.
 
-    2. `OffsetCommitCallback` (only available for `KafkaManualCommitConsumer`) will be triggered by a background thread, not by the user's thread.
-
+    2. If `enable.auto.commit=true`, the `OffsetCommitCallback` will be triggered by the user's `poll` thread; otherwise, it would be triggered by a background thread.

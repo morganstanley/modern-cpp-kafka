@@ -24,10 +24,10 @@ int main(int argc, char **argv)
             {"enable.idempotence", "true"},
         });
 
-        // Create a producer instance.
+        // Create a producer instance
         KafkaProducer producer(props);
 
-        // Read messages from stdin and produce to the broker.
+        // Read messages from stdin and produce to the broker
         std::cout << "% Type message value and hit enter to produce message. (empty line to quit)" << std::endl;
 
         for (std::string line; std::getline(std::cin, line);) {
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
             auto record = producer::ProducerRecord(topic,
                                                    kafka::NullKey,
                                                    kafka::Value(line.c_str(), line.size()));
-            // Send the message.
+            // Send the message
             producer.send(record,
                           // The delivery report handler
                           [](const producer::RecordMetadata& metadata, const kafka::Error& error) {
