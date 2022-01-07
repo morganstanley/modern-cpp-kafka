@@ -19,17 +19,19 @@ namespace KAFKA_API::utility {
  */
 inline std::string getLocalTimeString(const std::chrono::system_clock::time_point& timePoint)
 {
-    auto micros = std::chrono::duration_cast<std::chrono::microseconds>(timePoint.time_since_epoch()) % 1000000;
     auto time = std::chrono::system_clock::to_time_t(timePoint);
-
-    std::ostringstream oss;
     std::tm tmBuf = {};
+
 #if !defined(WIN32)
-    oss << std::put_time(localtime_r(&time, &tmBuf), "%F %T") <<  "." << std::setfill('0') << std::setw(6) << micros.count();
+    localtime_r(&time, &tmBuf);
 #else
     localtime_s(&tmBuf, &time);
-    oss << std::put_time(&tmBuf, "%F %T") <<  "." << std::setfill('0') << std::setw(6) << micros.count();
 #endif
+
+    std::ostringstream oss;
+    oss << std::put_time(&tmBuf, "%F %T") <<  "." << std::setfill('0') << std::setw(6)
+        << std::chrono::duration_cast<std::chrono::microseconds>(timePoint.time_since_epoch()).count() % 1000000;
+
     return oss.str();
 }
 
