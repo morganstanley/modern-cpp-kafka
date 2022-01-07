@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION "3.8")
 
-project("Modern C++ based Kafka API" VERSION 1.0.0)
+project("Modern C++ Kafka API" VERSION 1.0.0)
 
 include(CTest)
 include(CheckCXXCompilerFlag)
@@ -8,38 +8,58 @@ include(CMakePushCheckState)
 
 
 #---------------------------
-# Suggest to use C++17
+# C++17 (by default)
 #---------------------------
 if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
 endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED False)
 
-#---------------------------
-# Build options
-#---------------------------
-if ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-    add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif ()
-
 
 #---------------------------
-# Check librdkafka directory
+# Check librdkafka library
 #---------------------------
 if (DEFINED ENV{LIBRDKAFKA_ROOT})
-    set(LIBRDKAFKA_ROOT $ENV{LIBRDKAFKA_ROOT})
+    set(LIBRDKAFKA_INCLUDE_DIR $ENV{LIBRDKAFKA_ROOT}/include)
+    set(LIBRDKAFKA_LIBRARY_DIR $ENV{LIBRDKAFKA_ROOT}/lib)
 else ()
-    set(LIBRDKAFKA_ROOT /usr/local)
+    set(LIBRDKAFKA_INCLUDE_DIR /usr/local/include)
+    set(LIBRDKAFKA_LIBRARY_DIR /usr/local/lib)
 endif ()
-message(STATUS "librdkafka root directory: ${LIBRDKAFKA_ROOT}")
 
-include_directories(SYSTEM ${LIBRDKAFKA_ROOT}/include)
-link_directories(${LIBRDKAFKA_ROOT}/lib)
+message(STATUS "librdkafka include directory: ${LIBRDKAFKA_INCLUDE_DIR}")
+message(STATUS "librdkafka library directory: ${LIBRDKAFKA_LIBRARY_DIR}")
+
 
 #---------------------------
-# Check boost headers for C++14 support
+# Check pthread library (for linux only)
+#---------------------------
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    find_library(PTHREAD_LIB pthread)
+    if (PTHREAD_LIB)
+        message(STATUS "pthread library: ${PTHREAD_LIB}")
+    else ()
+        message(FATAL_ERROR "Could not find library: pthread!")
+    endif ()
+endif ()
+
+
+#---------------------------
+# Check sasl library
+#---------------------------
+if (DEFINED ENV{SASL_LIBRARYDIR})
+    set(SASL_LIBRARYDIR $ENV{SASL_LIBRARYDIR})
+    link_directories(${SASL_LIBRARYDIR})
+    message(STATUS "sasl2 library directory: ${SASL_LIBRARYDIR}")
+endif ()
+if (DEFINED ENV{SASL_LIBRARY})
+    set(SASL_LIBRARY $ENV{SASL_LIBRARY})
+    message(STATUS "sasl2 library: ${SASL_LIBRARY}")
+endif ()
+
+
+#---------------------------
+# Check boost headers (for C++14 support)
 #---------------------------
 if (CMAKE_CXX_STANDARD EQUAL 14)
     if (DEFINED ENV{BOOST_ROOT})
@@ -52,6 +72,25 @@ if (CMAKE_CXX_STANDARD EQUAL 14)
     endif ()
     include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 endif ()
+
+
+#---------------------------
+# Build Options
+#---------------------------
+if ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+    add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif ()
+
+
+#---------------------------
+# Build Option: UT stubs
+#---------------------------
+if (BUILD_OPTION_ENABLE_UT_STUBS)
+    add_definitions(-DKAFKA_API_ENABLE_UNIT_TEST_STUBS)
+endif ()
+
 
 #---------------------------
 # Build Option: clang-tidy
@@ -179,17 +218,19 @@ if (BUILD_OPTION_GEN_COVERAGE)
         add_link_options("-fprofile-instr-generate" "-fcoverage-mapping")
 
         add_custom_target(coverage_init
-          COMMENT "Initialize coverage counters"
-          COMMAND "rm" "-f" "tests/unit/default.profraw" "tests/default.profdata")
+            COMMENT "Initialize coverage counters"
+            COMMAND "rm" "-f" "tests/unit/default.profraw" "tests/default.profdata"
+        )
 
         add_custom_target(coverage
-          COMMENT "Generate coverage report"
-          COMMAND "llvm-profdata" "merge" "-sparse" "tests/unit/default.profraw"
+            COMMENT "Generate coverage report"
+            COMMAND "llvm-profdata" "merge" "-sparse" "tests/unit/default.profraw"
                                   "-o" "tests/default.profdata"
-          COMMAND "llvm-cov" "show" "-format" "html" "-instr-profile" "tests/default.profdata" "tests/unit/kafka-unit-test"
+            COMMAND "llvm-cov" "show" "-format" "html" "-instr-profile" "tests/default.profdata" "tests/unit/kafka-unit-test"
                              ">" "coverage_report.html"
-          COMMAND "echo" "Coverage report generated: coverage_report.html"
+            COMMAND "echo" "Coverage report generated: coverage_report.html"
         )
+
     else ()
         message(FATAL_ERROR "Coverage report requrested by BUILD_OPTION_GEN_COVERAGE, but only supported with Clang build")
     endif ()
@@ -203,7 +244,7 @@ endif ()
 #---------------------------
 if (BUILD_OPTION_DOC_ONLY)
     add_subdirectory("doc")
-else()
+else ()
     if (BUILD_OPTION_GEN_DOC)
         add_subdirectory("doc")
     endif ()
@@ -213,5 +254,3 @@ else()
     add_subdirectory("tools")
     add_subdirectory("examples")
 endif ()
-
-

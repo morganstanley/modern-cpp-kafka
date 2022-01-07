@@ -17,11 +17,12 @@ int main(int argc, char **argv)
 
         // Create configuration object
         kafka::Properties props ({
-            {"bootstrap.servers", brokers},
+            {"bootstrap.servers",  brokers},
+            {"enable.auto.commit", "true"}
         });
 
         // Create a consumer instance.
-        kafka::KafkaAutoCommitConsumer consumer(props);
+        kafka::clients::KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});

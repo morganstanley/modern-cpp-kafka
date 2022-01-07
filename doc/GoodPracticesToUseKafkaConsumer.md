@@ -16,7 +16,7 @@ If we want to achieve high performance/availability, here're some rules of thumb
 
 ## How to avoid polling duplicated messages
 
-* A `KafkaManualCommitConsumer` could help to commit the offsets more frequently (e.g, always do commit after finishing processing a message).
+* To commit the offsets more frequently (e.g, always do commit after finishing processing a message).
 
-* Don't use quite a large `MAX_POLL_RECORDS` for a `KafkaAutoCommitConsumer`, -- you might fail to commit all these messages before crash, thus more duplications with the next `poll`.
+* Don't use quite a large `MAX_POLL_RECORDS` for a `KafkaConsumer` (with `enable.auto.commit=true`) -- you might fail to commit all these messages before crash, thus more duplications with the next `poll`.
 

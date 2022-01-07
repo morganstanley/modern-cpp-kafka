@@ -22,47 +22,27 @@
 #include <thread>
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients {
 
 /**
- * The base class for Kafka clients (i.e, KafkaConsumer, KafkaProducer, and AdminClient).
+ * The base class for Kafka clients.
  */
 class KafkaClient
 {
-protected:
-    using ConfigCallbacksRegister = std::function<void(rd_kafka_conf_t*)>;
-    using StatsCallback           = std::function<void(std::string)>;
-
-    enum class ClientType { KafkaConsumer, KafkaProducer, AdminClient };
-    static std::string getClientTypeString(ClientType type)
-    {
-        switch (type)
-        {
-            case ClientType::KafkaConsumer: return "KafkaConsumer";
-            case ClientType::KafkaProducer: return "KafkaProducer";
-            case ClientType::AdminClient:   return "AdminClient";
-            default: assert(false);         return "Invalid Type";
-        }
-    }
-
-    static constexpr int TIMEOUT_INFINITE  = -1;
-
-    static int convertMsDurationToInt(std::chrono::milliseconds ms)
-    {
-        return ms > std::chrono::milliseconds(INT_MAX) ? TIMEOUT_INFINITE : static_cast<int>(ms.count());
-    }
-
 public:
+    /**
+     * The option shows whether user wants to call `pollEvents()` manually to trigger internal callbacks.
+     */
     enum class EventsPollingOption { Manual, Auto };
 
-    KafkaClient(ClientType                     clientType,
-                const Properties&              properties,
-                const ConfigCallbacksRegister& registerCallbacks   = ConfigCallbacksRegister(),
-                const std::set<std::string>&   privatePropertyKeys = {});
-
-    virtual ~KafkaClient() = default;
-
+    /**
+     * Get the client id.
+     */
     const std::string& clientId()   const { return _clientId; }
+
+    /**
+     * Get the client name (i.e. client type + id).
+     */
     const std::string& name()       const { return _clientName; }
 
     /**
@@ -85,11 +65,26 @@ public:
     void setLogLevel(int level);
 
     /**
+     * Callback type for statistics info dumping.
+     */
+    using StatsCallback = std::function<void(const std::string&)>;
+
+    /**
      * Set callback to receive the periodic statistics info.
      * Note: 1) It only works while the "statistics.interval.ms" property is configured with a non-0 value.
      *       2) The callback would be triggered periodically, receiving the internal statistics info (with JSON format) emited from librdkafka.
      */
     void setStatsCallback(StatsCallback cb) { _statsCb = std::move(cb); }
+
+    /**
+     * Callback type for error notification.
+     */
+    using ErrorCallback = std::function<void(const Error&)>;
+
+    /**
+     * Set callback for error notification.
+     */
+    void setErrorCallback(ErrorCallback cb) { _errorCb = std::move(cb); }
 
     /**
      * Return the properties which took effect.
@@ -100,6 +95,15 @@ public:
      * Fetch the effected property (including the property internally set by librdkafka).
      */
     Optional<std::string> getProperty(const std::string& name) const;
+
+    /**
+     * Call the OffsetCommit callbacks (if any)
+     * Note: The Kafka client should be constructed with option `EventsPollingOption::Manual`.
+     */
+    void pollEvents(std::chrono::milliseconds timeout)
+    {
+        _pollable->poll(convertMsDurationToInt(timeout));
+    }
 
     /**
      * Fetch matadata from a available broker.
@@ -150,56 +154,6 @@ public:
  */
 #define KAFKA_API_LOG(lvl, ...) KafkaClient::doGlobalLog(lvl, __FILE__, __LINE__, ##__VA_ARGS__)
 
-protected:
-
-    rd_kafka_t* getClientHandle() const { return _rk.get(); }
-
-    static const KafkaClient& kafkaClient(const rd_kafka_t* rk) { return *static_cast<const KafkaClient*>(rd_kafka_opaque(rk)); }
-    static       KafkaClient& kafkaClient(rd_kafka_t* rk)       { return *static_cast<KafkaClient*>(rd_kafka_opaque(rk)); }
-
-    static const constexpr int LOG_BUFFER_SIZE = 1024;
-
-    template <typename T = void>
-    struct Global
-    {
-        static Logger         logger;
-        static std::once_flag initOnce;
-    };
-
-    // Log callback (for librdkafka)
-    static void logCallback(const rd_kafka_t* rk, int level, const char* fac, const char* buf);
-
-    // Statistics callback (for librdkafka)
-    static int statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, void* opaque);
-
-    // Validate properties (and fix it if necesary)
-    static Properties validateAndReformProperties(const Properties& origProperties);
-
-    // To avoid double-close
-    bool _opened = false;
-
-private:
-    std::string         _clientId;
-    std::string         _clientName;
-    std::atomic<int>    _logLevel = {Log::Level::Notice};
-    Logger              _logger;
-    Properties          _properties;
-    StatsCallback       _statsCb;
-    rd_kafka_unique_ptr _rk;
-
-    // Log callback (for class instance)
-    void onLog(int level, const char* fac, const char* buf) const;
-
-    // Stats callback (for class instance)
-    void onStats(std::string&& jsonString);
-
-    static const constexpr char* BOOTSTRAP_SERVERS = "bootstrap.servers";
-    static const constexpr char* CLIENT_ID         = "client.id";
-    static const constexpr char* LOG_LEVEL         = "log_level";
-    static const constexpr char* DEBUG             = "debug";
-    static const constexpr char* SECURITY_PROTOCOL          = "security.protocol";
-    static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
-
 #if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
 #else
@@ -207,25 +161,116 @@ private:
 #endif
 
 protected:
-    class Pollable
+    // There're 3 derived classes: KafkaConsumer, KafkaProducer, AdminClient
+    enum class ClientType { KafkaConsumer, KafkaProducer, AdminClient };
+
+    using ConfigCallbacksRegister = std::function<void(rd_kafka_conf_t*)>;
+
+    KafkaClient(ClientType                     clientType,
+                const Properties&              properties,
+                const ConfigCallbacksRegister& extraConfigRegister = ConfigCallbacksRegister{},
+                EventsPollingOption            eventsPollingOption = EventsPollingOption::Auto);
+
+    virtual ~KafkaClient() = default;
+
+    rd_kafka_t* getClientHandle() const { return _rk.get(); }
+
+    static const KafkaClient& kafkaClient(const rd_kafka_t* rk) { return *static_cast<const KafkaClient*>(rd_kafka_opaque(rk)); }
+    static       KafkaClient& kafkaClient(rd_kafka_t* rk)       { return *static_cast<KafkaClient*>(rd_kafka_opaque(rk)); }
+
+    static constexpr int TIMEOUT_INFINITE  = -1;
+
+    static int convertMsDurationToInt(std::chrono::milliseconds ms)
     {
-    public:
+        return ms > std::chrono::milliseconds(INT_MAX) ? TIMEOUT_INFINITE : static_cast<int>(ms.count());
+    }
+
+    // Show whether it's using automatical events polling
+    bool isWithAutoEventsPolling() const { return _eventsPollingOption == EventsPollingOption::Auto; }
+
+    // Buffer size for single line logging
+    static const constexpr int LOG_BUFFER_SIZE = 1024;
+
+    // Global logger
+    template <typename T = void>
+    struct Global
+    {
+        static Logger         logger;
+        static std::once_flag initOnce;
+    };
+
+    // Validate properties (and fix it if necesary)
+    static Properties validateAndReformProperties(const Properties& properties);
+
+    // To avoid double-close
+    bool       _opened = false;
+
+    // Accepted properties
+    Properties _properties;
+
+#if COMPILER_SUPPORTS_CPP_17
+    static constexpr int EVENT_POLLING_INTERVAL_MS = 100;
+#else
+    enum { EVENT_POLLING_INTERVAL_MS  = 100 };
+#endif
+
+private:
+    std::string         _clientId;
+    std::string         _clientName;
+    std::atomic<int>    _logLevel = {Log::Level::Notice};
+    Logger              _logger;
+    StatsCallback       _statsCb;
+    ErrorCallback       _errorCb;
+    rd_kafka_unique_ptr _rk;
+    EventsPollingOption _eventsPollingOption;
+
+    static std::string getClientTypeString(ClientType type)
+    {
+        return (type == ClientType::KafkaConsumer ? "KafkaConsumer"
+                    : (type == ClientType::KafkaProducer ? "KafkaProducer" : "AdminClient"));
+    }
+
+    // Log callback (for librdkafka)
+    static void logCallback(const rd_kafka_t* rk, int level, const char* fac, const char* buf);
+
+    // Statistics callback (for librdkafka)
+    static int statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, void* opaque);
+
+    // Error callback (for librdkafka)
+    static void errorCallback(rd_kafka_t* rk, int err, const char* reason, void* opaque);
+
+    // Log callback (for class instance)
+    void onLog(int level, const char* fac, const char* buf) const;
+
+    // Stats callback (for class instance)
+    void onStats(const std::string& jsonString);
+
+    // Error callback (for class instance)
+    void onError(const Error& error);
+
+    static const constexpr char* BOOTSTRAP_SERVERS = "bootstrap.servers";
+    static const constexpr char* CLIENT_ID         = "client.id";
+    static const constexpr char* LOG_LEVEL         = "log_level";
+    static const constexpr char* DEBUG             = "debug";
+
+protected:
+    struct Pollable
+    {
         virtual ~Pollable() = default;
         virtual void poll(int timeoutMs) = 0;
     };
 
-    template <typename T>
     class PollableCallback: public Pollable
     {
     public:
-        using Func = void(*)(T*, int);
-        PollableCallback(T* client, Func cb): _client(client), _cb(cb) {}
+        using Callback = std::function<void(int)>;
 
-        void poll(int timeoutMs) override { _cb(_client, timeoutMs); }
+        explicit PollableCallback(Callback cb): _cb(std::move(cb)) {}
+
+        void poll(int timeoutMs) override { _cb(timeoutMs); }
 
     private:
-        T*   _client;
-        Func _cb;
+        const Callback _cb;
     };
 
     class PollThread
@@ -240,10 +285,7 @@ protected:
         {
             _running = false;
 
-            if (_thread.joinable())
-            {
-                _thread.join();
-            }
+            if (_thread.joinable()) _thread.join();
         }
 
     private:
@@ -260,6 +302,24 @@ protected:
         std::atomic_bool _running;
         std::thread      _thread;
     };
+
+    void startBackgroundPollingIfNecessary(const PollableCallback::Callback& pollableCallback)
+    {
+        _pollable = std::make_unique<KafkaClient::PollableCallback>(pollableCallback);
+
+        if (isWithAutoEventsPolling()) _pollThread = std::make_unique<PollThread>(*_pollable);
+    }
+
+    void stopBackgroundPollingIfNecessary()
+    {
+        _pollThread.reset(); // Join the polling thread (in case it's running)
+
+        _pollable.reset();
+    }
+
+private:
+    std::unique_ptr<Pollable>   _pollable;
+    std::unique_ptr<PollThread> _pollThread;
 };
 
 template <typename T>
@@ -271,9 +331,12 @@ std::once_flag KafkaClient::Global<T>::initOnce;
 inline
 KafkaClient::KafkaClient(ClientType                     clientType,
                          const Properties&              properties,
-                         const ConfigCallbacksRegister& registerCallbacks,
-                         const std::set<std::string>&   privatePropertyKeys)
+                         const ConfigCallbacksRegister& extraConfigRegister,
+                         EventsPollingOption            eventsPollingOption)
+    : _eventsPollingOption(eventsPollingOption)
 {
+    static const std::set<std::string> PRIVATE_PROPERTY_KEYS = { "max.poll.records" };
+
     // Save clientID
     if (auto clientId = properties.getProperty(CLIENT_ID))
     {
@@ -293,12 +356,12 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         }
         catch (const std::exception& e)
         {
-            KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be an number!").append(e.what()));
+            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be an number!").append(e.what())));
         }
 
         if (_logLevel < Log::Level::Emerg || _logLevel > Log::Level::Debug)
         {
-            KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be a value between 0 and 7!"));
+            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be a value between 0 and 7!")));
         }
     }
 
@@ -309,7 +372,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     for (const auto& prop: properties.map())
     {
         // Those private properties are only available for `C++ wrapper`, not for librdkafka
-        if (privatePropertyKeys.count(prop.first))
+        if (PRIVATE_PROPERTY_KEYS.count(prop.first))
         {
             _properties.put(prop.first, prop.second);
             continue;
@@ -335,73 +398,63 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     // Statistics Callback
     rd_kafka_conf_set_stats_cb(rk_conf.get(), KafkaClient::statsCallback);
 
+    // Error Callback
+    rd_kafka_conf_set_error_cb(rk_conf.get(), KafkaClient::errorCallback);
+
     // Other Callbacks
-    if (registerCallbacks)
-    {
-        registerCallbacks(rk_conf.get());
-    }
+    if (extraConfigRegister) extraConfigRegister(rk_conf.get());
 
     // Set client handler
     _rk.reset(rd_kafka_new((clientType == ClientType::KafkaConsumer ? RD_KAFKA_CONSUMER : RD_KAFKA_PRODUCER),
                            rk_conf.release(),  // rk_conf's ownship would be transferred to rk, after the "rd_kafka_new()" call
                            errInfo.clear().str(),
                            errInfo.capacity()));
-    KAFKA_THROW_IF_WITH_RESP_ERROR(rd_kafka_last_error());
+    KAFKA_THROW_IF_WITH_ERROR(Error(rd_kafka_last_error()));
 
     // Add brokers
     auto brokers = properties.getProperty(BOOTSTRAP_SERVERS);
     if (rd_kafka_brokers_add(getClientHandle(), brokers->c_str()) == 0)
     {
-        KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                             "No broker could be added successfully, BOOTSTRAP_SERVERS=[" + *brokers + "]");
+        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                                "No broker could be added successfully, BOOTSTRAP_SERVERS=[" + *brokers + "]"));
     }
 
     _opened = true;
 }
 
 inline Properties
-KafkaClient::validateAndReformProperties(const Properties& origProperties)
+KafkaClient::validateAndReformProperties(const Properties& properties)
 {
-    Properties properties(origProperties);
+    auto newProperties = properties;
 
     // BOOTSTRAP_SERVERS property is mandatory
-    if (!properties.getProperty(BOOTSTRAP_SERVERS))
+    if (!newProperties.getProperty(BOOTSTRAP_SERVERS))
     {
-        KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                             "Validation failed! With no property [" + std::string(BOOTSTRAP_SERVERS) + "]");
+        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                                "Validation failed! With no property [" + std::string(BOOTSTRAP_SERVERS) + "]"));
     }
 
     // If no "client.id" configured, generate a random one for user
-    if (!properties.getProperty(CLIENT_ID))
+    if (!newProperties.getProperty(CLIENT_ID))
     {
-        properties.put(CLIENT_ID, Utility::getRandomString());
-    }
-
-    // "sasl.kerberos.service.name" is mandatory for SASL connection
-    if (auto securityProtocol = properties.getProperty(SECURITY_PROTOCOL))
-    {
-        if (securityProtocol->find("sasl") != std::string::npos)
-        {
-            if (!properties.getProperty(SASL_KERBEROS_SERVICE_NAME))
-            {
-                KAFKA_THROW_WITH_MSG(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                     "The \"sasl.kerberos.service.name\" property is mandatory for SASL connection!");
-            }
-        }
+        newProperties.put(CLIENT_ID, utility::getRandomString());
     }
 
     // If no "log_level" configured, use Log::Level::Notice as default
-    if (!properties.getProperty(LOG_LEVEL))
+    if (!newProperties.getProperty(LOG_LEVEL))
     {
-        properties.put(LOG_LEVEL, std::to_string(static_cast<int>(Log::Level::Notice)));
+        newProperties.put(LOG_LEVEL, std::to_string(static_cast<int>(Log::Level::Notice)));
     }
 
-    return properties;
+    return newProperties;
 }
 
 inline Optional<std::string>
 KafkaClient::getProperty(const std::string& name) const
 {
+    // Find it in pre-saved properties
+    if (auto property = _properties.getProperty(name)) return *property;
+
     constexpr int DEFAULT_BUF_SIZE = 512;
 
     const rd_kafka_conf_t* conf = rd_kafka_conf(getClientHandle());
@@ -409,14 +462,10 @@ KafkaClient::getProperty(const std::string& name) const
     std::vector<char> valueBuf(DEFAULT_BUF_SIZE);
     std::size_t       valueSize = valueBuf.size();
 
-    // Firstly, try with a default buf size
-    if (rd_kafka_conf_get(conf, name.c_str(), valueBuf.data(), &valueSize) != RD_KAFKA_CONF_OK)
-    {
-        // If doesn't exist within librdkafka, might be from the C++ wrapper
-        return _properties.getProperty(name);
-    }
+    // Try with a default buf size. If could not find the property, return immediately.
+    if (rd_kafka_conf_get(conf, name.c_str(), valueBuf.data(), &valueSize) != RD_KAFKA_CONF_OK) return Optional<std::string>{};
 
-    // If the default buf size is not big enough, retry with a larger buf
+    // If the default buf size is not big enough, retry with a larger one
     if (valueSize > valueBuf.size())
     {
         valueBuf.resize(valueSize);
@@ -447,16 +496,43 @@ KafkaClient::logCallback(const rd_kafka_t* rk, int level, const char* fac, const
 }
 
 inline void
-KafkaClient::onStats(std::string&& jsonString)
+KafkaClient::onStats(const std::string& jsonString)
 {
-    if (_statsCb) _statsCb(std::move(jsonString));
+    if (_statsCb) _statsCb(jsonString);
 }
 
 inline int
 KafkaClient::statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, void* /*opaque*/)
 {
-    kafkaClient(rk).onStats(std::string(jsonStrBuf, jsonStrBuf+jsonStrLen));
+    std::string stats(jsonStrBuf, jsonStrBuf+jsonStrLen);
+    kafkaClient(rk).onStats(stats);
     return 0;
+}
+
+inline void
+KafkaClient::onError(const Error& error)
+{
+    if (_errorCb) _errorCb(error);
+}
+
+inline void
+KafkaClient::errorCallback(rd_kafka_t* rk, int err, const char* reason, void* /*opaque*/)
+{
+    auto respErr = static_cast<rd_kafka_resp_err_t>(err);
+
+    Error error;
+    if (respErr != RD_KAFKA_RESP_ERR__FATAL)
+    {
+        error = Error{respErr, reason};
+    }
+    else
+    {
+        LogBuffer<LOG_BUFFER_SIZE> errInfo;
+        respErr = rd_kafka_fatal_error(rk, errInfo.str(), errInfo.capacity());
+        error = Error{respErr, errInfo.c_str(), true};
+    }
+
+    kafkaClient(rk).onError(error);
 }
 
 inline Optional<BrokerMetadata>
@@ -547,5 +623,5 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
 }
 
 
-} // end of KAFKA_API
+} // end of KAFKA_API::clients
 

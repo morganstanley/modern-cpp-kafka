@@ -8,22 +8,29 @@
 #include "librdkafka/rdkafka.h"
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::producer {
 
 /**
  * A key/value pair to be sent to Kafka.
  * This consists of a topic name to which the record is being sent, an optional partition number, and an optional key and value.
+ * Note: `ProducerRecord` would not take the ownership from the memory block of `Value`.
  */
 class ProducerRecord
 {
 public:
     using Id  = std::uint64_t;
 
-    // Note: ProducerRecord would not take the ownership from these parameters,
-    ProducerRecord(Topic topic, Partition partition, const Key& key, const Value& value, Id id = 0)
-       : _topic(std::move(topic)), _partition(partition), _key(key), _value(value), _id(id) {}
-    ProducerRecord(const Topic& topic, const Key& key, const Value& value, Id id = 0)
-        : ProducerRecord(topic, RD_KAFKA_PARTITION_UA, key, value, id) {}
+    ProducerRecord(Topic topic, Partition partition, const Key& key, const Value& value)
+       : _topic(std::move(topic)), _partition(partition), _key(key), _value(value) {}
+
+    ProducerRecord(const Topic& topic, Partition partition, const Key& key, const Value& value, Id id)
+        : ProducerRecord(topic, partition, key, value) { _id = id; }
+
+    ProducerRecord(const Topic& topic, const Key& key, const Value& value)
+        : ProducerRecord(topic, RD_KAFKA_PARTITION_UA, key, value) {}
+
+    ProducerRecord(const Topic& topic, const Key& key, const Value& value, Id id)
+        : ProducerRecord(topic, key, value) { _id = id; }
 
     /**
      * The topic this record is being sent to.
@@ -48,7 +55,7 @@ public:
     /**
      * The id to identify the message (consistent with `Producer::Metadata::recordId()`).
      */
-    Id        id()        const { return _id; }
+    Optional<Id>   id()      const { return _id; }
 
     /**
      * The headers.
@@ -83,19 +90,20 @@ public:
 
     std::string toString() const
     {
-        return _topic + "-" + (_partition == RD_KAFKA_PARTITION_UA ? "NA" : std::to_string(_partition)) + std::string(":") + std::to_string(_id)
-            + std::string(", ") + (_headers.empty() ? "" : ("headers[" + KAFKA_API::toString(_headers) + "], "))
+        return _topic + "-" + (_partition == RD_KAFKA_PARTITION_UA ? "NA" : std::to_string(_partition)) + std::string(":")
+            + (_id ? (std::to_string(*_id) + std::string(", ")) : " ")
+            + (_headers.empty() ? "" : ("headers[" + KAFKA_API::toString(_headers) + "], "))
             + _key.toString() + std::string("/") + _value.toString();
     }
 
 private:
-    Topic     _topic;
-    Partition _partition;
-    Key       _key;
-    Value     _value;
-    Id        _id;
-    Headers   _headers;
+    Topic        _topic;
+    Partition    _partition;
+    Key          _key;
+    Value        _value;
+    Headers      _headers;
+    Optional<Id> _id;
 };
 
-}
+} // end of KAFKA_API::clients::producer
 

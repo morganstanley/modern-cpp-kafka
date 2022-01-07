@@ -3,6 +3,7 @@
 #include "kafka/Project.h"
 
 #include "kafka/AdminClientConfig.h"
+#include "kafka/AdminCommon.h"
 #include "kafka/Error.h"
 #include "kafka/KafkaClient.h"
 #include "kafka/RdKafkaHelper.h"
@@ -17,41 +18,7 @@
 #include <vector>
 
 
-namespace KAFKA_API {
-
-namespace Admin
-{
-/**
- * The result of AdminClient::createTopics().
- */
-using CreateTopicsResult = SimpleError;
-
-/**
- * The result of AdminClient::deleteTopics().
- */
-using DeleteTopicsResult = SimpleError;
-
-/**
- * The result of AdminClient::deleteRecords().
- */
-using DeleteRecordsResult = SimpleError;
-
-/**
- * The result of AdminClient::listTopics().
- */
-struct ListTopicsResult: public SimpleError
-{
-    ListTopicsResult(rd_kafka_resp_err_t respErr, std::string detailedMsg): SimpleError(respErr, std::move(detailedMsg)) {}
-    explicit ListTopicsResult(Topics names): SimpleError(RD_KAFKA_RESP_ERR_NO_ERROR, "Success"), topics(std::move(names)) {}
-
-    /**
-     * The topics fetched.
-     */
-    Topics topics;
-};
-
-} // end of Admin
-
+namespace KAFKA_API::clients {
 
 /**
  * The administrative client for Kafka, which supports managing and inspecting topics, etc.
@@ -60,14 +27,15 @@ class AdminClient: public KafkaClient
 {
 public:
     explicit AdminClient(const Properties& properties)
-        : KafkaClient(ClientType::AdminClient, KafkaClient::validateAndReformProperties(properties))
+        : KafkaClient(ClientType::AdminClient,
+                      KafkaClient::validateAndReformProperties(properties))
     {
     }
 
     /**
      * Create a batch of new topics.
      */
-    Admin::CreateTopicsResult createTopics(const Topics&             topics,
+    admin::CreateTopicsResult createTopics(const Topics&             topics,
                                            int                       numPartitions,
                                            int                       replicationFactor,
                                            const Properties&         topicConfig = Properties(),
@@ -75,12 +43,12 @@ public:
     /**
      * Delete a batch of topics.
      */
-    Admin::DeleteTopicsResult deleteTopics(const Topics&             topics,
+    admin::DeleteTopicsResult deleteTopics(const Topics&             topics,
                                            std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
     /**
      * List the topics available in the cluster.
      */
-    Admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
+    admin::ListTopicsResult   listTopics(std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
     /**
      * Delete records whose offset is smaller than the given offset of the corresponding partition.
@@ -88,28 +56,26 @@ public:
      * @param timeout
      * @return
      */
-    Admin::DeleteRecordsResult deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
+    admin::DeleteRecordsResult deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
                                              std::chrono::milliseconds    timeout = std::chrono::milliseconds(DEFAULT_COMMAND_TIMEOUT_MS));
 
 private:
-    static std::list<SimpleError> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount);
-    static std::list<SimpleError> getPerTopicPartitionResults(const rd_kafka_topic_partition_list_t* partitionResults);
-    static SimpleError combineErrors(const std::list<SimpleError>& errors);
+    static std::list<Error> getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount);
+    static std::list<Error> getPerTopicPartitionResults(const rd_kafka_topic_partition_list_t* partitionResults);
+    static Error combineErrors(const std::list<Error>& errors);
 
 #if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_COMMAND_TIMEOUT_MS = 30000;
-    static constexpr int EVENT_POLLING_INTERVAL_MS  = 100;
 #else
     enum { DEFAULT_COMMAND_TIMEOUT_MS = 30000 };
-    enum { EVENT_POLLING_INTERVAL_MS  = 100   };
 #endif
 };
 
 
-inline std::list<SimpleError>
+inline std::list<Error>
 AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, std::size_t topicCount)
 {
-    std::list<SimpleError> errors;
+    std::list<Error> errors;
 
     for (std::size_t i = 0; i < topicCount; ++i)
     {
@@ -123,10 +89,10 @@ AdminClient::getPerTopicResults(const rd_kafka_topic_result_t** topicResults, st
     return errors;
 }
 
-inline std::list<SimpleError>
+inline std::list<Error>
 AdminClient::getPerTopicPartitionResults(const rd_kafka_topic_partition_list_t* partitionResults)
 {
-    std::list<SimpleError> errors;
+    std::list<Error> errors;
 
     for (int i = 0; i < (partitionResults ? partitionResults->cnt : 0); ++i)
     {
@@ -139,8 +105,8 @@ AdminClient::getPerTopicPartitionResults(const rd_kafka_topic_partition_list_t* 
     return errors;
 }
 
-inline SimpleError
-AdminClient::combineErrors(const std::list<SimpleError>& errors)
+inline Error
+AdminClient::combineErrors(const std::list<Error>& errors)
 {
     if (!errors.empty())
     {
@@ -152,13 +118,13 @@ AdminClient::combineErrors(const std::list<SimpleError>& errors)
                           detailedMsg += error.message();
                       });
 
-        return  SimpleError(static_cast<rd_kafka_resp_err_t>(errors.front().errorCode().value()), detailedMsg);
+        return  Error{static_cast<rd_kafka_resp_err_t>(errors.front().value()), detailedMsg};
     }
 
-    return SimpleError(RD_KAFKA_RESP_ERR_NO_ERROR, "Success");
+    return Error{RD_KAFKA_RESP_ERR_NO_ERROR, "Success"};
 }
 
-inline Admin::CreateTopicsResult
+inline admin::CreateTopicsResult
 AdminClient::createTopics(const Topics&             topics,
                           int                       numPartitions,
                           int                       replicationFactor,
@@ -174,7 +140,7 @@ AdminClient::createTopics(const Topics&             topics,
         rkNewTopics.emplace_back(rd_kafka_NewTopic_new(topic.c_str(), numPartitions, replicationFactor, errInfo.str(), errInfo.capacity()));
         if (!rkNewTopics.back())
         {
-            return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR__INVALID_ARG, rd_kafka_err2str(RD_KAFKA_RESP_ERR__INVALID_ARG));
+            return admin::CreateTopicsResult(Error{RD_KAFKA_RESP_ERR__INVALID_ARG, rd_kafka_err2str(RD_KAFKA_RESP_ERR__INVALID_ARG)});
         }
 
         for (const auto& conf: topicConfig.map())
@@ -184,7 +150,7 @@ AdminClient::createTopics(const Topics&             topics,
             {
                 std::string errMsg = "Invalid config[" + conf.first + "=" + conf.second + "]";
                 KAFKA_API_DO_LOG(Log::Level::Err, errMsg.c_str());
-                return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg);
+                return admin::CreateTopicsResult(Error{RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg});
             }
         }
     }
@@ -215,10 +181,10 @@ AdminClient::createTopics(const Topics&             topics,
 
     if (!rk_ev)
     {
-        return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit");
+        return admin::CreateTopicsResult(Error{RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit"});
     }
 
-    std::list<SimpleError> errors;
+    std::list<Error> errors;
 
     if (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))
     {
@@ -235,23 +201,23 @@ AdminClient::createTopics(const Topics&             topics,
     // Return the error if any
     if (!errors.empty())
     {
-        return combineErrors(errors);
+        return admin::CreateTopicsResult{combineErrors(errors)};
     }
 
     // Update metedata
     do
     {
         auto listResult = listTopics();
-        if (!listResult.errorCode())
+        if (!listResult.error)
         {
-            return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR_NO_ERROR, "Success");
+            return admin::CreateTopicsResult(Error{RD_KAFKA_RESP_ERR_NO_ERROR, "Success"});
         }
     } while (std::chrono::steady_clock::now() < end);
 
-    return Admin::CreateTopicsResult(RD_KAFKA_RESP_ERR__TIMED_OUT, "Updating metadata timed out");
+    return admin::CreateTopicsResult(Error{RD_KAFKA_RESP_ERR__TIMED_OUT, "Updating metadata timed out"});
 }
 
-inline Admin::DeleteTopicsResult
+inline admin::DeleteTopicsResult
 AdminClient::deleteTopics(const Topics& topics, std::chrono::milliseconds timeout)
 {
     std::vector<rd_kafka_DeleteTopic_unique_ptr> rkDeleteTopics;
@@ -288,10 +254,10 @@ AdminClient::deleteTopics(const Topics& topics, std::chrono::milliseconds timeou
 
     if (!rk_ev)
     {
-        return Admin::DeleteTopicsResult(RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit");
+        return admin::DeleteTopicsResult(Error{RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit"});
     }
 
-    std::list<SimpleError> errors;
+    std::list<Error> errors;
 
     if (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))
     {
@@ -305,10 +271,10 @@ AdminClient::deleteTopics(const Topics& topics, std::chrono::milliseconds timeou
 
     errors.splice(errors.end(), getPerTopicResults(res_topics, res_topic_cnt));
 
-    return combineErrors(errors);
+    return admin::DeleteTopicsResult(combineErrors(errors));
 }
 
-inline Admin::ListTopicsResult
+inline admin::ListTopicsResult
 AdminClient::listTopics(std::chrono::milliseconds timeout)
 {
     const rd_kafka_metadata_t* rk_metadata = nullptr;
@@ -317,7 +283,7 @@ AdminClient::listTopics(std::chrono::milliseconds timeout)
 
     if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
     {
-        return Admin::ListTopicsResult(err, rd_kafka_err2str(err));
+        return admin::ListTopicsResult(Error{err, rd_kafka_err2str(err)});
     }
 
     Topics names;
@@ -325,10 +291,10 @@ AdminClient::listTopics(std::chrono::milliseconds timeout)
     {
         names.insert(rk_metadata->topics[i].topic);
     }
-    return Admin::ListTopicsResult(names);
+    return admin::ListTopicsResult(names);
 }
 
-inline Admin::DeleteRecordsResult
+inline admin::DeleteRecordsResult
 AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
                            std::chrono::milliseconds    timeout)
 {
@@ -357,10 +323,10 @@ AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
 
     if (!rk_ev)
     {
-        return Admin::DeleteRecordsResult(RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit");
+        return admin::DeleteRecordsResult(Error{RD_KAFKA_RESP_ERR__TIMED_OUT, "No response within the time limit"});
     }
 
-    std::list<SimpleError> errors;
+    std::list<Error> errors;
 
     if (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))
     {
@@ -372,8 +338,8 @@ AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
 
     errors.splice(errors.end(), getPerTopicPartitionResults(res_offsets));
 
-    return combineErrors(errors);
+    return admin::DeleteRecordsResult(combineErrors(errors));
 }
 
-} // end of KAFKA_API
+} // end of KAFKA_API::clients
 

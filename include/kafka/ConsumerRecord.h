@@ -12,7 +12,7 @@
 #include <sstream>
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::consumer {
 
 /**
  * A key/value pair to be received from Kafka.
@@ -79,7 +79,7 @@ public:
      *   2. Failure
      *     - [Error Codes] (https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
      */
-    std::error_code error() const { return ErrorCode(_rk_msg->err); }
+    Error error() const { return Error{_rk_msg->err}; }
 
     /**
     * Obtains explanatory string.
@@ -87,8 +87,8 @@ public:
     std::string toString() const;
 
 private:
-    using rd_kafka_message_unique_ptr = std::unique_ptr<rd_kafka_message_t, void(*)(rd_kafka_message_t*)>;
-    rd_kafka_message_unique_ptr _rk_msg;
+    using rd_kafka_message_shared_ptr = std::shared_ptr<rd_kafka_message_t>;
+    rd_kafka_message_shared_ptr _rk_msg;
 };
 
 inline Headers
@@ -150,5 +150,5 @@ ConsumerRecord::toString() const
     return oss.str();
 }
 
-}
+} // end of KAFKA_API::clients::consumer
 

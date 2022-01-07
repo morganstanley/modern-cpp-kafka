@@ -2,6 +2,7 @@
 
 #include "kafka/Project.h"
 
+#include "kafka/Error.h"
 #include "kafka/RdKafkaHelper.h"
 #include "kafka/Types.h"
 
@@ -10,10 +11,8 @@
 #include <functional>
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::consumer {
 
-namespace Consumer
-{
     /**
      * To identify which kind of re-balance event is handling, when the set of partitions assigned to the consumer changes.
      * It's guaranteed that rebalance callback will be called twice (first with PartitionsRevoked, and then with PartitionsAssigned).
@@ -37,7 +36,7 @@ namespace Consumer
     /**
      * A callback interface that the user can implement to trigger custom actions when a commit request completes.
      */
-    using OffsetCommitCallback = std::function<void(const TopicPartitionOffsets& topicPartitionOffsets, std::error_code ec)>;
+    using OffsetCommitCallback = std::function<void(const TopicPartitionOffsets& topicPartitionOffsets, const Error& error)>;
 
     /**
      * Null OffsetCommitCallback
@@ -62,7 +61,5 @@ namespace Consumer
         rd_kafka_consumer_group_metadata_unique_ptr _rkConsumerGroupMetadata;
     };
 
-} // end of Consumer
-
-} // end of KAFKA_API
+} // end of KAFKA_API::clients::consumer
 

@@ -1,10 +1,10 @@
-# About the `Modern C++ based Kafka API`
+# About the *Modern C++ Kafka API*
 
 ## Introduction
 
-The `Modern C++ based Kafka API` (`modern-cpp-kafka`) is a layer of C++ wrapper based on [librdkafka](https://github.com/edenhill/librdkafka) (the C part), with high quality, but more friendly to users.
+The [Modern C++ Kafka API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html) is a layer of C++ wrapper based on [librdkafka](https://github.com/edenhill/librdkafka) (the C part), with high quality, but more friendly to users.
 
-- By now, `modern-cpp-kafka` is compatible with `librdkafka` **v1.7.0**.
+- By now, [modern-cpp-kafka](https://github.com/morganstanley/modern-cpp-kafka) is compatible with [librdkafka v1.7.0](https://github.com/edenhill/librdkafka/releases/tag/v1.7.0).
 
 ```
 KAFKA is a registered trademark of The Apache Software Foundation and
@@ -14,13 +14,13 @@ affiliation with and is not endorsed by The Apache Software Foundation.
 
 ## Why it's here
 
-The `librdkafka` is a robust high performance C/C++ library, widely used and well maintained.
+The ***librdkafka*** is a robust high performance C/C++ library, widely used and well maintained.
 
-Unfortunately, to maintain C++98 compatibility, the C++ interface of `librdkafka` is not quite object-oriented or user-friendly.
+Unfortunately, to maintain C++98 compatibility, the C++ interface of ***librdkafka*** is not quite object-oriented or user-friendly.
 
 Since C++ is evolving quickly, we want to take advantage of new C++ features, thus make the life easier for developers. And this led us to create a new C++ API for Kafka clients.
 
-Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.
+Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.
 
 ## Features
 
@@ -36,7 +36,7 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
     * RAII is used for lifetime management
 
-    * librdkafka's polling and queue management is now hidden
+    * ***librdkafka***'s polling and queue management is now hidden
 
 * Robust
 
@@ -63,13 +63,15 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
     * Specify library locations with environment variables
 
-        * `LIBRDKAFKA_ROOT`                 -- `librdkafka` headers and libraries
+        * `LIBRDKAFKA_ROOT`                 -- ***librdkafka*** headers and libraries
 
-        * `GTEST_ROOT`                      -- `googletest` headers and libraries
+        * `GTEST_ROOT`                      -- ***googletest*** headers and libraries
 
-        * `BOOST_ROOT`                      -- `boost` headers and libraries
+        * `BOOST_ROOT`                      -- ***boost*** headers and libraries
 
         * `SASL_LIBRARYDIR`/`SASL_LIBRARY`  -- if SASL connection support is wanted
+
+        * `RAPIDJSON_INCLUDE_DIRS`          -- `addons/KafkaMetrics` requires **rapidjson** headers
 
     * Create an empty directory for the build, and `cd` to it
 
@@ -89,7 +91,7 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
             * `BUILD_OPTION_GEN_DOC=ON`       -- Generate documentation as well
 
-            * `BUILD_OPTION_DOC_ONLY=ON`       -- Only generate documentation
+            * `BUILD_OPTION_DOC_ONLY=ON`      -- Only generate documentation
 
             * `BUILD_OPTION_GEN_COVERAGE=ON`  -- Generate test coverage, only support by clang currently
 
@@ -99,13 +101,13 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
 * Include the `include/kafka` directory in your project
 
-* To work together with `modern-cpp-kafka` API, the compiler should support
+* To work together with ***modern-cpp-kafka*** API, the compiler should support
 
     * Option 1: C++17
 
     * Option 2: C++14 (with pre-requirements)
 
-        * Need `boost` headers (for `boost::optional`)
+        * Need ***boost*** headers (for `boost::optional`)
 
         * GCC only (with optimization, e.g. -O2)
 
@@ -135,6 +137,14 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
         * E.g. `export KAFKA_BROKER_PIDS=61567,61569,61571`
 
+* Additional settings for clients
+
+    * The environment variable `KAFKA_CLIENT_ADDITIONAL_SETTINGS` could be used for customized test environment
+
+        * Especially for Kafka cluster with SASL(or SSL) connections
+
+        * E.g. `export KAFKA_CLIENT_ADDITIONAL_SETTINGS="security.protocol=SASL_PLAINTEXT;sasl.kerberos.service.name=...;sasl.kerberos.keytab=...;sasl.kerberos.principal=..."`
+
 ## To Start
 
 * Tutorial
@@ -147,29 +157,16 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
 * User's Manual
 
-    * Kafka Client API
+    * [Kafka Client API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html)
 
-        * [modern-cpp-kafka API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html)
 
     * Kafka Client Properties
 
-        * In most cases, the `Properties` setting in `modern-cpp-kafka` is identical with [librdkafka configuration](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
+        * In most cases, the `Properties` settings for ***modern-cpp-kafka*** are identical with [librdkafka configuration](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
 
         * With following exceptions
 
             * KafkaConsumer
-
-                * More properties than `librdkafka`
-
-                    * `max.poll.records` (default: `500`): The maxmum number of records that a single call to `poll()` would return
-
-                * Properties not supposed to be used (internally shadowed by `modern-cpp-kafka`)
-
-                    * `enable.auto.offset.store`
-
-                    * `enable.auto.commit`
-
-                    * `auto.commit.interval.ms`
 
                 * Properties with random string as default
 
@@ -177,13 +174,21 @@ Eventually, we worked out the `modern-cpp-kafka`, -- a header-only library that 
 
                     * `group.id`
 
+                * More properties than ***librdkafka***
+
+                    * `max.poll.records` (default: `500`): The maxmum number of records that a single call to `poll()` would return
+
+                * Property which overrides the one from ***librdkafka***
+
+                    * `enable.auto.commit` (default: `false`): To automatically commit the previously polled offsets on each `poll` operation
+
+                * Properties not supposed to be used (internally shadowed by ***modern-cpp-kafka***)
+
+                    * `enable.auto.offset.store`
+
+                    * `auto.commit.interval.ms`
+
             * KafkaProducer
-
-                * Different default value from `librdkafka`
-
-                    * KafkaSyncProducer
-
-                        * `linger.ms` (default: `0`)
 
                 * Properties with random string as default
 

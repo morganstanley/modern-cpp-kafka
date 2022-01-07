@@ -8,7 +8,6 @@
 #include <vector>
 
 
-namespace Kafka = KAFKA_API;
 
 
 struct Arguments
@@ -21,8 +20,8 @@ struct Arguments
     int         partitions{};
     int         replicationFactor{};
 
-    Kafka::Properties adminConfig;
-    Kafka::Properties topicProps;
+    kafka::Properties adminConfig;
+    kafka::Properties topicProps;
 };
 
 std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
@@ -72,7 +71,7 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
     {
 
         std::cout << "This tool helps in Kafka topic operations" << std::endl;
-        std::cout << "    (with librdkafka v" << Kafka::Utility::getLibRdKafkaVersion() << ")" << std::endl;
+        std::cout << "    (with librdkafka v" << kafka::utility::getLibRdKafkaVersion() << ")" << std::endl;
         std::cout << desc << std::endl;
         return nullptr;
     }
@@ -156,17 +155,19 @@ int main (int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    Kafka::Properties adminConf = args->adminConfig;
-    adminConf.put(Kafka::AdminClientConfig::BOOTSTRAP_SERVERS, args->broker);
+    using namespace kafka::clients;
 
-    Kafka::AdminClient adminClient(adminConf);
+    kafka::Properties adminConf = args->adminConfig;
+    adminConf.put(admin::Config::BOOTSTRAP_SERVERS, args->broker);
+
+    AdminClient adminClient(adminConf);
 
     if (args->opType == Arguments::OpType::List)
     {
         auto listResult = adminClient.listTopics();
-        if (listResult.errorCode())
+        if (listResult.error)
         {
-            std::cerr << "Error: " << listResult.message() << std::endl;
+            std::cerr << "Error: " << listResult.error.message() << std::endl;
             return EXIT_FAILURE;
         }
 
@@ -178,18 +179,18 @@ int main (int argc, char **argv)
     else if (args->opType == Arguments::OpType::Create)
     {
         auto createResult = adminClient.createTopics({args->topic}, args->partitions, args->replicationFactor, args->topicProps);
-        if (createResult.errorCode())
+        if (createResult.error)
         {
-            std::cerr << "Error: " << createResult.message() << std::endl;
+            std::cerr << "Error: " << createResult.error.message() << std::endl;
             return EXIT_FAILURE;
         }
     }
     else
     {
         auto deleteResult = adminClient.deleteTopics({args->topic});
-        if (deleteResult.errorCode())
+        if (deleteResult.error)
         {
-            std::cerr << "Error: " << deleteResult.message() << std::endl;
+            std::cerr << "Error: " << deleteResult.error.message() << std::endl;
             return EXIT_FAILURE;
         }
     }

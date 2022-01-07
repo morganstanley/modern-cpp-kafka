@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 
-namespace Kafka = KAFKA_API;
 
 std::atomic_bool running = {true};
 
@@ -61,7 +60,7 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
     if (vm.count("help") || argc == 1)
     {
         std::cout << "Read data from a given Kafka topic and write it to the standard output" << std::endl;
-        std::cout << "    (with librdkafka v" << Kafka::Utility::getLibRdKafkaVersion() << ")" << std::endl;
+        std::cout << "    (with librdkafka v" << kafka::utility::getLibRdKafkaVersion() << ")" << std::endl;
         std::cout << desc << std::endl;
         return nullptr;
     }
@@ -82,11 +81,13 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
     return args;
 }
 
-void RunConsumer(const std::string& topic, const Kafka::ConsumerConfig& props)
+void RunConsumer(const std::string& topic, const kafka::clients::consumer::Config& props)
 {
+    using namespace kafka::clients;
+    using namespace kafka::clients::consumer;
     // Create a manual-commit consumer
-    Kafka::KafkaClient::setGlobalLogger(Kafka::Logger());
-    Kafka::KafkaManualCommitConsumer consumer(props);
+    KafkaClient::setGlobalLogger(kafka::Logger());
+    KafkaConsumer consumer(props);
 
     // Subscribe to topic
     consumer.subscribe({topic});
@@ -101,12 +102,12 @@ void RunConsumer(const std::string& topic, const Kafka::ConsumerConfig& props)
         {
             if (!record.error())
             {
-                std::cout << "Current Local Time [" << Kafka::Utility::getCurrentTime() << "]" << std::endl;
+                std::cout << "Current Local Time [" << kafka::utility::getCurrentTime() << "]" << std::endl;
                 std::cout << "  Topic    : " << record.topic() << std::endl;
                 std::cout << "  Partition: " << record.partition() << std::endl;
                 std::cout << "  Offset   : " << record.offset() << std::endl;
                 std::cout << "  Timestamp: " << record.timestamp().toString() << std::endl;
-                std::cout << "  Headers  : " << Kafka::toString(record.headers()) << std::endl;
+                std::cout << "  Headers  : " << kafka::toString(record.headers()) << std::endl;
                 std::cout << "  Key   [" << std::setw(4) << record.key().size()   << " B]: " << record.key().toString() << std::endl;
                 std::cout << "  Value [" << std::setw(4) << record.value().size() << " B]: " << record.value().toString() << std::endl;
                 std::cout << "--------------------" << std::endl;
@@ -141,12 +142,14 @@ int main (int argc, char **argv)
     signal(SIGINT, stopRunning);
 
     // Prepare consumer properties
-    Kafka::ConsumerConfig props;
-    props.put(Kafka::ConsumerConfig::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
+    //
+    using namespace kafka::clients::consumer;
+    Config props;
+    props.put(Config::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
     // Get client id
     std::ostringstream oss;
     oss << "consumer-" << std::this_thread::get_id();
-    props.put(Kafka::ConsumerConfig::CLIENT_ID, oss.str());
+    props.put(Config::CLIENT_ID, oss.str());
     // For other properties user assigned
     for (const auto& prop: args->props)
     {
@@ -158,7 +161,7 @@ int main (int argc, char **argv)
     {
         RunConsumer(args->topic, props);
     }
-    catch (const Kafka::KafkaException& e)
+    catch (const kafka::KafkaException& e)
     {
         std::cerr << "Exception thrown by consumer: " << e.what() << std::endl;
         return EXIT_FAILURE;

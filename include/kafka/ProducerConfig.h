@@ -5,17 +5,17 @@
 #include "kafka/Types.h"
 
 
-namespace KAFKA_API {
+namespace KAFKA_API::clients::producer {
 
 /**
  * Configuration for the Kafka Producer.
  */
-class ProducerConfig: public Properties
+class Config: public Properties
 {
 public:
-    ProducerConfig() = default;
-    ProducerConfig(const ProducerConfig&) = default;
-    explicit ProducerConfig(const PropertiesMap& kvMap): Properties(kvMap) {}
+    Config() = default;
+    Config(const Config&) = default;
+    explicit Config(const PropertiesMap& kvMap): Properties(kvMap) {}
 
     /**
      * The string contains host:port pairs of brokers (splitted by ",") that the producer will use to establish initial connection to the Kafka cluster.
@@ -72,7 +72,7 @@ public:
 
     /**
      * Maximum Kafka protocol request message size.
-     * Note: Should be coordinated with the bokers's configuration. Otherwise, any larger message would be rejected!
+     * Note: Should be coordinated with the brokers's configuration. Otherwise, any larger message would be rejected!
      * Default value: 1000000
      */
     static const constexpr char* MESSAGE_MAX_BYTES            = "message.max.bytes";
@@ -96,12 +96,12 @@ public:
      * Note: It's not the same with Java version's "partitioner.class" property
      * Available options:
      *     1) random            -- random distribution
-     *     2) consistent        -- CRC32 hash of key (`ProducerRecord`s with empty key are mapped to single partition)
-     *     3) consistent_random -- CRC32 hash of key (`ProducerRecord`s with empty key are randomly partitioned)
-     *     4) murmur2           -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with empty key are mapped to single partition)
-     *     5) murmur2_random    -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with empty key are randomly partitioned. It's equivalent to the Java Producer's default partitioner)
-     *     6) fnv1a             -- FNV-1a hash of key (`ProducerRecord`s with empty key are mapped to single partition)
-     *     7) fnv1a_random      -- FNV-1a hash of key (`ProducerRecord`s with empty key are randomly partitioned)
+     *     2) consistent        -- CRC32 hash of key (`ProducerRecord`s with empty/null key are mapped to single partition)
+     *     3) consistent_random -- CRC32 hash of key (`ProducerRecord`s with empty/null key are randomly partitioned)
+     *     4) murmur2           -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with null key are mapped to single partition)
+     *     5) murmur2_random    -- Java Producer compatible Murmur2 hash of key (`ProducerRecord`s with null key are randomly partitioned. It's equivalent to the Java Producer's default partitioner)
+     *     6) fnv1a             -- FNV-1a hash of key (`ProducerRecord`s with null key are mapped to single partition)
+     *     7) fnv1a_random      -- FNV-1a hash of key (`ProducerRecord`s with null key are randomly partitioned)
      * Default value: murmur2_random
      */
     static const constexpr char* PARTITIONER                  = "partitioner";
@@ -146,5 +146,5 @@ public:
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME   = "sasl.kerberos.service.name";
 };
 
-}
+} // end of KAFKA_API::clients::producer
 

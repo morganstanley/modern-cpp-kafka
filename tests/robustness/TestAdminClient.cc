@@ -7,44 +7,41 @@
 #include <iostream>
 
 
-using namespace KAFKA_API;
-
-
 TEST(AdminClient, BrokersTimeout)
 {
-    Topic topic = Utility::getRandomString();
+    kafka::Topic topic = kafka::utility::getRandomString();
     const int numPartitions = 5;
     const int replicaFactor = 3;
 
     {
-        AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
-        std::cout << "[" << Utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
+        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
         KafkaTestUtility::PauseBrokers();
 
         // Fetch metadata, -- timeout
-        std::cout << "[" << Utility::getCurrentTime() << "] will ListTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will ListTopics" << std::endl;
         {
             auto fetchResult = adminClient.fetchBrokerMetadata(topic, std::chrono::seconds(1));
-            std::cout << "[" << Utility::getCurrentTime() << "] FetchMetadata: result[" << (fetchResult ? fetchResult->toString() : "NA") << "]" << std::endl;
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] FetchMetadata: result[" << (fetchResult ? fetchResult->toString() : "NA") << "]" << std::endl;
             EXPECT_FALSE(fetchResult);
         }
 
         // List Topics, -- timeout
-        std::cout << "[" << Utility::getCurrentTime() << "] will ListTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will ListTopics" << std::endl;
         {
             auto listResult = adminClient.listTopics(std::chrono::seconds(1));
-            std::cout << "[" << Utility::getCurrentTime() << "] ListTopics: result[" << listResult.message() << "]. Result: " << listResult.message() << std::endl;
-            EXPECT_TRUE(listResult.errorCode().value() == RD_KAFKA_RESP_ERR__TRANSPORT || listResult.errorCode().value() == RD_KAFKA_RESP_ERR__TIMED_OUT);
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] ListTopics: result[" << listResult.error.message() << "]. Result: " << listResult.error.message() << std::endl;
+            EXPECT_TRUE(listResult.error.value() == RD_KAFKA_RESP_ERR__TRANSPORT || listResult.error.value() == RD_KAFKA_RESP_ERR__TIMED_OUT);
             EXPECT_EQ(0, listResult.topics.size());
         }
 
         // Create Topics, -- timeout
-        std::cout << "[" << Utility::getCurrentTime() << "] will CreateTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will CreateTopics" << std::endl;
         {
-            auto createResult = adminClient.createTopics({topic}, numPartitions, replicaFactor, Properties(), std::chrono::seconds(3));
-            std::cout << "[" << Utility::getCurrentTime() << "] createTopics: result[" << createResult.message() << "]" << std::endl;
-            EXPECT_TRUE(createResult.errorCode());
+            auto createResult = adminClient.createTopics({topic}, numPartitions, replicaFactor, kafka::Properties(), std::chrono::seconds(3));
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] createTopics: result[" << createResult.error.message() << "]" << std::endl;
+            EXPECT_TRUE(createResult.error);
         }
     }
 
@@ -54,13 +51,13 @@ TEST(AdminClient, BrokersTimeout)
     constexpr int maxRetry = 5;
     for (int i = 0; i < maxRetry; ++i)
     {
-        AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // Create Topics, -- success
-        std::cout << "[" << Utility::getCurrentTime() << "] will CreateTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will CreateTopics" << std::endl;
         auto createResult = adminClient.createTopics({topic}, numPartitions, replicaFactor);
-        std::cout << "[" << Utility::getCurrentTime() << "] CreateTopics: result[" << createResult.message() << "]" << std::endl;
-        if (!createResult.errorCode() || createResult.errorCode().value() == RD_KAFKA_RESP_ERR_TOPIC_ALREADY_EXISTS)
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] CreateTopics: result[" << createResult.error.message() << "]" << std::endl;
+        if (!createResult.error || createResult.error.value() == RD_KAFKA_RESP_ERR_TOPIC_ALREADY_EXISTS)
         {
             break;
         }
@@ -68,10 +65,10 @@ TEST(AdminClient, BrokersTimeout)
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         auto listResult = adminClient.listTopics(std::chrono::seconds(1));
-        if (!listResult.errorCode() && listResult.topics.count(topic) == 1)
+        if (!listResult.error && listResult.topics.count(topic) == 1)
             {
             auto metadata = adminClient.fetchBrokerMetadata(topic, std::chrono::seconds(5), false);
-            std::cout << "[" << Utility::getCurrentTime() << "] broker metadata: " << (metadata ? metadata->toString() : "NA") << std::endl;
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] broker metadata: " << (metadata ? metadata->toString() : "NA") << std::endl;
         }
 
         EXPECT_NE(maxRetry - 1, i);
@@ -80,22 +77,22 @@ TEST(AdminClient, BrokersTimeout)
     KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
 
     {
-        AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // List Topics, -- success
-        std::cout << "[" << Utility::getCurrentTime() << "] will ListTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will ListTopics" << std::endl;
         {
             auto listResult = adminClient.listTopics();
-            std::cout << "[" << Utility::getCurrentTime() << "] ListTopics: result[" << listResult.message() << "]" << std::endl;
-            EXPECT_FALSE(listResult.errorCode());
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] ListTopics: result[" << listResult.error.message() << "]" << std::endl;
+            EXPECT_FALSE(listResult.error);
             EXPECT_EQ(1, listResult.topics.count(topic));
         }
 
         // Fetch metadata, -- success
-        std::cout << "[" << Utility::getCurrentTime() << "] will FetchMetadata" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will FetchMetadata" << std::endl;
         {
             auto fetchResult = adminClient.fetchBrokerMetadata(topic, std::chrono::seconds(5));
-            std::cout << "[" << Utility::getCurrentTime() << "] FetchMetadata: result[" << (fetchResult ? fetchResult->toString() : "NA") << "]" << std::endl;
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] FetchMetadata: result[" << (fetchResult ? fetchResult->toString() : "NA") << "]" << std::endl;
             EXPECT_TRUE(fetchResult);
         }
     }
@@ -103,14 +100,14 @@ TEST(AdminClient, BrokersTimeout)
     KafkaTestUtility::PauseBrokers();
 
     {
-        AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // Delete Topics, -- timeout
-        std::cout << "[" << Utility::getCurrentTime() << "] will DeleteTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will DeleteTopics" << std::endl;
         {
             auto deleteResult = adminClient.deleteTopics({topic}, std::chrono::seconds(5));
-            std::cout << "[" << Utility::getCurrentTime() << "] DeleteTopics: result[" << deleteResult.message() << "]" << std::endl;
-            EXPECT_TRUE(deleteResult.errorCode());
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] DeleteTopics: result[" << deleteResult.error.message() << "]" << std::endl;
+            EXPECT_TRUE(deleteResult.error);
         }
     }
 
@@ -119,14 +116,14 @@ TEST(AdminClient, BrokersTimeout)
     // Since the brokers might not be ready during the short time, sometimes we have to retry...
     for (int i = 0; i < maxRetry; ++i)
     {
-        AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
         // Delete Topics, -- success
-        std::cout << "[" << Utility::getCurrentTime() << "] will DeleteTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will DeleteTopics" << std::endl;
         auto deleteResult = adminClient.deleteTopics({topic});
-        std::cout << "[" << Utility::getCurrentTime() << "] DeleteTopics: result[" << deleteResult.message() << "]" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] DeleteTopics: result[" << deleteResult.error.message() << "]" << std::endl;
         // In some edge cases, the result might be "timed out", while in fact the topic had already been deleted.
         // Then, even we keep retrying, we could only get response of "unknown topic or partition", and this should be treated as "SUCCESS".
-        if (!deleteResult.errorCode() || deleteResult.errorCode().value() == RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART)
+        if (!deleteResult.error || deleteResult.error.value() == RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART)
         {
             break;
         }
@@ -138,14 +135,14 @@ TEST(AdminClient, BrokersTimeout)
     KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
 
     {
-        AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // List Topics, -- success
-        std::cout << "[" << Utility::getCurrentTime() << "] will ListTopics" << std::endl;
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] will ListTopics" << std::endl;
         {
             auto listResult = adminClient.listTopics(std::chrono::seconds(1));
-            std::cout << "[" << Utility::getCurrentTime() << "] ListTopics: result[" << listResult.message() << "]" << std::endl;
-            EXPECT_FALSE(listResult.errorCode());
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] ListTopics: result[" << listResult.error.message() << "]" << std::endl;
+            EXPECT_FALSE(listResult.error);
             EXPECT_EQ(0, listResult.topics.count(topic));
         }
     }
