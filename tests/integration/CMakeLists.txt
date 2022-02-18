@@ -8,7 +8,7 @@ target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api gtest gtest_main)
 
 add_test(NAME ${PROJECT_NAME}
          COMMAND gtest-parallel ./${PROJECT_NAME})
-set_tests_properties(${PROJECT_NAME} PROPERTIES LABELS "IT")
+set_tests_properties(${PROJECT_NAME} PROPERTIES LABELS "integration")
 
 if (BUILD_OPTION_USE_ASAN OR BUILD_OPTION_USE_TSAN)
     target_compile_options(${PROJECT_NAME} PRIVATE "-fno-sanitize=all")

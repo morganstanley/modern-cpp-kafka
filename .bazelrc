@@ -1,0 +1,2 @@
+build --copt='-std=c++17' --linkopt='-L/usr/local/lib'
+

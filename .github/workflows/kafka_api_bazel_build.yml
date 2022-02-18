@@ -1,0 +1,90 @@
+name: '[Kafka API] Bazel Build'
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
+  CPU_CORE_NUM:       2
+  LIBRDKAFKA_VERSION: 1.7.0
+
+jobs:
+  kafka-api-bazel-build:
+    runs-on: ${{ matrix.os }}
+
+    env:
+      OS_VERSION:        ${{ matrix.os }}
+      TEST_LABELS:       ${{ matrix.test-labels }}
+
+    strategy:
+      matrix:
+        include:
+          - os:                ubuntu-20.04
+            test-labels:       unit,integration
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Update the List for Available Packages
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          sed -e 's/azure.archive.ubuntu.com/us.archive.ubuntu.com/g' -e t -e d /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/nonazure.list
+          sudo apt-get update
+
+      - name: Install Dependencies
+        run: |
+          # 1. Install librdkafka
+          wget -nv https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          tar -xzf v${LIBRDKAFKA_VERSION}.tar.gz
+          cd librdkafka-${LIBRDKAFKA_VERSION}
+          ./configure
+          make -j${CPU_CORE_NUM} && sudo make install
+          cd ../
+
+          # 2. Install boost lib
+          if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
+            sudo apt install -y libboost-all-dev
+          elif [[ ${OS_VERSION} == 'macos'* ]]; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            brew install boost
+          fi
+
+      - name: Build
+        run: |
+          bazel build //...
+
+      - name: Test
+        if: matrix.test-labels
+        timeout-minutes: 15
+        run: |
+          # Setup Kafka cluster for integration test & regression test
+          if [[ ${TEST_LABELS} == *'integration'* ]]; then
+            # Install kafka
+            time wget -nv ${KAFKA_SRC_LINK}
+            tar -xzf `basename ${KAFKA_SRC_LINK}`
+            export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
+
+            # Start Kafka cluster
+            rm -f test.env
+            scripts/start-local-kafka-cluster.py --zookeeper-port 52181 --broker-ports 50091 50092 50093 --temp-dir ./tmp &
+
+            # Wait server to be ready
+            for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
+
+            # Set the environment variables: KAFKA_BROKER_LIST, KAFKA_BROKER_PIDS
+            source test.env
+          fi
+
+          # Run tests
+          bazel test  //... --test_env=KAFKA_BROKER_LIST=$KAFKA_BROKER_LIST --test_tag_filters="${TEST_LABELS}" --test_verbose_timeout_warnings --test_output=all
+
+          # Stop Kafka cluster for integration test & regression test
+          if [[ ${TEST_LABELS} == *'integration'* ]]; then
+            # Stop kafka cluster
+            kafka-server-stop.sh
+            zookeeper-server-stop.sh
+          fi
+
