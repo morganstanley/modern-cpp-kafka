@@ -1,0 +1,46 @@
+cc_test(
+    name = "kafka-unit-test",
+
+    srcs = glob(["unit/*.cc", "utils/*.h"]),
+
+    deps = ["//:modern-cpp-kafka-api",
+            "@gtest//:gtest",
+            "@gtest//:gtest_main",
+            "@rapidjson//:rapidjson"],
+
+    timeout = "short",
+
+    tags = ["unit"],
+)
+
+
+cc_test(
+    name = "kafka-integration-test",
+
+    srcs = glob(["integration/*.cc", "utils/*.h"]),
+
+    deps = ["//:modern-cpp-kafka-api",
+            "@gtest//:gtest",
+            "@gtest//:gtest_main"],
+
+    timeout = "long",
+    shard_count = 8,
+
+    tags = ["integration"],
+)
+
+cc_test(
+    name = "kafka-robustness-test",
+
+    srcs = glob(["robustness/*.cc", "utils/*.h"]),
+
+    deps = ["//:modern-cpp-kafka-api",
+            "@gtest//:gtest",
+            "@gtest//:gtest_main"],
+
+    timeout = "long",
+    shard_count = 1,
+
+    tags = ["robustness"],
+)
+

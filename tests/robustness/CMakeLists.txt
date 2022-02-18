@@ -7,7 +7,7 @@ add_executable("${PROJECT_NAME}" ${TEST_SRCS})
 target_link_libraries("${PROJECT_NAME}" modern-cpp-kafka-api gtest gtest_main)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ./${PROJECT_NAME})
-set_tests_properties(${PROJECT_NAME} PROPERTIES LABELS "RT")
+set_tests_properties(${PROJECT_NAME} PROPERTIES LABELS "robustness")
 
 if (BUILD_OPTION_USE_ASAN OR BUILD_OPTION_USE_TSAN)
     target_compile_options(${PROJECT_NAME} PRIVATE "-fno-sanitize=all")

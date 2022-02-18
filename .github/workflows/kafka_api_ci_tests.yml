@@ -4,13 +4,13 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - main
 
 env:
   KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
   CPU_CORE_NUM:       2
   LIBRDKAFKA_VERSION: 1.7.0
-  BUILD_SUB_DIR:      build/sub-build
+  BUILD_SUB_DIR:      builds/sub-build
 
 jobs:
   kafka-api-tests:
@@ -32,43 +32,43 @@ jobs:
         include:
           - os:                macos-10.15
             build-cxx:         clang++
-            test-labels:       UT|IT
+            test-labels:       unit|integration
 
           - os:                ubuntu-20.04
             build-cxx:         g++
             build-type:        Debug
-            test-labels:       UT|IT
+            test-labels:       unit|integration
             enable-ut-stubs:   true
 
           - os:                ubuntu-20.04
             build-cxx:         g++
             build-type:        Release
-            test-labels:       RT
+            test-labels:       robustness
 
           - os:                ubuntu-20.04
             build-cxx:         g++
             build-type:        Release
             cxx-standard:      14
-            test-labels:       UT|IT
+            test-labels:       unit|integration
 
           - os:                ubuntu-20.04
             build-cxx:         g++
             check-option:      asan
-            test-labels:       UT|IT
+            test-labels:       unit|integration
 
           - os:                ubuntu-20.04
             build-cxx:         g++
             check-option:      tsan
-            test-labels:       UT|IT
+            test-labels:       unit|integration
 
           - os:                ubuntu-20.04
             build-cxx:         g++
             check-option:      ubsan
-            test-labels:       UT|IT
+            test-labels:       unit|integration
 
           - os:                ubuntu-20.04
             build-cxx:         clang++
-            test-labels:       UT|IT
+            test-labels:       unit|integration
             generate-doc:      true
             with-installation: true
 
@@ -79,11 +79,11 @@ jobs:
 
           - os:                ubuntu-18.04
             build-cxx:         g++
-            test-labels:       UT|IT
+            test-labels:       unit|integration
 
           - os:                ubuntu-18.04
             build-cxx:         clang++
-            test-labels:       RT
+            test-labels:       robustness
 
     steps:
       - uses: actions/checkout@v2
@@ -96,7 +96,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          mkdir -p $BUILD_SUB_DIR
+          mkdir -p ${BUILD_SUB_DIR}
           cd ${BUILD_SUB_DIR}
 
           # 1. Install clang/clang-tidy
@@ -110,10 +110,10 @@ jobs:
             sudo apt install -y clang-tidy
           fi
 
-          # 2. Install googletest (v1.10.0)
-          wget -nv https://github.com/google/googletest/archive/release-1.10.0.tar.gz
-          tar -xzf release-1.10.0.tar.gz
-          cd googletest-release-1.10.0
+          # 2. Install googletest (v1.11.0)
+          wget -nv https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+          tar -xzf release-1.11.0.tar.gz
+          cd googletest-release-1.11.0
           env CXX=${BUILD_CXX} cmake ./
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
@@ -211,7 +211,7 @@ jobs:
           cd ${BUILD_SUB_DIR}
 
           # Setup Kafka cluster for integration test & regression test
-          if [[ ${TEST_LABELS} == *'IT'* ]] || [[ ${TEST_LABELS} == *'RT'* ]]; then
+          if [[ ${TEST_LABELS} == *'integration'* ]] || [[ ${TEST_LABELS} == *'robustness'* ]]; then
             # Install kafka
             time wget -nv ${KAFKA_SRC_LINK}
             tar -xzf `basename ${KAFKA_SRC_LINK}`
@@ -229,7 +229,7 @@ jobs:
           fi
 
           # Install gtest-parallel
-          if [[ ${TEST_LABELS} == *'IT'* ]]; then
+          if [[ ${TEST_LABELS} == *'integration'* ]]; then
             wget https://github.com/google/gtest-parallel/archive/refs/heads/master.zip
             unzip master.zip
             export PATH=`pwd`/gtest-parallel-master:$PATH
@@ -239,7 +239,7 @@ jobs:
           ctest -VV -L "${TEST_LABELS}"
 
           # Stop Kafka cluster for integration test & regression test
-          if [[ ${TEST_LABELS} == *'IT'* ]] || [[ ${TEST_LABELS} == *'RT'* ]]; then
+          if [[ ${TEST_LABELS} == *'integration'* ]] || [[ ${TEST_LABELS} == *'robustness'* ]]; then
             # Stop kafka cluster
             kafka-server-stop.sh
             zookeeper-server-stop.sh
@@ -249,7 +249,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      TEST_LABELS: ${{ matrix.test-labels }}
+      TEST_LABELS:   ${{ matrix.test-labels }}
 
     strategy:
       matrix:
@@ -278,8 +278,6 @@ jobs:
           vcpkg install boost-program-options
 
           cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options-vc140-mt.lib" "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options.lib"
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.dll" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.dll"
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options-vc142-mt-x32-1_77.pdb" "C:\VCPKG\INSTALLED\x86-windows\bin\boost_program_options.pdb"
 
           # Install rapidjson
           vcpkg install rapidjson
