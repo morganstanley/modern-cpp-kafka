@@ -14,7 +14,8 @@
 #include <thread>
 
 
-TEST(KafkaConsumer, AlwaysFinishClosing_ManuallyPollEvents)
+// https://github.com/morganstanley/modern-cpp-kafka/issues/120
+TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
 {
     const kafka::Topic     topic     = kafka::utility::getRandomString();
     const kafka::Partition partition = 0;
@@ -81,7 +82,8 @@ TEST(KafkaConsumer, AlwaysFinishClosing_ManuallyPollEvents)
     KafkaTestUtility::ResumeBrokers();
 }
 
-TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
+// https://github.com/morganstanley/modern-cpp-kafka/issues/120
+TEST(KafkaConsumer, DISABLED_CommitOffsetWhileBrokersStop)
 {
     const kafka::Topic     topic     = kafka::utility::getRandomString();
     const kafka::Partition partition = 0;
@@ -98,7 +100,9 @@ TEST(KafkaConsumer, CommitOffsetWhileBrokersStop)
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
                             .put(kafka::clients::consumer::Config::MAX_POLL_RECORDS,  "1")         // Only poll 1 message each time
                             .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
-                            .put(kafka::clients::consumer::Config::SOCKET_TIMEOUT_MS, "2000");     // Just don't want to wait too long for the commit-offset callback.
+                            .put(kafka::clients::consumer::Config::SOCKET_TIMEOUT_MS, "2000")      // Just don't want to wait too long for the commit-offset callback.
+                            .put("log_level", "7")
+                            .put("debug", "all");
 
     volatile std::size_t commitCbCount = 0;
     {
