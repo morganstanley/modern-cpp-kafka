@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/Types.h"
+#include <kafka/Types.h>
 
 
 namespace KAFKA_API::clients::producer {

@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION "3.8")
 
 project("Modern C++ Kafka API" VERSION 1.0.0)
 
-include(CTest)
+get_property(parent_directory DIRECTORY PROPERTY PARENT_DIRECTORY)
+if(NOT parent_directory)
+    set(cppkafka_master_project ON)
+endif()
+
+option(CPPKAFKA_ENABLE_TESTS "Generate the test targets" ${cppkafka_master_project})
+
 include(CheckCXXCompilerFlag)
 include(CMakePushCheckState)
 
@@ -250,7 +256,14 @@ else ()
     endif ()
 
     add_subdirectory("include")
-    add_subdirectory("tests")
-    add_subdirectory("tools")
-    add_subdirectory("examples")
+
+    if (CPPKAFKA_ENABLE_TESTS)
+        include(CTest)
+        add_subdirectory("tests")
+    endif()
+
+    if (cppkafka_master_project)
+        add_subdirectory("tools")
+        add_subdirectory("examples")
+    endif()
 endif ()

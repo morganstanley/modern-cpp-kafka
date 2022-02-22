@@ -1,13 +1,13 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/ProducerRecord.h"
-#include "kafka/RdKafkaHelper.h"
-#include "kafka/Timestamp.h"
-#include "kafka/Types.h"
+#include <kafka/ProducerRecord.h>
+#include <kafka/RdKafkaHelper.h>
+#include <kafka/Timestamp.h>
+#include <kafka/Types.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 #include <functional>
 #include <memory>

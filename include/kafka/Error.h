@@ -1,10 +1,10 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/RdKafkaHelper.h"
+#include <kafka/RdKafkaHelper.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 #include <string>
 #include <system_error>

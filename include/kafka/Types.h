@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
 #include <algorithm>
 #include <cctype>

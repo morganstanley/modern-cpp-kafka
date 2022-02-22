@@ -1,14 +1,14 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/ConsumerCommon.h"
-#include "kafka/ConsumerConfig.h"
-#include "kafka/ConsumerRecord.h"
-#include "kafka/Error.h"
-#include "kafka/KafkaClient.h"
+#include <kafka/ConsumerCommon.h>
+#include <kafka/ConsumerConfig.h>
+#include <kafka/ConsumerRecord.h>
+#include <kafka/Error.h>
+#include <kafka/KafkaClient.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 #include <algorithm>
 #include <cassert>

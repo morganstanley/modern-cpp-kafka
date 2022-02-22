@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/Properties.h"
+#include <kafka/Properties.h>
 
 
 namespace KAFKA_API::clients::admin {

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
 // https://github.com/Tencent/rapidjson/releases/tag/v1.1.0
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <algorithm>
 #include <iostream>
