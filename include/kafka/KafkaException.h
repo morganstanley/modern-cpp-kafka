@@ -1,12 +1,12 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/Error.h"
-#include "kafka/RdKafkaHelper.h"
-#include "kafka/Utility.h"
+#include <kafka/Error.h>
+#include <kafka/RdKafkaHelper.h>
+#include <kafka/Utility.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 #include <chrono>
 #include <exception>

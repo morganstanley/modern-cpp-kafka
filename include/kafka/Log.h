@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/Utility.h"
+#include <kafka/Utility.h>
 
 #include <cassert>
 #include <functional>

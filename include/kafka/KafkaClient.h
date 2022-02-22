@@ -1,16 +1,16 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/BrokerMetadata.h"
-#include "kafka/Error.h"
-#include "kafka/KafkaException.h"
-#include "kafka/Log.h"
-#include "kafka/Properties.h"
-#include "kafka/RdKafkaHelper.h"
-#include "kafka/Types.h"
+#include <kafka/BrokerMetadata.h>
+#include <kafka/Error.h>
+#include <kafka/KafkaException.h>
+#include <kafka/Log.h>
+#include <kafka/Properties.h>
+#include <kafka/RdKafkaHelper.h>
+#include <kafka/Types.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 #include <atomic>
 #include <cassert>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 #include <cassert>
 #include <chrono>

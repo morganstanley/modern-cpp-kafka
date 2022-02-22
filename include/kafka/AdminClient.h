@@ -1,14 +1,14 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/AdminClientConfig.h"
-#include "kafka/AdminCommon.h"
-#include "kafka/Error.h"
-#include "kafka/KafkaClient.h"
-#include "kafka/RdKafkaHelper.h"
+#include <kafka/AdminClientConfig.h>
+#include <kafka/AdminCommon.h>
+#include <kafka/Error.h>
+#include <kafka/KafkaClient.h>
+#include <kafka/RdKafkaHelper.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 #include <array>
 #include <cassert>

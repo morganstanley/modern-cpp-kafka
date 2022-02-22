@@ -1,11 +1,11 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/Header.h"
-#include "kafka/Types.h"
+#include <kafka/Header.h>
+#include <kafka/Types.h>
 
-#include "librdkafka/rdkafka.h"
+#include <librdkafka/rdkafka.h>
 
 
 namespace KAFKA_API::clients::producer {

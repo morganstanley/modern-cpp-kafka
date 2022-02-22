@@ -1,10 +1,10 @@
 #pragma once
 
-#include "kafka/Project.h"
+#include <kafka/Project.h>
 
-#include "kafka/KafkaClient.h"
-#include "kafka/KafkaProducer.h"
-#include "kafka/Types.h"
+#include <kafka/KafkaClient.h>
+#include <kafka/KafkaProducer.h>
+#include <kafka/Types.h>
 
 #include <deque>
 #include <mutex>
