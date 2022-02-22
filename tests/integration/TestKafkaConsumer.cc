@@ -1422,6 +1422,7 @@ TEST(KafkaConsumer, SeekAfterPause)
     }
 }
 
+// https://github.com/morganstanley/modern-cpp-kafka/issues/113
 TEST(KafkaConsumer, DISABLED_SeekBeforePause)
 {
     const kafka::Topic topic = kafka::utility::getRandomString();

@@ -9,7 +9,7 @@ on:
 env:
   KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
   CPU_CORE_NUM:       2
-  LIBRDKAFKA_VERSION: 1.7.0
+  LIBRDKAFKA_VERSION: 1.8.2
 
 jobs:
   kafka-api-bazel-build:
