@@ -12,7 +12,9 @@
 #include <sstream>
 
 
-namespace KAFKA_API::clients::consumer {
+namespace KAFKA_API {
+namespace clients {
+namespace consumer {
 
 /**
  * A key/value pair to be received from Kafka.
@@ -150,5 +152,7 @@ ConsumerRecord::toString() const
     return oss.str();
 }
 
+}
+}
 } // end of KAFKA_API::clients::consumer
 

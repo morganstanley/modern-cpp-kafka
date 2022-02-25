@@ -19,7 +19,8 @@
 #include <unordered_map>
 
 
-namespace KAFKA_API::clients {
+namespace KAFKA_API {
+namespace clients {
 
 /**
  * KafkaProducer class.
@@ -511,5 +512,6 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           t
     KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
+}
 } // end of KAFKA_API::clients
 

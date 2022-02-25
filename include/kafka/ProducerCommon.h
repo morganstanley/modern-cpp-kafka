@@ -13,7 +13,9 @@
 #include <memory>
 
 
-namespace KAFKA_API::clients::producer {
+namespace KAFKA_API {
+namespace clients {
+namespace producer {
 
 /**
  * The metadata for a record that has been acknowledged by the server.
@@ -181,5 +183,7 @@ private:
  */
 using Callback = std::function<void(const RecordMetadata& metadata, const Error& error)>;
 
+}
+}
 } // end of KAFKA_API::clients::producer
 
