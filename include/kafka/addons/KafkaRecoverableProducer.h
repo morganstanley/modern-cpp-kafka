@@ -10,7 +10,8 @@
 #include <mutex>
 #include <vector>
 
-namespace KAFKA_API::clients {
+namespace KAFKA_API {
+namespace clients {
 
 class KafkaRecoverableProducer
 {
@@ -356,5 +357,6 @@ private:
     std::unique_ptr<KafkaProducer> _producer;
 };
 
+}
 } // end of KAFKA_API::clients
 

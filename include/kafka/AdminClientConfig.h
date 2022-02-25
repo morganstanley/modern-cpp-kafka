@@ -5,7 +5,9 @@
 #include <kafka/Properties.h>
 
 
-namespace KAFKA_API::clients::admin {
+namespace KAFKA_API {
+namespace clients {
+namespace admin {
 
 /**
  * Configuration for the Kafka Consumer.
@@ -40,5 +42,7 @@ public:
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
 };
 
+}
+}
 } // end of KAFKA_API::clients::admin
 
