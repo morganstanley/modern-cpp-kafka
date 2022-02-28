@@ -8,9 +8,7 @@
 #include <librdkafka/rdkafka.h>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace producer {
+namespace KAFKA_API { namespace clients { namespace producer {
 
 /**
  * A key/value pair to be sent to Kafka.

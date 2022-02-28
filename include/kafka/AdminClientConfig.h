@@ -5,9 +5,7 @@
 #include <kafka/Properties.h>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace admin {
+namespace KAFKA_API { namespace clients { namespace admin {
 
 /**
  * Configuration for the Kafka Consumer.

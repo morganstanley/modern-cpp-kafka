@@ -19,8 +19,7 @@
 #include <unordered_map>
 
 
-namespace KAFKA_API {
-namespace clients {
+namespace KAFKA_API { namespace clients {
 
 /**
  * KafkaProducer class.

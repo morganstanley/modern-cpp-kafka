@@ -5,9 +5,7 @@
 #include <kafka/Properties.h>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace consumer {
+namespace KAFKA_API { namespace clients { namespace consumer {
 
 /**
  * Configuration for the Kafka Consumer.

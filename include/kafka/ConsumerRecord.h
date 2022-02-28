@@ -12,9 +12,7 @@
 #include <sstream>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace consumer {
+namespace KAFKA_API { namespace clients { namespace consumer {
 
 /**
  * A key/value pair to be received from Kafka.

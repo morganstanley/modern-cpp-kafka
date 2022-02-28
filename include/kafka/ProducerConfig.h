@@ -5,9 +5,7 @@
 #include <kafka/Types.h>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace producer {
+namespace KAFKA_API { namespace clients { namespace producer {
 
 /**
  * Configuration for the Kafka Producer.

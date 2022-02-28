@@ -13,9 +13,7 @@
 #include <memory>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace producer {
+namespace KAFKA_API { namespace clients { namespace producer {
 
 /**
  * The metadata for a record that has been acknowledged by the server.

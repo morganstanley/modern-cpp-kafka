@@ -8,9 +8,7 @@
 #include <deque>
 #include <vector>
 
-namespace KAFKA_API {
-namespace clients {
-namespace consumer {
+namespace KAFKA_API { namespace clients { namespace consumer {
 
 template <typename T>
 class Heap
