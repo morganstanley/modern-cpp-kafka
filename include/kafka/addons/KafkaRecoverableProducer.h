@@ -10,8 +10,7 @@
 #include <mutex>
 #include <vector>
 
-namespace KAFKA_API {
-namespace clients {
+namespace KAFKA_API { namespace clients {
 
 class KafkaRecoverableProducer
 {

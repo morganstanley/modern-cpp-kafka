@@ -17,8 +17,7 @@
 #include <memory>
 
 
-namespace KAFKA_API {
-namespace clients {
+namespace KAFKA_API { namespace clients {
 
 /**
  * KafkaConsumer class.

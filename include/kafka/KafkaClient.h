@@ -22,8 +22,7 @@
 #include <thread>
 
 
-namespace KAFKA_API {
-namespace clients {
+namespace KAFKA_API { namespace clients {
 
 /**
  * The base class for Kafka clients.

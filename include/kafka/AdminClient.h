@@ -18,8 +18,7 @@
 #include <vector>
 
 
-namespace KAFKA_API {
-namespace clients {
+namespace KAFKA_API { namespace clients {
 
 /**
  * The administrative client for Kafka, which supports managing and inspecting topics, etc.

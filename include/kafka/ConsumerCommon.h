@@ -11,9 +11,7 @@
 #include <functional>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace consumer {
+namespace KAFKA_API { namespace clients { namespace consumer {
 
     /**
      * To identify which kind of re-balance event is handling, when the set of partitions assigned to the consumer changes.

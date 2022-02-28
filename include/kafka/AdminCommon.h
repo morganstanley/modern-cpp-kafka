@@ -6,9 +6,7 @@
 #include <kafka/Types.h>
 
 
-namespace KAFKA_API {
-namespace clients {
-namespace admin {
+namespace KAFKA_API { namespace clients { namespace admin {
 
 /**
  * The result of AdminClient::createTopics().

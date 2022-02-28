@@ -12,8 +12,7 @@
 #include <time.h>
 
 
-namespace KAFKA_API {
-namespace utility {
+namespace KAFKA_API { namespace utility {
 
 /**
  * Get local time as string.
