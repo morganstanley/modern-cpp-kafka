@@ -76,7 +76,7 @@ $(function() {
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;kafka/Types.h&gt;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span>KAFKA_API::clients::producer {</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">namespace </span>KAFKA_API { <span class="keyword">namespace </span>clients { <span class="keyword">namespace </span>producer {</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
 <div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html">   13</a></span>&#160;<span class="keyword">class </span><a class="code" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html">Config</a>: <span class="keyword">public</span> <a class="code" href="classKAFKA__API_1_1Properties.html">Properties</a></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;{</div>
@@ -124,8 +124,10 @@ $(function() {
 <div class="line"><a name="l00146"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a81e866212d51ea8d6b96359686bb1fb0">  146</a></span>&#160;    <span class="keyword">static</span> <span class="keyword">const</span> constexpr <span class="keywordtype">char</span>* <a class="code" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a81e866212d51ea8d6b96359686bb1fb0">SASL_KERBEROS_SERVICE_NAME</a>   = <span class="stringliteral">&quot;sasl.kerberos.service.name&quot;</span>;</div>
 <div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;};</div>
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;} <span class="comment">// end of KAFKA_API::clients::producer</span></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160; </div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;}</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;}</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;} <span class="comment">// end of KAFKA_API::clients::producer</span></div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassKAFKA__API_1_1clients_1_1producer_1_1Config_html_a1ec451c5d10d9c65db1ea27a98ebeeba"><div class="ttname"><a href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a1ec451c5d10d9c65db1ea27a98ebeeba">KAFKA_API::clients::producer::Config::MESSAGE_TIMEOUT_MS</a></div><div class="ttdeci">static const constexpr char * MESSAGE_TIMEOUT_MS</div><div class="ttdoc">This value is enforced locally and limits the time a produced message waits for successful delivery.</div><div class="ttdef"><b>Definition:</b> ProducerConfig.h:85</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1clients_1_1producer_1_1Config_html"><div class="ttname"><a href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html">KAFKA_API::clients::producer::Config</a></div><div class="ttdoc">Configuration for the Kafka Producer.</div><div class="ttdef"><b>Definition:</b> ProducerConfig.h:13</div></div>

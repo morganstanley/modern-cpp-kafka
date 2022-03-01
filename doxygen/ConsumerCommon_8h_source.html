@@ -82,7 +82,7 @@ $(function() {
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;functional&gt;</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">namespace </span>KAFKA_API::clients::consumer {</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">namespace </span>KAFKA_API { <span class="keyword">namespace </span>clients { <span class="keyword">namespace </span>consumer {</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keyword">enum class</span> RebalanceEventType { PartitionsAssigned, PartitionsRevoked };</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
@@ -113,8 +113,10 @@ $(function() {
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        rd_kafka_consumer_group_metadata_unique_ptr _rkConsumerGroupMetadata;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    };</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;} <span class="comment">// end of KAFKA_API::clients::consumer</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;}</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;} <span class="comment">// end of KAFKA_API::clients::consumer</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassKAFKA__API_1_1clients_1_1consumer_1_1ConsumerGroupMetadata_html"><div class="ttname"><a href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerGroupMetadata.html">KAFKA_API::clients::consumer::ConsumerGroupMetadata</a></div><div class="ttdoc">A metadata struct containing the consumer group information.</div><div class="ttdef"><b>Definition:</b> ConsumerCommon.h:53</div></div>
 <!-- start footer part -->

@@ -79,7 +79,7 @@ $(function() {
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;librdkafka/rdkafka.h&gt;</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">namespace </span>KAFKA_API::clients::producer {</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">namespace </span>KAFKA_API { <span class="keyword">namespace </span>clients { <span class="keyword">namespace </span>producer {</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
 <div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">   18</a></span>&#160;<span class="keyword">class </span><a class="code" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">ProducerRecord</a></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;{</div>
@@ -137,8 +137,10 @@ $(function() {
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    Optional&lt;Id&gt; _id;</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;};</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;} <span class="comment">// end of KAFKA_API::clients::producer</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;}</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;}</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;} <span class="comment">// end of KAFKA_API::clients::producer</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord_html_a2d55e29a2403bccbfb6c04887ddf83b7"><div class="ttname"><a href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html#a2d55e29a2403bccbfb6c04887ddf83b7">KAFKA_API::clients::producer::ProducerRecord::key</a></div><div class="ttdeci">Key key() const</div><div class="ttdoc">The key (or null if no key is specified).</div><div class="ttdef"><b>Definition:</b> ProducerRecord.h:48</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord_html_ad10b5b29c8eef6326f4fd0ae88b133cc"><div class="ttname"><a href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html#ad10b5b29c8eef6326f4fd0ae88b133cc">KAFKA_API::clients::producer::ProducerRecord::id</a></div><div class="ttdeci">Optional&lt; Id &gt; id() const</div><div class="ttdoc">The id to identify the message (consistent with Producer::Metadata::recordId()).</div><div class="ttdef"><b>Definition:</b> ProducerRecord.h:58</div></div>
