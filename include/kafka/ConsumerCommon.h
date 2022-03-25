@@ -61,7 +61,5 @@ namespace KAFKA_API { namespace clients { namespace consumer {
         rd_kafka_consumer_group_metadata_unique_ptr _rkConsumerGroupMetadata;
     };
 
-}
-}
-} // end of KAFKA_API::clients::consumer
+} } } // end of KAFKA_API::clients::consumer
 

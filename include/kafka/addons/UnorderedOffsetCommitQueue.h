@@ -174,7 +174,5 @@ private:
     static constexpr Offset INVALID_OFFSET = -1;
 };
 
-}
-}
-} // end of KAFKA_API::clients::consumer
+} } } // end of KAFKA_API::clients::consumer
 

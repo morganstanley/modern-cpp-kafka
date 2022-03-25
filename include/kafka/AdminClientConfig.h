@@ -40,7 +40,5 @@ public:
     static const constexpr char* SASL_KERBEROS_SERVICE_NAME = "sasl.kerberos.service.name";
 };
 
-}
-}
-} // end of KAFKA_API::clients::admin
+} } } // end of KAFKA_API::clients::admin
 

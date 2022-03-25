@@ -181,7 +181,5 @@ private:
  */
 using Callback = std::function<void(const RecordMetadata& metadata, const Error& error)>;
 
-}
-}
-} // end of KAFKA_API::clients::producer
+} } } // end of KAFKA_API::clients::producer
 

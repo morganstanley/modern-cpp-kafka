@@ -77,6 +77,5 @@ inline int getLibRdKafkaThreadCount()
     return rd_kafka_thread_cnt();
 }
 
-}
-} // end of KAFKA_API::utility
+} } // end of KAFKA_API::utility
 
