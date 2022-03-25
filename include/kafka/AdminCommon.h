@@ -66,7 +66,5 @@ struct ListTopicsResult
     Topics topics;
 };
 
-}
-}
-} // end of KAFKA_API::clients::admin
+} } } // end of KAFKA_API::clients::admin
 

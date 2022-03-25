@@ -1039,6 +1039,5 @@ KafkaConsumer::commitAsync(const consumer::OffsetCommitCallback& offsetCommitCal
     commitAsync(TopicPartitionOffsets(), offsetCommitCallback);
 }
 
-}
-} // end of KAFKA_API::clients
+} } // end of KAFKA_API::clients
 

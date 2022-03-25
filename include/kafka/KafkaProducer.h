@@ -511,6 +511,5 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           t
     KAFKA_THROW_IF_WITH_ERROR(result);
 }
 
-}
-} // end of KAFKA_API::clients
+} } // end of KAFKA_API::clients
 

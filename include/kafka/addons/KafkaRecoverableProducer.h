@@ -356,6 +356,5 @@ private:
     std::unique_ptr<KafkaProducer> _producer;
 };
 
-}
-} // end of KAFKA_API::clients
+} } // end of KAFKA_API::clients
 

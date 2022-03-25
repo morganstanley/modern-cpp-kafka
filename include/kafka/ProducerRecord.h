@@ -105,7 +105,5 @@ private:
     Optional<Id> _id;
 };
 
-}
-}
-} // end of KAFKA_API::clients::producer
+} } } // end of KAFKA_API::clients::producer
 

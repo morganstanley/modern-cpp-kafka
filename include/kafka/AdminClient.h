@@ -341,6 +341,5 @@ AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
     return admin::DeleteRecordsResult(combineErrors(errors));
 }
 
-}
-} // end of KAFKA_API::clients
+} } // end of KAFKA_API::clients
 

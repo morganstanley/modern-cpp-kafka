@@ -150,7 +150,5 @@ ConsumerRecord::toString() const
     return oss.str();
 }
 
-}
-}
-} // end of KAFKA_API::clients::consumer
+} } } // end of KAFKA_API::clients::consumer
 
