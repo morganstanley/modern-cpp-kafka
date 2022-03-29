@@ -2,7 +2,7 @@
 
 #include <kafka/Project.h>
 
-#include <kafka/Types.h>
+#include <kafka/Properties.h>
 
 
 namespace KAFKA_API { namespace clients { namespace producer {
