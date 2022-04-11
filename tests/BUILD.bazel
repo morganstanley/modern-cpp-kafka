@@ -8,6 +8,8 @@ cc_test(
             "@gtest//:gtest_main",
             "@rapidjson//:rapidjson"],
 
+    linkopts = ["-lrdkafka"],
+
     timeout = "short",
 
     tags = ["unit"],
@@ -23,6 +25,8 @@ cc_test(
             "@gtest//:gtest",
             "@gtest//:gtest_main"],
 
+    linkopts = ["-lrdkafka"],
+
     timeout = "long",
     shard_count = 8,
 
@@ -37,6 +41,8 @@ cc_test(
     deps = ["//:modern-cpp-kafka-api",
             "@gtest//:gtest",
             "@gtest//:gtest_main"],
+
+    linkopts = ["-lrdkafka"],
 
     timeout = "long",
     shard_count = 1,
