@@ -83,3 +83,15 @@ TEST(Properties, AdminClientConfig)
 
     EXPECT_EQ("bootstrap.servers=127.0.0.1:9000,127.0.0.1:9001|security.protocol=SASL_PLAINTEXT", props.toString());
 }
+
+TEST(Properties, SensitiveProperties)
+{
+    kafka::Properties props
+    {{
+        { "ssl.key.password",      "passwordA" },
+        { "ssl.keystore.password", "passwordB" },
+        { "sasl.password",         "passwordC" },
+    }};
+
+    EXPECT_EQ("sasl.password=*|ssl.key.password=*|ssl.keystore.password=*", props.toString());
+}

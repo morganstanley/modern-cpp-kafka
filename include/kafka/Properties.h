@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <map>
+#include <regex>
 #include <string>
 
 
@@ -71,10 +72,17 @@ public:
 
     std::string toString() const
     {
+
         std::string ret;
         std::for_each(_kvMap.cbegin(), _kvMap.cend(),
                       [&ret](const auto& kv) {
-                          ret.append(ret.empty() ? "" : "|").append(kv.first).append("=").append(kv.second);
+                          const std::string& key   = kv.first;
+                          const std::string& value = kv.second;
+
+                          static const std::regex reSensitiveKey(R"(.+\.password)");
+                          bool isSensitive = std::regex_match(key, reSensitiveKey);
+
+                          ret.append(ret.empty() ? "" : "|").append(key).append("=").append(isSensitive ? "*" : value);
                       });
         return ret;
     }
