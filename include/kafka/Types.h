@@ -55,6 +55,28 @@ public:
 
         return oss.str();
     }
+
+    /**
+     * @brief return an UTF-8 encoded string.
+     * 
+     * @return std::string 
+     */
+    std::string toUtf8String() const
+    {
+        if (_size == 0) return _data ? "[empty]" : "[null]";
+
+        std::ostringstream oss;
+
+        auto getStr = [&oss](const unsigned char c)
+        { 
+            oss << c;
+        };
+        
+        const auto *beg = static_cast<const unsigned char *>(_data);
+        std::for_each(beg, beg + _size, getStr);
+
+        return oss.str();
+    }
 private:
     const void* _data;
     std::size_t _size;
