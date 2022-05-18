@@ -14,24 +14,22 @@ inline rd_kafka_message_t* mockRdKafkaMessage(kafka::Partition partition, kafka:
     constexpr std::size_t MSG_PRIVATE_LEN = 128;    // the underlying `rk_kafka_msg_t` is longer than `rk_kafka_message_t`
     std::size_t msgSize = sizeof(rd_kafka_message_t) + MSG_PRIVATE_LEN + key.size() + 1 + value.size() + 1;
 
-    void* memBlock = std::malloc(msgSize);
-    auto* rkMsg = static_cast<rd_kafka_message_t*>(memBlock);
-    char* msgBuf = static_cast<char*>(memBlock);
-    std::memset(msgBuf, 0, msgSize);
+    char* msgBuf = new char[msgSize]();
 
     char *keyBuf = msgBuf + sizeof(rd_kafka_message_t) + MSG_PRIVATE_LEN;
     std::memcpy(keyBuf, key.c_str(), key.size() + 1);
-    rkMsg->key     = keyBuf;
-    rkMsg->key_len = key.size();
 
     char *payloadBuf = keyBuf + key.size() + 1;
     std::memcpy(payloadBuf, value.c_str(), value.size() + 1);
-    rkMsg->payload = payloadBuf;
-    rkMsg->len     = value.size();
 
+    auto* rkMsg = reinterpret_cast<rd_kafka_message_t*>(msgBuf); // NOLINT
+    rkMsg->key       = keyBuf;
+    rkMsg->key_len   = key.size();
+    rkMsg->payload   = payloadBuf;
+    rkMsg->len       = value.size();
     rkMsg->partition = partition;
-    rkMsg->offset = offset;
-    rkMsg->err = respErr;
+    rkMsg->offset    = offset;
+    rkMsg->err       = respErr;
 
     return rkMsg;
 }

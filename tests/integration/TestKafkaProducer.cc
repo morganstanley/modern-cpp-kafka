@@ -347,7 +347,7 @@ TEST(KafkaProducer, ThreadCount)
 TEST(KafkaProducer, MessageDeliveryCallback)
 {
     // Prepare messages to test
-    const std::vector<std::tuple<std::string, std::string, int>> messages = {
+    const std::vector<std::tuple<std::string, std::string, kafka::clients::producer::ProducerRecord::Id>> messages = {
         {"key1", "value1", 1},
         {"key2", "value2", 2},
         {"key3", "value3", 3},
@@ -379,7 +379,7 @@ TEST(KafkaProducer, MessageDeliveryCallback)
             auto record = kafka::clients::producer::ProducerRecord(topic, partition,
                                                                    kafka::Key(std::get<0>(msg).c_str(), std::get<0>(msg).size()),
                                                                    kafka::Value(std::get<1>(msg).c_str(), std::get<1>(msg).size()),
-                                                                 std::get<2>(msg));
+                                                                   std::get<2>(msg));
             std::cout << "[" <<kafka::utility::getCurrentTime() << "] ProducerRecord: " << record.toString() << std::endl;
             producer.send(record, drCallback);
         }
@@ -397,7 +397,7 @@ TEST(KafkaProducer, MessageDeliveryCallback)
 TEST(KafkaProducer, DeliveryCallback_ManuallyPollEvents)
 {
     // Prepare messages to test
-    const std::vector<std::tuple<std::string, std::string, int>> messages = {
+    const std::vector<std::tuple<std::string, std::string, kafka::clients::producer::ProducerRecord::Id>> messages = {
         {"key1", "value1", 1},
         {"key2", "value2", 2},
         {"key3", "value3", 3},

@@ -39,10 +39,10 @@ TEST(Types, ConstBuffer)
     EXPECT_EQ(str.size(), strBuf.size());
     EXPECT_EQ("hello world", strBuf.toString());
 
-    char nonPrintable[] = "hello\0world";
-    kafka::ConstBuffer nonPrintableBuf(nonPrintable, sizeof(nonPrintable));
-    EXPECT_EQ(nonPrintable, nonPrintableBuf.data());
-    EXPECT_EQ(sizeof(nonPrintable), nonPrintableBuf.size());
-    EXPECT_EQ("hello[0x00]world[0x00]", nonPrintableBuf.toString());
+    std::string nonPrintable({'h', 'e', 'l', 'l', 'o', 0, 'w', 'o', 'r', 'l', 'd'});
+    kafka::ConstBuffer nonPrintableBuf(nonPrintable.data(), nonPrintable.size());
+    EXPECT_EQ(nonPrintable.data(), nonPrintableBuf.data());
+    EXPECT_EQ(nonPrintable.size(), nonPrintableBuf.size());
+    EXPECT_EQ("hello[0x00]world", nonPrintableBuf.toString());
 }
 

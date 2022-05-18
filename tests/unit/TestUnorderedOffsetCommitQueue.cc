@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <vector>
 
 
@@ -125,7 +126,7 @@ auto checkTimeMsConsumedToSortOffsets(std::size_t testNum, std::size_t step)
     std::vector<kafka::Offset> waitSequence(testNum);
     for (std::size_t i = 0 ; i < testNum; ++i)
     {
-        waitSequence[i] = i;
+        waitSequence[i] = static_cast<kafka::Offset>(i);
     }
 
     std::vector<kafka::Offset> ackSequence = waitSequence;
@@ -134,7 +135,7 @@ auto checkTimeMsConsumedToSortOffsets(std::size_t testNum, std::size_t step)
     for (std::size_t iBegin = 0; iBegin < ackSequence.size(); iBegin += step)
     {
         std::size_t iEnd = std::min(iBegin + step, ackSequence.size());
-        std::shuffle(ackSequence.begin() + iBegin, ackSequence.begin() + iEnd, g);
+        std::shuffle(ackSequence.begin() + static_cast<int64_t>(iBegin), ackSequence.begin() + static_cast<int64_t>(iEnd), g);
     }
 
     using namespace std::chrono;

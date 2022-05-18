@@ -38,7 +38,7 @@ TEST(BrokerMetadata, Basic)
     // Add info for partitions
     for (kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
     {
-        kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
+        kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[static_cast<std::size_t>(partition)].id);
         for (const auto& node: nodes)
         {
             partitionInfo.addReplica(node.id);
@@ -53,7 +53,7 @@ TEST(BrokerMetadata, Basic)
     for (kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
     {
         const auto& partitionInfo = metadata.partitions().at(partition);
-        EXPECT_EQ(nodes[partition].id,   partitionInfo.leader);
+        EXPECT_EQ(nodes[static_cast<std::size_t>(partition)].id, partitionInfo.leader);
         EXPECT_EQ(numNode, partitionInfo.replicas.size());
         EXPECT_EQ(numNode, partitionInfo.inSyncReplicas.size());
     }
@@ -81,7 +81,7 @@ TEST(BrokerMetadata, IncompleteInfo)
     // Add info for partitions
     for (kafka::Partition partition = 0; partition < static_cast<int>(numPartition); ++partition)
     {
-        kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[partition].id);
+        kafka::BrokerMetadata::PartitionInfo partitionInfo(nodes[static_cast<std::size_t>(partition)].id);
         for (const auto& node: nodes)
         {
             partitionInfo.addReplica(node.id);
