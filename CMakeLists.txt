@@ -3,9 +3,15 @@ cmake_minimum_required(VERSION "3.8")
 project("Modern C++ Kafka API" VERSION 1.0.0)
 
 get_property(parent_directory DIRECTORY PROPERTY PARENT_DIRECTORY)
-if(NOT parent_directory)
+if (NOT parent_directory)
     set(cppkafka_master_project ON)
-endif()
+    # Use Strict Options
+    if ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+        add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result" "-Wsign-conversion")
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    endif ()
+endif ()
 
 option(CPPKAFKA_ENABLE_TESTS "Generate the test targets" ${cppkafka_master_project})
 
@@ -77,16 +83,6 @@ if (CMAKE_CXX_STANDARD EQUAL 14)
         endif ()
     endif ()
     include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-endif ()
-
-
-#---------------------------
-# Build Options
-#---------------------------
-if ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-    add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif ()
 
 

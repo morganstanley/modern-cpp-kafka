@@ -93,8 +93,8 @@ TEST(KafkaRecoverableProducer, MockFatalError)
     // Prepare messages to send
     static constexpr int MSG_NUM = 50;
     std::mutex messagesMutex;
-    std::list<int> messagesToSend;
-    for (int i = 0; i < MSG_NUM; ++i) messagesToSend.push_back(i);
+    std::list<kafka::clients::producer::ProducerRecord::Id> messagesToSend;
+    for (std::size_t i = 0; i < MSG_NUM; ++i) messagesToSend.push_back(i);
 
     int sendCount     = 0;
     int deliveryCount = 0;
@@ -122,7 +122,7 @@ TEST(KafkaRecoverableProducer, MockFatalError)
                              // Would resend the message
                              if (error) {
                                 std::lock_guard<std::mutex> lock(messagesMutex);
-                                messagesToSend.push_front(std::stoi(*payload));
+                                messagesToSend.push_front(static_cast<kafka::clients::producer::ProducerRecord::Id>(std::stoi(*payload)));
                              }
 
                              ++deliveryCount;

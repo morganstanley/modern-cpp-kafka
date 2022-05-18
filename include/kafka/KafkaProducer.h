@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <condition_variable>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -398,7 +399,7 @@ KafkaProducer::send(const producer::ProducerRecord& record,
         vu.vtype         = RD_KAFKA_VTYPE_HEADER;
         vu.u.header.name = header.key.c_str();
         vu.u.header.val  = header.value.data();
-        vu.u.header.size = header.value.size();
+        vu.u.header.size = static_cast<int64_t>(header.value.size());
     }
 
     assert(uvCount == rkVUs.size());

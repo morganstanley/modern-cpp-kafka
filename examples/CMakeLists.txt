@@ -1,5 +1,6 @@
 project("kafka-examples")
 
+
 # Target: kafka_sync_producer
 add_executable("kafka_sync_producer" "kafka_sync_producer.cc")
 target_link_libraries("kafka_sync_producer" modern-cpp-kafka-api)

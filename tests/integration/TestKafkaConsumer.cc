@@ -1564,7 +1564,7 @@ TEST(KafkaConsumer, OffsetsForTime)
 
     using namespace std::chrono;
 
-    constexpr int MESSAGES_NUM = 5;
+    constexpr std::size_t MESSAGES_NUM = 5;
 
     std::vector<time_point<system_clock>>     checkPoints;
     std::vector<kafka::TopicPartitionOffsets> expectedOffsets;
@@ -1572,7 +1572,7 @@ TEST(KafkaConsumer, OffsetsForTime)
     std::cout << "Produce messages:" << std::endl;
     {
         kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
-        for (int i = 0; i < MESSAGES_NUM; ++i)
+        for (std::size_t i = 0; i < MESSAGES_NUM; ++i)
         {
             checkPoints.emplace_back(system_clock::now());
 
@@ -1602,7 +1602,7 @@ TEST(KafkaConsumer, OffsetsForTime)
     {
         kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
         consumer.subscribe({topic1, topic2});
-        for (int i = 0; i < MESSAGES_NUM; ++i)
+        for (std::size_t i = 0; i < MESSAGES_NUM; ++i)
         {
             const auto timepoint = checkPoints[i];
             const auto expected  = expectedOffsets[i];
@@ -1619,7 +1619,7 @@ TEST(KafkaConsumer, OffsetsForTime)
         kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // Here we doesn't subsribe to topic1 or topic2 (the result is undefined)
-        for (int i = 0; i < MESSAGES_NUM; ++i)
+        for (std::size_t i = 0; i < MESSAGES_NUM; ++i)
         {
             try
             {
@@ -1654,7 +1654,7 @@ TEST(KafkaConsumer, OffsetsForTime)
         kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
         consumer.subscribe({topic1, topic2});
 
-        for (int i = 0; i < MESSAGES_NUM; ++i)
+        for (std::size_t i = 0; i < MESSAGES_NUM; ++i)
         {
             const auto timepoint = checkPoints[i];
             const auto validTp   = kafka::TopicPartition{topic1, partition1};

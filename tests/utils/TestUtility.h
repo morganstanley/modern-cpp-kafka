@@ -37,25 +37,25 @@
         EXPECT_FALSE(true);                                         \
     }
 
-#define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                           \
-    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                               \
-        try {                                                                   \
-            expr;                                                               \
-            break;                                                              \
-        } catch (const kafka::KafkaException& e) {                              \
-            if (e.error().value() == errToRetry && cnt != maxRetries) continue; \
-            throw;                                                              \
-        }                                                                       \
+#define RETRY_FOR_ERROR(expr, errToRetry, maxRetries)                               \
+    for (int cnt = 0; cnt <= (maxRetries); ++cnt) {                                 \
+        try {                                                                       \
+            expr;                                                                   \
+            break;                                                                  \
+        } catch (const kafka::KafkaException& e) {                                  \
+            if (e.error().value() == (errToRetry) && cnt != (maxRetries)) continue; \
+            throw;                                                                  \
+        }                                                                           \
     }
 
 #define RETRY_FOR_FAILURE(expr, maxRetries)                         \
-    for (int cnt = 0; cnt <= maxRetries; ++cnt) {                   \
+    for (int cnt = 0; cnt <= (maxRetries); ++cnt) {                 \
         try {                                                       \
             expr;                                                   \
             break;                                                  \
         } catch (const kafka::KafkaException& e) {                  \
             std::cerr << "Met error: " << e.what() << std::endl;    \
-            if (cnt != maxRetries) continue;                        \
+            if (cnt != (maxRetries)) continue;                      \
             throw;                                                  \
         }                                                           \
     }
@@ -125,7 +125,9 @@ inline std::size_t
 GetNumberOfKafkaBrokers()
 {
     auto kafkaBrokerListEnv = GetEnvVar("KAFKA_BROKER_LIST");
-    return kafkaBrokerListEnv ? (std::count(kafkaBrokerListEnv->cbegin(), kafkaBrokerListEnv->cend(), ',') + 1) : 0;
+    if (!kafkaBrokerListEnv) return 0;
+
+    return static_cast<std::size_t>(std::count(kafkaBrokerListEnv->cbegin(), kafkaBrokerListEnv->cend(), ',')) + 1;
 }
 
 const auto POLL_INTERVAL             = std::chrono::milliseconds(100);

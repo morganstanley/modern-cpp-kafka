@@ -4,6 +4,8 @@
 
 #include <kafka/Utility.h>
 
+#include <algorithm>
+#include <array>
 #include <cassert>
 #include <functional>
 #include <iostream>
@@ -25,25 +27,24 @@ struct Log
         Debug   = 7
     };
 
-    static const std::string& levelString(int level)
+    static const std::string& levelString(std::size_t level)
     {
-        static const std::vector<std::string> levelNames = {"EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG"};
-        static const int                      numLevels  = static_cast<int>(levelNames.size());
-        static const std::string              invalid    = "INVALID";
+        static const std::vector<std::string> levelNames = {"EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG", "INVALID"};
+        static const std::size_t              maxIndex   = levelNames.size() - 1;
 
-        return (level >= 0 && level < numLevels) ? levelNames[level] : invalid;
+        return levelNames[std::min(level, maxIndex)];
     }
 };
 
-template <int MAX_CAPACITY>
+template <std::size_t MAX_CAPACITY>
 class LogBuffer
 {
 public:
-    LogBuffer():_wptr(_buf) { _buf[0] = 0; } // NOLINT
+    LogBuffer():_wptr(_buf.data()) { _buf[0] = 0; } // NOLINT
 
     LogBuffer& clear()
     {
-        _wptr = _buf;
+        _wptr = _buf.data();
         _buf[0] = 0;
         return *this;
     }
@@ -51,31 +52,31 @@ public:
     template<class ...Args>
     LogBuffer& print(const char* format, Args... args)
     {
-        assert(!(_buf[0] != 0 && _wptr == _buf)); // means it has already been used as a plain buffer (with `str()`)
+        assert(!(_buf[0] != 0 && _wptr == _buf.data())); // means it has already been used as a plain buffer (with `str()`)
 
         auto cnt = std::snprintf(_wptr, capacity(), format, args...); // returns number of characters written if successful (not including '\0')
         if (cnt > 0)
         {
-            _wptr = std::min(_wptr + cnt, _buf + MAX_CAPACITY - 1);
+            _wptr = std::min(_wptr + cnt, _buf.data() + MAX_CAPACITY - 1);
         }
         return *this;
     }
     LogBuffer& print(const char* format) { return print("%s", format); }
 
-    std::size_t capacity() const { return static_cast<size_t>(_buf + MAX_CAPACITY - _wptr); }
-    char* str() { return _buf; }
-    const char* c_str() const { return _buf; }
+    std::size_t capacity() const { return static_cast<size_t>(_buf.data() + MAX_CAPACITY - _wptr); }
+    char* str() { return _buf.data(); }
+    const char* c_str() const { return _buf.data(); }
 
 private:
-    char* _wptr;
-    char _buf[MAX_CAPACITY];
+    std::array<char, MAX_CAPACITY> _buf;
+    char*                          _wptr;
 };
 
 using Logger = std::function<void(int, const char*, int, const char* msg)>;
 
 inline void DefaultLogger(int level, const char* /*filename*/, int /*lineno*/, const char* msg)
 {
-    std::cout << "[" << utility::getCurrentTime() << "]" << Log::levelString(level) << " " << msg;
+    std::cout << "[" << utility::getCurrentTime() << "]" << Log::levelString(static_cast<std::size_t>(level)) << " " << msg;
     std::cout << std::endl;
 }
 
