@@ -139,60 +139,57 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
 
 int main (int argc, char **argv)
 {
-    // Parse input arguments
-    std::unique_ptr<Arguments> args;
+    using namespace kafka::clients;
+
     try
     {
+        // Parse input arguments
+        std::unique_ptr<Arguments> args;
         args = ParseArguments(argc, argv);
+        if (!args) return EXIT_SUCCESS; // Only for "help"
+
+        kafka::Properties adminConf = args->adminConfig;
+        adminConf.put(admin::Config::BOOTSTRAP_SERVERS, args->broker);
+
+        AdminClient adminClient(adminConf);
+
+        if (args->opType == Arguments::OpType::List)
+        {
+            auto listResult = adminClient.listTopics();
+            if (listResult.error)
+            {
+                std::cerr << "Error: " << listResult.error.message() << std::endl;
+                return EXIT_FAILURE;
+            }
+
+            for (const auto& topic: listResult.topics)
+            {
+                std::cout << topic << std::endl;
+            }
+        }
+        else if (args->opType == Arguments::OpType::Create)
+        {
+            auto createResult = adminClient.createTopics({args->topic}, args->partitions, args->replicationFactor, args->topicProps);
+            if (createResult.error)
+            {
+                std::cerr << "Error: " << createResult.error.message() << std::endl;
+                return EXIT_FAILURE;
+            }
+        }
+        else
+        {
+            auto deleteResult = adminClient.deleteTopics({args->topic});
+            if (deleteResult.error)
+            {
+                std::cerr << "Error: " << deleteResult.error.message() << std::endl;
+                return EXIT_FAILURE;
+            }
+        }
     }
     catch (const std::exception& e)
     {
         std::cout << e.what() << std::endl;
         return EXIT_FAILURE;
-    }
-    if (!args) // Only for "help"
-    {
-        return EXIT_SUCCESS;
-    }
-
-    using namespace kafka::clients;
-
-    kafka::Properties adminConf = args->adminConfig;
-    adminConf.put(admin::Config::BOOTSTRAP_SERVERS, args->broker);
-
-    AdminClient adminClient(adminConf);
-
-    if (args->opType == Arguments::OpType::List)
-    {
-        auto listResult = adminClient.listTopics();
-        if (listResult.error)
-        {
-            std::cerr << "Error: " << listResult.error.message() << std::endl;
-            return EXIT_FAILURE;
-        }
-
-        for (const auto& topic: listResult.topics)
-        {
-            std::cout << topic << std::endl;
-        }
-    }
-    else if (args->opType == Arguments::OpType::Create)
-    {
-        auto createResult = adminClient.createTopics({args->topic}, args->partitions, args->replicationFactor, args->topicProps);
-        if (createResult.error)
-        {
-            std::cerr << "Error: " << createResult.error.message() << std::endl;
-            return EXIT_FAILURE;
-        }
-    }
-    else
-    {
-        auto deleteResult = adminClient.deleteTopics({args->topic});
-        if (deleteResult.error)
-        {
-            std::cerr << "Error: " << deleteResult.error.message() << std::endl;
-            return EXIT_FAILURE;
-        }
     }
 
     return EXIT_SUCCESS;

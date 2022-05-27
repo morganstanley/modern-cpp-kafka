@@ -153,19 +153,21 @@ TEST(KafkaRecoverableProducer, MockFatalError)
     // Check the messages
     std::cout << records.size() << " message got by consumer" << std::endl;
 
-    std::map<int, int> countMap;
+    std::map<kafka::clients::producer::ProducerRecord::Id, int> countMap;
     for (const auto& record: records)
     {
         std::string payload(static_cast<const char*>(record.value().data()), record.value().size());
-        ++countMap[std::stoi(payload)];
+        ++countMap[static_cast<kafka::clients::producer::ProducerRecord::Id>(std::stoi(payload))];
     }
 
     for (std::size_t i = 0; i < MSG_NUM; ++i)
     {
-        auto count = countMap[i];
+        auto id = static_cast<kafka::clients::producer::ProducerRecord::Id>(i);
+        auto count = countMap[id];
+
         EXPECT_TRUE(count > 0);
 
-        if (count > 1) std::cout << "Message " << i << " was duplicated! count[" << count << "]" << std::endl;
+        if (count > 1) std::cout << "Message " << id << " was duplicated! count[" << count << "]" << std::endl;
     }
 }
 

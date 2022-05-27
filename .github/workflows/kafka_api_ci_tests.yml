@@ -30,58 +30,63 @@ jobs:
     strategy:
       matrix:
         include:
-          - os:                macos-10.15
+          - os:                macos-11
             build-cxx:         clang++
             test-labels:       unit|integration
+            enable-ut-stubs:   true
 
-          - os:                ubuntu-20.04
+          - os:                macos-12
+            build-cxx:         clang++
+            test-labels:       robustness
+
+          - os:                ubuntu-22.04
             build-cxx:         g++
             build-type:        Debug
             test-labels:       unit|integration
             enable-ut-stubs:   true
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         g++
             build-type:        Release
             test-labels:       robustness
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         g++
             build-type:        Release
             cxx-standard:      14
             test-labels:       unit|integration
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         g++
             check-option:      asan
             test-labels:       unit|integration
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         g++
             check-option:      tsan
             test-labels:       unit|integration
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         g++
             check-option:      ubsan
             test-labels:       unit|integration
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         clang++
             test-labels:       unit|integration
             generate-doc:      true
             with-installation: true
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         clang++
             check-option:      clang-tidy
             enable-ut-stubs:   true
 
-          - os:                ubuntu-18.04
+          - os:                ubuntu-20.04
             build-cxx:         g++
             test-labels:       unit|integration
 
-          - os:                ubuntu-18.04
+          - os:                ubuntu-20.04
             build-cxx:         clang++
             test-labels:       robustness
 
@@ -100,14 +105,12 @@ jobs:
           cd ${BUILD_SUB_DIR}
 
           # 1. Install clang/clang-tidy
-          if [[ ${BUILD_CXX} == 'clang'* ]] && [[ ${OS_VERSION} == 'ubuntu'* ]]; then
-            sudo rm /usr/bin/clang /usr/bin/clang++
-            sudo apt install -y clang-10
-            sudo ln -s clang-10 /usr/bin/clang
-            sudo ln -s clang++-10 /usr/bin/clang++
-          fi
           if [[ ${CHECK_OPTION} == 'clang-tidy' ]]; then
-            sudo apt install -y clang-tidy
+            if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
+              sudo apt install -y clang-tidy
+            elif [[ ${OS_VERSION} == 'macos'* ]]; then
+              brew install llvm
+            fi
           fi
 
           # 2. Install googletest (v1.11.0)
@@ -144,6 +147,29 @@ jobs:
             sudo pip3 install markdown
             sudo apt install -y doxygen
           fi
+
+          # 6. Install Jre, Kafka for integration/regression tests
+          if [[ ${TEST_LABELS} == *'integration'* ]] || [[ ${TEST_LABELS} == *'robustness'* ]]; then
+            # Install Jre
+            if [[ ${OS_VERSION} == 'ubuntu-22.04' ]]; then
+              sudo apt install -y openjdk-18-jre
+            fi
+
+            # Install kafka
+            time wget -nv ${KAFKA_SRC_LINK}
+            tar -xzf `basename ${KAFKA_SRC_LINK}`
+            export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
+          fi
+
+          # 7. Install gtest-parallel for integration test
+          if [[ ${TEST_LABELS} == *'integration'* ]]; then
+            wget https://github.com/google/gtest-parallel/archive/refs/heads/master.zip
+            unzip master.zip
+            export PATH=`pwd`/gtest-parallel-master:$PATH
+          fi
+
+          # Save the PATH to environment file
+          echo "PATH=${PATH}" >> $GITHUB_ENV
 
           # Print dev env
           cmake --version | head -n 1
@@ -210,30 +236,18 @@ jobs:
         run: |
           cd ${BUILD_SUB_DIR}
 
-          # Setup Kafka cluster for integration test & regression test
-          if [[ ${TEST_LABELS} == *'integration'* ]] || [[ ${TEST_LABELS} == *'robustness'* ]]; then
-            # Install kafka
-            time wget -nv ${KAFKA_SRC_LINK}
-            tar -xzf `basename ${KAFKA_SRC_LINK}`
-            export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
+          # Restore the PATH from environment file
+          export PATH=${{ env.PATH }}
 
-            # Start Kafka cluster
-            rm -f test.env
-            ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
+          # Start Kafka cluster
+          rm -f test.env
+          ../../scripts/start-local-kafka-cluster.py --zookeeper-port 42181 --broker-ports 40091 40092 40093 --temp-dir ./tmp &
 
-            # Wait server to be ready
-            for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
+          # Wait server to be ready
+          for i in {1..60}; do cat test.env 2>/dev/null && break || sleep 1; done
 
-            # Set the environment variables: KAFKA_BROKER_LIST, KAFKA_BROKER_PIDS
-            source test.env
-          fi
-
-          # Install gtest-parallel
-          if [[ ${TEST_LABELS} == *'integration'* ]]; then
-            wget https://github.com/google/gtest-parallel/archive/refs/heads/master.zip
-            unzip master.zip
-            export PATH=`pwd`/gtest-parallel-master:$PATH
-          fi
+          # Set the environment variables: KAFKA_BROKER_LIST, KAFKA_BROKER_PIDS
+          source test.env
 
           # Run tests
           ctest -VV -L "${TEST_LABELS}"
@@ -304,7 +318,7 @@ jobs:
 
       - name: Test
         if: matrix.test-labels
-        timeout-minutes: 20
+        timeout-minutes: 15
         run: |
           cd $Env:BUILD_SUB_DIR
           tree "tests"

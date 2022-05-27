@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             test-labels:       unit,integration
 
     steps:
@@ -52,6 +52,22 @@ jobs:
             brew install boost
           fi
 
+          # 3. Install Jre, Kafka for integration/regression tests
+          if [[ ${TEST_LABELS} == *'integration'* ]] || [[ ${TEST_LABELS} == *'robustness'* ]]; then
+            # Install Jre
+            if [[ ${OS_VERSION} == 'ubuntu-22.04' ]]; then
+              sudo apt install -y openjdk-18-jre
+            fi
+
+            # Install kafka
+            time wget -nv ${KAFKA_SRC_LINK}
+            tar -xzf `basename ${KAFKA_SRC_LINK}`
+            export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
+
+            # Save the PATH to environment file
+            echo "PATH=${PATH}" >> $GITHUB_ENV
+          fi
+
       - name: Build
         run: |
           bazel build //...
@@ -60,13 +76,11 @@ jobs:
         if: matrix.test-labels
         timeout-minutes: 15
         run: |
-          # Setup Kafka cluster for integration test & regression test
-          if [[ ${TEST_LABELS} == *'integration'* ]]; then
-            # Install kafka
-            time wget -nv ${KAFKA_SRC_LINK}
-            tar -xzf `basename ${KAFKA_SRC_LINK}`
-            export PATH=`pwd`/`basename ${KAFKA_SRC_LINK} .tgz`/bin:$PATH
+          # Restore the PATH from environment file
+          export PATH=${{ env.PATH }}
 
+          # Setup Kafka cluster for integration test & regression test
+          if [[ ${TEST_LABELS} == *'integration'* ]] || [[ ${TEST_LABELS} == *'robustness'* ]]; then
             # Start Kafka cluster
             rm -f test.env
             scripts/start-local-kafka-cluster.py --zookeeper-port 52181 --broker-ports 50091 50092 50093 --temp-dir ./tmp &
@@ -82,7 +96,7 @@ jobs:
           bazel test  //... --test_env=KAFKA_BROKER_LIST=$KAFKA_BROKER_LIST --test_tag_filters="${TEST_LABELS}" --test_verbose_timeout_warnings --test_output=all
 
           # Stop Kafka cluster for integration test & regression test
-          if [[ ${TEST_LABELS} == *'integration'* ]]; then
+          if [[ ${TEST_LABELS} == *'integration'* ]] || [[ ${TEST_LABELS} == *'robustness'* ]]; then
             # Stop kafka cluster
             kafka-server-stop.sh
             zookeeper-server-stop.sh

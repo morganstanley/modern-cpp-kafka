@@ -35,6 +35,8 @@ public:
      */
     enum class EventsPollingOption { Manual, Auto };
 
+    virtual ~KafkaClient() = default;
+
     /**
      * Get the client id.
      */
@@ -170,8 +172,6 @@ protected:
                 const Properties&              properties,
                 const ConfigCallbacksRegister& extraConfigRegister = ConfigCallbacksRegister{},
                 EventsPollingOption            eventsPollingOption = EventsPollingOption::Auto);
-
-    virtual ~KafkaClient() = default;
 
     rd_kafka_t* getClientHandle() const { return _rk.get(); }
 

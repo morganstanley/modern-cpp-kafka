@@ -139,7 +139,7 @@ int main (int argc, char **argv)
     }
 
     // Use Ctrl-C to terminate the program
-    signal(SIGINT, stopRunning);
+    signal(SIGINT, stopRunning); // NOLINT
 
     // Prepare consumer properties
     //
