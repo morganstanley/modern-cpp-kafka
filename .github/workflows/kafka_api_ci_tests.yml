@@ -9,7 +9,7 @@ on:
 env:
   KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
   CPU_CORE_NUM:       2
-  LIBRDKAFKA_VERSION: 1.8.2
+  LIBRDKAFKA_VERSION: 1.9.0
   BUILD_SUB_DIR:      builds/sub-build
 
 jobs:
@@ -130,9 +130,13 @@ jobs:
           fi
 
           # 4. Install librdkafka
-          wget -nv https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
+          # ToDo
+          wget https://github.com/edenhill/librdkafka/archive/refs/heads/master.zip -O librdkafka-master.zip
+          unzip librdkafka-master.zip
+          cd librdkafka-master
+          #wget -nv https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
+          #tar -xzf v${LIBRDKAFKA_VERSION}.tar.gz
+          #cd librdkafka-${LIBRDKAFKA_VERSION}
           ./configure --cxx=${BUILD_CXX}
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
