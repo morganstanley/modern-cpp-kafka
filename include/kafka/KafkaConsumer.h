@@ -438,7 +438,7 @@ KafkaConsumer::close()
         // Commit the offsets for these messages which had been polled last time (for `enable.auto.commit=true` case.)
         commitStoredOffsetsIfNecessary(CommitType::Sync);
     }
-    catch(const KafkaException& e)
+    catch (const KafkaException& e)
     {
         KAFKA_API_DO_LOG(Log::Level::Err, "met error[%s] while closing", e.what());
     }
@@ -707,7 +707,7 @@ KafkaConsumer::offsetsForTime(const TopicPartitions& topicPartitions,
                               std::chrono::time_point<std::chrono::system_clock> timepoint,
                               std::chrono::milliseconds timeout) const
 {
-    if (topicPartitions.empty()) return TopicPartitionOffsets();
+    if (topicPartitions.empty()) return {};
 
     auto msSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(timepoint.time_since_epoch()).count();
 

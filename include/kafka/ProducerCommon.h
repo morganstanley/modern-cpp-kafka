@@ -29,7 +29,7 @@ public:
 
     // This is only called by the KafkaProducer::deliveryCallback (with a valid rkmsg pointer)
     RecordMetadata(const rd_kafka_message_t* rkmsg, Optional<ProducerRecord::Id> recordId)
-        : _cachedInfo(), _rkmsg(rkmsg), _recordId(recordId) {}
+        : _rkmsg(rkmsg), _recordId(recordId) {}
 
     RecordMetadata& operator=(const RecordMetadata& another)
     {

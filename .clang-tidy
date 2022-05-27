@@ -1,6 +1,10 @@
 Checks: "*,\
          -llvm-header-guard,\
          -llvm-namespace-comment,\
+         -llvmlibc-restrict-system-libc-headers,\
+         -llvmlibc-callee-namespace,\
+         -llvmlibc-implementation-in-namespace,\
+         -altera-*,\
          -fuchsia-*,\
          -google-readability-namespace-comments,\
          -google-build-using-namespace,\
@@ -9,6 +13,7 @@ Checks: "*,\
          -modernize-use-nodiscard,\
          -modernize-deprecated-headers,\
          -modernize-use-trailing-return-type,\
+         -modernize-concat-nested-namespaces,\
          -hicpp-special-member-functions,\
          -hicpp-vararg,\
          -hicpp-no-malloc,\
@@ -18,6 +23,7 @@ Checks: "*,\
          -cppcoreguidelines-special-member-function,\
          -cppcoreguidelines-macro-usage,\
          -cppcoreguidelines-avoid-magic-numbers,\
+         -cppcoreguidelines-avoid-non-const-global-variables,\
          -cppcoreguidelines-pro-type-vararg,\
          -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
          -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
@@ -26,11 +32,15 @@ Checks: "*,\
          -cppcoreguidelines-non-private-member-variables-in-classes,\
          -cppcoreguidelines-pro-type-union-access,\
          -misc-non-private-member-variables-in-classes,\
+         -misc-no-recursion,\
          -readability-magic-numbers,\
          -readability-implicit-bool-conversion,\
          -readability-braces-around-statements,\
          -readability-isolate-declaration,\
+         -readability-identifier-length,\
+         -readability-function-cognitive-complexity,\
          -bugprone-unused-return-value,\
+         -bugprone-easily-swappable-parameters,\
          -cert-err58-cpp,\
          -cert-err60-cpp"
 

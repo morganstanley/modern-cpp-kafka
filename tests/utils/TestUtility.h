@@ -80,7 +80,7 @@ PrintDividingLine(const std::string& description = "")
 inline Optional<std::string>
 GetEnvVar(const std::string& name)
 {
-    if (const auto* value = getenv(name.c_str()))
+    if (const auto* value = getenv(name.c_str())) // NOLINT
     {
         return std::string{value};
     }
