@@ -219,67 +219,67 @@
 </ul>
 <h2 id="some-examples"><a class="toclink" href="#some-examples">Some examples</a></h2>
 <h3 id="kafkaproducer-demo"><a class="toclink" href="#kafkaproducer-demo"><code>KafkaProducer</code> demo</a></h3>
-<div class="codehilite"><pre><span></span>    <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
 
 
 
-    <span class="n">KafkaProducer</span> <span class="nf">producer</span><span class="p">(</span>
+<span class="w">    </span><span class="n">KafkaProducer</span><span class="w"> </span><span class="nf">producer</span><span class="p">(</span><span class="w"></span>
 
-        <span class="n">Properties</span><span class="p">({</span>
+<span class="w">        </span><span class="n">Properties</span><span class="p">({</span><span class="w"></span>
 
-            <span class="p">{</span> <span class="n">ProducerConfig</span><span class="o">::</span><span class="n">BOOTSTRAP_SERVERS</span><span class="p">,</span>  <span class="s">&quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span> <span class="p">},</span>
+<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">BOOTSTRAP_SERVERS</span><span class="p">,</span><span class="w">  </span><span class="s">&quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 
-            <span class="p">{</span> <span class="n">ProducerConfig</span><span class="o">::</span><span class="n">ENABLE_IDEMPOTENCE</span><span class="p">,</span> <span class="s">&quot;true&quot;</span> <span class="p">},</span>
+<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">ENABLE_IDEMPOTENCE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 
-            <span class="p">{</span> <span class="n">ProducerConfig</span><span class="o">::</span><span class="n">MESSAGE_TIMEOUT_MS</span><span class="p">,</span> <span class="s">&quot;86400000&quot;</span><span class="p">}</span>  <span class="c1">// as long as 1 day</span>
+<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">MESSAGE_TIMEOUT_MS</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;86400000&quot;</span><span class="p">}</span><span class="w">  </span><span class="c1">// as long as 1 day</span>
 
-        <span class="p">})</span>
+<span class="w">        </span><span class="p">})</span><span class="w"></span>
 
-    <span class="p">);</span>
-
-
-
-    <span class="k">while</span> <span class="p">(</span><span class="n">running</span><span class="p">)</span> <span class="p">{</span>
-
-        <span class="k">auto</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">fetchMsgFromUpstream</span><span class="p">();</span>
-
-        <span class="k">auto</span> <span class="n">record</span> <span class="o">=</span> <span class="n">ProducerRecord</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">key</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="n">msg</span><span class="p">.</span><span class="n">id</span><span class="p">);</span>
-
-        <span class="n">producer</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">,</span>
-
-                      <span class="c1">// Ack callback</span>
-
-                      <span class="p">[</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">](</span><span class="k">const</span> <span class="n">Producer</span><span class="o">::</span><span class="n">RecordMetadata</span><span class="o">&amp;</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">error_code</span> <span class="n">ec</span><span class="p">)</span> <span class="p">{</span>
-
-                           <span class="c1">// the message could be identified by `metadata.recordId()`</span>
-
-                           <span class="k">auto</span> <span class="n">recordId</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">.</span><span class="n">recordId</span><span class="p">();</span>
-
-                           <span class="k">if</span> <span class="p">(</span><span class="n">ec</span><span class="p">)</span>  <span class="p">{</span>
-
-                               <span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Cannot send out message with recordId: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">recordId</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;, error:&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">ec</span><span class="p">.</span><span class="n">message</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-
-                           <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-
-                               <span class="n">commitMsgToUpstream</span><span class="p">(</span><span class="n">recordId</span><span class="p">);</span>
-
-                           <span class="p">}</span>
-
-                       <span class="p">});</span>
-
-    <span class="p">}</span>
+<span class="w">    </span><span class="p">);</span><span class="w"></span>
 
 
 
-    <span class="n">producer</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
-</pre></div>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">running</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fetchMsgFromUpstream</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">record</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProducerRecord</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">id</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">producer</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">                      </span><span class="c1">// Ack callback</span>
+
+<span class="w">                      </span><span class="p">[</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Producer</span><span class="o">::</span><span class="n">RecordMetadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">error_code</span><span class="w"> </span><span class="n">ec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                           </span><span class="c1">// the message could be identified by `metadata.recordId()`</span>
+
+<span class="w">                           </span><span class="k">auto</span><span class="w"> </span><span class="n">recordId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">metadata</span><span class="p">.</span><span class="n">recordId</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">                           </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ec</span><span class="p">)</span><span class="w">  </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                               </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Cannot send out message with recordId: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">recordId</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;, error:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">ec</span><span class="p">.</span><span class="n">message</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                           </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                               </span><span class="n">commitMsgToUpstream</span><span class="p">(</span><span class="n">recordId</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">                           </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">                       </span><span class="p">});</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="n">producer</span><span class="p">.</span><span class="n">close</span><span class="p">();</span><span class="w"></span>
+</code></pre></div>
 
 <ul>
 <li>With a long <code>message.timeout.ms</code>, we're not likely to catch an error with delivery callback, --it would retry for temporary errors anyway. But be aware with permanent errors, it might be caused by careless design.</li>
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2022. 04. 11
+        Generated: 2022. 06. 14
       </footer>
       <hr/>
     </div>
