@@ -70,7 +70,7 @@ jobs:
           name: document
 
       - name: Deploy to Pages
-        uses: JamesIves/github-pages-deploy-action@4.3.3
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages
           folder: document
