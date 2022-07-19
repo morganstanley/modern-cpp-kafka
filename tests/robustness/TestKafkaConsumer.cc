@@ -83,7 +83,7 @@ TEST(KafkaConsumer, AlwaysFinishClosing_ManuallyPollEvents)
 }
 
 // https://github.com/morganstanley/modern-cpp-kafka/issues/120
-TEST(KafkaConsumer,CommitOffsetWhileBrokersStop)
+TEST(KafkaConsumer,DISABLED_CommitOffsetWhileBrokersStop)
 {
     const kafka::Topic     topic     = kafka::utility::getRandomString();
     const kafka::Partition partition = 0;

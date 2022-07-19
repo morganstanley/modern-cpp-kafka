@@ -436,18 +436,24 @@ KafkaConsumer::close()
     try
     {
         // Commit the offsets for these messages which had been polled last time (for `enable.auto.commit=true` case.)
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
         commitStoredOffsetsIfNecessary(CommitType::Sync);
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
     }
     catch (const KafkaException& e)
     {
         KAFKA_API_DO_LOG(Log::Level::Err, "met error[%s] while closing", e.what());
     }
 
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
     rd_kafka_consumer_close(getClientHandle());
 
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
     while (rd_kafka_outq_len(getClientHandle()))
     {
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
         rd_kafka_poll(getClientHandle(), KafkaClient::TIMEOUT_INFINITE);
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
     }
 
     rd_kafka_queue_t* queue = getCommitCbQueue();
@@ -757,7 +763,9 @@ KafkaConsumer::commit(const TopicPartitionOffsets& topicPartitionOffsets, Commit
 {
     auto rk_tpos = rd_kafka_topic_partition_list_unique_ptr(topicPartitionOffsets.empty() ? nullptr : createRkTopicPartitionList(topicPartitionOffsets));
 
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
     Error error{ rd_kafka_commit(getClientHandle(), rk_tpos.get(), type == CommitType::Async ? 1 : 0) };
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
     // No stored offset to commit (it might happen and should not be treated as a mistake)
     if (topicPartitionOffsets.empty() && error.value() == RD_KAFKA_RESP_ERR__NO_OFFSET)
     {
@@ -789,7 +797,9 @@ KafkaConsumer::commitStoredOffsetsIfNecessary(CommitType type)
         {
             ++o.second;
         }
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
         commit(_offsetsToStore, type);
+    std::cout << "*** DEBUG ***, line: " << __LINE__ << std::endl;
         _offsetsToStore.clear();
     }
 }
