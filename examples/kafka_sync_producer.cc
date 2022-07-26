@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <brokers> <topic>\n";
-        exit(1); // NOLINT
+        exit(argc == 1 ? 0 : 1); // NOLINT
     }
 
     std::string brokers = argv[1];
