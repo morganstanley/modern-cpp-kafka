@@ -7,10 +7,10 @@ on:
       - main
 
 env:
-  KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
-  CPU_CORE_NUM:       2
-  LIBRDKAFKA_VERSION: 1.8.2
-  BUILD_SUB_DIR:      builds/sub-build
+  KAFKA_SRC_LINK: https://dlcdn.apache.org/kafka/3.2.0/kafka_2.13-3.2.0.tgz
+  CPU_CORE_NUM:   2
+  LIBRDKAFKA_TAG: v1.9.0
+  BUILD_SUB_DIR:  builds/sub-build
 
 jobs:
   kafka-api-tests:
@@ -91,7 +91,7 @@ jobs:
             test-labels:       robustness
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Update the List for Available Packages
         if: contains(matrix.os, 'ubuntu')
@@ -130,9 +130,9 @@ jobs:
           fi
 
           # 4. Install librdkafka
-          wget -nv https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
+          git clone https://github.com/edenhill/librdkafka.git
+          cd librdkafka
+          git reset --hard ${LIBRDKAFKA_TAG}
           ./configure --cxx=${BUILD_CXX}
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
@@ -271,7 +271,7 @@ jobs:
           - test-labels: ''
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: |
@@ -303,8 +303,8 @@ jobs:
           cd $Env:BUILD_SUB_DIR
 
           $Env:GTEST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
-          $Env:BOOST_ROOT='C:\VCPKG\INSTALLED\x86-windows\';
-          $Env:LIBRDKAFKA_ROOT='C:\VCPKG\INSTALLED\x86-windows\';
+          $Env:BOOST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
+          $Env:LIBRDKAFKA_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
 
           $Env:LD_LIBRARY_PATH='C:\VCPKG\INSTALLED\x86-windows\lib\'
           echo $Env:LD_LIBRARY_PATH

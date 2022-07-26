@@ -7,9 +7,9 @@ on:
       - main
 
 env:
-  KAFKA_SRC_LINK:     https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
-  CPU_CORE_NUM:       2
-  LIBRDKAFKA_VERSION: 1.8.2
+  KAFKA_SRC_LINK: https://dlcdn.apache.org/kafka/3.2.0/kafka_2.13-3.2.0.tgz
+  CPU_CORE_NUM:   2
+  LIBRDKAFKA_TAG: v1.9.0
 
 jobs:
   kafka-api-bazel-build:
@@ -26,7 +26,7 @@ jobs:
             test-labels:       unit,integration
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Update the List for Available Packages
         if: contains(matrix.os, 'ubuntu')
@@ -37,9 +37,9 @@ jobs:
       - name: Install Dependencies
         run: |
           # 1. Install librdkafka
-          wget -nv https://github.com/edenhill/librdkafka/archive/v${LIBRDKAFKA_VERSION}.tar.gz
-          tar -xzf v${LIBRDKAFKA_VERSION}.tar.gz
-          cd librdkafka-${LIBRDKAFKA_VERSION}
+          git clone https://github.com/edenhill/librdkafka.git
+          cd librdkafka
+          git reset --hard ${LIBRDKAFKA_TAG}
           ./configure
           make -j${CPU_CORE_NUM} && sudo make install
           cd ../
