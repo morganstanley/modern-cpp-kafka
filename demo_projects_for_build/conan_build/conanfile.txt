@@ -1,0 +1,5 @@
+[requires]
+modern-cpp-kafka/2022.06.15
+
+[generators]
+cmake
