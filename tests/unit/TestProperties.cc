@@ -90,8 +90,9 @@ TEST(Properties, SensitiveProperties)
     {{
         { "ssl.key.password",      "passwordA" },
         { "ssl.keystore.password", "passwordB" },
+        { "sasl.username",         "userName" },
         { "sasl.password",         "passwordC" },
     }};
 
-    EXPECT_EQ("sasl.password=*|ssl.key.password=*|ssl.keystore.password=*", props.toString());
+    EXPECT_EQ("sasl.password=*|sasl.username=*|ssl.key.password=*|ssl.keystore.password=*", props.toString());
 }
