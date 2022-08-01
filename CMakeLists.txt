@@ -32,60 +32,76 @@ set(CMAKE_CXX_STANDARD_REQUIRED False)
 
 
 #---------------------------
-# Check librdkafka library
+# Check Dependencies
 #---------------------------
-if (DEFINED ENV{LIBRDKAFKA_ROOT})
-    set(LIBRDKAFKA_INCLUDE_DIR $ENV{LIBRDKAFKA_ROOT}/include)
-    set(LIBRDKAFKA_LIBRARY_DIR $ENV{LIBRDKAFKA_ROOT}/lib)
-else ()
-    set(LIBRDKAFKA_INCLUDE_DIR /usr/local/include)
-    set(LIBRDKAFKA_LIBRARY_DIR /usr/local/lib)
-endif ()
+if (NOT BUILD_OPTION_DOC_ONLY)
 
-message(STATUS "librdkafka include directory: ${LIBRDKAFKA_INCLUDE_DIR}")
-message(STATUS "librdkafka library directory: ${LIBRDKAFKA_LIBRARY_DIR}")
-
-
-#---------------------------
-# Check pthread library (for linux only)
-#---------------------------
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    find_library(PTHREAD_LIB pthread)
-    if (PTHREAD_LIB)
-        message(STATUS "pthread library: ${PTHREAD_LIB}")
+    #---------------------------
+    # librdkafka library
+    #---------------------------
+    if (DEFINED ENV{LIBRDKAFKA_ROOT})
+        set(LIBRDKAFKA_INCLUDE_DIR $ENV{LIBRDKAFKA_ROOT}/include)
+        set(LIBRDKAFKA_LIBRARY_DIR $ENV{LIBRDKAFKA_ROOT}/lib)
     else ()
-        message(FATAL_ERROR "Could not find library: pthread!")
+        set(LIBRDKAFKA_INCLUDE_DIR /usr/local/include)
+        set(LIBRDKAFKA_LIBRARY_DIR /usr/local/lib)
     endif ()
-endif ()
 
-
-#---------------------------
-# Check sasl library
-#---------------------------
-if (DEFINED ENV{SASL_LIBRARYDIR})
-    set(SASL_LIBRARYDIR $ENV{SASL_LIBRARYDIR})
-    link_directories(${SASL_LIBRARYDIR})
-    message(STATUS "sasl2 library directory: ${SASL_LIBRARYDIR}")
-endif ()
-if (DEFINED ENV{SASL_LIBRARY})
-    set(SASL_LIBRARY $ENV{SASL_LIBRARY})
-    message(STATUS "sasl2 library: ${SASL_LIBRARY}")
-endif ()
-
-
-#---------------------------
-# Check boost headers (for C++14 support)
-#---------------------------
-if (CMAKE_CXX_STANDARD EQUAL 14)
-    if (DEFINED ENV{BOOST_ROOT})
-        set(Boost_INCLUDE_DIRS $ENV{BOOST_ROOT}/include)
+    if (EXISTS "${LIBRDKAFKA_INCLUDE_DIR}/librdkafka/rdkafka.h")
+        message(STATUS "librdkafka include directory: ${LIBRDKAFKA_INCLUDE_DIR}")
     else ()
-        find_package(Boost)
-        if (NOT Boost_FOUND)
-            message(FATAL_ERROR "Boost not found!")
+        message(FATAL_ERROR "Could not find headers: librdkafka!")
+    endif ()
+
+    if (EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/librdkafka.a" OR EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/rdkafka.lib" )
+        message(STATUS "librdkafka library directory: ${LIBRDKAFKA_LIBRARY_DIR}")
+    else ()
+        message(FATAL_ERROR "Could not find library: librdkafka!")
+    endif ()
+
+
+    #---------------------------
+    # pthread library (for linux only)
+    #---------------------------
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        find_library(PTHREAD_LIB pthread)
+        if (PTHREAD_LIB)
+            message(STATUS "pthread library: ${PTHREAD_LIB}")
+        else ()
+            message(FATAL_ERROR "Could not find library: pthread!")
         endif ()
     endif ()
-    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
+
+    #---------------------------
+    # sasl library
+    #---------------------------
+    if (DEFINED ENV{SASL_LIBRARYDIR})
+        set(SASL_LIBRARYDIR $ENV{SASL_LIBRARYDIR})
+        link_directories(${SASL_LIBRARYDIR})
+        message(STATUS "sasl2 library directory: ${SASL_LIBRARYDIR}")
+    endif ()
+    if (DEFINED ENV{SASL_LIBRARY})
+        set(SASL_LIBRARY $ENV{SASL_LIBRARY})
+        message(STATUS "sasl2 library: ${SASL_LIBRARY}")
+    endif ()
+
+
+    #---------------------------
+    # boost headers (for C++14 support)
+    #---------------------------
+    if (CMAKE_CXX_STANDARD EQUAL 14)
+        if (DEFINED ENV{BOOST_ROOT})
+            set(Boost_INCLUDE_DIRS $ENV{BOOST_ROOT}/include)
+        else ()
+            find_package(Boost)
+            if (NOT Boost_FOUND)
+                message(FATAL_ERROR "Cound not find library: boost!")
+            endif ()
+        endif ()
+        include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+    endif ()
+
 endif ()
 
 

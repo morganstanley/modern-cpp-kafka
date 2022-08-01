@@ -6,13 +6,14 @@ project("kafka-unit-test")
 if (DEFINED ENV{RAPIDJSON_INCLUDE_DIRS})
     set(RAPIDJSON_INCLUDE_DIRS $ENV{RAPIDJSON_INCLUDE_DIRS})
 else ()
-    find_package(rapidjson REQUIRED)
-    if (NOT RAPIDJSON_INCLUDE_DIRS)
-        message(FATAL_ERROR "Rapidjson not found!")
-    endif ()
+    set(RAPIDJSON_INCLUDE_DIRS /usr/include)
 endif ()
 
-message(STATUS "rapidjson include directory: ${RAPIDJSON_INCLUDE_DIRS}")
+if (EXISTS "${RAPIDJSON_INCLUDE_DIRS}/rapidjson/rapidjson.h")
+    message(STATUS "rapidjson include directory: ${RAPIDJSON_INCLUDE_DIRS}")
+else ()
+    message(FATAL_ERROR "rapidjson not found!")
+endif ()
 
 
 # Target

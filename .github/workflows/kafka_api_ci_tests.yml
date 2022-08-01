@@ -138,8 +138,12 @@ jobs:
           cd ../
 
           # 5. Install rapidjson (for `addons/KafkaMetrics.h`)
-          wget -nv https://github.com/Tencent/rapidjson/archive/refs/tags/v1.1.0.tar.gz
-          tar -xzf v1.1.0.tar.gz
+          if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
+            sudo apt install -y rapidjson-dev
+          else
+            wget -nv https://github.com/Tencent/rapidjson/archive/refs/tags/v1.1.0.tar.gz
+            tar -xzf v1.1.0.tar.gz
+          fi
 
           # 6. Install tools to generate document
           if [ ${GENERATE_DOC} ]; then
@@ -214,7 +218,9 @@ jobs:
             export BUILD_OPTION="${BUILD_OPTION} -DBUILD_OPTION_GEN_DOC=ON"
           fi
 
-          export RAPIDJSON_INCLUDE_DIRS=`pwd`/rapidjson-1.1.0/include
+          if [ -d "rapidjson-1.1.0" ]; then
+            export RAPIDJSON_INCLUDE_DIRS=`pwd`/rapidjson-1.1.0/include
+          fi
           env CXX=${BUILD_CXX} cmake ../.. ${CMAKE_CXX_STANDARD} ${CMAKE_BUILD_TYPE} ${BUILD_OPTION}
 
       - name: Build
@@ -305,9 +311,7 @@ jobs:
           $Env:GTEST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
           $Env:BOOST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
           $Env:LIBRDKAFKA_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
-
-          $Env:LD_LIBRARY_PATH='C:\VCPKG\INSTALLED\x86-windows\lib\'
-          echo $Env:LD_LIBRARY_PATH
+          $Env:RAPIDJSON_INCLUDE_DIRS='C:\VCPKG\INSTALLED\x86-windows\include\'
 
           cmake -B ./ -A Win32 -S ../.. "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
