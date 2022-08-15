@@ -53,7 +53,7 @@ if (NOT BUILD_OPTION_DOC_ONLY)
         message(FATAL_ERROR "Could not find headers: librdkafka!")
     endif ()
 
-    if (EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/librdkafka.a" OR EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/rdkafka.lib" )
+    if (EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/librdkafka.a" OR EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/librdkafka.so" OR EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/rdkafka.lib" )
         message(STATUS "librdkafka library directory: ${LIBRDKAFKA_LIBRARY_DIR}")
     else ()
         message(FATAL_ERROR "Could not find library: librdkafka!")
