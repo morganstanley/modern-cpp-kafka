@@ -239,7 +239,7 @@ TEST(Transaction, ContinueTheTransaction)
 {
     const kafka::Topic topic         = kafka::utility::getRandomString();
     const std::string  transactionId = kafka::utility::getRandomString();
-    const std::string  messageToSent = "message to sent";
+    const std::string  messageToSend = "message to send";
 
     KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
 
@@ -252,7 +252,7 @@ TEST(Transaction, ContinueTheTransaction)
 
         producer.beginTransaction();
 
-        auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSent.c_str(), messageToSent.size()));
+        auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSend.c_str(), messageToSend.size()));
 
         producer.send(record,
                       [](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
@@ -272,7 +272,7 @@ TEST(Transaction, ContinueTheTransaction)
 
         producer.beginTransaction();
 
-        auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSent.c_str(), messageToSent.size()));
+        auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSend.c_str(), messageToSend.size()));
 
         producer.send(record,
                       [](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
@@ -316,6 +316,168 @@ TEST(Transaction, ContinueTheTransaction)
 
         // Uncertain result: most of the time, it would be 2.
         EXPECT_TRUE(records.size() == 2 || records.size() == 1);
+    }
+}
+
+TEST(Transaction, ContinueTheTransaction2)
+{
+    const kafka::Topic topic         = kafka::utility::getRandomString();
+    const std::string  transactionId = kafka::utility::getRandomString();
+    const std::string  clientId      = "someTransactionalProducer";
+
+    constexpr std::size_t NUM_MESSAGES = 100;
+    std::vector<std::string>  messagesToSend;
+    for(std::size_t i = 0; i < NUM_MESSAGES; ++i)
+    {
+        messagesToSend.emplace_back(std::to_string(i));
+    }
+
+    KafkaTestUtility::CreateKafkaTopic(topic, 1, 3);
+
+    // Start a producer to send the messages, but fail to commit the transaction for some messages (before close)
+    {
+        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                .put(kafka::clients::producer::Config::TRANSACTIONAL_ID, transactionId)
+                                                .put(kafka::clients::producer::Config::CLIENT_ID, clientId));
+
+        producer.initTransactions();
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer initialized the transaction" << std::endl;
+
+        // Send the first batch of messages
+        producer.beginTransaction();
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer began the transaction" << std::endl;
+
+        std::atomic<std::size_t> delivered(0);
+        for (std::size_t i = 0; i < NUM_MESSAGES / 2; ++i)
+        {
+            const auto& msg = messagesToSend[i];
+            auto record = kafka::clients::producer::ProducerRecord(topic,
+                                                                   kafka::NullKey,
+                                                                   kafka::Value(msg.c_str(), msg.size()));
+
+            producer.send(record,
+                          [&delivered](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                              ++delivered;
+
+                              if (error) {
+                                  std::cerr << "[" << kafka::utility::getCurrentTime() << "] Producer got delivery failure: " << error.message()
+                                      << ", with metadata: " << metadata.toString() << std::endl;
+                              }
+                              ASSERT_FALSE(error);
+                          });
+        }
+
+        KafkaTestUtility::WaitUntil([&delivered, count = NUM_MESSAGES / 2](){ return delivered == count; }, std::chrono::seconds(5));
+        ASSERT_EQ(NUM_MESSAGES / 2, delivered.load());
+
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer async-sent " << delivered.load() << " messages" << std::endl;
+
+        producer.commitTransaction();
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer committed the transaction" << std::endl;
+
+        // Send the second batch of messages
+        producer.beginTransaction();
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer began the transaction" << std::endl;
+
+        for (std::size_t i = NUM_MESSAGES / 2; i < NUM_MESSAGES; ++i)
+        {
+            const auto& msg = messagesToSend[i];
+            auto record = kafka::clients::producer::ProducerRecord(topic,
+                                                                   kafka::NullKey,
+                                                                   kafka::Value(msg.c_str(), msg.size()));
+
+            producer.send(record,
+                          [&delivered](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                              ++delivered;
+
+                              if (error) {
+                                  std::cerr << "[" << kafka::utility::getCurrentTime() << "] Producer got delivery failure: " << error.message()
+                                      << ", with metadata: " << metadata.toString() << std::endl;
+                              }
+                              ASSERT_FALSE(error);
+                          });
+        }
+
+        // Wait the batch of messages to be delivered
+        KafkaTestUtility::WaitUntil([&delivered, count = NUM_MESSAGES](){ return delivered == count; }, std::chrono::seconds(5));
+        ASSERT_EQ(NUM_MESSAGES, delivered.load());
+
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer async-sent another " << NUM_MESSAGES / 2 << " messages" << std::endl;
+
+        // No commitTransaction for the second batch of messages
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer would NOT commit the transaction" << std::endl;
+    }
+
+    // Re-start the producer, continue to send the message (with the same transaction.id)
+    {
+        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                 .put(kafka::clients::producer::Config::TRANSACTIONAL_ID, transactionId)
+                                                 .put(kafka::clients::producer::Config::CLIENT_ID, clientId ) );
+
+        producer.initTransactions();
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The second producer initialized the transaction" << std::endl;
+
+        producer.beginTransaction();
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The second producer began the transaction" << std::endl;
+
+        // Continue to send the second batch of messages
+        std::atomic<std::size_t> delivered(0);
+        for (std::size_t i = NUM_MESSAGES / 2; i < NUM_MESSAGES; ++i)
+        {
+            const auto& msg = messagesToSend[i];
+            auto record = kafka::clients::producer::ProducerRecord(topic,
+                                                                   kafka::NullKey,
+                                                                   kafka::Value(msg.c_str(), msg.size()));
+
+            producer.send(record,
+                          [&delivered](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                              ++delivered;
+
+                              if (error) {
+                                  std::cerr << "[" << kafka::utility::getCurrentTime() << "] Producer got delivery failure: " << error.message()
+                                      << ", with metadata: " << metadata.toString() << std::endl;
+                              }
+                              ASSERT_FALSE(error);
+                          });
+        }
+
+        KafkaTestUtility::WaitUntil([&delivered, count = NUM_MESSAGES / 2](){ return delivered == count; }, std::chrono::seconds(5));
+        ASSERT_EQ(NUM_MESSAGES / 2, delivered.load());
+
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The second producer async-sent " << delivered.load() << " messages" << std::endl;
+
+        producer.commitTransaction();
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] The second producer committed the transaction" << std::endl;
+    }
+
+    // Check all received messages (committed only)
+    {
+        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                               .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
+                                               .put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   "read_committed"));
+        consumer.subscribe({topic});
+
+        // No message lost, no message duplicated
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+        for (std::size_t i = 0; i < records.size(); ++i)
+        {
+            EXPECT_EQ(std::to_string(i), records[i].value().toString());
+        }
+
+        EXPECT_EQ(NUM_MESSAGES, records.size());
+    }
+
+    // Check all received messages (incluing uncommitted)
+    {
+        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                               .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
+                                               .put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   "read_uncommitted"));
+        consumer.subscribe({topic});
+
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+
+        // Those uncommitted messages would be got as well
+        EXPECT_EQ(NUM_MESSAGES + NUM_MESSAGES / 2, records.size());
     }
 }
 
