@@ -10,6 +10,7 @@
 #include <functional>
 #include <iostream>
 
+#undef min
 
 namespace KAFKA_API {
 
