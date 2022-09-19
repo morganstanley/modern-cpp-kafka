@@ -39,24 +39,27 @@ if (NOT BUILD_OPTION_DOC_ONLY)
     #---------------------------
     # librdkafka library
     #---------------------------
-    if (DEFINED ENV{LIBRDKAFKA_ROOT})
-        set(LIBRDKAFKA_INCLUDE_DIR $ENV{LIBRDKAFKA_ROOT}/include)
-        set(LIBRDKAFKA_LIBRARY_DIR $ENV{LIBRDKAFKA_ROOT}/lib)
+    if (DEFINED ENV{LIBRDKAFKA_INCLUDE_DIR})
+        set(LIBRDKAFKA_INCLUDE_DIR $ENV{LIBRDKAFKA_INCLUDE_DIR})
     else ()
         set(LIBRDKAFKA_INCLUDE_DIR /usr/local/include)
+    endif ()
+    if (DEFINED ENV{LIBRDKAFKA_LIBRARY_DIR})
+        set(LIBRDKAFKA_LIBRARY_DIR $ENV{LIBRDKAFKA_LIBRARY_DIR})
+    else ()
         set(LIBRDKAFKA_LIBRARY_DIR /usr/local/lib)
     endif ()
 
     if (EXISTS "${LIBRDKAFKA_INCLUDE_DIR}/librdkafka/rdkafka.h")
         message(STATUS "librdkafka include directory: ${LIBRDKAFKA_INCLUDE_DIR}")
     else ()
-        message(FATAL_ERROR "Could not find headers: librdkafka!")
+        message(FATAL_ERROR "Could not find headers for librdkafka!")
     endif ()
 
     if (EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/librdkafka.a" OR EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/librdkafka.so" OR EXISTS "${LIBRDKAFKA_LIBRARY_DIR}/rdkafka.lib" )
         message(STATUS "librdkafka library directory: ${LIBRDKAFKA_LIBRARY_DIR}")
     else ()
-        message(FATAL_ERROR "Could not find library: librdkafka!")
+        message(FATAL_ERROR "Could not find library for librdkafka!")
     endif ()
 
 
@@ -68,7 +71,7 @@ if (NOT BUILD_OPTION_DOC_ONLY)
         if (PTHREAD_LIB)
             message(STATUS "pthread library: ${PTHREAD_LIB}")
         else ()
-            message(FATAL_ERROR "Could not find library: pthread!")
+            message(FATAL_ERROR "Could not find library for pthread!")
         endif ()
     endif ()
 

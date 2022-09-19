@@ -247,7 +247,7 @@ public:
     /**
      * Needs to be called before any other methods when the transactional.id is set in the configuration.
      */
-    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS))
+    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
@@ -267,7 +267,7 @@ public:
     /**
      * Commit the ongoing transaction.
      */
-    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS))
+    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 

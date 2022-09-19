@@ -141,7 +141,7 @@ public:
     /**
      * Needs to be called before any other methods when the transactional.id is set in the configuration.
      */
-    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS));
+    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     /**
      * Should be called before the start of each new transaction.
@@ -151,7 +151,7 @@ public:
     /**
      * Commit the ongoing transaction.
      */
-    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS));
+    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
 
     /**
      * Abort the ongoing transaction.
@@ -165,14 +165,6 @@ public:
     void sendOffsetsToTransaction(const TopicPartitionOffsets&           topicPartitionOffsets,
                                   const consumer::ConsumerGroupMetadata& groupMetadata,
                                   std::chrono::milliseconds              timeout);
-
-#if COMPILER_SUPPORTS_CPP_17
-    static constexpr int DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000;
-    static constexpr int DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000;
-#else
-    enum { DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS  = 10000 };
-    enum { DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS = 10000 };
-#endif
 
 private:
     void pollCallbacks(int timeoutMs)
