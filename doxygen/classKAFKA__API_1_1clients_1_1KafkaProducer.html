@@ -100,12 +100,6 @@ Public Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a3d556d5bb639c9dc3fbb33ce469a6a5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Choose the action while the sending buffer is full. <br /></td></tr>
 <tr class="separator:a3d556d5bb639c9dc3fbb33ce469a6a5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed9a6a3e812693e14eba3b151d68a9a4"><td class="memItemLeft" align="right" valign="top"><a id="aed9a6a3e812693e14eba3b151d68a9a4"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <b>DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS</b> = 10000
- }</td></tr>
-<tr class="separator:aed9a6a3e812693e14eba3b151d68a9a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03bb718c61d250b6ad46270a021af0bd"><td class="memItemLeft" align="right" valign="top"><a id="a03bb718c61d250b6ad46270a021af0bd"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <b>DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS</b> = 10000
- }</td></tr>
-<tr class="separator:a03bb718c61d250b6ad46270a021af0bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_types_classKAFKA__API_1_1clients_1_1KafkaClient"><td colspan="2" onclick="javascript:toggleInherit('pub_types_classKAFKA__API_1_1clients_1_1KafkaClient')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html">KAFKA_API::clients::KafkaClient</a></td></tr>
 <tr class="memitem:ae7891e26da12ecc9564de418655e576c inherit pub_types_classKAFKA__API_1_1clients_1_1KafkaClient"><td class="memItemLeft" align="right" valign="top"><a id="ae7891e26da12ecc9564de418655e576c"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ae7891e26da12ecc9564de418655e576c">EventsPollingOption</a> { <b>Manual</b>
 , <b>Auto</b>
@@ -152,18 +146,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a412dbaaeda7b3a59a0106774f7093055"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1RecordMetadata.html">producer::RecordMetadata</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a412dbaaeda7b3a59a0106774f7093055">syncSend</a> (const <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerRecord.html">producer::ProducerRecord</a> &amp;record)</td></tr>
 <tr class="memdesc:a412dbaaeda7b3a59a0106774f7093055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronously send a record to a topic.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a412dbaaeda7b3a59a0106774f7093055">More...</a><br /></td></tr>
 <tr class="separator:a412dbaaeda7b3a59a0106774f7093055"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f072599ba38fa241f9ce3a316c496ad"><td class="memItemLeft" align="right" valign="top"><a id="a5f072599ba38fa241f9ce3a316c496ad"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a5f072599ba38fa241f9ce3a316c496ad">initTransactions</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds(KafkaProducer::DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS))</td></tr>
-<tr class="memdesc:a5f072599ba38fa241f9ce3a316c496ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Needs to be called before any other methods when the transactional.id is set in the configuration. <br /></td></tr>
-<tr class="separator:a5f072599ba38fa241f9ce3a316c496ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5259b323316438cd2a22ada4d2b780f"><td class="memItemLeft" align="right" valign="top"><a id="af5259b323316438cd2a22ada4d2b780f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#af5259b323316438cd2a22ada4d2b780f">initTransactions</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
+<tr class="memdesc:af5259b323316438cd2a22ada4d2b780f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Needs to be called before any other methods when the transactional.id is set in the configuration. <br /></td></tr>
+<tr class="separator:af5259b323316438cd2a22ada4d2b780f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afca61ccefbe414997425b20ef17a29be"><td class="memItemLeft" align="right" valign="top"><a id="afca61ccefbe414997425b20ef17a29be"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#afca61ccefbe414997425b20ef17a29be">beginTransaction</a> ()</td></tr>
 <tr class="memdesc:afca61ccefbe414997425b20ef17a29be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should be called before the start of each new transaction. <br /></td></tr>
 <tr class="separator:afca61ccefbe414997425b20ef17a29be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2b7c0f2efe6d710c0327abb3027fa97"><td class="memItemLeft" align="right" valign="top"><a id="ad2b7c0f2efe6d710c0327abb3027fa97"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#ad2b7c0f2efe6d710c0327abb3027fa97">commitTransaction</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds(KafkaProducer::DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS))</td></tr>
-<tr class="memdesc:ad2b7c0f2efe6d710c0327abb3027fa97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Commit the ongoing transaction. <br /></td></tr>
-<tr class="separator:ad2b7c0f2efe6d710c0327abb3027fa97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9f1c8ac7216afd047cbf85e5aff47a3"><td class="memItemLeft" align="right" valign="top"><a id="af9f1c8ac7216afd047cbf85e5aff47a3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#af9f1c8ac7216afd047cbf85e5aff47a3">commitTransaction</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
+<tr class="memdesc:af9f1c8ac7216afd047cbf85e5aff47a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Commit the ongoing transaction. <br /></td></tr>
+<tr class="separator:af9f1c8ac7216afd047cbf85e5aff47a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01ad1810f7e840eb877ef0c2cbb7f9cb"><td class="memItemLeft" align="right" valign="top"><a id="a01ad1810f7e840eb877ef0c2cbb7f9cb"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a01ad1810f7e840eb877ef0c2cbb7f9cb">abortTransaction</a> (std::chrono::milliseconds timeout=std::chrono::milliseconds::max())</td></tr>
 <tr class="memdesc:a01ad1810f7e840eb877ef0c2cbb7f9cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort the ongoing transaction. <br /></td></tr>
@@ -516,7 +510,7 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 9 2022 11:32:29 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Mon Sep 19 2022 10:41:02 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

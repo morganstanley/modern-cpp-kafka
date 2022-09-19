@@ -228,7 +228,7 @@ $(function() {
 <div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        _producer-&gt;send(record, deliveryCb, error, option, action);</div>
 <div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    }</div>
 <div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160; </div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">void</span> initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_INIT_TRANSACTIONS_TIMEOUT_MS))</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">void</span> initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())</div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    {</div>
 <div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;        std::lock_guard&lt;std::mutex&gt; lock(_producerMutex);</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160; </div>
@@ -242,7 +242,7 @@ $(function() {
 <div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;        _producer-&gt;beginTransaction();</div>
 <div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;    }</div>
 <div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160; </div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    <span class="keywordtype">void</span> commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds(KafkaProducer::DEFAULT_COMMIT_TRANSACTION_TIMEOUT_MS))</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    <span class="keywordtype">void</span> commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())</div>
 <div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;    {</div>
 <div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;        std::lock_guard&lt;std::mutex&gt; lock(_producerMutex);</div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160; </div>
@@ -334,7 +334,7 @@ $(function() {
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 9 2022 11:32:29 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Mon Sep 19 2022 10:41:02 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
