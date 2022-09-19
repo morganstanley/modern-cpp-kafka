@@ -6,7 +6,7 @@
 
 The [Modern C++ Kafka API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html) is a layer of C++ wrapper based on [librdkafka](https://github.com/edenhill/librdkafka) (the C part), with high quality, but more friendly to users.
 
-- By now, [modern-cpp-kafka](https://github.com/morganstanley/modern-cpp-kafka) is compatible with [librdkafka v1.9.0](https://github.com/edenhill/librdkafka/releases/tag/v1.9.0).
+- By now, [modern-cpp-kafka](https://github.com/morganstanley/modern-cpp-kafka) is compatible with [librdkafka v1.9.2](https://github.com/edenhill/librdkafka/releases/tag/v1.9.2).
 
 ```
 KAFKA is a registered trademark of The Apache Software Foundation and
@@ -65,7 +65,9 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library t
 
     * Specify library locations with environment variables
 
-        * `LIBRDKAFKA_ROOT`                 -- ***librdkafka*** headers and libraries
+        * `LIBRDKAFKA_INCLUDE_DIR`          -- ***librdkafka*** headers
+
+        * `LIBRDKAFKA_LIBRARY_DIR`          -- ***librdkafka*** libraries
 
         * `GTEST_ROOT`                      -- ***googletest*** headers and libraries
 
