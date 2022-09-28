@@ -134,7 +134,7 @@ auto checkTimeMsConsumedToSortOffsets(std::size_t testNum, std::size_t step)
     std::mt19937 g(rd());
     for (std::size_t iBegin = 0; iBegin < ackSequence.size(); iBegin += step)
     {
-        std::size_t iEnd = std::min(iBegin + step, ackSequence.size());
+        std::size_t iEnd = (std::min)(iBegin + step, ackSequence.size());
         std::shuffle(ackSequence.begin() + static_cast<int64_t>(iBegin), ackSequence.begin() + static_cast<int64_t>(iEnd), g);
     }
 
