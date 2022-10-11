@@ -1037,18 +1037,70 @@ TEST(KafkaConsumer, RebalancePartitionsAssign)
 
 TEST(KafkaConsumer, ThreadCount)
 {
-    {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
-        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
-        std::cout << "[" << kafka::utility::getCurrentTime() << "] librdkafka thread cnt[" << kafka::utility::getLibRdKafkaThreadCount() << "]" << std::endl;
+    auto testThreadCount = [](kafka::clients::KafkaClient::EventsPollingOption eventsPollingOption) {
+        struct {
+            std::atomic<int> main       = {0};
+            std::atomic<int> background = {0};
+            std::atomic<int> broker     = {0};
+        } threadCount;
 
-        // Just wait a short while, thus make sure all background threads be started
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        {
+            auto threadStartCb = [&threadCount](const std::string& threadName, const std::string& threadType) {
+                if (threadType == "main") {
+                    ++threadCount.main;
+                } else if (threadType == "background") {
+                    ++threadCount.background;
+                } else if (threadType == "broker") {
+                    ++threadCount.broker;
+                }
 
-        EXPECT_EQ(KafkaTestUtility::GetNumberOfKafkaBrokers() + 3, kafka::utility::getLibRdKafkaThreadCount());
-    }
+                std::cout << "[" <<kafka::utility::getCurrentTime() << "] Thread was started"
+                   << " -- name[" << threadName << "], type[" << threadType << "]" << std::endl;
+            };
 
-    EXPECT_EQ(0, kafka::utility::getLibRdKafkaThreadCount());
+            auto threadExitCb = [&threadCount](const std::string& threadName, const std::string& threadType) {
+                if (threadType == "main") {
+                    --threadCount.main;
+                } else if (threadType == "background") {
+                    --threadCount.background;
+                } else if (threadType == "broker") {
+                    --threadCount.broker;
+                }
+
+                std::cout << "[" <<kafka::utility::getCurrentTime() << "] Thread was exited"
+                   << " -- name[" << threadName << "], type[" << threadType << "]" << std::endl;
+            };
+
+            kafka::clients::Interceptors interceptors;
+            interceptors.onThreadStart(threadStartCb).onThreadExit(threadExitCb);
+
+            kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig(),
+                                                   eventsPollingOption,
+                                                   interceptors);
+
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+            std::cout << "[" << kafka::utility::getCurrentTime() << "] librdkafka thread cnt[" << kafka::utility::getLibRdKafkaThreadCount() << "]" << std::endl;
+
+            // Just wait a short while, thus make sure all background threads be started
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            EXPECT_EQ(KafkaTestUtility::GetNumberOfKafkaBrokers() + 3, kafka::utility::getLibRdKafkaThreadCount());
+
+            EXPECT_EQ(1, threadCount.main);
+            EXPECT_EQ(KafkaTestUtility::GetNumberOfKafkaBrokers() + 2, threadCount.broker);
+            EXPECT_EQ(eventsPollingOption == kafka::clients::KafkaClient::EventsPollingOption::Auto ? 1 : 0,
+                      threadCount.background);
+        }
+
+        EXPECT_EQ(0, kafka::utility::getLibRdKafkaThreadCount());
+
+        EXPECT_EQ(0, threadCount.main);
+        EXPECT_EQ(0, threadCount.broker);
+        EXPECT_EQ(0, threadCount.background);
+    };
+
+    testThreadCount(kafka::clients::KafkaClient::EventsPollingOption::Auto);
+    testThreadCount(kafka::clients::KafkaClient::EventsPollingOption::Manual);
 }
 
 TEST(KafkaConsumer, PartitionAssignment)
