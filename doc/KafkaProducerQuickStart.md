@@ -199,19 +199,15 @@ Larger `QUEUE_BUFFERING_MAX_MESSAGES`/`QUEUE_BUFFERING_MAX_KBYTES` might help to
 
 ### How many threads would be created by a KafkaProducer?
 
-Excluding the user's main thread, `KafkaProducer` would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)
-
 Most of these background threads are started internally by librdkafka.
 
 Here is a brief introduction what they're used for,
 
 1. Each broker (in the list of BOOTSTRAP_SERVERS) would take a separate thread to transmit messages towards a kafka cluster server.
 
-2. Another 2 background threads would handle internal operations and kinds of timers, etc.
+2. Another 2 threads would handle internal operations and kinds of timers, etc.
 
-3. One more background thread to keep polling the delivery callback event.
-
-E.g, if a `KafkaProducer` was created with property of `BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890`, it would take 7 threads in total (including the main thread).
+3. To enale the auto events-polling, one more background thread would be created, which keeps polling the delivery callback event.
 
 ### Which one of these threads will handle the callbacks
 

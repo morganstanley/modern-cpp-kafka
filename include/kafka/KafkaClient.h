@@ -4,6 +4,7 @@
 
 #include <kafka/BrokerMetadata.h>
 #include <kafka/Error.h>
+#include <kafka/Interceptors.h>
 #include <kafka/KafkaException.h>
 #include <kafka/Log.h>
 #include <kafka/Properties.h>
@@ -20,6 +21,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <vector>
 
 
 namespace KAFKA_API { namespace clients {
@@ -168,10 +170,11 @@ protected:
 
     using ConfigCallbacksRegister = std::function<void(rd_kafka_conf_t*)>;
 
-    KafkaClient(ClientType                     clientType,
-                const Properties&              properties,
-                const ConfigCallbacksRegister& extraConfigRegister = ConfigCallbacksRegister{},
-                EventsPollingOption            eventsPollingOption = EventsPollingOption::Auto);
+    KafkaClient(ClientType                      clientType,
+                const Properties&               properties,
+                const ConfigCallbacksRegister&  extraConfigRegister,
+                EventsPollingOption             eventsPollingOption,
+                Interceptors                    interceptors);
 
     rd_kafka_t* getClientHandle() const { return _rk.get(); }
 
@@ -221,8 +224,11 @@ private:
     Logger              _logger;
     StatsCallback       _statsCb;
     ErrorCallback       _errorCb;
-    rd_kafka_unique_ptr _rk;
+
     EventsPollingOption _eventsPollingOption;
+    Interceptors        _interceptors;
+
+    rd_kafka_unique_ptr _rk;
 
     static std::string getClientTypeString(ClientType type)
     {
@@ -239,6 +245,11 @@ private:
     // Error callback (for librdkafka)
     static void errorCallback(rd_kafka_t* rk, int err, const char* reason, void* opaque);
 
+    // Interceptor callback (for librdkafka)
+    static rd_kafka_resp_err_t configInterceptorOnNew(rd_kafka_t* rk, const rd_kafka_conf_t* conf, void* opaque, char* errStr, std::size_t maxErrStrSize);
+    static rd_kafka_resp_err_t interceptorOnThreadStart(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* opaque);
+    static rd_kafka_resp_err_t interceptorOnThreadExit(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* opaque);
+
     // Log callback (for class instance)
     void onLog(int level, const char* fac, const char* buf) const;
 
@@ -247,6 +258,10 @@ private:
 
     // Error callback (for class instance)
     void onError(const Error& error);
+
+    // Interceptor callback (for class instance)
+    void interceptThreadStart(const std::string& threadName, const std::string& threadType);
+    void interceptThreadExit(const std::string& threadName, const std::string& threadType);
 
     static const constexpr char* BOOTSTRAP_SERVERS = "bootstrap.servers";
     static const constexpr char* CLIENT_ID         = "client.id";
@@ -275,8 +290,9 @@ protected:
     class PollThread
     {
     public:
-        explicit PollThread(Pollable& pollable)
-            : _running(true), _thread(keepPolling, std::ref(_running), std::ref(pollable))
+        using InterceptorCb = std::function<void()>;
+        explicit PollThread(const InterceptorCb& entryCb, const InterceptorCb& exitCb, Pollable& pollable)
+            : _running(true), _thread(keepPolling, std::ref(_running), entryCb, exitCb, std::ref(pollable))
         {
         }
 
@@ -288,12 +304,19 @@ protected:
         }
 
     private:
-        static void keepPolling(std::atomic_bool& running, Pollable& pollable)
+        static void keepPolling(std::atomic_bool&       running,
+                                const InterceptorCb&    entryCb,
+                                const InterceptorCb&    exitCb,
+                                Pollable&               pollable)
         {
+            entryCb();
+
             while (running.load())
             {
                 pollable.poll(CALLBACK_POLLING_INTERVAL_MS);
             }
+
+            exitCb();
         }
 
         static constexpr int CALLBACK_POLLING_INTERVAL_MS = 10;
@@ -306,7 +329,10 @@ protected:
     {
         _pollable = std::make_unique<KafkaClient::PollableCallback>(pollableCallback);
 
-        if (isWithAutoEventsPolling()) _pollThread = std::make_unique<PollThread>(*_pollable);
+        auto entryCb = [this]() { interceptThreadStart("events-polling", "background"); };
+        auto exitCb =  [this]() { interceptThreadExit("events-polling", "background"); };
+
+        if (isWithAutoEventsPolling()) _pollThread = std::make_unique<PollThread>(entryCb, exitCb, *_pollable);
     }
 
     void stopBackgroundPollingIfNecessary()
@@ -331,8 +357,10 @@ inline
 KafkaClient::KafkaClient(ClientType                     clientType,
                          const Properties&              properties,
                          const ConfigCallbacksRegister& extraConfigRegister,
-                         EventsPollingOption            eventsPollingOption)
-    : _eventsPollingOption(eventsPollingOption)
+                         EventsPollingOption            eventsPollingOption,
+                         Interceptors                   interceptors)
+    : _eventsPollingOption(eventsPollingOption),
+      _interceptors(std::move(interceptors))
 {
     static const std::set<std::string> PRIVATE_PROPERTY_KEYS = { "max.poll.records" };
 
@@ -402,6 +430,13 @@ KafkaClient::KafkaClient(ClientType                     clientType,
 
     // Other Callbacks
     if (extraConfigRegister) extraConfigRegister(rk_conf.get());
+
+    // Interceptor
+    if (!_interceptors.empty())
+    {
+        Error result{ rd_kafka_conf_interceptor_add_on_new(rk_conf.get(), "on_new", KafkaClient::configInterceptorOnNew, nullptr) };
+        KAFKA_THROW_IF_WITH_ERROR(result);
+    }
 
     // Set client handler
     _rk.reset(rd_kafka_new((clientType == ClientType::KafkaConsumer ? RD_KAFKA_CONSUMER : RD_KAFKA_PRODUCER),
@@ -532,6 +567,50 @@ KafkaClient::errorCallback(rd_kafka_t* rk, int err, const char* reason, void* /*
     }
 
     kafkaClient(rk).onError(error);
+}
+
+inline void
+KafkaClient::interceptThreadStart(const std::string& threadName, const std::string& threadType)
+{
+    if (const auto& cb = _interceptors.onThreadStart()) cb(threadName, threadType);
+}
+
+inline void
+KafkaClient::interceptThreadExit(const std::string& threadName, const std::string& threadType)
+{
+    if (const auto& cb = _interceptors.onThreadExit()) cb(threadName, threadType);
+}
+
+inline rd_kafka_resp_err_t
+KafkaClient::configInterceptorOnNew(rd_kafka_t* rk, const rd_kafka_conf_t* /*conf*/, void* opaque, char* /*errStr*/, std::size_t /*maxErrStrSize*/)
+{
+    if (auto result = rd_kafka_interceptor_add_on_thread_start(rk, "on_thread_start", KafkaClient::interceptorOnThreadStart, opaque))
+    {
+        return result;
+    }
+
+    if (auto result = rd_kafka_interceptor_add_on_thread_exit(rk, "on_thread_exit", KafkaClient::interceptorOnThreadExit, opaque))
+    {
+        return result;
+    }
+
+    return RD_KAFKA_RESP_ERR_NO_ERROR;
+}
+
+inline rd_kafka_resp_err_t
+KafkaClient::interceptorOnThreadStart(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* /*opaque*/)
+{
+    kafkaClient(rk).interceptThreadStart(threadName, toString(threadType));
+
+    return RD_KAFKA_RESP_ERR_NO_ERROR;
+}
+
+inline rd_kafka_resp_err_t
+KafkaClient::interceptorOnThreadExit(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* /*opaque*/)
+{
+    kafkaClient(rk).interceptThreadExit(threadName, toString(threadType));
+
+    return RD_KAFKA_RESP_ERR_NO_ERROR;
 }
 
 inline Optional<BrokerMetadata>

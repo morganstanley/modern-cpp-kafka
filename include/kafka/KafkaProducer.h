@@ -39,8 +39,9 @@ public:
      *   - RD_KAFKA_RESP_ERR__INVALID_ARG      : Invalid BOOTSTRAP_SERVERS property
      *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
      */
-    explicit KafkaProducer(const Properties&   properties,
-                           EventsPollingOption eventsPollingOption = EventsPollingOption::Auto);
+    explicit KafkaProducer(const Properties&    properties,
+                           EventsPollingOption  eventsPollingOption = EventsPollingOption::Auto,
+                           const Interceptors&  interceptors        = Interceptors{});
 
     /**
      * The destructor for KafkaProducer.
@@ -221,11 +222,14 @@ private:
 };
 
 inline
-KafkaProducer::KafkaProducer(const Properties& properties, EventsPollingOption eventsPollingOption)
+KafkaProducer::KafkaProducer(const Properties&      properties,
+                             EventsPollingOption    eventsPollingOption,
+                             const Interceptors&    interceptors)
     : KafkaClient(ClientType::KafkaProducer,
                   validateAndReformProperties(properties),
                   registerConfigCallbacks,
-                  eventsPollingOption)
+                  eventsPollingOption,
+                  interceptors)
 {
     // Start background polling (if needed)
     startBackgroundPollingIfNecessary([this](int timeoutMs){ pollCallbacks(timeoutMs); });

@@ -191,15 +191,11 @@ About `Error`'s `value()`s, there are 2 cases
 
 * How many threads would be created by a KafkaConsumer?
 
-    Excluding the user's main thread, if `enable.auto.commit` is `false`, the `KafkaConsumer` would start another (N + 2) threads in the background; otherwise, the `KafkaConsumer` would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)
-
     1. Each broker (in the list of BOOTSTRAP_SERVERS) would take a seperate thread to transmit messages towards a kafka cluster server.
 
     2. Another 3 threads will handle internal operations, consumer group operations, and kinds of timers, etc.
 
-    3. To enable the auto commit, one more thread would be create, which keeps polling/processing the offset-commit callback event.
-
-    E.g, if a KafkaConsumer was created with property of `BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890`, it would take 6 threads in total (including the main thread).
+    3. To enable the auto events-polling, one more background thread would be created, which keeps polling/processing the offset-commit callback event.
 
 * Which one of these threads will handle the callbacks?
 

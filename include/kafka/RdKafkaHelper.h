@@ -6,6 +6,7 @@
 
 #include <librdkafka/rdkafka.h>
 
+#include <cassert>
 #include <memory>
 
 namespace KAFKA_API {
@@ -47,6 +48,23 @@ using rd_kafka_consumer_group_metadata_unique_ptr = std::unique_ptr<rd_kafka_con
 
 inline void RkErrorDeleter(rd_kafka_error_t* p) { rd_kafka_error_destroy(p); }
 using rd_kafka_error_shared_ptr = std::shared_ptr<rd_kafka_error_t>;
+
+
+inline std::string toString(rd_kafka_thread_type_t threadType)
+{
+    switch (threadType)
+    {
+        case RD_KAFKA_THREAD_MAIN:
+            return "main";
+        case RD_KAFKA_THREAD_BACKGROUND:
+            return "background";
+        case RD_KAFKA_THREAD_BROKER:
+            return "broker";
+        default:
+            assert(false);
+            return "NA";
+    }
+}
 
 // Convert from rd_kafka_xxx datatypes
 inline TopicPartitionOffsets getTopicPartitionOffsets(const rd_kafka_topic_partition_list_t* rk_tpos)

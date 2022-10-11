@@ -39,8 +39,9 @@ public:
      *   - RD_KAFKA_RESP_ERR__INVALID_ARG      : Invalid BOOTSTRAP_SERVERS property
      *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
      */
-    explicit KafkaConsumer(const Properties&   properties,
-                           EventsPollingOption eventsPollingOption = EventsPollingOption::Auto);
+    explicit KafkaConsumer(const Properties&    properties,
+                           EventsPollingOption  eventsPollingOption = EventsPollingOption::Auto,
+                           const Interceptors&  interceptors        = Interceptors{});
 
     /**
      * The destructor for KafkaConsumer.
@@ -373,11 +374,14 @@ KafkaConsumer::registerConfigCallbacks(rd_kafka_conf_t* conf)
 }
 
 inline
-KafkaConsumer::KafkaConsumer(const Properties &properties, EventsPollingOption eventsPollingOption)
+KafkaConsumer::KafkaConsumer(const Properties&      properties,
+                             EventsPollingOption    eventsPollingOption,
+                             const Interceptors&    interceptors)
     : KafkaClient(ClientType::KafkaConsumer,
                   validateAndReformProperties(properties),
                   registerConfigCallbacks,
-                  eventsPollingOption)
+                  eventsPollingOption,
+                  interceptors)
 {
     // Pick up the "max.poll.records" property
     if (auto maxPollRecordsProperty = properties.getProperty(consumer::Config::MAX_POLL_RECORDS))
