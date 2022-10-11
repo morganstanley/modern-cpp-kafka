@@ -7,7 +7,7 @@ on:
       - main
 
 env:
-  KAFKA_SRC_LINK: https://dlcdn.apache.org/kafka/3.2.0/kafka_2.13-3.2.0.tgz
+  KAFKA_SRC_LINK: https://downloads.apache.org/kafka/3.3.1/kafka_2.13-3.3.1.tgz
   CPU_CORE_NUM:   2
   LIBRDKAFKA_TAG: v1.9.2
   BUILD_SUB_DIR:  builds/sub-build
