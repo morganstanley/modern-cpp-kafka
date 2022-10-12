@@ -10,9 +10,6 @@
 // #define KAFKA_API_ENABLE_UNIT_TEST_STUBS
 // #endif
 
-#if defined(WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
 
 #if ((__cplusplus >= 201703L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
 #define COMPILER_SUPPORTS_CPP_17 1

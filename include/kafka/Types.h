@@ -60,6 +60,17 @@ private:
     std::size_t _size;
 };
 
+
+/**
+ * Infinite timeout.
+ */
+#if COMPILER_SUPPORTS_CPP_17
+const inline std::chrono::milliseconds InfiniteTimeout = (std::chrono::milliseconds::max)();
+#else
+const static std::chrono::milliseconds InfiniteTimeout = (std::chrono::milliseconds::max)();
+#endif
+
+
 /**
  * Topic name.
  */
