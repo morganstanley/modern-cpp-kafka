@@ -327,7 +327,6 @@
 </li>
 <li>
 <p>How many threads would be created by a KafkaConsumer?</p>
-<p>Excluding the user's main thread, if <code>enable.auto.commit</code> is <code>false</code>, the <code>KafkaConsumer</code> would start another (N + 2) threads in the background; otherwise, the <code>KafkaConsumer</code> would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)</p>
 <ol>
 <li>
 <p>Each broker (in the list of BOOTSTRAP_SERVERS) would take a seperate thread to transmit messages towards a kafka cluster server.</p>
@@ -336,10 +335,9 @@
 <p>Another 3 threads will handle internal operations, consumer group operations, and kinds of timers, etc.</p>
 </li>
 <li>
-<p>To enable the auto commit, one more thread would be create, which keeps polling/processing the offset-commit callback event.</p>
+<p>To enable the auto events-polling, one more background thread would be created, which keeps polling/processing the offset-commit callback event.</p>
 </li>
 </ol>
-<p>E.g, if a KafkaConsumer was created with property of <code>BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890</code>, it would take 6 threads in total (including the main thread).</p>
 </li>
 <li>
 <p>Which one of these threads will handle the callbacks?</p>
@@ -356,7 +354,7 @@
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2022. 10. 11
+        Generated: 2022. 10. 12
       </footer>
       <hr/>
     </div>

@@ -120,9 +120,9 @@ using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a55bba0254159c2491daa7dd6c92171a4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a55bba0254159c2491daa7dd6c92171a4">KafkaProducer</a> (const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;<a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a4f96f756ee68fc0f4c8ee935360a3018">properties</a>, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ae7891e26da12ecc9564de418655e576c">EventsPollingOption</a> eventsPollingOption=EventsPollingOption::Auto)</td></tr>
-<tr class="memdesc:a55bba0254159c2491daa7dd6c92171a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The constructor for <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a>.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#a55bba0254159c2491daa7dd6c92171a4">More...</a><br /></td></tr>
-<tr class="separator:a55bba0254159c2491daa7dd6c92171a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea3202f8f0855605da1cd595581b3a3c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#aea3202f8f0855605da1cd595581b3a3c">KafkaProducer</a> (const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;<a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a4f96f756ee68fc0f4c8ee935360a3018">properties</a>, <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ae7891e26da12ecc9564de418655e576c">EventsPollingOption</a> eventsPollingOption=EventsPollingOption::Auto, const Interceptors &amp;interceptors=Interceptors{})</td></tr>
+<tr class="memdesc:aea3202f8f0855605da1cd595581b3a3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The constructor for <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a>.  <a href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#aea3202f8f0855605da1cd595581b3a3c">More...</a><br /></td></tr>
+<tr class="separator:aea3202f8f0855605da1cd595581b3a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9f8f2120f33eee02585e4e3c8ce5f0b"><td class="memItemLeft" align="right" valign="top"><a id="ac9f8f2120f33eee02585e4e3c8ce5f0b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html#ac9f8f2120f33eee02585e4e3c8ce5f0b">~KafkaProducer</a> () override</td></tr>
 <tr class="memdesc:ac9f8f2120f33eee02585e4e3c8ce5f0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The destructor for <a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a>. <br /></td></tr>
@@ -230,8 +230,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaProducer.html" title="KafkaProducer class.">KafkaProducer</a> class. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a55bba0254159c2491daa7dd6c92171a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55bba0254159c2491daa7dd6c92171a4">&#9670;&nbsp;</a></span>KafkaProducer()</h2>
+<a id="aea3202f8f0855605da1cd595581b3a3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea3202f8f0855605da1cd595581b3a3c">&#9670;&nbsp;</a></span>KafkaProducer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -249,7 +249,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ae7891e26da12ecc9564de418655e576c">EventsPollingOption</a>&#160;</td>
-          <td class="paramname"><em>eventsPollingOption</em> = <code>EventsPollingOption::Auto</code>&#160;</td>
+          <td class="paramname"><em>eventsPollingOption</em> = <code>EventsPollingOption::Auto</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Interceptors &amp;&#160;</td>
+          <td class="paramname"><em>interceptors</em> = <code>Interceptors{}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -510,7 +516,7 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Oct 11 2022 08:28:46 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Wed Oct 12 2022 01:27:28 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

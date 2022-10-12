@@ -318,7 +318,6 @@
 </li>
 </ul>
 <h3 id="how-many-threads-would-be-created-by-a-kafkaproducer"><a class="toclink" href="#how-many-threads-would-be-created-by-a-kafkaproducer">How many threads would be created by a KafkaProducer?</a></h3>
-<p>Excluding the user's main thread, <code>KafkaProducer</code> would start (N + 3) background threads. (N means the number of BOOTSTRAP_SERVERS)</p>
 <p>Most of these background threads are started internally by librdkafka.</p>
 <p>Here is a brief introduction what they're used for,</p>
 <ol>
@@ -326,19 +325,18 @@
 <p>Each broker (in the list of BOOTSTRAP_SERVERS) would take a separate thread to transmit messages towards a kafka cluster server.</p>
 </li>
 <li>
-<p>Another 2 background threads would handle internal operations and kinds of timers, etc.</p>
+<p>Another 2 threads would handle internal operations and kinds of timers, etc.</p>
 </li>
 <li>
-<p>One more background thread to keep polling the delivery callback event.</p>
+<p>To enale the auto events-polling, one more background thread would be created, which keeps polling the delivery callback event.</p>
 </li>
 </ol>
-<p>E.g, if a <code>KafkaProducer</code> was created with property of <code>BOOTSTRAP_SERVERS=127.0.0.1:8888,127.0.0.1:8889,127.0.0.1:8890</code>, it would take 7 threads in total (including the main thread).</p>
 <h3 id="which-one-of-these-threads-will-handle-the-callbacks"><a class="toclink" href="#which-one-of-these-threads-will-handle-the-callbacks">Which one of these threads will handle the callbacks</a></h3>
 <p>It will be handled by a background thread, not by the user's thread.</p>
 <p>Note, should be careful if both the <code>KafkaProducer::send()</code> and the <code>producer::Callback</code> might access the same container at the same time.</p>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2022. 10. 11
+        Generated: 2022. 10. 12
       </footer>
       <hr/>
     </div>
