@@ -138,7 +138,7 @@ public:
      * Possible error values:
      *   - RD_KAFKA_RESP_ERR__TIMED_OUT: The `timeout` was reached before all outstanding requests were completed.
      */
-    Error flush(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
+    Error flush(std::chrono::milliseconds timeout = InfiniteTimeout)
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
@@ -158,7 +158,7 @@ public:
     /**
      * Close this producer. This method would wait up to timeout for the producer to complete the sending of all incomplete requests (before purging them).
      */
-    void close(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
+    void close(std::chrono::milliseconds timeout = InfiniteTimeout)
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
@@ -247,7 +247,7 @@ public:
     /**
      * Needs to be called before any other methods when the transactional.id is set in the configuration.
      */
-    void initTransactions(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
+    void initTransactions(std::chrono::milliseconds timeout = InfiniteTimeout)
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
@@ -267,7 +267,7 @@ public:
     /**
      * Commit the ongoing transaction.
      */
-    void commitTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
+    void commitTransaction(std::chrono::milliseconds timeout = InfiniteTimeout)
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
@@ -277,7 +277,7 @@ public:
     /**
      * Abort the ongoing transaction.
      */
-    void abortTransaction(std::chrono::milliseconds timeout = std::chrono::milliseconds::max())
+    void abortTransaction(std::chrono::milliseconds timeout = InfiniteTimeout)
     {
         std::lock_guard<std::mutex> lock(_producerMutex);
 
