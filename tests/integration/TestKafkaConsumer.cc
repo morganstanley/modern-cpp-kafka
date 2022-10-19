@@ -213,9 +213,12 @@ TEST(KafkaConsumer, SeekAndPoll)
     auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
     EXPECT_EQ(0, records.size());
 
-    // Try to get the beginning offsets
+    // Try to get the beginning/end offsets
     const kafka::TopicPartition tp{topic, partition};
     std::cout << "[" << kafka::utility::getCurrentTime() << "] Consumer get the beginningOffset[" << consumer.beginningOffsets({tp})[tp] << "]" << std::endl;;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] Consumer get the endOffset[" << consumer.endOffsets({tp})[tp] << "]" << std::endl;;
+    EXPECT_EQ(0, consumer.beginningOffsets({tp})[tp]);
+    EXPECT_EQ(0, consumer.endOffsets({tp})[tp]);
 
     // Prepare some messages to send
     std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
@@ -226,6 +229,12 @@ TEST(KafkaConsumer, SeekAndPoll)
 
     // Send the messages
     KafkaTestUtility::ProduceMessages(topic, partition, messages);
+
+    // Try to get the beginning/end offsets
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] Consumer get the beginningOffset[" << consumer.beginningOffsets({tp})[tp] << "]" << std::endl;;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] Consumer get the endOffset[" << consumer.endOffsets({tp})[tp] << "]" << std::endl;;
+    EXPECT_EQ(0, consumer.beginningOffsets({tp})[tp]);
+    EXPECT_EQ(messages.size(), consumer.endOffsets({tp})[tp]);
 
     // Poll these messages
     records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);

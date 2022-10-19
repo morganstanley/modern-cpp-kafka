@@ -139,7 +139,11 @@ public:
      * Throws KafkaException with errors:
      *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
      */
-    std::map<TopicPartition, Offset> beginningOffsets(const TopicPartitions& topicPartitions) const { return getOffsets(topicPartitions, true); }
+    std::map<TopicPartition, Offset> beginningOffsets(const TopicPartitions&    topicPartitions,
+                                                      std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const
+    {
+        return getOffsets(topicPartitions, true, timeout);
+    }
 
     /**
      * Get the last offset for the given partitions.  The last offset of a partition is the offset of the upcoming message, i.e. the offset of the last available message + 1.
@@ -147,7 +151,11 @@ public:
      * Throws KafkaException with errors:
      *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
      */
-    std::map<TopicPartition, Offset> endOffsets(const TopicPartitions& topicPartitions) const { return getOffsets(topicPartitions, false); }
+    std::map<TopicPartition, Offset> endOffsets(const TopicPartitions&    topicPartitions,
+                                                std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const
+    {
+        return getOffsets(topicPartitions, false, timeout);
+    }
 
     /**
      * Get the offsets for the given partitions by time-point.
@@ -284,7 +292,9 @@ private:
     void storeOffsetsIfNecessary(const std::vector<consumer::ConsumerRecord>& records);
 
     void seekToBeginningOrEnd(const TopicPartitions& topicPartitions, bool toBeginning, std::chrono::milliseconds timeout);
-    std::map<TopicPartition, Offset> getOffsets(const TopicPartitions& topicPartitions, bool atBeginning) const;
+    std::map<TopicPartition, Offset> getOffsets(const TopicPartitions&    topicPartitions,
+                                                bool                      atBeginning,
+                                                std::chrono::milliseconds timeout) const;
 
     enum class PartitionsRebalanceEvent { Assign, Revoke, IncrementalAssign, IncrementalUnassign };
     void changeAssignment(PartitionsRebalanceEvent event, const TopicPartitions& tps);
@@ -739,14 +749,16 @@ KafkaConsumer::offsetsForTime(const TopicPartitions& topicPartitions,
 }
 
 inline std::map<TopicPartition, Offset>
-KafkaConsumer::getOffsets(const TopicPartitions& topicPartitions, bool atBeginning) const
+KafkaConsumer::getOffsets(const TopicPartitions&    topicPartitions,
+                          bool                      atBeginning,
+                          std::chrono::milliseconds timeout) const
 {
     std::map<TopicPartition, Offset> result;
 
     for (const auto& topicPartition: topicPartitions)
     {
         Offset beginning{}, end{};
-        Error error{ rd_kafka_query_watermark_offsets(getClientHandle(), topicPartition.first.c_str(), topicPartition.second, &beginning, &end, 0) };
+        Error error{ rd_kafka_query_watermark_offsets(getClientHandle(), topicPartition.first.c_str(), topicPartition.second, &beginning, &end, timeout.count()) };
         KAFKA_THROW_IF_WITH_ERROR(error);
 
         result[topicPartition] = (atBeginning ? beginning : end);
