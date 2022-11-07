@@ -227,4 +227,3 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library t
     * [org.apache.kafka.clients.consumer](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/package-summary.html)
 
     * [org.apache.kafka.clients.admin](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/admin/package-summary.html)
-
