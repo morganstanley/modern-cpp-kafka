@@ -127,6 +127,7 @@ inline std::vector<std::shared_ptr<BrokerMetadata::Node>>
 BrokerMetadata::nodes() const
 {
     std::vector<std::shared_ptr<BrokerMetadata::Node>> ret;
+    ret.reserve(_nodes.size());
     for (const auto& nodeInfo: _nodes)
     {
         ret.emplace_back(nodeInfo.second);

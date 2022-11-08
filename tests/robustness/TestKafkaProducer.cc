@@ -45,9 +45,9 @@ TEST(KafkaProducer, RecordTimestamp)
         auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(payload.c_str(), payload.size()));
 
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer is about to send a message to topic [" << topic << "]" << std::endl;
-        kafka::Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        const kafka::Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         auto metadata = producer.syncSend(record);
-        kafka::Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        const kafka::Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
@@ -57,7 +57,7 @@ TEST(KafkaProducer, RecordTimestamp)
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         ASSERT_EQ(1, records.size());
 
-        kafka::Timestamp tsRecord = records.front().timestamp();
+        const kafka::Timestamp tsRecord = records.front().timestamp();
         std::cout << "Consumer got record from topic[" << topic << "]: " << records.front().toString() << std::endl;
 
         EXPECT_EQ(kafka::Timestamp::Type::CreateTime, tsRecord.type);
@@ -76,9 +76,9 @@ TEST(KafkaProducer, RecordTimestamp)
         auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(payload.c_str(), payload.size()));
 
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer is about to send a message to topic [" << topic << "]" << std::endl;
-        kafka::Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        const kafka::Timestamp::Value tsMsgAboutToSend = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         auto metadata = producer.syncSend(record);
-        kafka::Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        const kafka::Timestamp::Value tsMsgJustSent = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
@@ -88,7 +88,7 @@ TEST(KafkaProducer, RecordTimestamp)
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         ASSERT_EQ(1, records.size());
 
-        kafka::Timestamp tsRecord = records.front().timestamp();
+        const kafka::Timestamp tsRecord = records.front().timestamp();
         std::cout << "Consumer got record from topic[" << topic << "]: " << records.front().toString() << std::endl;
 
         EXPECT_EQ(kafka::Timestamp::Type::LogAppendTime, tsRecord.type);
@@ -106,19 +106,19 @@ TEST(KafkaProducer, NoMissedDeliveryCallback)
     std::set<kafka::clients::producer::ProducerRecord::Id> inFlightIds;
 
     auto insertIdInFlight = [&inFlightMutex, &inFlightIds](kafka::clients::producer::ProducerRecord::Id id) {
-        std::lock_guard<std::mutex> guard(inFlightMutex);
+        const std::lock_guard<std::mutex> guard(inFlightMutex);
         ASSERT_EQ(0, inFlightIds.count(id));
         inFlightIds.insert(id);
     };
 
     auto removeIdInFlight = [&inFlightMutex, &inFlightIds](kafka::clients::producer::ProducerRecord::Id id) {
-        std::lock_guard<std::mutex> guard(inFlightMutex);
+        const std::lock_guard<std::mutex> guard(inFlightMutex);
         ASSERT_EQ(1, inFlightIds.count(id));
         inFlightIds.erase(id);
     };
 
     auto sizeOfIdsInFlight = [&inFlightMutex, &inFlightIds]() {
-        std::lock_guard<std::mutex> guard(inFlightMutex);
+        const std::lock_guard<std::mutex> guard(inFlightMutex);
         return inFlightIds.size();
     };
 
@@ -244,7 +244,7 @@ TEST(KafkaProducer, BrokerStopWhileSendingMessages)
 
 TEST(KafkaProducer, Send_AckTimeout)
 {
-    std::vector<std::pair<std::string, std::string>> messages = {
+    const std::vector<std::pair<std::string, std::string>> messages = {
         {"1", "value1"},
         {"2", "value2"},
         {"3", "value3"},
@@ -255,7 +255,7 @@ TEST(KafkaProducer, Send_AckTimeout)
 
     {
         kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "3000")); // If with no response, the delivery would fail in a short time
+                                                .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "3000")); // If with no response, the delivery would fail in a short time
         producer.setErrorCallback(KafkaTestUtility::DumpError);
 
         // Pause the brokers for a while
@@ -284,7 +284,7 @@ TEST(KafkaProducer, Send_AckTimeout)
 
 TEST(KafkaProducer, ManuallyPollEvents_AckTimeout)
 {
-    std::vector<std::pair<std::string, std::string>> messages = {
+    const std::vector<std::pair<std::string, std::string>> messages = {
         {"1", "value1"},
         {"2", "value2"},
         {"3", "value3"},
@@ -332,7 +332,7 @@ TEST(KafkaProducer, ManuallyPollEvents_AckTimeout)
 
 TEST(KafkaProducer, ManuallyPollEvents_AlwaysFinishClosing)
 {
-    std::vector<std::pair<std::string, std::string>> messages = {
+    const std::vector<std::pair<std::string, std::string>> messages = {
         {"1", "value1"},
         {"2", "value2"},
         {"3", "value3"},

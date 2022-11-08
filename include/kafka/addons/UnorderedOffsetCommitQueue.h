@@ -25,7 +25,7 @@ public:
 
         for (std::size_t indexCurrent = data.size() - 1; indexCurrent > 0;)
         {
-            std::size_t indexParent = (indexCurrent + 1) / 2 - 1;
+            const std::size_t indexParent = (indexCurrent + 1) / 2 - 1;
 
             if (!(data[indexCurrent] < data[indexParent])) return;
 
@@ -43,12 +43,12 @@ public:
 
         for (std::size_t indexCurrent = 0;;)
         {
-            std::size_t indexRightChild = (indexCurrent + 1) * 2;
-            std::size_t indexLeftChild  = indexRightChild - 1;
+            const std::size_t indexRightChild = (indexCurrent + 1) * 2;
+            const std::size_t indexLeftChild  = indexRightChild - 1;
 
             if (indexLeftChild >= data.size()) return;
 
-            std::size_t indexMinChild = (indexRightChild >= data.size() || data[indexLeftChild] < data[indexRightChild]) ? indexLeftChild : indexRightChild;
+            const std::size_t indexMinChild = (indexRightChild >= data.size() || data[indexLeftChild] < data[indexRightChild]) ? indexLeftChild : indexRightChild;
 
             if (!(data[indexMinChild] < data[indexCurrent])) return;
 
@@ -107,7 +107,7 @@ public:
      */
     void ackOffset(Offset offset)
     {
-        Offset maxOffsetReceived = _offsetsReceived.back();
+        const Offset maxOffsetReceived = _offsetsReceived.back();
         if (offset > maxOffsetReceived)
         {
             // Runtime error
@@ -117,8 +117,8 @@ public:
         _offsetsToCommit.push(offset);
         do
         {
-            Offset minOffsetToCommit = _offsetsToCommit.front();
-            Offset expectedOffset    = _offsetsReceived.front();
+            const Offset minOffsetToCommit = _offsetsToCommit.front();
+            const Offset expectedOffset    = _offsetsReceived.front();
             if (minOffsetToCommit == expectedOffset)
             {
                 _toCommit = expectedOffset + 1;

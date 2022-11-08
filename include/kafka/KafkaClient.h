@@ -405,7 +405,11 @@ KafkaClient::KafkaClient(ClientType                     clientType,
             continue;
         }
 
-        rd_kafka_conf_res_t result = rd_kafka_conf_set(rk_conf.get(), prop.first.c_str(), prop.second.c_str(), errInfo.str(), errInfo.capacity());
+        const rd_kafka_conf_res_t result = rd_kafka_conf_set(rk_conf.get(),
+                                                             prop.first.c_str(),
+                                                             prop.second.c_str(),
+                                                             errInfo.str(),
+                                                             errInfo.capacity());
         if (result == RD_KAFKA_CONF_OK)
         {
             _properties.put(prop.first, prop.second);
@@ -434,7 +438,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     // Interceptor
     if (!_interceptors.empty())
     {
-        Error result{ rd_kafka_conf_interceptor_add_on_new(rk_conf.get(), "on_new", KafkaClient::configInterceptorOnNew, nullptr) };
+        const Error result{ rd_kafka_conf_interceptor_add_on_new(rk_conf.get(), "on_new", KafkaClient::configInterceptorOnNew, nullptr) };
         KAFKA_THROW_IF_WITH_ERROR(result);
     }
 
@@ -447,10 +451,10 @@ KafkaClient::KafkaClient(ClientType                     clientType,
 
     // Add brokers
     auto brokers = properties.getProperty(BOOTSTRAP_SERVERS);
-    if (rd_kafka_brokers_add(getClientHandle(), brokers->c_str()) == 0)
+    if (!brokers || rd_kafka_brokers_add(getClientHandle(), brokers->c_str()) == 0)
     {
         KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                "No broker could be added successfully, BOOTSTRAP_SERVERS=[" + *brokers + "]"));
+                                "No broker could be added successfully, BOOTSTRAP_SERVERS=[" + (brokers ? *brokers : "NA") + "]"));
     }
 
     _opened = true;
@@ -503,7 +507,7 @@ KafkaClient::getProperty(const std::string& name) const
     if (valueSize > valueBuf.size())
     {
         valueBuf.resize(valueSize);
-        [[maybe_unused]] rd_kafka_conf_res_t result = rd_kafka_conf_get(conf, name.c_str(), valueBuf.data(), &valueSize);
+        [[maybe_unused]] const rd_kafka_conf_res_t result = rd_kafka_conf_get(conf, name.c_str(), valueBuf.data(), &valueSize);
         assert(result == RD_KAFKA_CONF_OK);
     }
 
@@ -538,7 +542,7 @@ KafkaClient::onStats(const std::string& jsonString)
 inline int
 KafkaClient::statsCallback(rd_kafka_t* rk, char* jsonStrBuf, size_t jsonStrLen, void* /*opaque*/)
 {
-    std::string stats(jsonStrBuf, jsonStrBuf+jsonStrLen);
+    const std::string stats(jsonStrBuf, jsonStrBuf+jsonStrLen);
     kafkaClient(rk).onStats(stats);
     return 0;
 }
@@ -618,7 +622,11 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
 {
     const rd_kafka_metadata_t* rk_metadata = nullptr;
     // Here the input parameter for `all_topics` is `true`, since we want the `cgrp_update`
-    rd_kafka_resp_err_t err = rd_kafka_metadata(getClientHandle(), true, nullptr, &rk_metadata, convertMsDurationToInt(timeout));
+    const rd_kafka_resp_err_t err = rd_kafka_metadata(getClientHandle(),
+                                                      true,
+                                                      nullptr,
+                                                      &rk_metadata,
+                                                      convertMsDurationToInt(timeout));
 
     auto guard = rd_kafka_metadata_unique_ptr(rk_metadata);
 
@@ -670,7 +678,7 @@ KafkaClient::fetchBrokerMetadata(const std::string& topic, std::chrono::millisec
     {
         const rd_kafka_metadata_partition& metadata_partition = metadata_topic->partitions[i];
 
-        Partition partition = metadata_partition.id;
+        const Partition partition = metadata_partition.id;
 
         if (metadata_partition.err != 0)
         {

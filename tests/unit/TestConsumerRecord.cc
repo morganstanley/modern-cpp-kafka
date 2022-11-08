@@ -12,7 +12,7 @@ inline rd_kafka_message_t* mockRdKafkaMessage(kafka::Partition partition, kafka:
                                               rd_kafka_resp_err_t respErr = RD_KAFKA_RESP_ERR_NO_ERROR)
 {
     constexpr std::size_t MSG_PRIVATE_LEN = 128;    // the underlying `rk_kafka_msg_t` is longer than `rk_kafka_message_t`
-    std::size_t msgSize = sizeof(rd_kafka_message_t) + MSG_PRIVATE_LEN + key.size() + 1 + value.size() + 1;
+    const std::size_t msgSize = sizeof(rd_kafka_message_t) + MSG_PRIVATE_LEN + key.size() + 1 + value.size() + 1;
 
     char* msgBuf = new char[msgSize]();
 
@@ -39,14 +39,14 @@ inline rd_kafka_message_t* mockRdKafkaMessage(kafka::Partition partition, kafka:
 
 TEST(ConsumerRecord, Basic)
 {
-    kafka::Partition partition = 1;
-    kafka::Offset    offset    = 100;
-    std::string      key       = "some key";
-    std::string      value     = "some value";
+    const kafka::Partition partition = 1;
+    const kafka::Offset    offset    = 100;
+    const std::string      key       = "some key";
+    const std::string      value     = "some value";
 
     rd_kafka_message_t* rkMsg = mockRdKafkaMessage(partition, offset, key, value);
     // Here the ConsumerRecord will take over the ownership
-    kafka::clients::consumer::ConsumerRecord record(rkMsg);
+    const kafka::clients::consumer::ConsumerRecord record(rkMsg);
 
     EXPECT_FALSE(record.error());
     EXPECT_EQ(partition, record.partition());
@@ -57,13 +57,13 @@ TEST(ConsumerRecord, Basic)
 
 TEST(ConsumerRecord, WithError)
 {
-    kafka::Partition partition = 2;
-    kafka::Offset    offset    = 200;
-    rd_kafka_resp_err_t err    = RD_KAFKA_RESP_ERR_UNKNOWN;
+    const kafka::Partition partition = 2;
+    const kafka::Offset    offset    = 200;
+    const rd_kafka_resp_err_t err    = RD_KAFKA_RESP_ERR_UNKNOWN;
 
     rd_kafka_message_t* rkMsg = mockRdKafkaMessage(partition, offset, "", "", err);
     // Here the ConsumerRecord will take over the ownership
-    kafka::clients::consumer::ConsumerRecord record(rkMsg);
+    const kafka::clients::consumer::ConsumerRecord record(rkMsg);
 
     EXPECT_EQ(RD_KAFKA_RESP_ERR_UNKNOWN, record.error().value());
     EXPECT_EQ(partition, record.partition());
@@ -74,13 +74,13 @@ TEST(ConsumerRecord, WithError)
 
 TEST(ConsumerRecord, EndOfPartition)
 {
-    kafka::Partition    partition = 1;
-    kafka::Offset       offset    = 100;
-    rd_kafka_resp_err_t err       = RD_KAFKA_RESP_ERR__PARTITION_EOF;
+    const kafka::Partition    partition = 1;
+    const kafka::Offset       offset    = 100;
+    const rd_kafka_resp_err_t err       = RD_KAFKA_RESP_ERR__PARTITION_EOF;
 
     rd_kafka_message_t* rkMsg = mockRdKafkaMessage(partition, offset, "", "", err);
     // Here the ConsumerRecord will take over the ownership
-    kafka::clients::consumer::ConsumerRecord record(rkMsg);
+    const kafka::clients::consumer::ConsumerRecord record(rkMsg);
 
     EXPECT_EQ(RD_KAFKA_RESP_ERR__PARTITION_EOF, record.error().value());
     EXPECT_EQ(partition, record.partition());

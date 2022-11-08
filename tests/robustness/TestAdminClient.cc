@@ -9,7 +9,7 @@
 
 TEST(AdminClient, BrokersTimeout)
 {
-    kafka::Topic topic = kafka::utility::getRandomString();
+    const kafka::Topic topic = kafka::utility::getRandomString();
     const int numPartitions = 5;
     const int replicaFactor = 3;
 

@@ -49,12 +49,13 @@ inline std::string getCurrentTime()
 inline std::string getRandomString()
 {
     using namespace std::chrono;
-    std::uint32_t timestamp = static_cast<std::uint32_t>(duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count());
+
+    const std::uint32_t timestamp = static_cast<std::uint32_t>(duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count());
 
     std::random_device r;
     std::default_random_engine e(r());
     std::uniform_int_distribution<std::uint64_t> uniform_dist(0, 0xFFFFFFFF);
-    std::uint64_t rand = uniform_dist(e);
+    const std::uint64_t rand = uniform_dist(e);
 
     std::ostringstream oss;
     oss << std::setfill('0') << std::setw(sizeof(std::uint32_t) * 2) << std::hex << timestamp << "-" << rand;

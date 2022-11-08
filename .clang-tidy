@@ -20,6 +20,7 @@ Checks: "*,\
          -hicpp-no-array-decay,\
          -hicpp-deprecated-headers,\
          -hicpp-braces-around-statements,\
+         -hicppcert-err60-cpp,\
          -cppcoreguidelines-special-member-function,\
          -cppcoreguidelines-macro-usage,\
          -cppcoreguidelines-avoid-magic-numbers,\
@@ -41,6 +42,7 @@ Checks: "*,\
          -readability-function-cognitive-complexity,\
          -bugprone-unused-return-value,\
          -bugprone-easily-swappable-parameters,\
+         -bugprone-exception-escape,\
          -cert-err58-cpp,\
-         -cert-err60-cpp"
+         -clang-analyzer-optin.performance.Padding"
 

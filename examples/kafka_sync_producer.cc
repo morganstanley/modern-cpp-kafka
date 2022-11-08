@@ -12,13 +12,13 @@ int main(int argc, char **argv)
         exit(argc == 1 ? 0 : 1); // NOLINT
     }
 
-    std::string brokers = argv[1];
-    kafka::Topic topic  = argv[2];
+    const std::string brokers = argv[1];
+    const kafka::Topic topic  = argv[2];
 
     try {
 
         // Create configuration object
-        kafka::Properties props({
+        const kafka::Properties props({
             {"bootstrap.servers",  brokers},
             {"enable.idempotence", "true"},
         });
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 
             // Send the message.
             try {
-                producer::RecordMetadata metadata = producer.syncSend(record);
+                const producer::RecordMetadata metadata = producer.syncSend(record);
                 std::cout << "% Message delivered: " << metadata.toString() << std::endl;
             } catch (const kafka::KafkaException& e) {
                 std::cerr << "% Message delivery failed: " << e.error().message() << std::endl;

@@ -109,18 +109,21 @@ int main (int argc, char **argv)
         std::string line;
         while (std::getline(std::cin, line))
         {
-            kafka::Key   key;
-            kafka::Value value(line.c_str(), line.size());
-            producer::ProducerRecord record =
-                (args->partition ? producer::ProducerRecord(args->topic, *args->partition, key, value) : producer::ProducerRecord(args->topic, key, value));
+            const kafka::Key   key;
+            const kafka::Value value(line.c_str(), line.size());
+            const auto         topic           = args->topic;
+            const auto         partitionOption = args->partition;
+
+            const producer::ProducerRecord record =
+                (partitionOption ? producer::ProducerRecord(topic, *partitionOption, key, value) : producer::ProducerRecord(topic, key, value));
 
             std::cout << "Current Local Time [" << kafka::utility::getCurrentTime() << "]" << std::endl;
 
             // Note: might throw exceptions if with unknown topic, unknown partition, invalid message length, etc.
-            auto metadata = producer.syncSend(record);
-
+            const auto metadata = producer.syncSend(record);
+            const auto offsetOption = metadata.offset();
             std::cout << "Just Sent Key[" << metadata.keySize()   << " B]/Value["  << metadata.valueSize() << " B]"
-                << " ==> " << metadata.topic() << "-" << std::to_string(metadata.partition()) << "@" <<  (metadata.offset() ? std::to_string(*metadata.offset()) : "NA")
+                << " ==> " << metadata.topic() << "-" << std::to_string(metadata.partition()) << "@" <<  (offsetOption ? std::to_string(*offsetOption) : "NA")
                 << ", " << metadata.timestamp().toString() << ", " << metadata.persistedStatusString() << std::endl;
 
             std::cout << "--------------------" << std::endl;

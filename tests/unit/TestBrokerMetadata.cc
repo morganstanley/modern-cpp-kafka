@@ -9,7 +9,7 @@ TEST(BrokerMetadata, Node)
     const kafka::BrokerMetadata::Node::Host host = "127.0.0.1";
     const kafka::BrokerMetadata::Node::Port port = 9000;
 
-    kafka::BrokerMetadata::Node node(id, host, port);
+    const kafka::BrokerMetadata::Node node(id, host, port);
 
     EXPECT_EQ(id,   node.id);
     EXPECT_EQ(host, node.host);
@@ -58,7 +58,7 @@ TEST(BrokerMetadata, Basic)
         EXPECT_EQ(numNode, partitionInfo.inSyncReplicas.size());
     }
 
-    std::string expectedMetadata = std::string("originatingNode[server1], topic[topicName], partitions{")
+    const std::string expectedMetadata = std::string("originatingNode[server1], topic[topicName], partitions{")
         + "0: leader[server1:9000/1], replicas[server1:9000/1, server2:9000/2, server3:9000/3], inSyncReplicas[server1:9000/1, server2:9000/2, server3:9000/3]; "
         + "1: leader[server2:9000/2], replicas[server1:9000/1, server2:9000/2, server3:9000/3], inSyncReplicas[server1:9000/1, server2:9000/2, server3:9000/3]; "
         + "2: leader[server3:9000/3], replicas[server1:9000/1, server2:9000/2, server3:9000/3], inSyncReplicas[server1:9000/1, server2:9000/2, server3:9000/3]}";
@@ -90,7 +90,7 @@ TEST(BrokerMetadata, IncompleteInfo)
         metadata.addPartitionInfo(partition, partitionInfo);
     }
 
-    std::string expectedMetadata = std::string("originatingNode[server1], topic[topicName], partitions{")
+    const std::string expectedMetadata = std::string("originatingNode[server1], topic[topicName], partitions{")
         + "0: leader[server1:9000/1], replicas[server1:9000/1, -:-/2, -:-/3], inSyncReplicas[server1:9000/1, -:-/2, -:-/3]; "
         + "1: leader[-:-/2], replicas[server1:9000/1, -:-/2, -:-/3], inSyncReplicas[server1:9000/1, -:-/2, -:-/3]; "
         + "2: leader[-:-/3], replicas[server1:9000/1, -:-/2, -:-/3], inSyncReplicas[server1:9000/1, -:-/2, -:-/3]}";

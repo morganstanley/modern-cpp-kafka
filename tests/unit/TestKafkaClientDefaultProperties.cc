@@ -47,7 +47,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
     using namespace kafka::clients::producer;
 
     {
-        KafkaProducer producer(commonProps);
+        const KafkaProducer producer(commonProps);
 
         const KVMap expectedKVs =
         {
@@ -74,7 +74,7 @@ TEST(KafkaClient, KafkaProducerDefaultProperties)
     {
         auto props = commonProps;
         props.put(Config::ENABLE_IDEMPOTENCE, "true");
-        KafkaProducer producer(props);
+        const KafkaProducer producer(props);
 
         const KVMap expectedKVs =
         {
@@ -94,7 +94,7 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
     {
         auto props = commonProps;
         props.put(Config::ENABLE_AUTO_COMMIT, "true");
-        KafkaConsumer consumer(props);
+        const KafkaConsumer consumer(props);
 
         const KVMap expectedKVs =
         {
@@ -119,7 +119,7 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
     KafkaTestUtility::PrintDividingLine();
 
     {
-        KafkaConsumer consumer(commonProps);
+        const KafkaConsumer consumer(commonProps);
 
         const KVMap expectedKVs =
         {

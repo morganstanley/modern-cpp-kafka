@@ -43,13 +43,13 @@ public:
      * \brief Get integer value(s) for the specified metrics.
      * Note: the wildcard ("*") is supported.
      */
-    ResultsType<std::int64_t> getInt(const KeysType& keys) { return get<std::int64_t>(keys); }
+    ResultsType<std::int64_t> getInt(const KeysType& keys) const { return get<std::int64_t>(keys); }
 
     /**
      * \brief Get string value(s) for the specified metrics.
      * Note: the wildcard ("*") is supported.
      */
-    ResultsType<std::string> getString(const KeysType& keys) { return get<std::string>(keys); }
+    ResultsType<std::string> getString(const KeysType& keys) const { return get<std::string>(keys); }
 
     static std::string toString(const KafkaMetrics::KeysType& keys);
 
@@ -58,14 +58,14 @@ public:
 
 private:
     template<typename ValueType>
-    ResultsType<ValueType> get(const KeysType& keys);
+    ResultsType<ValueType> get(const KeysType& keys) const;
 
     template<typename ValueType>
-    void getResults(ResultsType<ValueType>&               results,
-                    KeysType&                             keysForWildcards,
-                    rapidjson::Value::ConstMemberIterator iter,
-                    KeysType::const_iterator              keysToParse,
-                    KeysType::const_iterator              keysEnd);
+    static void getResults(ResultsType<ValueType>&               results,
+                           KeysType&                             keysForWildcards,
+                           rapidjson::Value::ConstMemberIterator iter,
+                           KeysType::const_iterator              keysToParse,
+                           KeysType::const_iterator              keysEnd);
 
     template<typename ValueType>
     static ValueType getValue(rapidjson::Value::ConstMemberIterator iter);
@@ -108,7 +108,7 @@ KafkaMetrics::getValue<std::string>(rapidjson::Value::ConstMemberIterator iter)
 
 template<typename ValueType>
 inline KafkaMetrics::ResultsType<ValueType>
-KafkaMetrics::get(const KeysType& keys)
+KafkaMetrics::get(const KeysType& keys) const
 {
     if (keys.empty())             throw std::invalid_argument("Input keys cannot be empty!");
     if (keys.front() == WILDCARD) throw std::invalid_argument("The first key cannot be wildcard!");
@@ -116,7 +116,7 @@ KafkaMetrics::get(const KeysType& keys)
 
     ResultsType<ValueType> results;
 
-    rapidjson::Value::ConstMemberIterator iter = _jsonDoc.FindMember(keys.front().c_str());
+    const rapidjson::Value::ConstMemberIterator iter = _jsonDoc.FindMember(keys.front().c_str());
     if (iter == _jsonDoc.MemberEnd()) return results;
 
     if (keys.size() == 1)
@@ -160,7 +160,7 @@ KafkaMetrics::getResults(KafkaMetrics::ResultsType<ValueType>& results,
     }
     else
     {
-        rapidjson::Value::ConstMemberIterator subIter = iter->value.FindMember(key.c_str());
+        const rapidjson::Value::ConstMemberIterator subIter = iter->value.FindMember(key.c_str());
         if (subIter == iter->value.MemberEnd()) return;
 
         if (!isTheEnd)

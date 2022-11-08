@@ -36,7 +36,7 @@ TEST(AdminClient, CreateListDeleteTopics)
         auto listResult = adminClient.listTopics();
         auto foundAllTopics = std::all_of(topics.cbegin(), topics.cend(),
                                           [&listResult](const kafka::Topic& topic) {
-                                              bool ret = (listResult.topics.count(topic) == 1);
+                                              const bool ret = (listResult.topics.count(topic) == 1);
                                               if (!ret) {
                                                   std::cout << "[" << kafka::utility::getCurrentTime() << "] can't find topic " << topic << " by now!" << std::endl;
                                               }
@@ -128,10 +128,17 @@ TEST(AdminClient, DeleteRecords)
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
     // Prepare offsets for `deleteRecords`
-    kafka::TopicPartitionOffsets offsetsToDeleteWith = {
-        {kafka::TopicPartition{topic, partition1}, *metadatas1[0].offset()},  // the very first offset, which means no message would be deleted
-        {kafka::TopicPartition{topic, partition2}, *metadatas2[1].offset()},  // there's only 1 message before the offset
-        {kafka::TopicPartition{topic, partition3}, *metadatas3[2].offset() + 1} // the offset beyond the end, which means all messages would be deleted
+    auto offsetOption1 = metadatas1[0].offset();
+    auto offsetOption2 = metadatas2[1].offset();
+    auto offsetOption3 = metadatas3[2].offset();
+    ASSERT_TRUE(offsetOption1);
+    ASSERT_TRUE(offsetOption2);
+    ASSERT_TRUE(offsetOption3);
+
+    const kafka::TopicPartitionOffsets offsetsToDeleteWith = {
+        {kafka::TopicPartition{topic, partition1}, *offsetOption1},     // NOLINT. The very first offset, which means no message would be deleted
+        {kafka::TopicPartition{topic, partition2}, *offsetOption2},     // NOLINT. There's only 1 message before the offset
+        {kafka::TopicPartition{topic, partition3}, *offsetOption3 + 1}  // NOLINT. The offset beyond the end, which means all messages would be deleted
     };
 
     // Delete some records
