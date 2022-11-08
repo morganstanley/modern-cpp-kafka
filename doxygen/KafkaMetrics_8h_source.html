@@ -101,9 +101,9 @@ $(function() {
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ValueType&gt;</div>
 <div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929">   40</a></span>&#160;    <span class="keyword">using</span> <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929">ResultsType</a> = std::vector&lt;std::pair&lt;KeysType, ValueType&gt;&gt;;</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1KafkaMetrics.html#ad0c3ecfb1c9facd0fd4092a9cad48b69">   46</a></span>&#160;    <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929">ResultsType&lt;std::int64_t&gt;</a> <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#ad0c3ecfb1c9facd0fd4092a9cad48b69">getInt</a>(<span class="keyword">const</span> KeysType&amp; keys) { <span class="keywordflow">return</span> get&lt;std::int64_t&gt;(keys); }</div>
+<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1KafkaMetrics.html#a5e8d026474b61e9004675c5499d4d996">   46</a></span>&#160;    <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929">ResultsType&lt;std::int64_t&gt;</a> <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a5e8d026474b61e9004675c5499d4d996">getInt</a>(<span class="keyword">const</span> KeysType&amp; keys)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> get&lt;std::int64_t&gt;(keys); }</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1KafkaMetrics.html#a3e875fc80bd62e44e10af079f4aaa84e">   52</a></span>&#160;    <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929">ResultsType&lt;std::string&gt;</a> <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a3e875fc80bd62e44e10af079f4aaa84e">getString</a>(<span class="keyword">const</span> KeysType&amp; keys) { <span class="keywordflow">return</span> get&lt;std::string&gt;(keys); }</div>
+<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1KafkaMetrics.html#a173fbf3abd6153dcfc4b268e9ba29140">   52</a></span>&#160;    <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929">ResultsType&lt;std::string&gt;</a> <a class="code" href="classKAFKA__API_1_1KafkaMetrics.html#a173fbf3abd6153dcfc4b268e9ba29140">getString</a>(<span class="keyword">const</span> KeysType&amp; keys)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> get&lt;std::string&gt;(keys); }</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keyword">static</span> std::string toString(<span class="keyword">const</span> KafkaMetrics::KeysType&amp; keys);</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
@@ -112,14 +112,14 @@ $(function() {
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="keyword">private</span>:</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ValueType&gt;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    ResultsType&lt;ValueType&gt; get(<span class="keyword">const</span> KeysType&amp; keys);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    ResultsType&lt;ValueType&gt; get(<span class="keyword">const</span> KeysType&amp; keys) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ValueType&gt;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keywordtype">void</span> getResults(ResultsType&lt;ValueType&gt;&amp;               results,</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                    KeysType&amp;                             keysForWildcards,</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                    rapidjson::Value::ConstMemberIterator iter,</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                    KeysType::const_iterator              keysToParse,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                    KeysType::const_iterator              keysEnd);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> getResults(ResultsType&lt;ValueType&gt;&amp;               results,</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                           KeysType&amp;                             keysForWildcards,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                           rapidjson::Value::ConstMemberIterator iter,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                           KeysType::const_iterator              keysToParse,</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                           KeysType::const_iterator              keysEnd);</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ValueType&gt;</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keyword">static</span> ValueType getValue(rapidjson::Value::ConstMemberIterator iter);</div>
@@ -162,15 +162,15 @@ $(function() {
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> ValueType&gt;</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="keyword">inline</span> KafkaMetrics::ResultsType&lt;ValueType&gt;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;KafkaMetrics::get(<span class="keyword">const</span> KeysType&amp; keys)</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;{</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;KafkaMetrics::get(<span class="keyword">const</span> KeysType&amp; keys)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="keyword"></span>{</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="keywordflow">if</span> (keys.empty())             <span class="keywordflow">throw</span> std::invalid_argument(<span class="stringliteral">&quot;Input keys cannot be empty!&quot;</span>);</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    <span class="keywordflow">if</span> (keys.front() == WILDCARD) <span class="keywordflow">throw</span> std::invalid_argument(<span class="stringliteral">&quot;The first key cannot be wildcard!&quot;</span>);</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="keywordflow">if</span> (keys.back() == WILDCARD)  <span class="keywordflow">throw</span> std::invalid_argument(<span class="stringliteral">&quot;The last key cannot be wildcard!&quot;</span>);</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160; </div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    ResultsType&lt;ValueType&gt; results;</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160; </div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    rapidjson::Value::ConstMemberIterator iter = _jsonDoc.FindMember(keys.front().c_str());</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keyword">const</span> rapidjson::Value::ConstMemberIterator iter = _jsonDoc.FindMember(keys.front().c_str());</div>
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="keywordflow">if</span> (iter == _jsonDoc.MemberEnd()) <span class="keywordflow">return</span> results;</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keywordflow">if</span> (keys.size() == 1)</div>
@@ -214,7 +214,7 @@ $(function() {
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    }</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    <span class="keywordflow">else</span></div>
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    {</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;        rapidjson::Value::ConstMemberIterator subIter = iter-&gt;value.FindMember(key.c_str());</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;        <span class="keyword">const</span> rapidjson::Value::ConstMemberIterator subIter = iter-&gt;value.FindMember(key.c_str());</div>
 <div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        <span class="keywordflow">if</span> (subIter == iter-&gt;value.MemberEnd()) <span class="keywordflow">return</span>;</div>
 <div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160; </div>
 <div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;        <span class="keywordflow">if</span> (!isTheEnd)</div>
@@ -261,14 +261,14 @@ $(function() {
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;} <span class="comment">// end of KAFKA_API</span></div>
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160; </div>
 <div class="ttc" id="aclassKAFKA__API_1_1KafkaMetrics_html"><div class="ttname"><a href="classKAFKA__API_1_1KafkaMetrics.html">KAFKA_API::KafkaMetrics</a></div><div class="ttdoc">Helps to parse the metrics string with JSON format.</div><div class="ttdef"><b>Definition:</b> KafkaMetrics.h:25</div></div>
-<div class="ttc" id="aclassKAFKA__API_1_1KafkaMetrics_html_a3e875fc80bd62e44e10af079f4aaa84e"><div class="ttname"><a href="classKAFKA__API_1_1KafkaMetrics.html#a3e875fc80bd62e44e10af079f4aaa84e">KAFKA_API::KafkaMetrics::getString</a></div><div class="ttdeci">ResultsType&lt; std::string &gt; getString(const KeysType &amp;keys)</div><div class="ttdoc">Get string value(s) for the specified metrics.</div><div class="ttdef"><b>Definition:</b> KafkaMetrics.h:52</div></div>
+<div class="ttc" id="aclassKAFKA__API_1_1KafkaMetrics_html_a173fbf3abd6153dcfc4b268e9ba29140"><div class="ttname"><a href="classKAFKA__API_1_1KafkaMetrics.html#a173fbf3abd6153dcfc4b268e9ba29140">KAFKA_API::KafkaMetrics::getString</a></div><div class="ttdeci">ResultsType&lt; std::string &gt; getString(const KeysType &amp;keys) const</div><div class="ttdoc">Get string value(s) for the specified metrics.</div><div class="ttdef"><b>Definition:</b> KafkaMetrics.h:52</div></div>
+<div class="ttc" id="aclassKAFKA__API_1_1KafkaMetrics_html_a5e8d026474b61e9004675c5499d4d996"><div class="ttname"><a href="classKAFKA__API_1_1KafkaMetrics.html#a5e8d026474b61e9004675c5499d4d996">KAFKA_API::KafkaMetrics::getInt</a></div><div class="ttdeci">ResultsType&lt; std::int64_t &gt; getInt(const KeysType &amp;keys) const</div><div class="ttdoc">Get integer value(s) for the specified metrics.</div><div class="ttdef"><b>Definition:</b> KafkaMetrics.h:46</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1KafkaMetrics_html_a762d91a9aa3d23e2f2ca1644854daffe"><div class="ttname"><a href="classKAFKA__API_1_1KafkaMetrics.html#a762d91a9aa3d23e2f2ca1644854daffe">KAFKA_API::KafkaMetrics::KafkaMetrics</a></div><div class="ttdeci">KafkaMetrics(std::string jsonMetrics)</div><div class="ttdoc">Initilize with the metrics string.</div><div class="ttdef"><b>Definition:</b> KafkaMetrics.h:82</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1KafkaMetrics_html_a977c1f4194b7773c1a8155489d0d3929"><div class="ttname"><a href="classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929">KAFKA_API::KafkaMetrics::ResultsType</a></div><div class="ttdeci">std::vector&lt; std::pair&lt; KeysType, ValueType &gt; &gt; ResultsType</div><div class="ttdoc">The matched keys (for wildcards) and the value.</div><div class="ttdef"><b>Definition:</b> KafkaMetrics.h:40</div></div>
-<div class="ttc" id="aclassKAFKA__API_1_1KafkaMetrics_html_ad0c3ecfb1c9facd0fd4092a9cad48b69"><div class="ttname"><a href="classKAFKA__API_1_1KafkaMetrics.html#ad0c3ecfb1c9facd0fd4092a9cad48b69">KAFKA_API::KafkaMetrics::getInt</a></div><div class="ttdeci">ResultsType&lt; std::int64_t &gt; getInt(const KeysType &amp;keys)</div><div class="ttdoc">Get integer value(s) for the specified metrics.</div><div class="ttdef"><b>Definition:</b> KafkaMetrics.h:46</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Oct 12 2022 03:05:54 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Tue Nov 8 2022 01:44:07 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

@@ -136,9 +136,9 @@ $(function() {
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keywordflow">for</span> (std::size_t i = 0; i &lt; topicCount; ++i)</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    {</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        <span class="keyword">const</span> rd_kafka_topic_result_t* topicResult = topicResults[i];</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <span class="keywordflow">if</span> (rd_kafka_resp_err_t topicError = rd_kafka_topic_result_error(topicResult))</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <span class="keywordflow">if</span> (<span class="keyword">const</span> rd_kafka_resp_err_t topicError = rd_kafka_topic_result_error(topicResult))</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        {</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;            std::string detailedMsg = <span class="stringliteral">&quot;topic[&quot;</span> + std::string(rd_kafka_topic_result_name(topicResult)) + <span class="stringliteral">&quot;] with error[&quot;</span> + rd_kafka_topic_result_error_string(topicResult) + <span class="stringliteral">&quot;]&quot;</span>;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;            <span class="keyword">const</span> std::string detailedMsg = <span class="stringliteral">&quot;topic[&quot;</span> + std::string(rd_kafka_topic_result_name(topicResult)) + <span class="stringliteral">&quot;] with error[&quot;</span> + rd_kafka_topic_result_error_string(topicResult) + <span class="stringliteral">&quot;]&quot;</span>;</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;            errors.emplace_back(topicError, detailedMsg);</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        }</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    }</div>
@@ -152,9 +152,9 @@ $(function() {
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; (partitionResults ? partitionResults-&gt;cnt : 0); ++i)</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    {</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keywordflow">if</span> (rd_kafka_resp_err_t partitionError = partitionResults-&gt;elems[i].err)</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keywordflow">if</span> (<span class="keyword">const</span> rd_kafka_resp_err_t partitionError = partitionResults-&gt;elems[i].err)</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        {</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;            std::string detailedMsg = <span class="stringliteral">&quot;topic-partition[&quot;</span> + std::string(partitionResults-&gt;elems[i].topic) + <span class="stringliteral">&quot;-&quot;</span> + std::to_string(partitionResults-&gt;elems[i].partition) + <span class="stringliteral">&quot;] with error[&quot;</span> + rd_kafka_err2str(partitionError) + <span class="stringliteral">&quot;]&quot;</span>;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;            <span class="keyword">const</span> std::string detailedMsg = <span class="stringliteral">&quot;topic-partition[&quot;</span> + std::string(partitionResults-&gt;elems[i].topic) + <span class="stringliteral">&quot;-&quot;</span> + std::to_string(partitionResults-&gt;elems[i].partition) + <span class="stringliteral">&quot;] with error[&quot;</span> + rd_kafka_err2str(partitionError) + <span class="stringliteral">&quot;]&quot;</span>;</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;            errors.emplace_back(partitionError, detailedMsg);</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        }</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    }</div>
@@ -201,10 +201,10 @@ $(function() {
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; conf: topicConfig.<a class="code" href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">map</a>())</div>
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        {</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            rd_kafka_resp_err_t err = rd_kafka_NewTopic_set_config(rkNewTopics.back().get(), conf.first.c_str(), conf.second.c_str());</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            <span class="keyword">const</span> rd_kafka_resp_err_t err = rd_kafka_NewTopic_set_config(rkNewTopics.back().get(), conf.first.c_str(), conf.second.c_str());</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;            <span class="keywordflow">if</span> (err != RD_KAFKA_RESP_ERR_NO_ERROR)</div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            {</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                std::string errMsg = <span class="stringliteral">&quot;Invalid config[&quot;</span> + conf.first + <span class="stringliteral">&quot;=&quot;</span> + conf.second + <span class="stringliteral">&quot;]&quot;</span>;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                <span class="keyword">const</span> std::string errMsg = <span class="stringliteral">&quot;Invalid config[&quot;</span> + conf.first + <span class="stringliteral">&quot;=&quot;</span> + conf.second + <span class="stringliteral">&quot;]&quot;</span>;</div>
 <div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                KAFKA_API_DO_LOG(Log::Level::Err, errMsg.c_str());</div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;                <span class="keywordflow">return</span> <a class="code" href="structKAFKA__API_1_1clients_1_1admin_1_1CreateTopicsResult.html">admin::CreateTopicsResult</a>(<a class="code" href="classKAFKA__API_1_1Error.html">Error</a>{RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg});</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;            }</div>
@@ -242,7 +242,7 @@ $(function() {
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    std::list&lt;Error&gt; errors;</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160; </div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordflow">if</span> (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordflow">if</span> (<span class="keyword">const</span> rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))</div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    {</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        errors.emplace_back(respErr, rd_kafka_event_error_string(rk_ev.get()));</div>
 <div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    }</div>
@@ -315,7 +315,7 @@ $(function() {
 <div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160; </div>
 <div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    std::list&lt;Error&gt; errors;</div>
 <div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160; </div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;    <span class="keywordflow">if</span> (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;    <span class="keywordflow">if</span> (<span class="keyword">const</span> rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))</div>
 <div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;    {</div>
 <div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;        errors.emplace_back(respErr, rd_kafka_event_error_string(rk_ev.get()));</div>
 <div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;    }</div>
@@ -334,7 +334,7 @@ $(function() {
 <div class="line"><a name="l00281"></a><span class="lineno"><a class="line" href="classKAFKA__API_1_1clients_1_1AdminClient.html#a9246d506d3309c47fc5a78909dfccdd0">  281</a></span>&#160;<a class="code" href="classKAFKA__API_1_1clients_1_1AdminClient.html#a9246d506d3309c47fc5a78909dfccdd0">AdminClient::listTopics</a>(std::chrono::milliseconds timeout)</div>
 <div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;{</div>
 <div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    <span class="keyword">const</span> rd_kafka_metadata_t* rk_metadata = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;    rd_kafka_resp_err_t err = rd_kafka_metadata(getClientHandle(), <span class="keyword">true</span>, <span class="keyword">nullptr</span>, &amp;rk_metadata, convertMsDurationToInt(timeout));</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;    <span class="keyword">const</span> rd_kafka_resp_err_t err = rd_kafka_metadata(getClientHandle(), <span class="keyword">true</span>, <span class="keyword">nullptr</span>, &amp;rk_metadata, convertMsDurationToInt(timeout));</div>
 <div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    <span class="keyword">auto</span> guard = rd_kafka_metadata_unique_ptr(rk_metadata);</div>
 <div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160; </div>
 <div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    <span class="keywordflow">if</span> (err != RD_KAFKA_RESP_ERR_NO_ERROR)</div>
@@ -356,7 +356,7 @@ $(function() {
 <div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;{</div>
 <div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;    <span class="keyword">auto</span> rk_queue = rd_kafka_queue_unique_ptr(rd_kafka_queue_new(getClientHandle()));</div>
 <div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160; </div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;    rd_kafka_DeleteRecords_unique_ptr rkDeleteRecords(rd_kafka_DeleteRecords_new(createRkTopicPartitionList(topicPartitionOffsets)));</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;    <span class="keyword">const</span> rd_kafka_DeleteRecords_unique_ptr rkDeleteRecords(rd_kafka_DeleteRecords_new(createRkTopicPartitionList(topicPartitionOffsets)));</div>
 <div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;    std::array&lt;rd_kafka_DeleteRecords_t*, 1&gt; rk_del_records{rkDeleteRecords.get()};</div>
 <div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160; </div>
 <div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    rd_kafka_DeleteRecords(getClientHandle(), rk_del_records.data(), rk_del_records.size(), <span class="keyword">nullptr</span>, rk_queue.get());</div>
@@ -384,7 +384,7 @@ $(function() {
 <div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160; </div>
 <div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;    std::list&lt;Error&gt; errors;</div>
 <div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160; </div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;    <span class="keywordflow">if</span> (rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;    <span class="keywordflow">if</span> (<span class="keyword">const</span> rd_kafka_resp_err_t respErr = rd_kafka_event_error(rk_ev.get()))</div>
 <div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;    {</div>
 <div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;        errors.emplace_back(respErr, rd_kafka_event_error_string(rk_ev.get()));</div>
 <div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;    }</div>
@@ -416,7 +416,7 @@ $(function() {
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Oct 12 2022 03:05:54 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Tue Nov 8 2022 01:44:07 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

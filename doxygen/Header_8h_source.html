@@ -92,7 +92,7 @@ $(function() {
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
 <div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="structKAFKA__API_1_1Header.html#a675d60fe3cbcd15a6fa2b0ce84213c17">   28</a></span>&#160;    std::string <a class="code" href="structKAFKA__API_1_1Header.html#a675d60fe3cbcd15a6fa2b0ce84213c17">toString</a>()<span class="keyword"> const</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">    </span>{</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        <span class="keywordflow">return</span> key + <span class="stringliteral">&quot;:&quot;</span> + value.toString();</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        <span class="keywordflow">return</span> (key.empty() ? <span class="stringliteral">&quot;[null]&quot;</span> : key) + <span class="stringliteral">&quot;:&quot;</span> + value.toString();</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    }</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    Key   key;</div>
@@ -124,7 +124,7 @@ $(function() {
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Oct 12 2022 03:05:54 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Tue Nov 8 2022 01:44:07 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

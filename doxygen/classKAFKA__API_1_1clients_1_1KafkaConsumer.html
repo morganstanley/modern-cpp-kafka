@@ -145,12 +145,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>seekToEnd</b> (std::c
 Offset&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#ae27d9234efe3bf99b36b62b413fcebb8">position</a> (const TopicPartition &amp;topicPartition) const</td></tr>
 <tr class="memdesc:ae27d9234efe3bf99b36b62b413fcebb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the offset of the next record that will be fetched (if a record with that offset exists). <br /></td></tr>
 <tr class="separator:ae27d9234efe3bf99b36b62b413fcebb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a491d4bf2a07d6c43add3abc4a3de39ad"><td class="memItemLeft" align="right" valign="top">std::map&lt; TopicPartition, Offset &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a491d4bf2a07d6c43add3abc4a3de39ad">beginningOffsets</a> (const TopicPartitions &amp;topicPartitions) const</td></tr>
-<tr class="memdesc:a491d4bf2a07d6c43add3abc4a3de39ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first offset for the given partitions.  <a href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a491d4bf2a07d6c43add3abc4a3de39ad">More...</a><br /></td></tr>
-<tr class="separator:a491d4bf2a07d6c43add3abc4a3de39ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b883d6e579965f70fc380b88445946a"><td class="memItemLeft" align="right" valign="top">std::map&lt; TopicPartition, Offset &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a6b883d6e579965f70fc380b88445946a">endOffsets</a> (const TopicPartitions &amp;topicPartitions) const</td></tr>
-<tr class="memdesc:a6b883d6e579965f70fc380b88445946a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the last offset for the given partitions.  <a href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a6b883d6e579965f70fc380b88445946a">More...</a><br /></td></tr>
-<tr class="separator:a6b883d6e579965f70fc380b88445946a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43051fb63c57514210c112bc3a2f7acd"><td class="memItemLeft" align="right" valign="top">std::map&lt; TopicPartition, Offset &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a43051fb63c57514210c112bc3a2f7acd">beginningOffsets</a> (const TopicPartitions &amp;topicPartitions, std::chrono::milliseconds timeout=std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const</td></tr>
+<tr class="memdesc:a43051fb63c57514210c112bc3a2f7acd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first offset for the given partitions.  <a href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a43051fb63c57514210c112bc3a2f7acd">More...</a><br /></td></tr>
+<tr class="separator:a43051fb63c57514210c112bc3a2f7acd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a133d0ffeb6c1438cd44f0a37c42121b7"><td class="memItemLeft" align="right" valign="top">std::map&lt; TopicPartition, Offset &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a133d0ffeb6c1438cd44f0a37c42121b7">endOffsets</a> (const TopicPartitions &amp;topicPartitions, std::chrono::milliseconds timeout=std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const</td></tr>
+<tr class="memdesc:a133d0ffeb6c1438cd44f0a37c42121b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the last offset for the given partitions.  <a href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a133d0ffeb6c1438cd44f0a37c42121b7">More...</a><br /></td></tr>
+<tr class="separator:a133d0ffeb6c1438cd44f0a37c42121b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a149b50baa7a35bbfddadb1b3c191eaab"><td class="memItemLeft" align="right" valign="top">std::map&lt; TopicPartition, Offset &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a149b50baa7a35bbfddadb1b3c191eaab">offsetsForTime</a> (const TopicPartitions &amp;topicPartitions, std::chrono::time_point&lt; std::chrono::system_clock &gt; timepoint, std::chrono::milliseconds timeout=std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const</td></tr>
 <tr class="memdesc:a149b50baa7a35bbfddadb1b3c191eaab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the offsets for the given partitions by time-point.  <a href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a149b50baa7a35bbfddadb1b3c191eaab">More...</a><br /></td></tr>
 <tr class="separator:a149b50baa7a35bbfddadb1b3c191eaab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -370,8 +370,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 
 </div>
 </div>
-<a id="a491d4bf2a07d6c43add3abc4a3de39ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a491d4bf2a07d6c43add3abc4a3de39ad">&#9670;&nbsp;</a></span>beginningOffsets()</h2>
+<a id="a43051fb63c57514210c112bc3a2f7acd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43051fb63c57514210c112bc3a2f7acd">&#9670;&nbsp;</a></span>beginningOffsets()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -383,8 +383,18 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
           <td class="memname">std::map&lt;TopicPartition, Offset&gt; KAFKA_API::clients::KafkaConsumer::beginningOffsets </td>
           <td>(</td>
           <td class="paramtype">const TopicPartitions &amp;&#160;</td>
-          <td class="paramname"><em>topicPartitions</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>topicPartitions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::chrono::milliseconds&#160;</td>
+          <td class="paramname"><em>timeout</em> = <code>std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -500,8 +510,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 
 </div>
 </div>
-<a id="a6b883d6e579965f70fc380b88445946a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b883d6e579965f70fc380b88445946a">&#9670;&nbsp;</a></span>endOffsets()</h2>
+<a id="a133d0ffeb6c1438cd44f0a37c42121b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a133d0ffeb6c1438cd44f0a37c42121b7">&#9670;&nbsp;</a></span>endOffsets()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -513,8 +523,18 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
           <td class="memname">std::map&lt;TopicPartition, Offset&gt; KAFKA_API::clients::KafkaConsumer::endOffsets </td>
           <td>(</td>
           <td class="paramtype">const TopicPartitions &amp;&#160;</td>
-          <td class="paramname"><em>topicPartitions</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>topicPartitions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::chrono::milliseconds&#160;</td>
+          <td class="paramname"><em>timeout</em> = <code>std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -983,7 +1003,7 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Oct 12 2022 03:05:54 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Tue Nov 8 2022 01:44:07 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
