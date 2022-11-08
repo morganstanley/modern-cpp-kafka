@@ -329,13 +329,13 @@ TEST(KafkaMetrics, FailureCases)
     // Try invalid format for metrics
     try
     {
-        kafka::KafkaMetrics invalidMetrics("{invalid: 3}");
+        const kafka::KafkaMetrics invalidMetrics("{invalid: 3}");
         EXPECT_FALSE(true);
     }
     catch (const std::runtime_error& e) {}
     catch (...) { EXPECT_FALSE(true); }
 
-    kafka::KafkaMetrics metrics(consumerMetricsSample);
+    const kafka::KafkaMetrics metrics(consumerMetricsSample);
 
     // Try invalid inputs (begin with "*")
     try
@@ -373,7 +373,7 @@ TEST(KafkaMetrics, FailureCases)
 
 TEST(KafkaMetrics, ParseConsumerMetrics)
 {
-    kafka::KafkaMetrics metrics(consumerMetricsSample);
+    const kafka::KafkaMetrics metrics(consumerMetricsSample);
 
     {
         auto results = metrics.getString({"type"});
@@ -459,7 +459,7 @@ TEST(KafkaMetrics, ParseConsumerMetrics)
 
 TEST(KafkaMetrics, ParseProducerMetrics)
 {
-    kafka::KafkaMetrics metrics(producerMetricsSample);
+    const kafka::KafkaMetrics metrics(producerMetricsSample);
 
     // outbuf_latency: Internal request queue latency in microseconds.
     //                 This is the time between a request is enqueued on the transmit (outbuf) queue and the time the request is written to the TCP socket.
@@ -511,7 +511,7 @@ TEST(KafkaMetrics, Perf)
 
     auto testParse1000Get1000 = [sample = consumerMetricsSample]() {
         for (int i = 0; i < 1000; ++i) {
-            kafka::KafkaMetrics metrics(sample);
+            const kafka::KafkaMetrics metrics(sample);
 
             auto results = metrics.getInt({"topics", "*", "*", "*", "consumer_lag"});
             EXPECT_EQ(2, results.size());
@@ -519,7 +519,7 @@ TEST(KafkaMetrics, Perf)
     };
 
     auto testParse1Get1000 = [sample = consumerMetricsSample]() {
-        kafka::KafkaMetrics metrics(sample);
+        const kafka::KafkaMetrics metrics(sample);
 
         for (int i = 0; i < 1000; ++i) {
             auto results = metrics.getInt({"topics", "*", "*", "*", "consumer_lag"});

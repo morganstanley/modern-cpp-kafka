@@ -59,7 +59,7 @@ TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
             EXPECT_EQ(std::get<1>(messages[i]), records[i].key().toString());
             EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
 
-            kafka::Offset expectedOffset = records[i].offset() + 1;
+            const kafka::Offset expectedOffset = records[i].offset() + 1;
             consumer.commitAsync(records[i],
                                  [expectedOffset, topic, partition, &commitCbCount](const kafka::TopicPartitionOffsets& tpos, const kafka::Error& error){
                                      std::cout << "[" << kafka::utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], got result[" << error.message() << "], tpos[" << kafka::toString(tpos) << "]" << std::endl;
@@ -137,7 +137,7 @@ TEST(KafkaConsumer, DISABLED_CommitOffsetWhileBrokersStop)
                 EXPECT_EQ(std::get<2>(messages[i]), records[i].value().toString());
 
                 // Try to commit the offsets
-                kafka::Offset expectedOffset = records[i].offset() + 1;
+                const kafka::Offset expectedOffset = records[i].offset() + 1;
                 consumer.commitAsync(records[i],
                                      [expectedOffset, topic, partition, &commitCbCount](const kafka::TopicPartitionOffsets& tpos, const kafka::Error& error){
                                          std::cout << "[" << kafka::utility::getCurrentTime() << "] offset commit callback for offset[" << expectedOffset << "], result[" << error.message() << "], tpos[" << kafka::toString(tpos) << "]" << std::endl;

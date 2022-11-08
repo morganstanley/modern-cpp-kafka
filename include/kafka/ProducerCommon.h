@@ -35,9 +35,10 @@ public:
     {
         if (this != &another)
         {
+            const auto offsetOption = another.offset();
             _cachedInfo = std::make_unique<CachedInfo>(another.topic(),
                                                        another.partition(),
-                                                       another.offset() ? *another.offset() : RD_KAFKA_OFFSET_INVALID,
+                                                       offsetOption ? *offsetOption : RD_KAFKA_OFFSET_INVALID,
                                                        another.keySize(),
                                                        another.valueSize(),
                                                        another.timestamp(),
@@ -121,8 +122,11 @@ public:
 
     std::string                  toString() const
     {
-        return topic() + "-" + std::to_string(partition()) + "@" + (offset() ? std::to_string(*offset()) : "NA")
-               + (recordId() ? (":id[" + std::to_string(*recordId()) + "],") : ",")
+        const auto offsetOption   = offset();
+        const auto recordIdOption = recordId();
+
+        return topic() + "-" + std::to_string(partition()) + "@" + (offsetOption ? std::to_string(*offsetOption) : "NA")
+               + (recordIdOption ? (":id[" + std::to_string(*recordIdOption) + "],") : ",")
                + timestamp().toString() + "," + persistedStatusString();
     }
 
@@ -130,13 +134,13 @@ private:
     static Timestamp getMsgTimestamp(const rd_kafka_message_t* rkmsg)
     {
         rd_kafka_timestamp_type_t tstype{};
-        Timestamp::Value tsValue = rd_kafka_message_timestamp(rkmsg, &tstype);
+        const Timestamp::Value tsValue = rd_kafka_message_timestamp(rkmsg, &tstype);
         return {tsValue, tstype};
     }
 
     static PersistedStatus getMsgPersistedStatus(const rd_kafka_message_t* rkmsg)
     {
-        rd_kafka_msg_status_t status = rd_kafka_message_status(rkmsg);
+        const rd_kafka_msg_status_t status = rd_kafka_message_status(rkmsg);
         return status == RD_KAFKA_MSG_STATUS_NOT_PERSISTED ? PersistedStatus::Not : (status == RD_KAFKA_MSG_STATUS_PERSISTED ? PersistedStatus::Done : PersistedStatus::Possibly);
     }
 

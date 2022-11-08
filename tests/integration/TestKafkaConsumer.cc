@@ -1016,7 +1016,7 @@ TEST(KafkaConsumer, RebalancePartitionsAssign)
     std::cout << "[" << kafka::utility::getCurrentTime() << "] Second consumer closed" << std::endl;
 
     // Start a producer to send some messages
-    std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
+    const std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
         {kafka::Headers{}, "key1", "value1"},
         {kafka::Headers{}, "key2", "value2"},
         {kafka::Headers{}, "key3", "value3"},
@@ -1083,9 +1083,9 @@ TEST(KafkaConsumer, ThreadCount)
             kafka::clients::Interceptors interceptors;
             interceptors.onThreadStart(threadStartCb).onThreadExit(threadExitCb);
 
-            kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig(),
-                                                   eventsPollingOption,
-                                                   interceptors);
+            const kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig(),
+                                                         eventsPollingOption,
+                                                         interceptors);
 
             std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
             std::cout << "[" << kafka::utility::getCurrentTime() << "] librdkafka thread cnt[" << kafka::utility::getLibRdKafkaThreadCount() << "]" << std::endl;
@@ -1275,7 +1275,7 @@ TEST(KafkaConsumer, WrongOperation_AssignThenSubscribe)
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Assign topic-partitions
-    kafka::TopicPartitions tps{{topic, partition}};
+    const kafka::TopicPartitions tps{{topic, partition}};
     consumer.assign(tps);
 
     EXPECT_EQ(tps, consumer.assignment());
@@ -1310,10 +1310,10 @@ TEST(KafkaClient, FetchBrokerMetadata)
     auto brokerMetadata = consumer.fetchBrokerMetadata(topic);
     ASSERT_TRUE(brokerMetadata);
 
-    std::cout << "[" << kafka::utility::getCurrentTime() << "] Brokers' metadata: " << brokerMetadata->toString() << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] Brokers' metadata: " << brokerMetadata->toString() << std::endl; // NOLINT
 
-    EXPECT_EQ(topic, brokerMetadata->topic());
-    EXPECT_EQ(assignment.size(), brokerMetadata->partitions().size());
+    EXPECT_EQ(topic, brokerMetadata->topic());                          // NOLINT
+    EXPECT_EQ(assignment.size(), brokerMetadata->partitions().size());  // NOLINT
 
     consumer.close();
 }
@@ -1570,8 +1570,10 @@ TEST(KafkaConsumer, PauseStillWorksAfterRebalance)
     std::promise<void> p;
     auto fu = p.get_future();
     // Anther consumer with the same group.id
-    const auto props2 = props1.put(kafka::clients::consumer::Config::GROUP_ID, *consumer1.getProperty(kafka::clients::consumer::Config::GROUP_ID));
-    KafkaTestUtility::JoiningThread consumer2Thread(
+    const auto groupIdOption = consumer1.getProperty(kafka::clients::consumer::Config::GROUP_ID);
+    ASSERT_TRUE(groupIdOption);
+    const auto props2 = props1.put(kafka::clients::consumer::Config::GROUP_ID, *groupIdOption);     // NOLINT
+    const KafkaTestUtility::JoiningThread consumer2Thread(
         [props2, topic1, topic2, &p]() {
             kafka::clients::KafkaConsumer consumer2(props2);
             consumer2.subscribe({topic1, topic2});
@@ -1593,7 +1595,7 @@ TEST(KafkaConsumer, PauseStillWorksAfterRebalance)
     fu.wait();
 
     // Produce a message
-    std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
+    const std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
         {kafka::Headers{}, "key1", "value1"}
     };
     KafkaTestUtility::ProduceMessages(topic1, 0, messages);
@@ -1676,7 +1678,7 @@ TEST(KafkaConsumer, OffsetsForTime)
 
     std::cout << "Try with no subcription:" << std::endl;
     {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        const kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // Here we doesn't subsribe to topic1 or topic2 (the result is undefined)
         for (std::size_t i = 0; i < MESSAGES_NUM; ++i)
@@ -1701,7 +1703,7 @@ TEST(KafkaConsumer, OffsetsForTime)
 
     std::cout << "Try with all invalid topic-partitions: (exception caught)" << std::endl;
     {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+        const kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         const auto timepoint = checkPoints[0];
 
@@ -1878,7 +1880,7 @@ TEST(KafkaConsumer, CreateTopicAfterSubscribe)
                               });
 
     // The topic would be created after 5 seconds
-    KafkaTestUtility::JoiningThread consumer1Thread(createTopicAfterSeconds, 5);
+    const KafkaTestUtility::JoiningThread consumer1Thread(createTopicAfterSeconds, 5);
 
     std::cout << "[" << kafka::utility::getCurrentTime() << "] Consumer will subscribe" << std::endl;
     EXPECT_KAFKA_NO_THROW(consumer.subscribe({topic}));
@@ -1896,7 +1898,7 @@ TEST(KafkaConsumer, CooperativeRebalance)
     const std::string topicPrefix  = kafka::utility::getRandomString();
     for (int i = 0; i < NUM_TOPICS; i++)
     {
-        kafka::Topic topic = topicPrefix + std::to_string(i);
+        const kafka::Topic topic = topicPrefix + std::to_string(i);
         KafkaTestUtility::CreateKafkaTopic(topic, NUM_PARTITIONS, 1);
     }
 
@@ -1914,10 +1916,10 @@ TEST(KafkaConsumer, CooperativeRebalance)
             }
         };
 
-        kafka::Properties props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                                     .put(kafka::clients::consumer::Config::CLIENT_ID, clientId)
-                                     .put(kafka::clients::consumer::Config::GROUP_ID,  groupId)
-                                     .put(kafka::clients::consumer::Config::PARTITION_ASSIGNMENT_STRATEGY, "cooperative-sticky");
+        const kafka::Properties props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                                         .put(kafka::clients::consumer::Config::CLIENT_ID, clientId)
+                                         .put(kafka::clients::consumer::Config::GROUP_ID,  groupId)
+                                         .put(kafka::clients::consumer::Config::PARTITION_ASSIGNMENT_STRATEGY, "cooperative-sticky");
 
         KafkaTestUtility::PrintDividingLine(clientId + " is starting");
 
@@ -1932,19 +1934,19 @@ TEST(KafkaConsumer, CooperativeRebalance)
         KafkaTestUtility::PrintDividingLine(clientId + " is quitting");
     };
 
-    KafkaTestUtility::JoiningThread consumer1Thread(startConsumer, "consumer1", 10);
+    const KafkaTestUtility::JoiningThread consumer1Thread(startConsumer, "consumer1", 10);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    KafkaTestUtility::JoiningThread consumer2Thread(startConsumer, "consumer2", 10);
+    const KafkaTestUtility::JoiningThread consumer2Thread(startConsumer, "consumer2", 10);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    KafkaTestUtility::JoiningThread consumer3Thread(startConsumer, "consumer3", 10);
+    const KafkaTestUtility::JoiningThread consumer3Thread(startConsumer, "consumer3", 10);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    KafkaTestUtility::JoiningThread consumer4Thread(startConsumer, "consumer4", 10);
+    const KafkaTestUtility::JoiningThread consumer4Thread(startConsumer, "consumer4", 10);
 }
 
 TEST(KafkaConsumer, FetchBrokerMetadataTriggersRejoin)
@@ -1965,7 +1967,7 @@ TEST(KafkaConsumer, FetchBrokerMetadataTriggersRejoin)
         }
     };
 
-    kafka::Properties props = KafkaTestUtility::GetKafkaClientCommonConfig()
+    const kafka::Properties props = KafkaTestUtility::GetKafkaClientCommonConfig()
                                 .put(kafka::clients::consumer::Config::PARTITION_ASSIGNMENT_STRATEGY, "cooperative-sticky");
 
     kafka::clients::KafkaConsumer consumer(props);
@@ -1982,7 +1984,7 @@ TEST(KafkaConsumer, FetchBrokerMetadataTriggersRejoin)
     // Note: here the Metadata response information would trigger a re-join as well
     auto metadata2 = consumer.fetchBrokerMetadata(topic2);
     ASSERT_TRUE(metadata2);
-    std::cout << "[" << kafka::utility::getCurrentTime() << "] brokerMetadata for topic[" << topic2 << "]: " << metadata2->toString() << std::endl;
+    std::cout << "[" << kafka::utility::getCurrentTime() << "] brokerMetadata for topic[" << topic2 << "]: " << metadata2->toString() << std::endl; // NOLINT
 
     consumer.poll(std::chrono::seconds(1));
 

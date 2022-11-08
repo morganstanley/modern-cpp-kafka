@@ -70,7 +70,7 @@ inline std::string toString(rd_kafka_thread_type_t threadType)
 inline TopicPartitionOffsets getTopicPartitionOffsets(const rd_kafka_topic_partition_list_t* rk_tpos)
 {
     TopicPartitionOffsets ret;
-    int count = rk_tpos ? rk_tpos->cnt : 0;
+    const int count = rk_tpos ? rk_tpos->cnt : 0;
     for (int i = 0; i < count; ++i)
     {
         const Topic     t = rk_tpos->elems[i].topic;

@@ -24,7 +24,21 @@ link_directories(${Boost_LIBRARY_DIRS})
 if (DEFINED ENV{GTEST_ROOT})
     set(GTEST_ROOT $ENV{GTEST_ROOT})
 else ()
-    set(GTEST_ROOT /usr/local)
+    if (EXISTS "/usr/local/include/gtest/gtest.h")
+        set(GTEST_ROOT /usr/local)
+    elseif (EXISTS "/opt/homebrew/include/gtest/gtest.h")
+        set(GTEST_ROOT /opt/homebrew)
+    endif ()
+endif ()
+
+if (NOT EXISTS "${GTEST_ROOT}/include/gtest/gtest.h")
+    message(FATAL_ERROR "Could not find headers for gtest!")
+endif ()
+
+if (NOT (EXISTS "${GTEST_ROOT}/lib/libgtest_main.a"
+         OR EXISTS "${GTEST_ROOT}/lib/libgtest_main.so"
+         OR EXISTS "${GTEST_ROOT}/lib/gtest_main.lib"))
+    message(FATAL_ERROR "Could not find library for gtest!")
 endif ()
 
 message(STATUS "googletest root directory: ${GTEST_ROOT}")

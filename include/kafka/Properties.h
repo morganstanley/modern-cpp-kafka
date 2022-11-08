@@ -80,7 +80,7 @@ public:
                           const std::string& value = kv.second;
 
                           static const std::regex reSensitiveKey(R"(.+\.password|.+\.username)");
-                          bool isSensitive = std::regex_match(key, reSensitiveKey);
+                          const bool isSensitive = std::regex_match(key, reSensitiveKey);
 
                           ret.append(ret.empty() ? "" : "|").append(key).append("=").append(isSensitive ? "*" : value);
                       });

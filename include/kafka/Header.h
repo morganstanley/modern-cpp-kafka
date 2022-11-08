@@ -27,7 +27,7 @@ struct Header
     */
     std::string toString() const
     {
-        return key + ":" + value.toString();
+        return (key.empty() ? "[null]" : key) + ":" + value.toString();
     }
 
     Key   key;

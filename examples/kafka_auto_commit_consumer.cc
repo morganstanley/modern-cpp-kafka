@@ -10,13 +10,13 @@ int main(int argc, char **argv)
         exit(argc == 1 ? 0 : 1); // NOLINT
     }
 
-    std::string brokers = argv[1];
-    kafka::Topic topic  = argv[2];
+    const std::string brokers = argv[1];
+    const kafka::Topic topic  = argv[2];
 
     try {
 
         // Create configuration object
-        kafka::Properties props ({
+        const kafka::Properties props ({
             {"bootstrap.servers",  brokers},
             {"enable.auto.commit", "true"}
         });

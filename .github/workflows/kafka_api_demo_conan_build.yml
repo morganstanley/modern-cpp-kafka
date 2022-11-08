@@ -20,10 +20,23 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    env:
+      OS_VERSION: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Prepare
+      - name: Prepare (non-windows)
+        if: ${{!contains(matrix.os, 'windows')}}
+        run: |
+          if [[ ${OS_VERSION} == 'macos'* ]]; then
+            brew install conan
+          else
+            pip3 install conan
+          fi
+
+      - name: Prepare (windows)
+        if: ${{contains(matrix.os, 'windows')}}
         run: |
           pip3 install conan
 

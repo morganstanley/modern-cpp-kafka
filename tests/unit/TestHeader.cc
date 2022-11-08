@@ -7,11 +7,16 @@
 
 TEST(Header, Basic)
 {
-    kafka::Header defaultHeader;
+    const kafka::Header defaultHeader;
 
-    std::string v = "v";
-    kafka::Header::Value value{v.c_str(), v.size()};
-    kafka::Header header("k", value);
+    EXPECT_EQ("", defaultHeader.key);
+    EXPECT_EQ(0, defaultHeader.value.size());
+    EXPECT_EQ(nullptr, defaultHeader.value.data());
+    EXPECT_EQ("[null]:[null]", defaultHeader.toString());
+
+    const std::string v = "v";
+    const kafka::Header header("k", kafka::Header::Value{v.c_str(), v.size()});
+
     EXPECT_EQ("k", header.key);
     EXPECT_EQ(v.c_str(), header.value.data());
     EXPECT_EQ(v.size(), header.value.size());
@@ -20,7 +25,7 @@ TEST(Header, Basic)
 
 TEST(Header, Headers)
 {
-    std::vector<std::pair<std::string, std::string>> kvs =
+    const std::vector<std::pair<std::string, std::string>> kvs =
     {
         {"k1", "v1"},
         {"k2", "v2"},

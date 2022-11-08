@@ -195,8 +195,8 @@ TEST(KafkaProducer, DefaultPartitioner)
     static constexpr int MSG_NUM = 20;
     for (int i = 0; i < MSG_NUM; ++i)
     {
-        std::string key   = "k" + std::to_string(i);
-        std::string value = "v" + std::to_string(i);
+        const std::string key   = "k" + std::to_string(i);
+        const std::string value = "v" + std::to_string(i);
 
         auto record = kafka::clients::producer::ProducerRecord(topic,
                                                                kafka::Key(key.c_str(), key.size()),
@@ -228,8 +228,8 @@ TEST(KafkaProducer, TryOtherPartitioners)
         static constexpr int MSG_NUM = 20;
         for (int i = 0; i < MSG_NUM; ++i)
         {
-            std::string key;
-            std::string value = "v" + std::to_string(i);
+            const std::string key;
+            const std::string value = "v" + std::to_string(i);
 
             auto record = kafka::clients::producer::ProducerRecord(topic,
                                                                    kafka::Key(key.c_str(), key.size()),
@@ -252,7 +252,7 @@ TEST(KafkaProducer, TryOtherPartitioners)
         props.put(kafka::clients::producer::Config::PARTITIONER, "invalid");
 
         // An exception would be thrown for invalid "partitioner" setting
-        EXPECT_KAFKA_THROW(kafka::clients::KafkaProducer producer(props), RD_KAFKA_RESP_ERR__INVALID_ARG);
+        EXPECT_KAFKA_THROW(const kafka::clients::KafkaProducer producer(props), RD_KAFKA_RESP_ERR__INVALID_ARG);
     }
 }
 
@@ -367,9 +367,9 @@ TEST(KafkaProducer, ThreadCount)
             kafka::clients::Interceptors interceptors;
             interceptors.onThreadStart(threadStartCb).onThreadExit(threadExitCb);
 
-            kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig(),
-                                                   eventsPollingOption,
-                                                   interceptors);
+            const kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig(),
+                                                         eventsPollingOption,
+                                                         interceptors);
 
             std::cout << "[" <<kafka::utility::getCurrentTime() << "] " << producer.name() << " started" << std::endl;
             std::cout << "[" <<kafka::utility::getCurrentTime() << "] librdkafka thread cnt[" << kafka::utility::getLibRdKafkaThreadCount() << "]" << std::endl;
@@ -414,7 +414,7 @@ TEST(KafkaProducer, MessageDeliveryCallback)
     std::set<kafka::clients::producer::ProducerRecord::Id> msgIdsSent;
 
     // Delivery callback
-    kafka::clients::producer::Callback drCallback =
+    const kafka::clients::producer::Callback drCallback =
         [&msgIdsSent, topic, partition](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
             std::cout << "[" <<kafka::utility::getCurrentTime() << "] kafka::clients::producer::Metadata: " << metadata.toString() << std::endl;
             EXPECT_FALSE(error);
@@ -464,7 +464,7 @@ TEST(KafkaProducer, DeliveryCallback_ManuallyPollEvents)
     std::set<kafka::clients::producer::ProducerRecord::Id> msgIdsSent;
 
     // Delivery callback
-    kafka::clients::producer::Callback drCallback = [&msgIdsSent, topic, partition, appThreadId = std::this_thread::get_id()]
+    const kafka::clients::producer::Callback drCallback = [&msgIdsSent, topic, partition, appThreadId = std::this_thread::get_id()]
         (const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
             std::cout << "[" <<kafka::utility::getCurrentTime() << "] kafka::clients::producer::Metadata: " << metadata.toString() << std::endl;
             EXPECT_FALSE(error);
@@ -515,7 +515,7 @@ TEST(KafkaProducer, NoBlockSendingWhileQueueIsFull_ManuallyPollEvents)
     const auto appThreadId = std::this_thread::get_id();
     int msgSentCnt  = 0;
 
-    kafka::clients::producer::Callback drCallback =
+    const kafka::clients::producer::Callback drCallback =
         [&msgSentCnt, appThreadId](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
             EXPECT_EQ(std::this_thread::get_id(), appThreadId); // It should be polled by the same thread
             EXPECT_FALSE(error);

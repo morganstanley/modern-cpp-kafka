@@ -16,8 +16,8 @@ TEST(Properties, Basic)
 
     // Fetch a property
     auto getBootstrapServers = props.getProperty("bootstrap.servers");
-    EXPECT_TRUE(getBootstrapServers);
-    EXPECT_EQ("127.0.0.1:9000,127.0.0.1:9001", *getBootstrapServers);
+    ASSERT_TRUE(getBootstrapServers);
+    EXPECT_EQ("127.0.0.1:9000,127.0.0.1:9001", *getBootstrapServers);   // NOLINT
 
     // Remove a property
     props.eraseProperty("bootstrap.servers");
@@ -48,7 +48,7 @@ TEST(Properties, ConsumerConfig)
 {
     using namespace kafka::clients::consumer;
 
-    Config props
+    const Config props
     {{
         { Config::BOOTSTRAP_SERVERS,    "127.0.0.1:9000,127.0.0.1:9001" },
         { Config::AUTO_OFFSET_RESET,    "earliest"                      },
@@ -62,7 +62,7 @@ TEST(Properties, ProducerConfig)
 {
     using namespace kafka::clients::producer;
 
-    Config props
+    const Config props
     {{
         { Config::BOOTSTRAP_SERVERS,  "127.0.0.1:9000,127.0.0.1:9001" },
         { Config::LINGER_MS,          "20"                            },
@@ -75,7 +75,7 @@ TEST(Properties, ProducerConfig)
 TEST(Properties, AdminClientConfig)
 {
     using namespace kafka::clients::admin;
-    Config props
+    const Config props
     {{
         { Config::BOOTSTRAP_SERVERS, "127.0.0.1:9000,127.0.0.1:9001" },
         { Config::SECURITY_PROTOCOL, "SASL_PLAINTEXT"                }
@@ -86,7 +86,7 @@ TEST(Properties, AdminClientConfig)
 
 TEST(Properties, SensitiveProperties)
 {
-    kafka::Properties props
+    const kafka::Properties props
     {{
         { "ssl.key.password",      "passwordA" },
         { "ssl.keystore.password", "passwordB" },

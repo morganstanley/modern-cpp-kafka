@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 
@@ -39,8 +40,9 @@ TEST(UnorderedOffsetCommitQueue, Functionality)
 
     queue.ackOffset(1);
     auto offset = queue.popOffsetToCommit();
-    EXPECT_EQ(*offset, queue.lastPoppedOffset());
-    EXPECT_EQ(3 + 1, *offset);
+    ASSERT_TRUE(offset.has_value());
+    EXPECT_EQ(*offset, queue.lastPoppedOffset()); // NOLINT
+    EXPECT_EQ(3 + 1, *offset);                    // NOLINT
 
     // No new offset to commit
     offset = queue.popOffsetToCommit();
@@ -48,7 +50,8 @@ TEST(UnorderedOffsetCommitQueue, Functionality)
 
     queue.ackOffset(4);
     offset = queue.popOffsetToCommit();
-    EXPECT_EQ(5 + 1, *offset);
+    ASSERT_TRUE(offset);
+    EXPECT_EQ(5 + 1, *offset);                    // NOLINT
 
     queue.ackOffset(7);
     offset = queue.popOffsetToCommit();
@@ -56,16 +59,19 @@ TEST(UnorderedOffsetCommitQueue, Functionality)
 
     queue.ackOffset(6);
     offset = queue.popOffsetToCommit();
-    EXPECT_EQ(*offset, *queue.lastPoppedOffset());
-    EXPECT_EQ(7 + 1, *offset);
+    ASSERT_TRUE(offset);
+    EXPECT_EQ(*offset, *queue.lastPoppedOffset());  // NOLINT
+    EXPECT_EQ(7 + 1, *offset);                      // NOLINT
 
     queue.ackOffset(8);
     offset = queue.popOffsetToCommit();
-    EXPECT_EQ(8 + 1, *offset);
+    ASSERT_TRUE(offset);
+    EXPECT_EQ(8 + 1, *offset);                      // NOLINT
 
     queue.ackOffset(9);
     offset = queue.popOffsetToCommit();
-    EXPECT_EQ(9 + 1, *offset);
+    ASSERT_TRUE(offset);
+    EXPECT_EQ(9 + 1, *offset);                      // NOLINT
 
     // No more records to commit
     offset = queue.popOffsetToCommit();
@@ -96,7 +102,8 @@ TEST(UnorderedOffsetCommitQueue, AbnormalCases)
 
     queue.ackOffset(1);
     offset = queue.popOffsetToCommit();
-    EXPECT_EQ(3 + 1, *offset);
+    ASSERT_TRUE(offset);
+    EXPECT_EQ(3 + 1, *offset);              // NOLINT
 
     // ack an offset even smaller than expected
     queue.ackOffset(2);
@@ -110,7 +117,8 @@ TEST(UnorderedOffsetCommitQueue, AbnormalCases)
 
     queue.ackOffset(4);
     offset = queue.popOffsetToCommit();
-    EXPECT_EQ(4 + 1, *offset);
+    ASSERT_TRUE(offset);
+    EXPECT_EQ(4 + 1, *offset);              // NOLINT
 
     // Now only 1 offset left un-popped
     EXPECT_EQ(1, queue.size());
@@ -119,12 +127,12 @@ TEST(UnorderedOffsetCommitQueue, AbnormalCases)
 
 namespace {
 
-auto checkTimeMsConsumedToSortOffsets(std::size_t testNum, std::size_t step)
+std::int64_t checkTimeMsConsumedToSortOffsets(std::int64_t testNum, std::int64_t step)
 {
     kafka::clients::consumer::UnorderedOffsetCommitQueue queue;
 
     std::vector<kafka::Offset> waitSequence(testNum);
-    for (std::size_t i = 0 ; i < testNum; ++i)
+    for (std::int64_t i = 0 ; i < testNum; ++i)
     {
         waitSequence[i] = static_cast<kafka::Offset>(i);
     }
@@ -134,23 +142,23 @@ auto checkTimeMsConsumedToSortOffsets(std::size_t testNum, std::size_t step)
     std::mt19937 g(rd());
     for (std::size_t iBegin = 0; iBegin < ackSequence.size(); iBegin += step)
     {
-        std::size_t iEnd = (std::min)(iBegin + step, ackSequence.size());
+        const std::size_t iEnd = (std::min)(static_cast<std::size_t>(iBegin + step), ackSequence.size());
         std::shuffle(ackSequence.begin() + static_cast<int64_t>(iBegin), ackSequence.begin() + static_cast<int64_t>(iEnd), g);
     }
 
     using namespace std::chrono;
     auto timestampBegin = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
-    std::size_t indexWait = 0;
-    std::size_t indexAck = 0;
+    std::int64_t indexWait = 0;
+    std::int64_t indexAck = 0;
     while (indexAck < testNum)
     {
-        for (std::size_t i = 0; i < step && indexWait < testNum; ++i)
+        for (std::int64_t i = 0; i < step && indexWait < testNum; ++i)
         {
             queue.waitOffset(waitSequence[indexWait++]);
         }
 
-        for (std::size_t i = 0; i < step && indexAck < testNum; ++i)
+        for (std::int64_t i = 0; i < step && indexAck < testNum; ++i)
         {
             queue.ackOffset(ackSequence[indexAck++]);
         }
@@ -159,7 +167,15 @@ auto checkTimeMsConsumedToSortOffsets(std::size_t testNum, std::size_t step)
     auto timestampEnd = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
     // All offsets have been acked
-    EXPECT_EQ(testNum, *queue.popOffsetToCommit());
+    auto offsetToCommit = queue.popOffsetToCommit();
+    if (!offsetToCommit)
+    {
+        throw std::runtime_error("Failed to get the offset to commit!");
+    }
+    if (testNum != *offsetToCommit)
+    {
+        throw std::runtime_error("Failed to get the right offset to commit!");
+    }
 
     return (timestampEnd - timestampBegin);
 }
@@ -170,18 +186,26 @@ TEST(UnorderedOffsetCommitQueue, CheckPerf)
 {
     std::size_t testNum = 1000000;
     std::size_t step = 100;
-    std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    EXPECT_NO_THROW({
+        std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    });
 
     testNum = 1000000;
     step = 1000;
-    std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    EXPECT_NO_THROW({
+        std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    });
 
     testNum = 1000000;
     step = 10000;
-    std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    EXPECT_NO_THROW({
+        std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    });
 
     testNum = 1000000;
     step = 100000;
-    std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    EXPECT_NO_THROW({
+        std::cout << "Took " << checkTimeMsConsumedToSortOffsets(testNum, step) << " ms to sort " << testNum << " offsets (with step:" << step << ")." << std::endl;
+    });
 }
 

@@ -65,7 +65,7 @@ struct Timestamp
     {
         auto ms = std::chrono::milliseconds(v);
         auto timepoint = std::chrono::time_point<std::chrono::system_clock>(ms);
-        std::time_t time = std::chrono::system_clock::to_time_t(timepoint);
+        const std::time_t time = std::chrono::system_clock::to_time_t(timepoint);
         std::ostringstream oss;
         std::tm tmBuf = {};
 #if !defined(WIN32)

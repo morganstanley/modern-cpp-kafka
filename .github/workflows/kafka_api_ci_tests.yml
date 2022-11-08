@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os:                macos-11
+          - os:                macos-12
             build-cxx:         clang++
             test-labels:       unit|integration
             enable-ut-stubs:   true
@@ -38,6 +38,10 @@ jobs:
           - os:                macos-12
             build-cxx:         clang++
             test-labels:       robustness
+
+          - os:                macos-12
+            build-cxx:         clang++
+            check-option:      clang-tidy
 
           - os:                ubuntu-22.04
             build-cxx:         g++
@@ -93,11 +97,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Update the List for Available Packages
-        if: contains(matrix.os, 'ubuntu')
+      - name: Preparation
+        if: ${{!contains(matrix.os, 'windows')}}
         run: |
-          sed -e 's/azure.archive.ubuntu.com/us.archive.ubuntu.com/g' -e t -e d /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/nonazure.list
-          sudo apt-get update
+          if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
+            sed -e 's/azure.archive.ubuntu.com/us.archive.ubuntu.com/g' -e t -e d /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/nonazure.list
+            sudo apt-get update
+          elif [[ ${OS_VERSION} == 'macos'* ]]; then
+            echo "CPU_CORE_NUM=3" >> $GITHUB_ENV
+          fi
 
       - name: Install Dependencies
         run: |
@@ -110,6 +118,7 @@ jobs:
               sudo apt install -y clang-tidy
             elif [[ ${OS_VERSION} == 'macos'* ]]; then
               brew install llvm
+              export PATH=/usr/local/opt/llvm/bin/:$PATH
             fi
           fi
 
@@ -125,7 +134,6 @@ jobs:
           if [[ ${OS_VERSION} == 'ubuntu'* ]]; then
             sudo apt install -y libboost-all-dev
           elif [[ ${OS_VERSION} == 'macos'* ]]; then
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
             brew install boost
           fi
 
@@ -183,6 +191,9 @@ jobs:
       - name: Config
         run: |
           cd ${BUILD_SUB_DIR}
+
+          # Restore the PATH from environment file
+          export PATH=${{ env.PATH }}
 
           if [ ${CXX_STANDARD} ]; then
             export CMAKE_CXX_STANDARD="-DCMAKE_CXX_STANDARD=${CXX_STANDARD}"
