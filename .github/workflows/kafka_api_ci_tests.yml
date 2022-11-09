@@ -35,11 +35,11 @@ jobs:
             test-labels:       unit|integration
             enable-ut-stubs:   true
 
-          - os:                macos-12
+          - os:                macos-13
             build-cxx:         clang++
             test-labels:       robustness
 
-          - os:                macos-12
+          - os:                macos-13
             build-cxx:         clang++
             check-option:      clang-tidy
 
