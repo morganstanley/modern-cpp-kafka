@@ -6,7 +6,12 @@ project("kafka-unit-test")
 if (DEFINED ENV{RAPIDJSON_INCLUDE_DIRS})
     set(RAPIDJSON_INCLUDE_DIRS $ENV{RAPIDJSON_INCLUDE_DIRS})
 else ()
-    set(RAPIDJSON_INCLUDE_DIRS /usr/include)
+    find_file(RAPIDJSON_HEADER
+        NAMES rapidjson.h
+        HINTS /usr/include/rapidjson /usr/local/include/rapidjson /opt/homebrew/include/rapidjson)
+
+    cmake_path(GET RAPIDJSON_HEADER PARENT_PATH RAPIDJSON_INCLUDE_DIRS)
+    cmake_path(GET RAPIDJSON_INCLUDE_DIRS PARENT_PATH RAPIDJSON_INCLUDE_DIRS)
 endif ()
 
 if (EXISTS "${RAPIDJSON_INCLUDE_DIRS}/rapidjson/rapidjson.h")
