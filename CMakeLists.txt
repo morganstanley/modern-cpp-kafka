@@ -42,12 +42,22 @@ if (NOT BUILD_OPTION_DOC_ONLY)
     if (DEFINED ENV{LIBRDKAFKA_INCLUDE_DIR})
         set(LIBRDKAFKA_INCLUDE_DIR $ENV{LIBRDKAFKA_INCLUDE_DIR})
     else ()
-        set(LIBRDKAFKA_INCLUDE_DIR /usr/local/include)
+        find_file(LIBRDKAFKA_HEADER
+             NAMES rdkafka.h
+             HINTS /usr/include/librdkafka /usr/local/include/librdkafka /opt/homebrew/include/librdkafka)
+
+        cmake_path(GET LIBRDKAFKA_HEADER PARENT_PATH LIBRDKAFKA_INCLUDE_DIR)
+        cmake_path(GET LIBRDKAFKA_INCLUDE_DIR PARENT_PATH LIBRDKAFKA_INCLUDE_DIR)
     endif ()
+
     if (DEFINED ENV{LIBRDKAFKA_LIBRARY_DIR})
         set(LIBRDKAFKA_LIBRARY_DIR $ENV{LIBRDKAFKA_LIBRARY_DIR})
     else ()
-        set(LIBRDKAFKA_LIBRARY_DIR /usr/local/lib)
+        find_library(LIBRDKAFKA_LIB
+             NAMES rdkafka
+             HINTS /usr/lib /usr/local/lib /opt/homebrew/lib)
+
+        cmake_path(GET LIBRDKAFKA_LIB PARENT_PATH LIBRDKAFKA_LIBRARY_DIR)
     endif ()
 
     if (EXISTS "${LIBRDKAFKA_INCLUDE_DIR}/librdkafka/rdkafka.h")
