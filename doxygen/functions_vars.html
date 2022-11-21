@@ -106,6 +106,11 @@ $(function() {
 <li>ENABLE_PARTITION_EOF
 : <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#acbb82cccc812c85c3779f4ff226301d4">KAFKA_API::clients::consumer::Config</a>
 </li>
+<li>ENABLE_SASL_OAUTHBEARER_UNSECURE_JWT
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#a76c468c86c8ec152db887f3da3fa3d0a">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a0006c88083f3d6a8be582307b36df9b5">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a9dd4ddcd1060f6ec1dfec4ed5d180ddf">KAFKA_API::clients::producer::Config</a>
+</li>
 <li>error
 : <a class="el" href="structKAFKA__API_1_1clients_1_1admin_1_1CreateTopicsResult.html#a887c2c26f73c68d4dd40abec34a8ea00">KAFKA_API::clients::admin::CreateTopicsResult</a>
 , <a class="el" href="structKAFKA__API_1_1clients_1_1admin_1_1DeleteRecordsResult.html#a1d6ac50802b6b002ed420cea596b60b5">KAFKA_API::clients::admin::DeleteRecordsResult</a>
@@ -215,6 +220,56 @@ $(function() {
 , <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a39b5ddc00332a4fdf0359c1d436a4b8d">KAFKA_API::clients::consumer::Config</a>
 , <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#afa71d23070880b49d508c29523863983">KAFKA_API::clients::producer::Config</a>
 </li>
+<li>SASL_MECHANISM
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#a1fc883a01a4f325418a75b01314c5c23">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#acabdbacbcc0f238c3907a78e5eed16dc">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#ad434f450a06f8c396d2048aace5c7f49">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_OAUTHBEARER_CLIENT_ID
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#ae0e4d9386395ce83459f957e9884520c">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#ad60f4819f831fc35e4914860e3a227b4">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a663006a25b702efcd8d3c2926a1adea4">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_OAUTHBEARER_CLIENT_SECRET
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#afb43b40d3dc1fb778fb529c6606366be">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#adcaa6a02aebcde198268990fdb349e8c">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#adaff066b5b3de8e672fa1e6d8522cdf9">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_OAUTHBEARER_CONFIG
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#a2ba802c4b6d6d16c92d7f888118f8770">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#ae46dab1bdef8f916e0919c6c4d5d4b7c">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a2778634f7026ff4049a6534341365de0">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_OAUTHBEARER_EXTENSIONS
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#a1887d9f44d25512fff555757f8899a4d">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#ac189246e15dc7782d8d1e714607badab">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a729da82387e47446a4e751bd1acbbb97">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_OAUTHBEARER_METHOD
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#ab465ee8b5901a274b99b549b3eda4d28">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a189f4e67d7bef090a3e341efb0467c52">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#ab7f3be84aef7cef0f55095889faca09e">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_OAUTHBEARER_SCOPE
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#a4537537b16f555cee68b4845bf4bf021">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#ae07da2f66ad11f9bec5f668cdfdee206">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a0655c3915c409436876feac356f7ed9f">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_OAUTHBEARER_TOKEN_ENDPOINT_URL
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#aadde2b04f4051329ad4b525d1c7a7af1">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a75f6fa0959a0ef74f2f8ba38d118e2ec">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#a990eeb4805fd193bbcfe5df6efa14dea">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_PASSWORD
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#a0f519e30a6f0c3945d68b018060ee6b3">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a196143c95fb9b4ed3ead96ef3b1470d1">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#aa6c367949cb7da9ea9b2fb8d2e453124">KAFKA_API::clients::producer::Config</a>
+</li>
+<li>SASL_USERNAME
+: <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#aec2102393c3d31852d3aed6f83663282">KAFKA_API::clients::admin::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a7e83c501ef680126a5367427a81c2400">KAFKA_API::clients::consumer::Config</a>
+, <a class="el" href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html#aea9ff92bba68b9df465f3343ffa59bd3">KAFKA_API::clients::producer::Config</a>
+</li>
 <li>SECURITY_PROTOCOL
 : <a class="el" href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html#a2187082deee9d01b24b6485a65b1ae62">KAFKA_API::clients::admin::Config</a>
 , <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html#a665c84bd3e87dd4fd16e11e1535f22b9">KAFKA_API::clients::consumer::Config</a>
@@ -246,7 +301,7 @@ $(function() {
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 16 2022 15:03:50 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Mon Nov 21 2022 03:54:09 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
