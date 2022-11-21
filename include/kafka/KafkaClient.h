@@ -91,6 +91,16 @@ public:
     void setErrorCallback(ErrorCallback cb) { _errorCb = std::move(cb); }
 
     /**
+     * Callback type for OAUTHBEARER token refresh.
+     */
+    using OauthbearerTokenRefreshCallback = std::function<SaslOauthbearerToken(const std::string&)>;
+
+    /**
+     * Set callback for OAUTHBEARER token refresh.
+     */
+    void setOauthbearerTokernRefreshCallback(OauthbearerTokenRefreshCallback cb) { _oauthbearerTokenRefreshCb = std::move(cb); }
+
+    /**
      * Return the properties which took effect.
      */
     const Properties& properties() const { return _properties; }
@@ -220,10 +230,13 @@ protected:
 private:
     std::string         _clientId;
     std::string         _clientName;
+
     std::atomic<int>    _logLevel = {Log::Level::Notice};
     Logger              _logger;
-    StatsCallback       _statsCb;
-    ErrorCallback       _errorCb;
+
+    StatsCallback                   _statsCb;
+    ErrorCallback                   _errorCb;
+    OauthbearerTokenRefreshCallback _oauthbearerTokenRefreshCb;
 
     EventsPollingOption _eventsPollingOption;
     Interceptors        _interceptors;
@@ -245,6 +258,9 @@ private:
     // Error callback (for librdkafka)
     static void errorCallback(rd_kafka_t* rk, int err, const char* reason, void* opaque);
 
+    // OAUTHBEARER Toker Refresh Callback (for librdkafka)
+    static void oauthbearerTokenRefreshCallback(rd_kafka_t* rk, const char* oauthbearerConfig, void* /*opaque*/);
+
     // Interceptor callback (for librdkafka)
     static rd_kafka_resp_err_t configInterceptorOnNew(rd_kafka_t* rk, const rd_kafka_conf_t* conf, void* opaque, char* errStr, std::size_t maxErrStrSize);
     static rd_kafka_resp_err_t interceptorOnThreadStart(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* opaque);
@@ -258,6 +274,9 @@ private:
 
     // Error callback (for class instance)
     void onError(const Error& error);
+
+    // OAUTHBEARER Toker Refresh Callback (for class instance)
+    SaslOauthbearerToken onOauthbearerTokenRefresh(const std::string& oauthbearerConfig);
 
     // Interceptor callback (for class instance)
     void interceptThreadStart(const std::string& threadName, const std::string& threadType);
@@ -432,6 +451,9 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     // Error Callback
     rd_kafka_conf_set_error_cb(rk_conf.get(), KafkaClient::errorCallback);
 
+    // OAUTHBEARER Toker Refresh Callback
+    rd_kafka_conf_set_oauthbearer_token_refresh_cb(rk_conf.get(), KafkaClient::oauthbearerTokenRefreshCallback);
+
     // Other Callbacks
     if (extraConfigRegister) extraConfigRegister(rk_conf.get());
 
@@ -441,6 +463,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         const Error result{ rd_kafka_conf_interceptor_add_on_new(rk_conf.get(), "on_new", KafkaClient::configInterceptorOnNew, nullptr) };
         KAFKA_THROW_IF_WITH_ERROR(result);
     }
+
 
     // Set client handler
     _rk.reset(rd_kafka_new((clientType == ClientType::KafkaConsumer ? RD_KAFKA_CONSUMER : RD_KAFKA_PRODUCER),
@@ -553,6 +576,17 @@ KafkaClient::onError(const Error& error)
     if (_errorCb) _errorCb(error);
 }
 
+inline SaslOauthbearerToken
+KafkaClient::onOauthbearerTokenRefresh(const std::string& oauthbearerConfig)
+{
+    if (!_oauthbearerTokenRefreshCb)
+    {
+        throw std::runtime_error("No OAUTHBEARER token refresh callback configured!");
+    }
+
+    return _oauthbearerTokenRefreshCb(oauthbearerConfig);
+}
+
 inline void
 KafkaClient::errorCallback(rd_kafka_t* rk, int err, const char* reason, void* /*opaque*/)
 {
@@ -571,6 +605,41 @@ KafkaClient::errorCallback(rd_kafka_t* rk, int err, const char* reason, void* /*
     }
 
     kafkaClient(rk).onError(error);
+}
+
+inline void
+KafkaClient::oauthbearerTokenRefreshCallback(rd_kafka_t* rk, const char* oauthbearerConfig, void* /* opaque */)
+{
+    SaslOauthbearerToken oauthbearerToken;
+
+    try
+    {
+        oauthbearerToken = kafkaClient(rk).onOauthbearerTokenRefresh(oauthbearerConfig);
+    }
+    catch (const std::exception& e)
+    {
+        rd_kafka_oauthbearer_set_token_failure(rk, e.what());
+    }
+
+    LogBuffer<LOG_BUFFER_SIZE> errInfo;
+
+    std::vector<const char*> extensions;
+    extensions.reserve(oauthbearerToken.extensions.size() * 2);
+    for (const auto& kv: oauthbearerToken.extensions)
+    {
+        extensions.push_back(kv.first.c_str());
+        extensions.push_back(kv.second.c_str());
+    }
+
+    if (rd_kafka_oauthbearer_set_token(rk,
+                                       oauthbearerToken.value.c_str(),
+                                       oauthbearerToken.mdLifetime.count(),
+                                       oauthbearerToken.mdPrincipalName.c_str(),
+                                       extensions.data(), extensions.size(),
+                                       errInfo.str(), errInfo.capacity()) != RD_KAFKA_RESP_ERR_NO_ERROR)
+    {
+        rd_kafka_oauthbearer_set_token_failure(rk, errInfo.c_str());
+    }
 }
 
 inline void

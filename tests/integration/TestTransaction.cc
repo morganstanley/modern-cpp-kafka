@@ -19,7 +19,7 @@ TEST(Transaction, CommitTransaction)
         kafka::clients::KafkaProducer producer(props);
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer created." << std::endl;
 
-        producer.initTransactions(std::chrono::seconds(10));
+        producer.initTransactions();
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer initialized the transaction." << std::endl;
 
         producer.beginTransaction();
