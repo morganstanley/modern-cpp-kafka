@@ -17,7 +17,7 @@
 #include <memory>
 
 
-namespace KAFKA_API { namespace clients {
+namespace KAFKA_API { namespace clients { namespace consumer {
 
 /**
  * KafkaConsumer class.
@@ -31,17 +31,11 @@ public:
     /**
      * The constructor for KafkaConsumer.
      *
-     * Options:
-     *   - EventsPollingOption::Auto (default) : An internal thread would be started for OffsetCommit callbacks handling.
-     *   - EventsPollingOption::Maunal         : User have to call the member function `pollEvents()` to trigger OffsetCommit callbacks.
-     *
      * Throws KafkaException with errors:
      *   - RD_KAFKA_RESP_ERR__INVALID_ARG      : Invalid BOOTSTRAP_SERVERS property
      *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
      */
-    explicit KafkaConsumer(const Properties&    properties,
-                           EventsPollingOption  eventsPollingOption = EventsPollingOption::Auto,
-                           const Interceptors&  interceptors        = Interceptors{});
+    explicit KafkaConsumer(const Properties& properties);
 
     /**
      * The destructor for KafkaConsumer.
@@ -354,20 +348,22 @@ private:
 inline Properties
 KafkaConsumer::validateAndReformProperties(Properties properties)
 {
+    using namespace consumer;
+
     // Don't pass the "max.poll.records" property to librdkafka
-    properties.remove(consumer::Config::MAX_POLL_RECORDS);
+    properties.remove(ConsumerConfig::MAX_POLL_RECORDS);
 
     // Let the base class validate first
     auto newProperties = KafkaClient::validateAndReformProperties(properties);
 
     // If no "group.id" configured, generate a random one for user
-    if (!newProperties.getProperty(consumer::Config::GROUP_ID))
+    if (!newProperties.getProperty(ConsumerConfig::GROUP_ID))
     {
-        newProperties.put(consumer::Config::GROUP_ID, utility::getRandomString());
+        newProperties.put(ConsumerConfig::GROUP_ID, utility::getRandomString());
     }
 
     // Disable the internal auto-commit from librdkafka, since we want to customize the behavior
-    newProperties.put(consumer::Config::ENABLE_AUTO_COMMIT, "false");
+    newProperties.put(ConsumerConfig::ENABLE_AUTO_COMMIT,   "false");
     newProperties.put(AUTO_COMMIT_INTERVAL_MS,              "0");
     newProperties.put(ENABLE_AUTO_OFFSET_STORE,             "true");
 
@@ -384,25 +380,21 @@ KafkaConsumer::registerConfigCallbacks(rd_kafka_conf_t* conf)
 }
 
 inline
-KafkaConsumer::KafkaConsumer(const Properties&      properties,
-                             EventsPollingOption    eventsPollingOption,
-                             const Interceptors&    interceptors)
-    : KafkaClient(ClientType::KafkaConsumer,
-                  validateAndReformProperties(properties),
-                  registerConfigCallbacks,
-                  eventsPollingOption,
-                  interceptors)
+KafkaConsumer::KafkaConsumer(const Properties& properties)
+    : KafkaClient(ClientType::KafkaConsumer, validateAndReformProperties(properties), registerConfigCallbacks)
 {
+    using namespace consumer;
+
     // Pick up the "max.poll.records" property
-    if (auto maxPollRecordsProperty = properties.getProperty(consumer::Config::MAX_POLL_RECORDS))
+    if (auto maxPollRecordsProperty = properties.getProperty(ConsumerConfig::MAX_POLL_RECORDS))
     {
         const std::string maxPollRecords = *maxPollRecordsProperty;
         _maxPollRecords = static_cast<std::size_t>(std::stoi(maxPollRecords));
     }
-    _properties.put(consumer::Config::MAX_POLL_RECORDS, std::to_string(_maxPollRecords));
+    _properties.put(ConsumerConfig::MAX_POLL_RECORDS, std::to_string(_maxPollRecords));
 
     // Pick up the "enable.auto.commit" property
-    if (auto enableAutoCommitProperty = properties.getProperty(consumer::Config::ENABLE_AUTO_COMMIT))
+    if (auto enableAutoCommitProperty = properties.getProperty(ConsumerConfig::ENABLE_AUTO_COMMIT))
     {
         const std::string enableAutoCommit = *enableAutoCommitProperty;
 
@@ -416,10 +408,10 @@ KafkaConsumer::KafkaConsumer(const Properties&      properties,
 
         _enableAutoCommit = isTrue(enableAutoCommit);
     }
-    _properties.put(consumer::Config::ENABLE_AUTO_COMMIT, (_enableAutoCommit ? "true" : "false"));
+    _properties.put(ConsumerConfig::ENABLE_AUTO_COMMIT, (_enableAutoCommit ? "true" : "false"));
 
     // Fetch groupId from reformed configuration
-    auto groupId = _properties.getProperty(consumer::Config::GROUP_ID);
+    auto groupId = _properties.getProperty(ConsumerConfig::GROUP_ID);
     assert(groupId);
     setGroupId(*groupId);
 
@@ -1067,5 +1059,5 @@ KafkaConsumer::commitAsync(const consumer::OffsetCommitCallback& offsetCommitCal
     commitAsync(TopicPartitionOffsets(), offsetCommitCallback);
 }
 
-} } // end of KAFKA_API::clients
+} } } // end of KAFKA_API::clients::consumer
 

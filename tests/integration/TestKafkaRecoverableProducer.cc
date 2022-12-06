@@ -22,10 +22,10 @@ TEST(KafkaRecoverableProducer, SendMessages)
 
     {
         // Properties for the producer
-        const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::producer::Config::ACKS, "all");
+        const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::producer::ProducerConfig::ACKS, "all");
 
         // Recoverable producer
-        kafka::clients::KafkaRecoverableProducer producer(props);
+        kafka::clients::producer::KafkaRecoverableProducer producer(props);
 
         // Send messages
         kafka::clients::producer::ProducerRecord::Id id = 0;
@@ -58,8 +58,8 @@ TEST(KafkaRecoverableProducer, SendMessages)
 
     {
         // Prepare a consumer
-        const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
-        kafka::clients::KafkaConsumer consumer(consumerProps);
+        const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
+        kafka::clients::consumer::KafkaConsumer consumer(consumerProps);
         consumer.setLogLevel(kafka::Log::Level::Crit);
         consumer.subscribe({topic});
 
@@ -88,7 +88,7 @@ TEST(KafkaRecoverableProducer, MockFatalError)
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
 
     // Recoverable producer
-    kafka::clients::KafkaRecoverableProducer producer(props);
+    kafka::clients::producer::KafkaRecoverableProducer producer(props);
 
     // Prepare messages to send
     static constexpr int MSG_NUM = 50;
@@ -142,8 +142,8 @@ TEST(KafkaRecoverableProducer, MockFatalError)
     EXPECT_EQ(sendCount, deliveryCount);
 
     // Prepare a consumer
-    const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
-    kafka::clients::KafkaConsumer consumer(consumerProps);
+    const auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
+    kafka::clients::consumer::KafkaConsumer consumer(consumerProps);
     consumer.setLogLevel(kafka::Log::Level::Crit);
     consumer.subscribe({topic});
 

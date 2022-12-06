@@ -140,6 +140,7 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
 int main (int argc, char **argv)
 {
     using namespace kafka::clients;
+    using namespace kafka::clients::admin;
 
     try
     {
@@ -149,7 +150,7 @@ int main (int argc, char **argv)
         if (!args) return EXIT_SUCCESS; // Only for "help"
 
         kafka::Properties adminConf = args->adminConfig;
-        adminConf.put(admin::Config::BOOTSTRAP_SERVERS, args->broker);
+        adminConf.put(Config::BOOTSTRAP_SERVERS, args->broker);
 
         AdminClient adminClient(adminConf);
 

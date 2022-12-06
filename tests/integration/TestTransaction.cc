@@ -10,13 +10,17 @@
 
 TEST(Transaction, CommitTransaction)
 {
+    using namespace kafka::clients;
+    using namespace kafka::clients::producer;
+    using namespace kafka::clients::consumer;
+
     enum class TransactionClosureAction { ToComplete, ToAbort, NoAction };
 
     auto sendMessageWithTransactions = [](const std::string& message, const kafka::Topic& topic, TransactionClosureAction closureAction) {
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::producer::Config::TRANSACTIONAL_ID, kafka::utility::getRandomString());
+        props.put(ProducerConfig::TRANSACTIONAL_ID, kafka::utility::getRandomString());
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer created." << std::endl;
 
         producer.initTransactions();
@@ -25,10 +29,10 @@ TEST(Transaction, CommitTransaction)
         producer.beginTransaction();
 
         auto payload = std::make_shared<std::string>(message);
-        auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(payload->c_str(), payload->size()));
+        auto record  = ProducerRecord(topic, kafka::NullKey, kafka::Value(payload->c_str(), payload->size()));
 
         producer.send(record,
-                      [payload](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                      [payload](const RecordMetadata& metadata, const kafka::Error& error) {
                           std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer got the delivery result: " << error.message()
                               << ", with metadata: " << metadata.toString() << std::endl;
                       });
@@ -52,10 +56,10 @@ TEST(Transaction, CommitTransaction)
         const std::string isolationConf = (isolationLevel == IsolationLevel::ReadCommitted) ? "read_committed" : "read_uncommitted";
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
-        props.put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   isolationConf);
+        props.put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
+        props.put(ConsumerConfig::ISOLATION_LEVEL,   isolationConf);
 
-        kafka::clients::KafkaConsumer consumer(props);
+        KafkaConsumer consumer(props);
         consumer.setLogLevel(kafka::Log::Level::Crit);
         consumer.subscribe({topic});
 
@@ -145,12 +149,15 @@ TEST(Transaction, CommitTransaction)
 
 TEST(Transaction, CatchException)
 {
+    using namespace kafka::clients;
+    using namespace kafka::clients::producer;
+
     {
         KafkaTestUtility::PrintDividingLine("No transaction.id configured");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
 
         EXPECT_KAFKA_THROW(producer.initTransactions(), RD_KAFKA_RESP_ERR__NOT_CONFIGURED);
     }
@@ -159,9 +166,9 @@ TEST(Transaction, CatchException)
         KafkaTestUtility::PrintDividingLine("No initTransactions");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::producer::Config::TRANSACTIONAL_ID, kafka::utility::getRandomString());
+        props.put(ProducerConfig::TRANSACTIONAL_ID, kafka::utility::getRandomString());
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
 
         EXPECT_KAFKA_THROW(producer.beginTransaction(), RD_KAFKA_RESP_ERR__STATE);
     }
@@ -170,9 +177,9 @@ TEST(Transaction, CatchException)
         KafkaTestUtility::PrintDividingLine("No beginTransaction");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::producer::Config::TRANSACTIONAL_ID, kafka::utility::getRandomString());
+        props.put(ProducerConfig::TRANSACTIONAL_ID, kafka::utility::getRandomString());
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -184,9 +191,9 @@ TEST(Transaction, CatchException)
         KafkaTestUtility::PrintDividingLine("abortTransaction (with no initTransactions)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::producer::Config::TRANSACTIONAL_ID, kafka::utility::getRandomString());
+        props.put(ProducerConfig::TRANSACTIONAL_ID, kafka::utility::getRandomString());
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
 
         EXPECT_KAFKA_THROW(producer.abortTransaction(), RD_KAFKA_RESP_ERR__STATE);
     }
@@ -195,9 +202,9 @@ TEST(Transaction, CatchException)
         KafkaTestUtility::PrintDividingLine("abortTransaction (with no beginTransaction)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::producer::Config::TRANSACTIONAL_ID, kafka::utility::getRandomString());
+        props.put(ProducerConfig::TRANSACTIONAL_ID, kafka::utility::getRandomString());
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -208,9 +215,9 @@ TEST(Transaction, CatchException)
         KafkaTestUtility::PrintDividingLine("abortTransaction (with no message sent)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::producer::Config::TRANSACTIONAL_ID, kafka::utility::getRandomString());
+        props.put(ProducerConfig::TRANSACTIONAL_ID, kafka::utility::getRandomString());
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -223,9 +230,9 @@ TEST(Transaction, CatchException)
         KafkaTestUtility::PrintDividingLine("commitTransation (with no message sent)");
 
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-        props.put(kafka::clients::producer::Config::TRANSACTIONAL_ID, kafka::utility::getRandomString());
+        props.put(ProducerConfig::TRANSACTIONAL_ID, kafka::utility::getRandomString());
 
-        kafka::clients::KafkaProducer producer(props);
+        KafkaProducer producer(props);
 
         producer.initTransactions();
 
@@ -237,6 +244,8 @@ TEST(Transaction, CatchException)
 
 TEST(Transaction, ContinueTheTransaction)
 {
+    using namespace kafka::clients::producer;
+
     const kafka::Topic topic         = kafka::utility::getRandomString();
     const std::string  transactionId = kafka::utility::getRandomString();
     const std::string  messageToSend = "message to send";
@@ -245,17 +254,17 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Start a producer to send the message, but fail to commit
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                .put(kafka::clients::producer::Config::TRANSACTIONAL_ID, transactionId));
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                .put(kafka::clients::producer::ProducerConfig::TRANSACTIONAL_ID, transactionId));
 
         producer.initTransactions();
 
         producer.beginTransaction();
 
-        auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSend.c_str(), messageToSend.size()));
+        auto record = ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSend.c_str(), messageToSend.size()));
 
         producer.send(record,
-                      [](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                      [](const RecordMetadata& metadata, const kafka::Error& error) {
                           std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer got the delivery result: " << error.message()
                               << ", with metadata: " << metadata.toString() << std::endl;
                       });
@@ -265,17 +274,17 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Start another producer, continue to send the message (with the same transaction.id)
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                .put(kafka::clients::producer::Config::TRANSACTIONAL_ID, transactionId));
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                .put(kafka::clients::producer::ProducerConfig::TRANSACTIONAL_ID, transactionId));
 
         producer.initTransactions();
 
         producer.beginTransaction();
 
-        auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSend.c_str(), messageToSend.size()));
+        auto record = ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSend.c_str(), messageToSend.size()));
 
         producer.send(record,
-                      [](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                      [](const RecordMetadata& metadata, const kafka::Error& error) {
                           std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer got the delivery result: " << error.message()
                               << ", with metadata: " << metadata.toString() << std::endl;
                       });
@@ -287,9 +296,9 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Check all received messages (committed only)
     {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                               .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
-                                               .put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   "read_committed"));
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                               .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                                               .put(kafka::clients::consumer::ConsumerConfig::ISOLATION_LEVEL,   "read_committed"));
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
@@ -303,9 +312,9 @@ TEST(Transaction, ContinueTheTransaction)
 
     // Check all received messages (incluing uncommitted)
     {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                               .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
-                                               .put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   "read_uncommitted"));
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                               .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                                               .put(kafka::clients::consumer::ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
@@ -321,6 +330,9 @@ TEST(Transaction, ContinueTheTransaction)
 
 TEST(Transaction, ContinueTheTransaction2)
 {
+    using namespace kafka::clients::producer;
+    using namespace kafka::clients::consumer;
+
     const kafka::Topic topic         = kafka::utility::getRandomString();
     const std::string  transactionId = kafka::utility::getRandomString();
     const std::string  clientId      = "someTransactionalProducer";
@@ -336,9 +348,9 @@ TEST(Transaction, ContinueTheTransaction2)
 
     // Start a producer to send the messages, but fail to commit the transaction for some messages (before close)
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                .put(kafka::clients::producer::Config::TRANSACTIONAL_ID, transactionId)
-                                                .put(kafka::clients::producer::Config::CLIENT_ID, clientId));
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                .put(ProducerConfig::TRANSACTIONAL_ID, transactionId)
+                                                .put(ProducerConfig::CLIENT_ID, clientId));
 
         producer.initTransactions();
         std::cout << "[" << kafka::utility::getCurrentTime() << "] The first producer initialized the transaction" << std::endl;
@@ -351,12 +363,12 @@ TEST(Transaction, ContinueTheTransaction2)
         for (std::size_t i = 0; i < NUM_MESSAGES / 2; ++i)
         {
             const auto& msg = messagesToSend[i];
-            auto record = kafka::clients::producer::ProducerRecord(topic,
-                                                                   kafka::NullKey,
-                                                                   kafka::Value(msg.c_str(), msg.size()));
+            auto record = ProducerRecord(topic,
+                                         kafka::NullKey,
+                                         kafka::Value(msg.c_str(), msg.size()));
 
             producer.send(record,
-                          [&delivered](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                          [&delivered](const RecordMetadata& metadata, const kafka::Error& error) {
                               ++delivered;
 
                               if (error) {
@@ -382,12 +394,12 @@ TEST(Transaction, ContinueTheTransaction2)
         for (std::size_t i = NUM_MESSAGES / 2; i < NUM_MESSAGES; ++i)
         {
             const auto& msg = messagesToSend[i];
-            auto record = kafka::clients::producer::ProducerRecord(topic,
-                                                                   kafka::NullKey,
-                                                                   kafka::Value(msg.c_str(), msg.size()));
+            auto record = ProducerRecord(topic,
+                                         kafka::NullKey,
+                                         kafka::Value(msg.c_str(), msg.size()));
 
             producer.send(record,
-                          [&delivered](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                          [&delivered](const RecordMetadata& metadata, const kafka::Error& error) {
                               ++delivered;
 
                               if (error) {
@@ -410,9 +422,9 @@ TEST(Transaction, ContinueTheTransaction2)
 
     // Re-start the producer, continue to send the message (with the same transaction.id)
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                 .put(kafka::clients::producer::Config::TRANSACTIONAL_ID, transactionId)
-                                                 .put(kafka::clients::producer::Config::CLIENT_ID, clientId ) );
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                 .put(ProducerConfig::TRANSACTIONAL_ID, transactionId)
+                                                 .put(ProducerConfig::CLIENT_ID, clientId ) );
 
         producer.initTransactions();
         std::cout << "[" << kafka::utility::getCurrentTime() << "] The second producer initialized the transaction" << std::endl;
@@ -425,12 +437,12 @@ TEST(Transaction, ContinueTheTransaction2)
         for (std::size_t i = NUM_MESSAGES / 2; i < NUM_MESSAGES; ++i)
         {
             const auto& msg = messagesToSend[i];
-            auto record = kafka::clients::producer::ProducerRecord(topic,
-                                                                   kafka::NullKey,
-                                                                   kafka::Value(msg.c_str(), msg.size()));
+            auto record = ProducerRecord(topic,
+                                         kafka::NullKey,
+                                         kafka::Value(msg.c_str(), msg.size()));
 
             producer.send(record,
-                          [&delivered](const kafka::clients::producer::RecordMetadata& metadata, const kafka::Error& error) {
+                          [&delivered](const RecordMetadata& metadata, const kafka::Error& error) {
                               ++delivered;
 
                               if (error) {
@@ -452,9 +464,9 @@ TEST(Transaction, ContinueTheTransaction2)
 
     // Check all received messages (committed only)
     {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                               .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
-                                               .put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   "read_committed"));
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                               .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                                               .put(ConsumerConfig::ISOLATION_LEVEL,   "read_committed"));
         consumer.subscribe({topic});
 
         // No message lost, no message duplicated
@@ -469,9 +481,9 @@ TEST(Transaction, ContinueTheTransaction2)
 
     // Check all received messages (incluing uncommitted)
     {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                               .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
-                                               .put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   "read_uncommitted"));
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                               .put(ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                                               .put(ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
