@@ -20,7 +20,6 @@
 #include <climits>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -45,15 +44,6 @@ public:
      * Get the client name (i.e. client type + id).
      */
     const std::string& name()       const { return _clientName; }
-
-    /**
-     * Set a log callback for kafka clients, which do not have a client specific logging callback configured (see `setLogCallback`).
-     */
-    static void setGlobalLogger(Logger logger = NullLogger)
-    {
-        std::call_once(Global<>::initOnce, [](){}); // Then no need to init within KafkaClient constructor
-        Global<>::logger = std::move(logger);
-    }
 
     /**
      * Set log level for the kafka client (the default value: 5).
@@ -90,12 +80,11 @@ public:
     template<class ...Args>
     void doLog(int level, const char* filename, int lineno, const char* format, Args... args) const
     {
-        const auto& logger = _logCb ? _logCb : Global<>::logger;
-        if (level >= 0 && level <= _logLevel && logger)
+        if (level >= 0 && level <= _logLevel && _logCb)
         {
             LogBuffer<LOG_BUFFER_SIZE> logBuffer;
             logBuffer.print("%s ", name().c_str()).print(format, args...);
-            logger(level, filename, lineno, logBuffer.c_str());
+            _logCb(level, filename, lineno, logBuffer.c_str());
         }
     }
 
@@ -105,28 +94,6 @@ public:
     }
 
 #define KAFKA_API_DO_LOG(lvl, ...) doLog(lvl, __FILE__, __LINE__, ##__VA_ARGS__)
-
-    template<class ...Args>
-    static void doGlobalLog(int level, const char* filename, int lineno, const char* format, Args... args)
-    {
-        if (!Global<>::logger) return;
-
-        LogBuffer<LOG_BUFFER_SIZE> logBuffer;
-        logBuffer.print(format, args...);
-        Global<>::logger(level, filename, lineno, logBuffer.c_str());
-    }
-    static void doGlobalLog(int level, const char* filename, int lineno, const char* msg)
-    {
-        doGlobalLog(level, filename, lineno, "%s", msg);
-    }
-
-/**
- * Log for kafka clients, with the callback which `setGlobalLogger` assigned.
- *
- * E.g,
- *     KAFKA_API_LOG(Log::Level::Err, "something wrong happened! %s", detailedInfo.c_str());
- */
-#define KAFKA_API_LOG(lvl, ...) KafkaClient::doGlobalLog(lvl, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #if COMPILER_SUPPORTS_CPP_17
     static constexpr int DEFAULT_METADATA_TIMEOUT_MS = 10000;
@@ -169,14 +136,6 @@ protected:
     // Buffer size for single line logging
     static const constexpr int LOG_BUFFER_SIZE = 1024;
 
-    // Global logger
-    template <typename T = void>
-    struct Global
-    {
-        static Logger         logger;
-        static std::once_flag initOnce;
-    };
-
     // Validate properties (and fix it if necesary)
     static Properties validateAndReformProperties(const Properties& properties);
 
@@ -197,8 +156,8 @@ private:
     std::string         _clientName;
 
     std::atomic<int>    _logLevel = {Log::Level::Notice};
-    Logger              _logCb;
 
+    LogCallback                     _logCb = DefaultLogger;
     StatsCallback                   _statsCb;
     ErrorCallback                   _errorCb;
     OauthbearerTokenRefreshCallback _oauthbearerTokenRefreshCb;
@@ -246,10 +205,6 @@ private:
     // Interceptor callback (for class instance)
     void interceptThreadStart(const std::string& threadName, const std::string& threadType);
     void interceptThreadExit(const std::string& threadName, const std::string& threadType);
-
-    static const constexpr char* BOOTSTRAP_SERVERS = "bootstrap.servers";
-    static const constexpr char* CLIENT_ID         = "client.id";
-    static const constexpr char* LOG_LEVEL         = "log_level";
 
 protected:
     struct Pollable
@@ -331,11 +286,6 @@ private:
     std::unique_ptr<PollThread> _pollThread;
 };
 
-template <typename T>
-Logger KafkaClient::Global<T>::logger;
-
-template <typename T>
-std::once_flag KafkaClient::Global<T>::initOnce;
 
 inline
 KafkaClient::KafkaClient(ClientType                     clientType,
@@ -345,14 +295,11 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     static const std::set<std::string> PRIVATE_PROPERTY_KEYS = { "max.poll.records" };
 
     // Save clientID
-    if (auto clientId = properties.getProperty(CLIENT_ID))
+    if (auto clientId = properties.getProperty(Config::CLIENT_ID))
     {
         _clientId   = *clientId;
         _clientName = getClientTypeString(clientType) + "[" + _clientId + "]";
     }
-
-    // Init global logger
-    std::call_once(Global<>::initOnce, [](){ Global<>::logger = DefaultLogger; });
 
     // Log Callback
     if (properties.contains("log_cb"))
@@ -361,7 +308,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     }
 
     // Save LogLevel
-    if (auto logLevel = properties.getProperty(LOG_LEVEL))
+    if (auto logLevel = properties.getProperty(Config::LOG_LEVEL))
     {
         try
         {
@@ -480,7 +427,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
     KAFKA_THROW_IF_WITH_ERROR(Error(rd_kafka_last_error()));
 
     // Add brokers
-    auto brokers = properties.getProperty(BOOTSTRAP_SERVERS);
+    auto brokers = properties.getProperty(Config::BOOTSTRAP_SERVERS);
     if (!brokers || rd_kafka_brokers_add(getClientHandle(), brokers->c_str()) == 0)
     {
         KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
@@ -496,22 +443,22 @@ KafkaClient::validateAndReformProperties(const Properties& properties)
     auto newProperties = properties;
 
     // BOOTSTRAP_SERVERS property is mandatory
-    if (!newProperties.getProperty(BOOTSTRAP_SERVERS))
+    if (!newProperties.getProperty(Config::BOOTSTRAP_SERVERS))
     {
         KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
-                                "Validation failed! With no property [" + std::string(BOOTSTRAP_SERVERS) + "]"));
+                                "Validation failed! With no property [" + std::string(Config::BOOTSTRAP_SERVERS) + "]"));
     }
 
     // If no "client.id" configured, generate a random one for user
-    if (!newProperties.getProperty(CLIENT_ID))
+    if (!newProperties.getProperty(Config::CLIENT_ID))
     {
-        newProperties.put(CLIENT_ID, utility::getRandomString());
+        newProperties.put(Config::CLIENT_ID, utility::getRandomString());
     }
 
     // If no "log_level" configured, use Log::Level::Notice as default
-    if (!newProperties.getProperty(LOG_LEVEL))
+    if (!newProperties.getProperty(Config::LOG_LEVEL))
     {
-        newProperties.put(LOG_LEVEL, std::to_string(static_cast<int>(Log::Level::Notice)));
+        newProperties.put(Config::LOG_LEVEL, std::to_string(static_cast<int>(Log::Level::Notice)));
     }
 
     return newProperties;
