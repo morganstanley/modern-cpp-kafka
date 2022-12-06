@@ -14,7 +14,7 @@ TEST(AdminClient, BrokersTimeout)
     const int replicaFactor = 3;
 
     {
-        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
         std::cout << "[" << kafka::utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
         KafkaTestUtility::PauseBrokers();
@@ -51,7 +51,7 @@ TEST(AdminClient, BrokersTimeout)
     constexpr int maxRetry = 5;
     for (int i = 0; i < maxRetry; ++i)
     {
-        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // Create Topics, -- success
         std::cout << "[" << kafka::utility::getCurrentTime() << "] will CreateTopics" << std::endl;
@@ -77,7 +77,7 @@ TEST(AdminClient, BrokersTimeout)
     KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
 
     {
-        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // List Topics, -- success
         std::cout << "[" << kafka::utility::getCurrentTime() << "] will ListTopics" << std::endl;
@@ -100,7 +100,7 @@ TEST(AdminClient, BrokersTimeout)
     KafkaTestUtility::PauseBrokers();
 
     {
-        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // Delete Topics, -- timeout
         std::cout << "[" << kafka::utility::getCurrentTime() << "] will DeleteTopics" << std::endl;
@@ -116,7 +116,7 @@ TEST(AdminClient, BrokersTimeout)
     // Since the brokers might not be ready during the short time, sometimes we have to retry...
     for (int i = 0; i < maxRetry; ++i)
     {
-        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
         // Delete Topics, -- success
         std::cout << "[" << kafka::utility::getCurrentTime() << "] will DeleteTopics" << std::endl;
         auto deleteResult = adminClient.deleteTopics({topic});
@@ -135,7 +135,7 @@ TEST(AdminClient, BrokersTimeout)
     KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
 
     {
-        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
         // List Topics, -- success
         std::cout << "[" << kafka::utility::getCurrentTime() << "] will ListTopics" << std::endl;

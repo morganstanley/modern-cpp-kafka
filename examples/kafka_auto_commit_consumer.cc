@@ -5,24 +5,28 @@
 
 int main(int argc, char **argv)
 {
+    using namespace kafka;
+    using namespace kafka::clients;
+    using namespace kafka::clients::consumer;
+
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <brokers> <topic>\n";
         exit(argc == 1 ? 0 : 1); // NOLINT
     }
 
     const std::string brokers = argv[1];
-    const kafka::Topic topic  = argv[2];
+    const Topic       topic   = argv[2];
 
     try {
 
         // Create configuration object
-        const kafka::Properties props ({
-            {"bootstrap.servers",  brokers},
-            {"enable.auto.commit", "true"}
+        const Properties props ({
+            {"bootstrap.servers",  {brokers}},
+            {"enable.auto.commit", {"true" }}
         });
 
         // Create a consumer instance
-        kafka::clients::KafkaConsumer consumer(props);
+        KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});
@@ -41,7 +45,7 @@ int main(int argc, char **argv)
                     std::cout << "    Partition: " << record.partition() << std::endl;
                     std::cout << "    Offset   : " << record.offset() << std::endl;
                     std::cout << "    Timestamp: " << record.timestamp().toString() << std::endl;
-                    std::cout << "    Headers  : " << kafka::toString(record.headers()) << std::endl;
+                    std::cout << "    Headers  : " << toString(record.headers()) << std::endl;
                     std::cout << "    Key   [" << record.key().toString() << "]" << std::endl;
                     std::cout << "    Value [" << record.value().toString() << "]" << std::endl;
                 } else {
@@ -52,7 +56,7 @@ int main(int argc, char **argv)
 
         // consumer.close(); // No explicit close is needed, RAII will take care of it
 
-    } catch (const kafka::KafkaException& e) {
+    } catch (const KafkaException& e) {
         std::cerr << "% Unexpected exception caught: " << e.what() << std::endl;
     }
 }

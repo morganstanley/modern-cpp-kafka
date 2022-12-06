@@ -32,15 +32,15 @@ TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
 
     // Consumer properties
     auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-    props.put(kafka::clients::consumer::Config::MAX_POLL_RECORDS,  "1");        // Only poll 1 message each time
-    props.put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest");
-    props.put(kafka::clients::consumer::Config::SOCKET_TIMEOUT_MS, "2000");
+    props.put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,  "1");        // Only poll 1 message each time
+    props.put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
+    props.put(kafka::clients::consumer::ConsumerConfig::SOCKET_TIMEOUT_MS, "2000");
 
     volatile std::size_t commitCbCount = 0;
     {
         // Start a consumer (which need to call `pollEvents()` to trigger the commit callback)
-        kafka::clients::KafkaConsumer consumer(props, kafka::clients::KafkaClient::EventsPollingOption::Manual);
-        consumer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::consumer::KafkaConsumer consumer(props.put(kafka::clients::Config::ENABLE_MANUAL_EVENTS_POLL, "true")
+                                                              .put(kafka::clients::Config::ERROR_CB,                  KafkaTestUtility::DumpError));
         std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
         // Subscribe the topic
@@ -98,17 +98,17 @@ TEST(KafkaConsumer, DISABLED_CommitOffsetWhileBrokersStop)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(kafka::clients::consumer::Config::MAX_POLL_RECORDS,  "1")         // Only poll 1 message each time
-                            .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
-                            .put(kafka::clients::consumer::Config::SOCKET_TIMEOUT_MS, "2000")      // Just don't want to wait too long for the commit-offset callback.
-                            .put("log_level", "7")
-                            .put("debug", "all");
+                            .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,  "1")         // Only poll 1 message each time
+                            .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                            .put(kafka::clients::consumer::ConsumerConfig::SOCKET_TIMEOUT_MS, "2000")      // Just don't want to wait too long for the commit-offset callback.
+                            .put(kafka::clients::Config::LOG_LEVEL,                           "7")
+                            .put(kafka::clients::Config::DEBUG,                               "all")
+                            .put(kafka::clients::Config::ERROR_CB,                            KafkaTestUtility::DumpError);
 
     volatile std::size_t commitCbCount = 0;
     {
         // Start a consumer
-        kafka::clients::KafkaConsumer consumer(props);
-        consumer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::consumer::KafkaConsumer consumer(props);
         std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
         // Subscribe th topic
@@ -163,12 +163,12 @@ TEST(KafkaConsumer, BrokerStopBeforeConsumerStart)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS,   "30000")
-                            .put(kafka::clients::consumer::Config::ENABLE_PARTITION_EOF, "true");
+                            .put(kafka::clients::consumer::ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
+                            .put(kafka::clients::consumer::ConsumerConfig::ENABLE_PARTITION_EOF, "true")
+                            .put(kafka::clients::Config::ERROR_CB,                               KafkaTestUtility::DumpError);
 
     // Start the consumer
-    kafka::clients::KafkaConsumer consumer(props);
-    consumer.setErrorCallback(KafkaTestUtility::DumpError);
+    kafka::clients::consumer::KafkaConsumer consumer(props);
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
 
@@ -211,12 +211,12 @@ TEST(KafkaConsumer, BrokerStopBeforeSubscription)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS,   "30000")
-                            .put(kafka::clients::consumer::Config::ENABLE_PARTITION_EOF, "true");
+                            .put(kafka::clients::consumer::ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
+                            .put(kafka::clients::consumer::ConsumerConfig::ENABLE_PARTITION_EOF, "true")
+                            .put(kafka::clients::Config::ERROR_CB,                               KafkaTestUtility::DumpError);
 
     // Start the consumer
-    kafka::clients::KafkaConsumer consumer(props);
-    consumer.setErrorCallback(KafkaTestUtility::DumpError);
+    kafka::clients::consumer::KafkaConsumer consumer(props);
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Pause the brokers for a while
@@ -260,12 +260,12 @@ TEST(KafkaConsumer, BrokerStopBeforeSeek)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS,   "30000")
-                            .put(kafka::clients::consumer::Config::ENABLE_PARTITION_EOF, "true");
+                            .put(kafka::clients::consumer::ConsumerConfig::SESSION_TIMEOUT_MS,   "30000")
+                            .put(kafka::clients::consumer::ConsumerConfig::ENABLE_PARTITION_EOF, "true")
+                            .put(kafka::clients::Config::ERROR_CB,                               KafkaTestUtility::DumpError);
 
     // Start the consumer
-    kafka::clients::KafkaConsumer consumer(props);
-    consumer.setErrorCallback(KafkaTestUtility::DumpError);
+    kafka::clients::consumer::KafkaConsumer consumer(props);
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe the topic
@@ -325,12 +325,12 @@ TEST(KafkaConsumer, BrokerStopDuringMsgPoll)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(kafka::clients::consumer::Config::SESSION_TIMEOUT_MS, "30000")
-                            .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET,  "earliest"); // Seek to the very beginning
+                            .put(kafka::clients::consumer::ConsumerConfig::SESSION_TIMEOUT_MS, "30000")
+                            .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the very beginning
+                            .put(kafka::clients::Config::ERROR_CB,                             KafkaTestUtility::DumpError);
 
     // Start the consumer
-    kafka::clients::KafkaConsumer consumer(props);
-    consumer.setErrorCallback(KafkaTestUtility::DumpError);
+    kafka::clients::consumer::KafkaConsumer consumer(props);
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe the topic

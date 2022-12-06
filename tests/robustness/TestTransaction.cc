@@ -20,10 +20,10 @@ TEST(Transaction, DeliveryFailure)
     {
         auto record = kafka::clients::producer::ProducerRecord(topic, kafka::NullKey, kafka::Value(messageToSent.c_str(), messageToSent.size()));
 
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                 .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "3000")  // The delivery would fail in a short timeout
-                                                 .put(kafka::clients::producer::Config::TRANSACTIONAL_ID,   transactionId));
-        producer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                             .put(kafka::clients::producer::ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")  // The delivery would fail in a short timeout
+                                                             .put(kafka::clients::producer::ProducerConfig::TRANSACTIONAL_ID,   transactionId)
+                                                             .put(kafka::clients::Config::ERROR_CB,                             KafkaTestUtility::DumpError));
 
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer created." << std::endl;
 
@@ -65,9 +65,9 @@ TEST(Transaction, DeliveryFailure)
 
     // Check all received messages (incluing uncommitted)
     {
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                               .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest")
-                                               .put(kafka::clients::consumer::Config::ISOLATION_LEVEL,   "read_uncommitted"));
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                           .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
+                                                           .put(kafka::clients::consumer::ConsumerConfig::ISOLATION_LEVEL,   "read_uncommitted"));
         consumer.subscribe({topic});
 
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));

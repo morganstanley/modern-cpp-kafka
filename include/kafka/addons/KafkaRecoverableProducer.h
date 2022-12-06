@@ -2,6 +2,7 @@
 
 #include <kafka/Project.h>
 
+#include <kafka/ClientCommon.h>
 #include <kafka/KafkaClient.h>
 #include <kafka/KafkaProducer.h>
 #include <kafka/Types.h>
@@ -10,7 +11,8 @@
 #include <mutex>
 #include <vector>
 
-namespace KAFKA_API { namespace clients {
+
+namespace KAFKA_API { namespace clients { namespace producer {
 
 class KafkaRecoverableProducer
 {
@@ -18,9 +20,8 @@ public:
     explicit KafkaRecoverableProducer(const Properties& properties)
         : _properties(properties), _running(true)
     {
-        _errorCb = [this](const Error& error) {
-            if (error.isFatal()) _fatalError = std::make_unique<Error>(error);
-        };
+        _properties.put("enable.manual.events.poll", "true");
+        _properties.put("error_cb", [this](const Error& error) { if (error.isFatal()) _fatalError = std::make_unique<Error>(error); });
 
         _producer = createProducer();
 
@@ -53,17 +54,6 @@ public:
     }
 
     /**
-     * Set the log callback for the kafka client (it's a per-client setting).
-     */
-    void setLogger(const Logger& logger)
-    {
-        const std::lock_guard<std::mutex> lock(_producerMutex);
-
-        _logger = logger;
-        _producer->setLogger(*_logger);
-    }
-
-    /**
      * Set log level for the kafka client (the default value: 5).
      */
     void setLogLevel(int level)
@@ -72,31 +62,6 @@ public:
 
         _logLevel = level;
         _producer->setLogLevel(*_logLevel);
-    }
-
-    /**
-     * Set callback to receive the periodic statistics info.
-     * Note: 1) It only works while the "statistics.interval.ms" property is configured with a non-0 value.
-     *       2) The callback would be triggered periodically, receiving the internal statistics info (with JSON format) emited from librdkafka.
-     */
-    void setStatsCallback(const KafkaClient::StatsCallback& cb)
-    {
-        const std::lock_guard<std::mutex> lock(_producerMutex);
-
-        _statsCb = cb;
-        _producer->setStatsCallback(*_statsCb);
-    }
-
-    void setErrorCallback(const KafkaClient::ErrorCallback& cb)
-    {
-        const std::lock_guard<std::mutex> lock(_producerMutex);
-
-        _errorCb = [cb, this](const Error& error) {
-            cb(error);
-
-            if (error.isFatal()) _fatalError = std::make_unique<Error>(error);
-        };
-        _producer->setErrorCallback(*_errorCb);
     }
 
     /**
@@ -330,22 +295,16 @@ private:
 
     std::unique_ptr<KafkaProducer> createProducer()
     {
-        auto producer = std::make_unique<KafkaProducer>(_properties, KafkaClient::EventsPollingOption::Manual);
+        auto producer = std::make_unique<KafkaProducer>(_properties);
 
-        if (_logger)   producer->setLogger(*_logger);
         if (_logLevel) producer->setLogLevel(*_logLevel);
-        if (_statsCb)  producer->setStatsCallback(*_statsCb);
-        if (_errorCb)  producer->setErrorCallback(*_errorCb);
 
         return producer;
     }
 
     // Configurations for producer
-    Properties                           _properties;
-    Optional<Logger>                     _logger;
-    Optional<int>                        _logLevel;
-    Optional<KafkaClient::StatsCallback> _statsCb;
-    Optional<KafkaClient::ErrorCallback> _errorCb;
+    Properties              _properties;
+    Optional<int>           _logLevel;
 
     std::unique_ptr<Error> _fatalError;
 
@@ -356,5 +315,5 @@ private:
     std::unique_ptr<KafkaProducer> _producer;
 };
 
-} } // end of KAFKA_API::clients
+} } } // end of KAFKA_API::clients::producer
 

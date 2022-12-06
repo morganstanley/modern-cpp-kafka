@@ -81,10 +81,11 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
     return args;
 }
 
-void RunConsumer(const std::string& topic, const kafka::clients::consumer::Config& props)
+void RunConsumer(const std::string& topic, const kafka::clients::Config& props)
 {
     using namespace kafka::clients;
     using namespace kafka::clients::consumer;
+
     // Create a manual-commit consumer
     KafkaClient::setGlobalLogger(kafka::Logger());
     KafkaConsumer consumer(props);
@@ -143,7 +144,7 @@ int main (int argc, char **argv)
 
     // Prepare consumer properties
     //
-    using namespace kafka::clients::consumer;
+    using namespace kafka::clients;
     Config props;
     props.put(Config::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
     // Get client id
