@@ -9,6 +9,7 @@
 #include <cassert>
 #include <functional>
 #include <iostream>
+#include <mutex>
 
 
 namespace KAFKA_API {
@@ -36,6 +37,8 @@ struct Log
     }
 };
 
+
+// Log Buffer
 template <std::size_t MAX_CAPACITY>
 class LogBuffer
 {
@@ -72,17 +75,66 @@ private:
     char*                          _wptr;
 };
 
-using Logger = std::function<void(int, const char*, int, const char* msg)>;
 
+// Default Logger
 inline void DefaultLogger(int level, const char* /*filename*/, int /*lineno*/, const char* msg)
 {
     std::cout << "[" << utility::getCurrentTime() << "]" << Log::levelString(static_cast<std::size_t>(level)) << " " << msg;
     std::cout << std::endl;
 }
 
+// Null Logger
 inline void NullLogger(int /*level*/, const char* /*filename*/, int /*lineno*/, const char* /*msg*/)
 {
 }
+
+
+// Global Logger
+template <typename T = void>
+struct GlobalLogger
+{
+    static clients::LogCallback logCb;
+    static std::once_flag       initOnce;
+
+    static const constexpr int LOG_BUFFER_SIZE = 1024;
+
+    template<class ...Args>
+    static void doLog(int level, const char* filename, int lineno, const char* format, Args... args)
+    {
+        if (!GlobalLogger<>::logCb) return;
+
+        LogBuffer<LOG_BUFFER_SIZE> logBuffer;
+        logBuffer.print(format, args...);
+        GlobalLogger<>::logCb(level, filename, lineno, logBuffer.c_str());
+    }
+};
+
+template <typename T>
+clients::LogCallback GlobalLogger<T>::logCb;
+
+template <typename T>
+std::once_flag GlobalLogger<T>::initOnce;
+
+/**
+ * Set a global log interface for kafka API (Note: it takes no effect on Kafka clients).
+ */
+inline void setGlobalLogger(clients::LogCallback cb)
+{
+    std::call_once(GlobalLogger<>::initOnce, [](){}); // Then no need to init within the first KAFKA_API_LOG call.
+    GlobalLogger<>::logCb = std::move(cb);
+}
+
+/**
+ * Log for kafka API (Note: not for Kafka client instances).
+ *
+ * E.g,
+ *     KAFKA_API_LOG(Log::Level::Err, "something wrong happened! %s", detailedInfo.c_str());
+ */
+#define KAFKA_API_LOG(level, ...) do {                                                                \
+    std::call_once(GlobalLogger<>::initOnce, [](){ GlobalLogger<>::logCb = DefaultLogger; });       \
+    GlobalLogger<>::doLog(level, __FILE__, __LINE__, ##__VA_ARGS__);                               \
+} while (0)
+
 
 } // end of KAFKA_API
 

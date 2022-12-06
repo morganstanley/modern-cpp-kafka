@@ -3,10 +3,6 @@
 #include <kafka/Project.h>
 
 #include <kafka/Error.h>
-#include <kafka/RdKafkaHelper.h>
-#include <kafka/Types.h>
-
-#include <librdkafka/rdkafka.h>
 
 #include <functional>
 
@@ -27,6 +23,19 @@ namespace KAFKA_API { namespace clients {
      * Callback type for statistics info dumping.
      */
     using StatsCallback = std::function<void(const std::string&)>;
+
+    /**
+     * SASL OAUTHBEARER token info.
+     */
+    struct SaslOauthbearerToken
+    {
+        using KeyValuePairs = std::map<std::string, std::string>;
+
+        std::string               value;
+        std::chrono::microseconds mdLifetime{};
+        std::string               mdPrincipalName;
+        KeyValuePairs             extensions;
+    };
 
     /**
      * Callback type for OAUTHBEARER token refresh.

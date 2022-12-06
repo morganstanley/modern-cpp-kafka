@@ -97,9 +97,10 @@ int main (int argc, char **argv)
         {
             props.put(prop.first, prop.second);
         }
+        // Disable logging
+        props.put(Config::LOG_CB, kafka::NullLogger);
 
-        // Create a sync-send producer
-        KafkaClient::setGlobalLogger(kafka::Logger());
+        // Create a producer
         KafkaProducer producer(props);
 
         auto startPromptLine = []() { std::cout << "> "; };
@@ -131,9 +132,9 @@ int main (int argc, char **argv)
             startPromptLine();
         }
     }
-    catch (const std::exception& e)
+    catch (const kafka::KafkaException& e)
     {
-        std::cout << e.what() << std::endl;
+        std::cerr << "Exception thrown by producer: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

@@ -199,20 +199,5 @@ inline std::string toString(const TopicPartitionOffsets& tpos)
     return ret;
 }
 
-
-/**
- * SASL OAUTHBEARER token info.
- */
-struct SaslOauthbearerToken
-{
-    using KeyValuePairs = std::map<std::string, std::string>;
-
-    std::string               value;
-    std::chrono::microseconds mdLifetime{};
-    std::string               mdPrincipalName;
-    KeyValuePairs             extensions;
-};
-
-
 } // end of KAFKA_API
 
