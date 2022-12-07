@@ -163,44 +163,50 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a header-only library t
 
     * [Kafka Client API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html)
 
+    * `Properties` for Kafka clients
 
-    * Kafka Client Properties
+        * `Properties` is a map which contains all configuration info needed to initialize a Kafka client. These configuration items are key-value pairs, -- the "key" is a `std::string`, while the "value" could be a `std::string`, a `std::function<...>`, or an `Interceptors`.
 
-        * In most cases, the `Properties` settings for ***modern-cpp-kafka*** are identical with [librdkafka configuration](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
+            * K-V Types: `std::string` -> `std::string`
 
-        * With following exceptions
+                * Most are identical with [librdkafka configuration](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
 
-            * KafkaConsumer
+                * But with Exceptions
 
-                * Properties with random string as default
+                    * Default Value Changes
 
-                    * `client.id`
+                        * `log_level`(default: `5`): default was `6` from **librdkafka**
 
-                    * `group.id`
+                        * `client.id` (default: random string): no default string from **librdkafka**
 
-                * More properties than ***librdkafka***
+                        * `group.id` (default: random string, for `KafkaConsumer` only): no default string from **librdkafka**
 
-                    * `max.poll.records` (default: `500`): The maxmum number of records that a single call to `poll()` would return
+                    * Additional Options
 
-                * Property which overrides the one from ***librdkafka***
+                        * `enable.manual.events.poll` (default: `false`): To poll the (offset-commit/message-delivery callback) events manually
 
-                    * `enable.auto.commit` (default: `false`): To automatically commit the previously polled offsets on each `poll` operation
+                        *  `max.poll.records` (default: `500`, for `KafkaConsumer` only): The maxmum number of records that a single call to `poll()` would return
 
-                * Properties not supposed to be used (internally shadowed by ***modern-cpp-kafka***)
+                    * Ignored Options
 
-                    * `enable.auto.offset.store`
+                        * `enable.auto.offset.store`: ***modern-cpp-kafka*** will save the offsets in its own way
 
-                    * `auto.commit.interval.ms`
+                        * `auto.commit.interval.ms`: ***modern-cpp-kafka*** will not commit the offsets periodically, instead, it would do it in the next `poll()`.
 
-            * KafkaProducer
 
-                * Properties with random string as default
+            * K-V Types: `std::string` -> `std::function<...>`
 
-                    * `client.id`
+                * `log_cb` -> `LogCallback` (`std::function<void(int, const char*, int, const char* msg)>`)
 
-            * Log level
+                * `error_cb` -> `ErrorCallback` (`std::function<void(const Error&)>`)
 
-                * The default `log_level` is `NOTICE` (`5`) for all these clients
+                * `stats_cb` -> `StatsCallback` (`std::function<void(const std::string&)>`)
+
+                * `oauthbearer_token_refresh_cb` -> `OauthbearerTokenRefreshCallback` (`std::function<SaslOauthbearerToken(const std::string&)>`)
+
+            * K-V Types: `std::string` -> `Interceptors`
+
+                * `interceptors`: takes `Interceptors` as the value type
 
 * Test Environment (ZooKeeper/Kafka cluster) Setup
 

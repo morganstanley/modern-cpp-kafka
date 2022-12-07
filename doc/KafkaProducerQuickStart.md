@@ -10,12 +10,14 @@ We'd recommend users to cross-reference them, --especially the examples.
 
 ### Example
 ```cpp
+        using namespace kafka;
         using namespace kafka::clients;
+        using namespace kafka::clients::producer;
 
         // Create configuration object
-        kafka::Properties props ({
-            {"bootstrap.servers",  brokers},
-            {"enable.idempotence", "true"},
+        const Properties props ({
+            {"bootstrap.servers",  {brokers}},
+            {"enable.idempotence", {"true" }},
         });
 
         // Create a producer instance
@@ -28,9 +30,9 @@ We'd recommend users to cross-reference them, --especially the examples.
              std::getline(std::cin, *line);
              line = std::make_shared<std::string>()) {
             // The ProducerRecord doesn't own `line`, it is just a thin wrapper
-            auto record = producer::ProducerRecord(topic,
-                                                   kafka::NullKey,
-                                                   kafka::Value(line->c_str(), line->size()));
+            auto record = ProducerRecord(topic,
+                                         NullKey,
+                                         Value(line->c_str(), line->size()));
 
             // Send the message
             producer.send(record,
@@ -38,7 +40,7 @@ We'd recommend users to cross-reference them, --especially the examples.
                           // Note: Here we capture the shared_pointer of `line`,
                           //       which holds the content for `record.value()`.
                           //       It makes sure the memory block is valid until the lambda finishes.
-                          [line](const producer::RecordMetadata& metadata, const kafka::Error& error) {
+                          [line](const RecordMetadata& metadata, const Error& error) {
                               if (!error) {
                                   std::cout << "% Message delivered: " << metadata.toString() << std::endl;
                               } else {
@@ -60,32 +62,32 @@ We'd recommend users to cross-reference them, --especially the examples.
 
 ## `KafkaProducer` with `kafka::clients::KafkaClient::EventsPollingOption`
 
-While we construct a `KafkaProducer` with `kafka::clients::KafkaClient::EventsPollingOption::Auto` (the default option), an internal thread would be created for `MessageDelivery` callbacks handling.
+While we construct a `KafkaProducer` with `enable.manual.events.poll=false` (the default option), an internal thread would be created for `MessageDelivery` callbacks handling.
 
 This might not be what you want, since then you have to use 2 different threads to send the messages and handle the `MessageDelivery` responses.
 
-Here we have another choice, -- using `kafka::clients::KafkaClient::EventsPollingOption::Manual`, thus the `MessageDelivery` callbacks would be called within member function `pollEvents()`.
+Here we have another choice, -- using `enable.manual.events.poll=true`, thus the `MessageDelivery` callbacks would be called within member function `pollEvents()`.
 
-* Note, if you constructed the `KafkaProducer` with `EventsPollingOption::Manual`, the `send()` would be an `unblocked` operation.
-I.e, once the `message buffering queue` becomes full, the `send()` operation would throw an exception (or return an `error code` with the input reference parameter), -- instead of blocking there.
-This makes sense, since you might want to call `pollEvents()` later, thus delivery-callback could be called for some messages (which could then be removed from the `message buffering queue`).
+* Note, if you constructed the `KafkaProducer` with `enable.manual.events.poll=true`, the `send()` will be an `unblocked` operation even if the `message buffering queue` is full. In that case, the `send()` operation would throw an exception (or return an `error code` with the input reference parameter), -- instead of blocking there. And you might want to call `pollEvents()`, thus delivery-callback could be called for some messages (which could then be removed from the `message buffering queue`).
 
 ### Example
 ```cpp
+    using namespace kafka;
     using namespace kafka::clients;
+    using namespace kafka::clients::producer;
 
-    KafkaProducer producer(props, KafkaClient::EventsPollingOption::Manual);
+    KafkaProducer producer(props.put("enable.manual.events.poll", "true"));
 
     // Prepare "msgsToBeSent"
     auto std::map<int, std::pair<Key, Value>> msgsToBeSent = ...;
     
     for (const auto& msg : msgsToBeSent) {
-        auto record = producer::ProducerRecord(topic, partition, msg.second.first, msg.second.second, msg.first);
+        auto record = ProducerRecord(topic, partition, msg.second.first, msg.second.second, msg.first);
         kafka::Error sendError;
         producer.send(sendError,
                       record,
                       // Ack callback
-                      [&msg](const producer::RecordMetadata& metadata, const kafka::Error& deliveryError) {
+                      [&msg](const RecordMetadata& metadata, const Error& deliveryError) {
                            // the message could be identified by `metadata.recordId()`
                            if (deliveryError)  {
                                std::cerr << "% Message delivery failed: " << deliveryError.message() << std::endl;
@@ -97,7 +99,7 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
     }
     
     // Here we call the `MessageDelivery` callbacks
-    // Note, we can only do this while the producer was constructed with `EventsPollingOption::MANUAL`.
+    // Note, we can only do this while the producer was constructed with `enable.manual.events.poll=true`.
     producer.pollEvents();
 ```
 
@@ -111,7 +113,7 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 ```cpp
     using namespace kafka::clients;
 
-    kafak::KafkaProducer producer(props);
+    kafak::producer::KafkaProducer producer(props);
 
     auto record = producer::ProducerRecord(topic, partition, Key(), Value());
 
@@ -129,7 +131,7 @@ This makes sense, since you might want to call `pollEvents()` later, thus delive
 
         producer.send(record,
                       // Ack callback
-                      [&msg](const kafka::Producer::RecordMetadata& metadata, , const kafka::Error& error) {
+                      [&msg](const kafka::producer::RecordMetadata& metadata, , const kafka::Error& error) {
                            if (error)  {
                                std::cerr << "% Message delivery failed: " << error.message() << std::endl;
                            }

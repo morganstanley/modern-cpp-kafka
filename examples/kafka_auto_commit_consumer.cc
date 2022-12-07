@@ -21,8 +21,7 @@ int main(int argc, char **argv)
 
         // Create configuration object
         const Properties props ({
-            {"bootstrap.servers",  {brokers}},
-            {"enable.auto.commit", {"true" }}
+            {"bootstrap.servers", {brokers}}
         });
 
         // Create a consumer instance
