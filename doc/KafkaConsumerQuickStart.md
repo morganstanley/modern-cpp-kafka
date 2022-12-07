@@ -4,8 +4,6 @@ Generally speaking, The `Modern C++ Kafka API` is quite similar with [Kafka Java
 
 We'd recommend users to cross-reference them, --especially the examples.
 
-Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAutoCommitConsumer and KafkaManualCommitConsumer, --depending on whether users should call `commit` manually.
-
 ## KafkaConsumer (`enable.auto.commit=true`)
 
 * Automatically commits previously polled offsets on each `poll` (and the final `close`) operations.
@@ -15,13 +13,12 @@ Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAuto
 ### Example
 ```cpp
         // Create configuration object
-        kafka::Properties props ({
-            {"bootstrap.servers",  brokers},
-            {"enable.auto.commit", "true"}
+        const Properties props ({
+            {"bootstrap.servers", {brokers}},
         });
 
         // Create a consumer instance
-        kafka::clients::KafkaConsumer consumer(props);
+        KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});
@@ -40,7 +37,7 @@ Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAuto
                     std::cout << "    Partition: " << record.partition() << std::endl;
                     std::cout << "    Offset   : " << record.offset() << std::endl;
                     std::cout << "    Timestamp: " << record.timestamp().toString() << std::endl;
-                    std::cout << "    Headers  : " << kafka::toString(record.headers()) << std::endl;
+                    std::cout << "    Headers  : " << toString(record.headers()) << std::endl;
                     std::cout << "    Key   [" << record.key().toString() << "]" << std::endl;
                     std::cout << "    Value [" << record.value().toString() << "]" << std::endl;
                 } else {
@@ -48,7 +45,7 @@ Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAuto
                 }
             }
         }
-        
+
         // consumer.close(); // No explicit close is needed, RAII will take care of it
 ```
 
@@ -67,12 +64,13 @@ Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAuto
 ### Example
 ```cpp
         // Create configuration object
-        kafka::Properties props ({
-            {"bootstrap.servers", brokers},
+        const Properties props ({
+            {"bootstrap.servers",  {brokers}},
+            {"enable.auto.commit", {"false" }}
         });
 
         // Create a consumer instance
-        kafka::clients::KafkaConsumer consumer(props);
+        KafkaConsumer consumer(props);
 
         // Subscribe to topics
         consumer.subscribe({topic});
@@ -98,7 +96,7 @@ Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAuto
                     std::cout << "    Partition: " << record.partition() << std::endl;
                     std::cout << "    Offset   : " << record.offset() << std::endl;
                     std::cout << "    Timestamp: " << record.timestamp().toString() << std::endl;
-                    std::cout << "    Headers  : " << kafka::toString(record.headers()) << std::endl;
+                    std::cout << "    Headers  : " << toString(record.headers()) << std::endl;
                     std::cout << "    Key   [" << record.key().toString() << "]" << std::endl;
                     std::cout << "    Value [" << record.value().toString() << "]" << std::endl;
 
@@ -112,7 +110,7 @@ Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAuto
                 auto now = std::chrono::steady_clock::now();
                 if (now - lastTimeCommitted > std::chrono::seconds(1)) {
                     // Commit offsets for messages polled
-                    std::cout << "% syncCommit offsets: " << kafka::utility::getCurrentTime() << std::endl;
+                    std::cout << "% syncCommit offsets: " << utility::getCurrentTime() << std::endl;
                     consumer.commitSync(); // or commitAsync()
 
                     lastTimeCommitted = now;
@@ -124,21 +122,21 @@ Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAuto
         // consumer.close(); // No explicit close is needed, RAII will take care of it
 ```
 
-* The example is quite similar with the KafkaAutoCommitConsumer, with only 1 more line added for manual-commit.
+* The example is quite similar with the previous `enable.auto.commit=true` case, but has to call `commitSync`(or `commitAsync`) manually.
 
-* `commitSync` and `commitAsync` are both available for a KafkaManualConsumer. Normally, use `commitSync` to guarantee the commitment, or use `commitAsync`(with `OffsetCommitCallback`) to get a better performance.
+* `commitSync` and `commitAsync` are both available here. Normally, use `commitSync` to guarantee the commitment, or use `commitAsync`(with `OffsetCommitCallback`) to get a better performance.
 
-## `KafkaConsumer` with `kafka::clients::KafkaClient::EventsPollingOption`
+## Option `enable.manual.events.poll`
 
-While we construct a `KafkaConsumer` with `kafka::clients::KafkaClient::EventsPollingOption::Auto` (i.e. the default option), an internal thread would be created for `OffsetCommit` callbacks handling.
+While we construct a `KafkaConsumer` with `enable.manual.events.poll=false` (i.e. the default option), an internal thread would be created for `OffsetCommit` callbacks handling.
 
 This might not be what you want, since then you have to use 2 different threads to process the messages and handle the `OffsetCommit` responses.
 
-Here we have another choice, -- using `kafka::clients::KafkaClient::EventsPollingOption::Manual`, thus the `OffsetCommit` callbacks would be called within member function `pollEvents()`.
+Here we have another choice, -- using `enable.manual.events.poll=true`, thus the `OffsetCommit` callbacks would be called within member function `pollEvents()`.
 
 ### Example
 ```cpp
-    KafkaConsumer consumer(props, kafka::clients::KafkaClient::EventsPollingOption::Manual);
+    KafkaConsumer consumer(props.put("enable.manual.events.poll", "true"));
 
     consumer.subscribe({"topic1", "topic2"});
 
@@ -153,7 +151,7 @@ Here we have another choice, -- using `kafka::clients::KafkaClient::EventsPollin
         }
 
         // Here we call the `OffsetCommit` callbacks
-        // Note, we can only do this while the consumer was constructed with `EventsPollingOption::Manual`.
+        // Note, we can only do this while the consumer was constructed with `enable.manual.events.poll=true`.
         consumer.pollEvents();
     }
 ```

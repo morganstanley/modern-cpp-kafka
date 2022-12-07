@@ -153,13 +153,16 @@ The `msgid` is used, (along with a base `msgid` value stored at the time the `PI
 ### `KafkaProducer` demo
 
 ```cpp
+    using namespace kafka::clients;
+    using namespace kafka::clients::producer;
+
     std::atomic<bool> running = true;
 
     KafkaProducer producer(
         Properties({
-            { ProducerConfig::BOOTSTRAP_SERVERS,  "192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092" },
-            { ProducerConfig::ENABLE_IDEMPOTENCE, "true" },
-            { ProducerConfig::MESSAGE_TIMEOUT_MS, "86400000"}  // as long as 1 day
+            { Config::BOOTSTRAP_SERVERS,  {"192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092"} },
+            { ProducerConfig::ENABLE_IDEMPOTENCE, {"true"} },
+            { ProducerConfig::MESSAGE_TIMEOUT_MS, {"86400000"} }  // as long as 1 day
         })
     );
 
@@ -168,7 +171,7 @@ The `msgid` is used, (along with a base `msgid` value stored at the time the `PI
         auto record = ProducerRecord(topic, msg.key, msg.value, msg.id);
         producer.send(record,
                       // Ack callback
-                      [&msg](const Producer::RecordMetadata& metadata, std::error_code ec) {
+                      [&msg](const RecordMetadata& metadata, std::error_code ec) {
                            // the message could be identified by `metadata.recordId()`
                            auto recordId = metadata.recordId();
                            if (ec)  {
