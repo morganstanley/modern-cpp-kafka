@@ -68,7 +68,6 @@ $(function() {
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classKAFKA__API_1_1clients_1_1KafkaClient-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">KAFKA_API::clients::KafkaClient Class Reference</div>  </div>
@@ -85,34 +84,17 @@ Inheritance diagram for KAFKA_API::clients::KafkaClient:</div>
  <div class="center">
   <img src="classKAFKA__API_1_1clients_1_1KafkaClient.png" usemap="#KAFKA_5FAPI::clients::KafkaClient_map" alt=""/>
   <map id="KAFKA_5FAPI::clients::KafkaClient_map" name="KAFKA_5FAPI::clients::KafkaClient_map">
-<area href="classKAFKA__API_1_1clients_1_1AdminClient.html" title="The administrative client for Kafka, which supports managing and inspecting topics,..." alt="KAFKA_API::clients::AdminClient" shape="rect" coords="0,56,218,80"/>
-<area href="classKAFKA__API_1_1clients_1_1KafkaConsumer.html" title="KafkaConsumer class." alt="KAFKA_API::clients::KafkaConsumer" shape="rect" coords="228,56,446,80"/>
-<area href="classKAFKA__API_1_1clients_1_1KafkaProducer.html" title="KafkaProducer class." alt="KAFKA_API::clients::KafkaProducer" shape="rect" coords="456,56,674,80"/>
+<area href="classKAFKA__API_1_1clients_1_1admin_1_1AdminClient.html" title="The administrative client for Kafka, which supports managing and inspecting topics,..." alt="KAFKA_API::clients::admin::AdminClient" shape="rect" coords="0,56,279,80"/>
+<area href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html" title="KafkaConsumer class." alt="KAFKA_API::clients::consumer::KafkaConsumer" shape="rect" coords="289,56,568,80"/>
+<area href="classKAFKA__API_1_1clients_1_1producer_1_1KafkaProducer.html" title="KafkaProducer class." alt="KAFKA_API::clients::producer::KafkaProducer" shape="rect" coords="578,56,857,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:ae7891e26da12ecc9564de418655e576c"><td class="memItemLeft" align="right" valign="top"><a id="ae7891e26da12ecc9564de418655e576c"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ae7891e26da12ecc9564de418655e576c">EventsPollingOption</a> { <b>Manual</b>
-, <b>Auto</b>
- }</td></tr>
-<tr class="memdesc:ae7891e26da12ecc9564de418655e576c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The option shows whether user wants to call <code><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ac2935c5b2fb8b8467fd89f60183d1734" title="Call the OffsetCommit callbacks (if any) Note: The Kafka client should be constructed with option Eve...">pollEvents()</a></code> manually to trigger internal callbacks. <br /></td></tr>
-<tr class="separator:ae7891e26da12ecc9564de418655e576c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7280a666b8700348ad8ab396918a162a"><td class="memItemLeft" align="right" valign="top"><a id="a7280a666b8700348ad8ab396918a162a"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <b>DEFAULT_METADATA_TIMEOUT_MS</b> = 10000
  }</td></tr>
 <tr class="separator:a7280a666b8700348ad8ab396918a162a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a75ea5fadbf115f897396fa41a6101645"><td class="memItemLeft" align="right" valign="top"><a id="a75ea5fadbf115f897396fa41a6101645"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a75ea5fadbf115f897396fa41a6101645">StatsCallback</a> = std::function&lt; void(const std::string &amp;)&gt;</td></tr>
-<tr class="memdesc:a75ea5fadbf115f897396fa41a6101645"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for statistics info dumping. <br /></td></tr>
-<tr class="separator:a75ea5fadbf115f897396fa41a6101645"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afab1aa1d16f1f2cf47e5e6bdf9feeed3"><td class="memItemLeft" align="right" valign="top"><a id="afab1aa1d16f1f2cf47e5e6bdf9feeed3"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#afab1aa1d16f1f2cf47e5e6bdf9feeed3">ErrorCallback</a> = std::function&lt; void(const <a class="el" href="classKAFKA__API_1_1Error.html">Error</a> &amp;)&gt;</td></tr>
-<tr class="memdesc:afab1aa1d16f1f2cf47e5e6bdf9feeed3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for error notification. <br /></td></tr>
-<tr class="separator:afab1aa1d16f1f2cf47e5e6bdf9feeed3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a505231cd382fae5cb6ebfb9422cb0698"><td class="memItemLeft" align="right" valign="top"><a id="a505231cd382fae5cb6ebfb9422cb0698"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a505231cd382fae5cb6ebfb9422cb0698">OauthbearerTokenRefreshCallback</a> = std::function&lt; <a class="el" href="structKAFKA__API_1_1SaslOauthbearerToken.html">SaslOauthbearerToken</a>(const std::string &amp;)&gt;</td></tr>
-<tr class="memdesc:a505231cd382fae5cb6ebfb9422cb0698"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for OAUTHBEARER token refresh. <br /></td></tr>
-<tr class="separator:a505231cd382fae5cb6ebfb9422cb0698"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -123,25 +105,10 @@ const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a cl
 <tr class="memitem:aa7b5c908c067a69ebad5d00c1266f728"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#aa7b5c908c067a69ebad5d00c1266f728">name</a> () const</td></tr>
 <tr class="memdesc:aa7b5c908c067a69ebad5d00c1266f728"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the client name (i.e.  <a href="classKAFKA__API_1_1clients_1_1KafkaClient.html#aa7b5c908c067a69ebad5d00c1266f728">More...</a><br /></td></tr>
 <tr class="separator:aa7b5c908c067a69ebad5d00c1266f728"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adecb78a1dd5ef8d069e5342e5f1063e6"><td class="memItemLeft" align="right" valign="top"><a id="adecb78a1dd5ef8d069e5342e5f1063e6"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#adecb78a1dd5ef8d069e5342e5f1063e6">setLogger</a> (Logger logger)</td></tr>
-<tr class="memdesc:adecb78a1dd5ef8d069e5342e5f1063e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the log callback for the kafka client (it's a per-client setting). <br /></td></tr>
-<tr class="separator:adecb78a1dd5ef8d069e5342e5f1063e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4954d6ff2b27d9085b75ced85be1a1b4"><td class="memItemLeft" align="right" valign="top"><a id="a4954d6ff2b27d9085b75ced85be1a1b4"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a4954d6ff2b27d9085b75ced85be1a1b4">setLogLevel</a> (int level)</td></tr>
 <tr class="memdesc:a4954d6ff2b27d9085b75ced85be1a1b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set log level for the kafka client (the default value: 5). <br /></td></tr>
 <tr class="separator:a4954d6ff2b27d9085b75ced85be1a1b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05ac8feee2c9155821b09b01f8c3f003"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a05ac8feee2c9155821b09b01f8c3f003">setStatsCallback</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a75ea5fadbf115f897396fa41a6101645">StatsCallback</a> cb)</td></tr>
-<tr class="memdesc:a05ac8feee2c9155821b09b01f8c3f003"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set callback to receive the periodic statistics info.  <a href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a05ac8feee2c9155821b09b01f8c3f003">More...</a><br /></td></tr>
-<tr class="separator:a05ac8feee2c9155821b09b01f8c3f003"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9903a3c39dcddd713a86279724a9fa70"><td class="memItemLeft" align="right" valign="top"><a id="a9903a3c39dcddd713a86279724a9fa70"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a9903a3c39dcddd713a86279724a9fa70">setErrorCallback</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#afab1aa1d16f1f2cf47e5e6bdf9feeed3">ErrorCallback</a> cb)</td></tr>
-<tr class="memdesc:a9903a3c39dcddd713a86279724a9fa70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set callback for error notification. <br /></td></tr>
-<tr class="separator:a9903a3c39dcddd713a86279724a9fa70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab049e7ab65767b185fa70c6c6086934b"><td class="memItemLeft" align="right" valign="top"><a id="ab049e7ab65767b185fa70c6c6086934b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ab049e7ab65767b185fa70c6c6086934b">setOauthbearerTokernRefreshCallback</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a505231cd382fae5cb6ebfb9422cb0698">OauthbearerTokenRefreshCallback</a> cb)</td></tr>
-<tr class="memdesc:ab049e7ab65767b185fa70c6c6086934b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set callback for OAUTHBEARER token refresh. <br /></td></tr>
-<tr class="separator:ab049e7ab65767b185fa70c6c6086934b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f96f756ee68fc0f4c8ee935360a3018"><td class="memItemLeft" align="right" valign="top"><a id="a4f96f756ee68fc0f4c8ee935360a3018"></a>
 const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a4f96f756ee68fc0f4c8ee935360a3018">properties</a> () const</td></tr>
 <tr class="memdesc:a4f96f756ee68fc0f4c8ee935360a3018"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the properties which took effect. <br /></td></tr>
@@ -152,7 +119,7 @@ Optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"
 <tr class="separator:a73e70f6afaa93f7dc6b930b16d05ad35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2935c5b2fb8b8467fd89f60183d1734"><td class="memItemLeft" align="right" valign="top"><a id="ac2935c5b2fb8b8467fd89f60183d1734"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#ac2935c5b2fb8b8467fd89f60183d1734">pollEvents</a> (std::chrono::milliseconds timeout)</td></tr>
-<tr class="memdesc:ac2935c5b2fb8b8467fd89f60183d1734"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call the OffsetCommit callbacks (if any) Note: The Kafka client should be constructed with option <code>EventsPollingOption::Manual</code>. <br /></td></tr>
+<tr class="memdesc:ac2935c5b2fb8b8467fd89f60183d1734"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call the OffsetCommit callbacks (if any) Note: The Kafka client should be constructed with option <code>enable.manual.events.poll=true</code>! <br /></td></tr>
 <tr class="separator:ac2935c5b2fb8b8467fd89f60183d1734"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a012ecf14a8328f7349f7fc886ba8d090"><td class="memItemLeft" align="right" valign="top">Optional&lt; <a class="el" href="structKAFKA__API_1_1BrokerMetadata.html">BrokerMetadata</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a012ecf14a8328f7349f7fc886ba8d090">fetchBrokerMetadata</a> (const std::string &amp;topic, std::chrono::milliseconds timeout=std::chrono::milliseconds(DEFAULT_METADATA_TIMEOUT_MS), bool disableErrorLogging=false)</td></tr>
 <tr class="memdesc:a012ecf14a8328f7349f7fc886ba8d090"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch matadata from a available broker.  <a href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a012ecf14a8328f7349f7fc886ba8d090">More...</a><br /></td></tr>
@@ -164,20 +131,6 @@ template&lt;class ... Args&gt; </td></tr>
 <tr class="memitem:a50e7e67da7bffff7e4a1e3c38ae05b81"><td class="memItemLeft" align="right" valign="top"><a id="a50e7e67da7bffff7e4a1e3c38ae05b81"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>doLog</b> (int level, const char *filename, int lineno, const char *msg) const</td></tr>
 <tr class="separator:a50e7e67da7bffff7e4a1e3c38ae05b81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a2660c0e701c823e004fdb59c4aa6713a"><td class="memItemLeft" align="right" valign="top"><a id="a2660c0e701c823e004fdb59c4aa6713a"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a2660c0e701c823e004fdb59c4aa6713a">setGlobalLogger</a> (Logger logger=NullLogger)</td></tr>
-<tr class="memdesc:a2660c0e701c823e004fdb59c4aa6713a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a log callback for kafka clients, which do not have a client specific logging callback configured (see <code>setLogger</code>). <br /></td></tr>
-<tr class="separator:a2660c0e701c823e004fdb59c4aa6713a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21ab22735916ccf5e2cc941ed7e05bad"><td class="memTemplParams" colspan="2"><a id="a21ab22735916ccf5e2cc941ed7e05bad"></a>
-template&lt;class ... Args&gt; </td></tr>
-<tr class="memitem:a21ab22735916ccf5e2cc941ed7e05bad"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>doGlobalLog</b> (int level, const char *filename, int lineno, const char *format, Args... args)</td></tr>
-<tr class="separator:a21ab22735916ccf5e2cc941ed7e05bad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36da7043d8cf979dbd11477c4c2a54eb"><td class="memItemLeft" align="right" valign="top"><a id="a36da7043d8cf979dbd11477c4c2a54eb"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b> (int level, const char *filename, int lineno, const char *msg)</td></tr>
-<tr class="separator:a36da7043d8cf979dbd11477c4c2a54eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The base class for Kafka clients. </p>
@@ -255,42 +208,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>doGlobalLog</b
 
 </div>
 </div>
-<a id="a05ac8feee2c9155821b09b01f8c3f003"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05ac8feee2c9155821b09b01f8c3f003">&#9670;&nbsp;</a></span>setStatsCallback()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void KAFKA_API::clients::KafkaClient::setStatsCallback </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classKAFKA__API_1_1clients_1_1KafkaClient.html#a75ea5fadbf115f897396fa41a6101645">StatsCallback</a>&#160;</td>
-          <td class="paramname"><em>cb</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set callback to receive the periodic statistics info. </p>
-<p>Note: 1) It only works while the "statistics.interval.ms" property is configured with a non-0 value. 2) The callback would be triggered periodically, receiving the internal statistics info (with JSON format) emited from librdkafka. </p>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/runner/work/modern-cpp-kafka/modern-cpp-kafka/include/kafka/<a class="el" href="KafkaClient_8h_source.html">KafkaClient.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Nov 21 2022 03:54:09 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Wed Dec 7 2022 01:37:21 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

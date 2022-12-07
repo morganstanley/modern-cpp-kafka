@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['unorderedoffsetcommitqueue_159',['UnorderedOffsetCommitQueue',['../classKAFKA__API_1_1clients_1_1consumer_1_1UnorderedOffsetCommitQueue.html',1,'KAFKA_API::clients::consumer']]],
-  ['unsubscribe_160',['unsubscribe',['../classKAFKA__API_1_1clients_1_1KafkaConsumer.html#a0b8b107a395da5c5dc6ad88dc0513376',1,'KAFKA_API::clients::KafkaConsumer']]]
+  ['unorderedoffsetcommitqueue_163',['UnorderedOffsetCommitQueue',['../classKAFKA__API_1_1clients_1_1consumer_1_1UnorderedOffsetCommitQueue.html',1,'KAFKA_API::clients::consumer']]],
+  ['unsubscribe_164',['unsubscribe',['../classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a300320d25d6e2e3920541e9f85528375',1,'KAFKA_API::clients::consumer::KafkaConsumer']]]
 ];

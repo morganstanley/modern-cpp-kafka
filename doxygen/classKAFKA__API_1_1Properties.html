@@ -84,17 +84,18 @@ Inheritance diagram for KAFKA_API::Properties:</div>
  <div class="center">
   <img src="classKAFKA__API_1_1Properties.png" usemap="#KAFKA_5FAPI::Properties_map" alt=""/>
   <map id="KAFKA_5FAPI::Properties_map" name="KAFKA_5FAPI::Properties_map">
-<area href="classKAFKA__API_1_1clients_1_1admin_1_1Config.html" title="Configuration for the Kafka Consumer." alt="KAFKA_API::clients::admin::Config" shape="rect" coords="0,56,227,80"/>
-<area href="classKAFKA__API_1_1clients_1_1consumer_1_1Config.html" title="Configuration for the Kafka Consumer." alt="KAFKA_API::clients::consumer::Config" shape="rect" coords="237,56,464,80"/>
-<area href="classKAFKA__API_1_1clients_1_1producer_1_1Config.html" title="Configuration for the Kafka Producer." alt="KAFKA_API::clients::producer::Config" shape="rect" coords="474,56,701,80"/>
+<area href="classKAFKA__API_1_1clients_1_1Config.html" title="Configuration for Kafka clients." alt="KAFKA_API::clients::Config" shape="rect" coords="294,56,578,80"/>
+<area href="classKAFKA__API_1_1clients_1_1admin_1_1AdminClientConfig.html" title="Configuration for the Kafka Consumer." alt="KAFKA_API::clients::admin::AdminClientConfig" shape="rect" coords="0,112,284,136"/>
+<area href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerConfig.html" title="Configuration for the Kafka Consumer." alt="KAFKA_API::clients::consumer::ConsumerConfig" shape="rect" coords="294,112,578,136"/>
+<area href="classKAFKA__API_1_1clients_1_1producer_1_1ProducerConfig.html" title="Configuration for the Kafka Producer." alt="KAFKA_API::clients::producer::ProducerConfig" shape="rect" coords="588,112,872,136"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:ae8e2b817d400a17292a689f6ac6dafa3"><td class="memItemLeft" align="right" valign="top"><a id="ae8e2b817d400a17292a689f6ac6dafa3"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>PropertiesMap</b> = std::map&lt; std::string, std::string &gt;</td></tr>
-<tr class="separator:ae8e2b817d400a17292a689f6ac6dafa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecf0f391071f2ac6886d7e9558058f43"><td class="memItemLeft" align="right" valign="top"><a id="aecf0f391071f2ac6886d7e9558058f43"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>PropertiesMap</b> = std::map&lt; std::string, ValueType &gt;</td></tr>
+<tr class="separator:aecf0f391071f2ac6886d7e9558058f43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -107,15 +108,25 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad10879cd01045ac2bb3111d81b4eb81e"><td class="memItemLeft" align="right" valign="top"><a id="ad10879cd01045ac2bb3111d81b4eb81e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const <a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;rhs) const</td></tr>
 <tr class="separator:ad10879cd01045ac2bb3111d81b4eb81e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a862e5c8422e86168105c40a34dc1136d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#a862e5c8422e86168105c40a34dc1136d">put</a> (const std::string &amp;key, const std::string &amp;value)</td></tr>
-<tr class="memdesc:a862e5c8422e86168105c40a34dc1136d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a property.  <a href="classKAFKA__API_1_1Properties.html#a862e5c8422e86168105c40a34dc1136d">More...</a><br /></td></tr>
-<tr class="separator:a862e5c8422e86168105c40a34dc1136d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e1689c4109840850b2152016c3c66a6"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a8e1689c4109840850b2152016c3c66a6"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classKAFKA__API_1_1Properties.html">Properties</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#a8e1689c4109840850b2152016c3c66a6">put</a> (const std::string &amp;key, const T &amp;value)</td></tr>
+<tr class="memdesc:a8e1689c4109840850b2152016c3c66a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a property.  <a href="classKAFKA__API_1_1Properties.html#a8e1689c4109840850b2152016c3c66a6">More...</a><br /></td></tr>
+<tr class="separator:a8e1689c4109840850b2152016c3c66a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a841d1bd2d346a610dee0c14bac25e29f"><td class="memItemLeft" align="right" valign="top"><a id="a841d1bd2d346a610dee0c14bac25e29f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#a841d1bd2d346a610dee0c14bac25e29f">remove</a> (const std::string &amp;key)</td></tr>
 <tr class="memdesc:a841d1bd2d346a610dee0c14bac25e29f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the property (if one exists). <br /></td></tr>
 <tr class="separator:a841d1bd2d346a610dee0c14bac25e29f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0d7b3f2251e97333d7e543d4794f5af"><td class="memItemLeft" align="right" valign="top">Optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">getProperty</a> (const std::string &amp;key) const</td></tr>
-<tr class="memdesc:af0d7b3f2251e97333d7e543d4794f5af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a property.  <a href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">More...</a><br /></td></tr>
+<tr class="memitem:ab6cd66d58771703a1e9b724f2f58f95e"><td class="memItemLeft" align="right" valign="top"><a id="ab6cd66d58771703a1e9b724f2f58f95e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#ab6cd66d58771703a1e9b724f2f58f95e">contains</a> (const std::string &amp;key) const</td></tr>
+<tr class="memdesc:ab6cd66d58771703a1e9b724f2f58f95e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether the map contains a property. <br /></td></tr>
+<tr class="separator:ab6cd66d58771703a1e9b724f2f58f95e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36b7b731daed93c621284a119ef80543"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a36b7b731daed93c621284a119ef80543"><td class="memTemplItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#a36b7b731daed93c621284a119ef80543">get</a> (const std::string &amp;key) const</td></tr>
+<tr class="memdesc:a36b7b731daed93c621284a119ef80543"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a property reference.  <a href="classKAFKA__API_1_1Properties.html#a36b7b731daed93c621284a119ef80543">More...</a><br /></td></tr>
+<tr class="separator:a36b7b731daed93c621284a119ef80543"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0d7b3f2251e97333d7e543d4794f5af"><td class="memItemLeft" align="right" valign="top"><a id="af0d7b3f2251e97333d7e543d4794f5af"></a>
+Optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">getProperty</a> (const std::string &amp;key) const</td></tr>
+<tr class="memdesc:af0d7b3f2251e97333d7e543d4794f5af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a property. <br /></td></tr>
 <tr class="separator:af0d7b3f2251e97333d7e543d4794f5af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ed8b1d3ed286def5273f0317e783ebd"><td class="memItemLeft" align="right" valign="top"><a id="a6ed8b1d3ed286def5273f0317e783ebd"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1Properties.html#a6ed8b1d3ed286def5273f0317e783ebd">eraseProperty</a> (const std::string &amp;key)</td></tr>
@@ -132,17 +143,19 @@ const PropertiesMap &amp;&#160;</td><td class="memItemRight" valign="bottom"><a 
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The properties for Kafka clients. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="af0d7b3f2251e97333d7e543d4794f5af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af0d7b3f2251e97333d7e543d4794f5af">&#9670;&nbsp;</a></span>getProperty()</h2>
+<a id="a36b7b731daed93c621284a119ef80543"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36b7b731daed93c621284a119ef80543">&#9670;&nbsp;</a></span>get()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Optional&lt;std::string&gt; KAFKA_API::Properties::getProperty </td>
+          <td class="memname">T&amp; KAFKA_API::Properties::get </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>key</em></td><td>)</td>
@@ -156,16 +169,18 @@ const PropertiesMap &amp;&#160;</td><td class="memItemRight" valign="bottom"><a 
 </table>
 </div><div class="memdoc">
 
-<p>Get a property. </p>
-<p>If the map previously contained a mapping for the key, the old value is replaced by the specified value. </p>
+<p>Get a property reference. </p>
+<p>If the property doesn't exist, an execption would be thrown. </p>
 
 </div>
 </div>
-<a id="a862e5c8422e86168105c40a34dc1136d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a862e5c8422e86168105c40a34dc1136d">&#9670;&nbsp;</a></span>put()</h2>
+<a id="a8e1689c4109840850b2152016c3c66a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e1689c4109840850b2152016c3c66a6">&#9670;&nbsp;</a></span>put()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -179,7 +194,7 @@ const PropertiesMap &amp;&#160;</td><td class="memItemRight" valign="bottom"><a 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>value</em>&#160;</td>
         </tr>
         <tr>
@@ -206,7 +221,7 @@ const PropertiesMap &amp;&#160;</td><td class="memItemRight" valign="bottom"><a 
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Nov 21 2022 03:54:09 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Wed Dec 7 2022 01:37:21 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

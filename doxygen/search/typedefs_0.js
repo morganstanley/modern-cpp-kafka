@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['errorcallback_333',['ErrorCallback',['../classKAFKA__API_1_1clients_1_1KafkaClient.html#afab1aa1d16f1f2cf47e5e6bdf9feeed3',1,'KAFKA_API::clients::KafkaClient']]]
+  ['resultstype_345',['ResultsType',['../classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929',1,'KAFKA_API::KafkaMetrics']]]
 ];
