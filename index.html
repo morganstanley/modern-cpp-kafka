@@ -273,68 +273,81 @@
 <p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">Kafka Client API</a></p>
 </li>
 <li>
-<p>Kafka Client Properties</p>
+<p><code>Properties</code> for Kafka clients</p>
 <ul>
 <li>
-<p>In most cases, the <code>Properties</code> settings for <strong><em>modern-cpp-kafka</em></strong> are identical with <a href="https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
+<p><code>Properties</code> is a map which contains all configuration info needed to initialize a Kafka client. These configuration items are key-value pairs, -- the "key" is a <code>std::string</code>, while the "value" could be a <code>std::string</code>, a <code>std::function&lt;...&gt;</code>, or an <code>Interceptors</code>.</p>
+<ul>
+<li>
+<p>K-V Types: <code>std::string</code> -&gt; <code>std::string</code></p>
+<ul>
+<li>
+<p>Most are identical with <a href="https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
 </li>
 <li>
-<p>With following exceptions</p>
+<p>But with Exceptions</p>
 <ul>
 <li>
-<p>KafkaConsumer</p>
+<p>Default Value Changes</p>
 <ul>
 <li>
-<p>Properties with random string as default</p>
-<ul>
-<li>
-<p><code>client.id</code></p>
+<p><code>log_level</code>(default: <code>5</code>): default was <code>6</code> from <strong>librdkafka</strong></p>
 </li>
 <li>
-<p><code>group.id</code></p>
+<p><code>client.id</code> (default: random string): no default string from <strong>librdkafka</strong></p>
+</li>
+<li>
+<p><code>group.id</code> (default: random string, for <code>KafkaConsumer</code> only): no default string from <strong>librdkafka</strong></p>
 </li>
 </ul>
 </li>
 <li>
-<p>More properties than <strong><em>librdkafka</em></strong></p>
-<ul>
-<li><code>max.poll.records</code> (default: <code>500</code>): The maxmum number of records that a single call to <code>poll()</code> would return</li>
-</ul>
-</li>
-<li>
-<p>Property which overrides the one from <strong><em>librdkafka</em></strong></p>
-<ul>
-<li><code>enable.auto.commit</code> (default: <code>false</code>): To automatically commit the previously polled offsets on each <code>poll</code> operation</li>
-</ul>
-</li>
-<li>
-<p>Properties not supposed to be used (internally shadowed by <strong><em>modern-cpp-kafka</em></strong>)</p>
+<p>Additional Options</p>
 <ul>
 <li>
-<p><code>enable.auto.offset.store</code></p>
+<p><code>enable.manual.events.poll</code> (default: <code>false</code>): To poll the (offset-commit/message-delivery callback) events manually</p>
 </li>
 <li>
-<p><code>auto.commit.interval.ms</code></p>
-</li>
-</ul>
+<p><code>max.poll.records</code> (default: <code>500</code>, for <code>KafkaConsumer</code> only): The maxmum number of records that a single call to <code>poll()</code> would return</p>
 </li>
 </ul>
 </li>
 <li>
-<p>KafkaProducer</p>
+<p>Ignored Options</p>
 <ul>
 <li>
-<p>Properties with random string as default</p>
-<ul>
-<li><code>client.id</code></li>
+<p><code>enable.auto.offset.store</code>: <strong><em>modern-cpp-kafka</em></strong> will save the offsets in its own way</p>
+</li>
+<li>
+<p><code>auto.commit.interval.ms</code>: <strong><em>modern-cpp-kafka</em></strong> will not commit the offsets periodically, instead, it would do it in the next <code>poll()</code>.</p>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-<p>Log level</p>
+<p>K-V Types: <code>std::string</code> -&gt; <code>std::function&lt;...&gt;</code></p>
 <ul>
-<li>The default <code>log_level</code> is <code>NOTICE</code> (<code>5</code>) for all these clients</li>
+<li>
+<p><code>log_cb</code> -&gt; <code>LogCallback</code> (<code>std::function&lt;void(int, const char*, int, const char* msg)&gt;</code>)</p>
+</li>
+<li>
+<p><code>error_cb</code> -&gt; <code>ErrorCallback</code> (<code>std::function&lt;void(const Error&amp;)&gt;</code>)</p>
+</li>
+<li>
+<p><code>stats_cb</code> -&gt; <code>StatsCallback</code> (<code>std::function&lt;void(const std::string&amp;)&gt;</code>)</p>
+</li>
+<li>
+<p><code>oauthbearer_token_refresh_cb</code> -&gt; <code>OauthbearerTokenRefreshCallback</code> (<code>std::function&lt;SaslOauthbearerToken(const std::string&amp;)&gt;</code>)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>K-V Types: <code>std::string</code> -&gt; <code>Interceptors</code></p>
+<ul>
+<li><code>interceptors</code>: takes <code>Interceptors</code> as the value type</li>
 </ul>
 </li>
 </ul>

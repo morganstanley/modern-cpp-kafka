@@ -219,7 +219,13 @@
 </ul>
 <h2 id="some-examples"><a class="toclink" href="#some-examples">Some examples</a></h2>
 <h3 id="kafkaproducer-demo"><a class="toclink" href="#kafkaproducer-demo"><code>KafkaProducer</code> demo</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="o">::</span><span class="nn">producer</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
 
 
 
@@ -227,11 +233,11 @@
 
 <span class="w">        </span><span class="n">Properties</span><span class="p">({</span><span class="w"></span>
 
-<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">BOOTSTRAP_SERVERS</span><span class="p">,</span><span class="w">  </span><span class="s">&quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">Config</span><span class="o">::</span><span class="n">BOOTSTRAP_SERVERS</span><span class="p">,</span><span class="w">  </span><span class="p">{</span><span class="s">&quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span><span class="p">}</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 
-<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">ENABLE_IDEMPOTENCE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">ENABLE_IDEMPOTENCE</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;true&quot;</span><span class="p">}</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 
-<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">MESSAGE_TIMEOUT_MS</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;86400000&quot;</span><span class="p">}</span><span class="w">  </span><span class="c1">// as long as 1 day</span>
+<span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="n">ProducerConfig</span><span class="o">::</span><span class="n">MESSAGE_TIMEOUT_MS</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;86400000&quot;</span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c1">// as long as 1 day</span>
 
 <span class="w">        </span><span class="p">})</span><span class="w"></span>
 
@@ -249,7 +255,7 @@
 
 <span class="w">                      </span><span class="c1">// Ack callback</span>
 
-<span class="w">                      </span><span class="p">[</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Producer</span><span class="o">::</span><span class="n">RecordMetadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">error_code</span><span class="w"> </span><span class="n">ec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                      </span><span class="p">[</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">RecordMetadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">error_code</span><span class="w"> </span><span class="n">ec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 
 <span class="w">                           </span><span class="c1">// the message could be identified by `metadata.recordId()`</span>
 

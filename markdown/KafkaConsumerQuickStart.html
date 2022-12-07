@@ -18,7 +18,6 @@
       <h1 id="kafkaconsumer-quick-start"><a class="toclink" href="#kafkaconsumer-quick-start">KafkaConsumer Quick Start</a></h1>
 <p>Generally speaking, The <code>Modern C++ Kafka API</code> is quite similar with <a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">Kafka Java's API</a></p>
 <p>We'd recommend users to cross-reference them, --especially the examples.</p>
-<p>Unlike Java's KafkaConsumer, here we introduced two derived classes, --KafkaAutoCommitConsumer and KafkaManualCommitConsumer, --depending on whether users should call <code>commit</code> manually.</p>
 <h2 id="kafkaconsumer-enableautocommittrue"><a class="toclink" href="#kafkaconsumer-enableautocommittrue">KafkaConsumer (<code>enable.auto.commit=true</code>)</a></h2>
 <ul>
 <li>
@@ -31,11 +30,9 @@
 <h3 id="example"><a class="toclink" href="#example">Example</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="c1">// Create configuration object</span>
 
-<span class="w">        </span><span class="n">kafka</span><span class="o">::</span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="w"> </span><span class="p">({</span><span class="w"></span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="w"> </span><span class="p">({</span><span class="w"></span>
 
-<span class="w">            </span><span class="p">{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w">  </span><span class="n">brokers</span><span class="p">},</span><span class="w"></span>
-
-<span class="w">            </span><span class="p">{</span><span class="s">&quot;enable.auto.commit&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">brokers</span><span class="p">}},</span><span class="w"></span>
 
 <span class="w">        </span><span class="p">});</span><span class="w"></span>
 
@@ -43,7 +40,7 @@
 
 <span class="w">        </span><span class="c1">// Create a consumer instance</span>
 
-<span class="w">        </span><span class="n">kafka</span><span class="o">::</span><span class="n">clients</span><span class="o">::</span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
 
 
 
@@ -81,7 +78,7 @@
 
 <span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Timestamp: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">timestamp</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Headers  : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kafka</span><span class="o">::</span><span class="n">toString</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">headers</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Headers  : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">toString</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">headers</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Key   [&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">key</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
@@ -123,9 +120,11 @@
 <h3 id="example_1"><a class="toclink" href="#example_1">Example</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="c1">// Create configuration object</span>
 
-<span class="w">        </span><span class="n">kafka</span><span class="o">::</span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="w"> </span><span class="p">({</span><span class="w"></span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="w"> </span><span class="p">({</span><span class="w"></span>
 
-<span class="w">            </span><span class="p">{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">brokers</span><span class="p">},</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w">  </span><span class="p">{</span><span class="n">brokers</span><span class="p">}},</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">{</span><span class="s">&quot;enable.auto.commit&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="p">}}</span><span class="w"></span>
 
 <span class="w">        </span><span class="p">});</span><span class="w"></span>
 
@@ -133,7 +132,7 @@
 
 <span class="w">        </span><span class="c1">// Create a consumer instance</span>
 
-<span class="w">        </span><span class="n">kafka</span><span class="o">::</span><span class="n">clients</span><span class="o">::</span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
 
 
 
@@ -185,7 +184,7 @@
 
 <span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Timestamp: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">timestamp</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Headers  : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kafka</span><span class="o">::</span><span class="n">toString</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">headers</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Headers  : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">toString</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">headers</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Key   [&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">key</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
@@ -213,7 +212,7 @@
 
 <span class="w">                    </span><span class="c1">// Commit offsets for messages polled</span>
 
-<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;% syncCommit offsets: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kafka</span><span class="o">::</span><span class="n">utility</span><span class="o">::</span><span class="n">getCurrentTime</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+<span class="w">                    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;% syncCommit offsets: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">utility</span><span class="o">::</span><span class="n">getCurrentTime</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">                    </span><span class="n">consumer</span><span class="p">.</span><span class="n">commitSync</span><span class="p">();</span><span class="w"> </span><span class="c1">// or commitAsync()</span>
 
@@ -236,18 +235,18 @@
 
 <ul>
 <li>
-<p>The example is quite similar with the KafkaAutoCommitConsumer, with only 1 more line added for manual-commit.</p>
+<p>The example is quite similar with the previous <code>enable.auto.commit=true</code> case, but has to call <code>commitSync</code>(or <code>commitAsync</code>) manually.</p>
 </li>
 <li>
-<p><code>commitSync</code> and <code>commitAsync</code> are both available for a KafkaManualConsumer. Normally, use <code>commitSync</code> to guarantee the commitment, or use <code>commitAsync</code>(with <code>OffsetCommitCallback</code>) to get a better performance.</p>
+<p><code>commitSync</code> and <code>commitAsync</code> are both available here. Normally, use <code>commitSync</code> to guarantee the commitment, or use <code>commitAsync</code>(with <code>OffsetCommitCallback</code>) to get a better performance.</p>
 </li>
 </ul>
-<h2 id="kafkaconsumer-with-kafkaclientskafkaclienteventspollingoption"><a class="toclink" href="#kafkaconsumer-with-kafkaclientskafkaclienteventspollingoption"><code>KafkaConsumer</code> with <code>kafka::clients::KafkaClient::EventsPollingOption</code></a></h2>
-<p>While we construct a <code>KafkaConsumer</code> with <code>kafka::clients::KafkaClient::EventsPollingOption::Auto</code> (i.e. the default option), an internal thread would be created for <code>OffsetCommit</code> callbacks handling.</p>
+<h2 id="option-enablemanualeventspoll"><a class="toclink" href="#option-enablemanualeventspoll">Option <code>enable.manual.events.poll</code></a></h2>
+<p>While we construct a <code>KafkaConsumer</code> with <code>enable.manual.events.poll=false</code> (i.e. the default option), an internal thread would be created for <code>OffsetCommit</code> callbacks handling.</p>
 <p>This might not be what you want, since then you have to use 2 different threads to process the messages and handle the <code>OffsetCommit</code> responses.</p>
-<p>Here we have another choice, -- using <code>kafka::clients::KafkaClient::EventsPollingOption::Manual</code>, thus the <code>OffsetCommit</code> callbacks would be called within member function <code>pollEvents()</code>.</p>
+<p>Here we have another choice, -- using <code>enable.manual.events.poll=true</code>, thus the <code>OffsetCommit</code> callbacks would be called within member function <code>pollEvents()</code>.</p>
 <h3 id="example_2"><a class="toclink" href="#example_2">Example</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">,</span><span class="w"> </span><span class="n">kafka</span><span class="o">::</span><span class="n">clients</span><span class="o">::</span><span class="n">KafkaClient</span><span class="o">::</span><span class="n">EventsPollingOption</span><span class="o">::</span><span class="n">Manual</span><span class="p">);</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="s">&quot;enable.manual.events.poll&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">));</span><span class="w"></span>
 
 
 
@@ -277,7 +276,7 @@
 
 <span class="w">        </span><span class="c1">// Here we call the `OffsetCommit` callbacks</span>
 
-<span class="w">        </span><span class="c1">// Note, we can only do this while the consumer was constructed with `EventsPollingOption::Manual`.</span>
+<span class="w">        </span><span class="c1">// Note, we can only do this while the consumer was constructed with `enable.manual.events.poll=true`.</span>
 
 <span class="w">        </span><span class="n">consumer</span><span class="p">.</span><span class="n">pollEvents</span><span class="p">();</span><span class="w"></span>
 
