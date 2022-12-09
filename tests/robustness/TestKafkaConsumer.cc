@@ -32,9 +32,10 @@ TEST(KafkaConsumer, DISABLED_AlwaysFinishClosing_ManuallyPollEvents)
 
     // Consumer properties
     auto props = KafkaTestUtility::GetKafkaClientCommonConfig();
-    props.put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,  "1");        // Only poll 1 message each time
-    props.put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest");
-    props.put(kafka::clients::consumer::ConsumerConfig::SOCKET_TIMEOUT_MS, "2000");
+    props.put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false");
+    props.put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1");        // Only poll 1 message each time
+    props.put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest");
+    props.put(kafka::clients::consumer::ConsumerConfig::SOCKET_TIMEOUT_MS,  "2000");
 
     volatile std::size_t commitCbCount = 0;
     {
@@ -98,12 +99,11 @@ TEST(KafkaConsumer, DISABLED_CommitOffsetWhileBrokersStop)
 
     // Consumer properties
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                            .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,  "1")         // Only poll 1 message each time
-                            .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
-                            .put(kafka::clients::consumer::ConsumerConfig::SOCKET_TIMEOUT_MS, "2000")      // Just don't want to wait too long for the commit-offset callback.
-                            .put(kafka::clients::Config::LOG_LEVEL,                           "7")
-                            .put(kafka::clients::Config::DEBUG,                               "all")
-                            .put(kafka::clients::Config::ERROR_CB,                            KafkaTestUtility::DumpError);
+                            .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
+                            .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1")         // Only poll 1 message each time
+                            .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest")
+                            .put(kafka::clients::consumer::ConsumerConfig::SOCKET_TIMEOUT_MS,  "2000")      // Just don't want to wait too long for the commit-offset callback.
+                            .put(kafka::clients::Config::ERROR_CB,                             KafkaTestUtility::DumpError);
 
     volatile std::size_t commitCbCount = 0;
     {
