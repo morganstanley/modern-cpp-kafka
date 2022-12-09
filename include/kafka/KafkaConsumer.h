@@ -295,8 +295,8 @@ private:
 
     std::string  _groupId;
 
-    std::size_t _maxPollRecords   = 500;   // From "max.poll.records" property, and here is the default for batch-poll
-    bool        _enableAutoCommit = false; // From "enable.auto.commit" property
+    std::size_t _maxPollRecords   = 500;  // From "max.poll.records" property, and here is the default for batch-poll
+    bool        _enableAutoCommit = true; // From "enable.auto.commit" property
 
     rd_kafka_queue_unique_ptr _rk_queue;
 

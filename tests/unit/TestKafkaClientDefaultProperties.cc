@@ -91,9 +91,7 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
     using namespace kafka::clients::consumer;
 
     {
-        auto props = commonProps;
-        props.put(ConsumerConfig::ENABLE_AUTO_COMMIT, "true");
-        const KafkaConsumer consumer(props);
+        const KafkaConsumer consumer(commonProps);
 
         const KVMap expectedKVs =
         {
@@ -117,7 +115,9 @@ TEST(KafkaClient, KafkaConsumerDefaultProperties)
     KafkaTestUtility::PrintDividingLine();
 
     {
-        const KafkaConsumer consumer(commonProps);
+        auto props = commonProps;
+        props.put(ConsumerConfig::ENABLE_AUTO_COMMIT, "false");
+        const KafkaConsumer consumer(props);
 
         const KVMap expectedKVs =
         {

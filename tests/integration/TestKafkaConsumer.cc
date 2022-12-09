@@ -24,8 +24,7 @@ TEST(KafkaConsumer, BasicPoll)
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // The auto-commit consumer
-    kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                            .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "true"));
+    kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe topics
@@ -97,8 +96,7 @@ TEST(KafkaConsumer, PollWithHeaders)
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     // The auto-commit consumer
-    kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                           .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "true"));
+    kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
 
     // Subscribe topics
@@ -191,7 +189,6 @@ TEST(KafkaConsumer, SeekAndPoll)
 
     // The auto-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "true")
                        .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1")         // Only poll 1 message each time
                        .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest"); // Seek to the earliest offset at the beginning
 
@@ -319,7 +316,9 @@ TEST(KafkaConsumer, NoOffsetCommitCallback)
 
     // The manual-commit consumer
     {
-        const auto props = KafkaTestUtility::GetKafkaClientCommonConfig().put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest"); // Seek to the earliest offset at the beginning
+        const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                            .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
+                            .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest"); // Seek to the earliest offset at the beginning
 
         kafka::clients::consumer::KafkaConsumer consumer(props);
 
@@ -365,8 +364,9 @@ TEST(KafkaConsumer, OffsetCommitCallback)
 
     // The manual-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                       .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
-                       .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1");       // Only poll 1 message each time
+                           .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
+                           .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
+                           .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1");       // Only poll 1 message each time
 
     kafka::clients::consumer::KafkaConsumer consumer(props);
 
@@ -431,8 +431,9 @@ TEST(KafkaConsumer, OffsetCommitCallbackTriggeredBeforeClose)
     // The manual-commit consumer
     {
         const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                           .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest") // Seek to the earliest offset at the beginning
-                           .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,  "1");       // Only poll 1 message each time
+                           .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
+                           .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
+                           .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1");       // Only poll 1 message each time
 
         kafka::clients::consumer::KafkaConsumer consumer(props);
 
@@ -489,6 +490,7 @@ TEST(KafkaConsumer, OffsetCommitCallback_ManuallyPollEvents)
 
     // The manual-commit consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                           .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
                            .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest") // Seek to the earliest offset at the beginning
                            .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1")        // Only poll 1 message each time
                            .put(kafka::clients::Config::ENABLE_MANUAL_EVENTS_POLL,            "true");    // Would call `pollEvents()` manually
@@ -567,6 +569,7 @@ TEST(KafkaConsumer, ManualOffsetCommitAndPosition)
     // Start consumer a few times, but only commit the offset for the first message each time
     {
         auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
                         .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1");    // Only poll 1 message each time
 
         kafka::clients::consumer::KafkaConsumer consumer(props);
@@ -804,8 +807,9 @@ TEST(KafkaConsumer, CommitOffsetBeforeRevolkingPartitions)
 
     // Prepare poperties for consumers
     auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                    .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
-                    .put(kafka::clients::consumer::ConsumerConfig::GROUP_ID,          kafka::utility::getRandomString());
+                    .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
+                    .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest")
+                    .put(kafka::clients::consumer::ConsumerConfig::GROUP_ID,           kafka::utility::getRandomString());
 
     {
         // First consumer starts
@@ -875,7 +879,6 @@ TEST(KafkaConsumer, AutoOffsetCommitAndPosition)
     // Consumer will poll twice, -- Note, the last polled message offset would not be committed (no following `poll`)
     {
         const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                                .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "true")
                                 .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,   "1");
 
         kafka::clients::consumer::KafkaConsumer consumer(props);
@@ -976,6 +979,7 @@ TEST(KafkaConsumer, RebalancePartitionsAssign)
 
     // Prepare the consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
+                        .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
                         .put(kafka::clients::consumer::ConsumerConfig::GROUP_ID, group);
 
     kafka::clients::consumer::KafkaConsumer consumer(props);
@@ -998,8 +1002,9 @@ TEST(KafkaConsumer, RebalancePartitionsAssign)
     auto fut = std::async(std::launch::async,
                           [topic, group]() {
                               auto consumerProps = KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                   .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest")
-                                                   .put(kafka::clients::consumer::ConsumerConfig::GROUP_ID,           group);
+                                                    .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT, "false")
+                                                    .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,  "earliest")
+                                                    .put(kafka::clients::consumer::ConsumerConfig::GROUP_ID,           group);
                               kafka::clients::consumer::KafkaConsumer anotherConsumer(consumerProps);
                               anotherConsumer.subscribe({topic});
                               KafkaTestUtility::ConsumeMessagesUntilTimeout(anotherConsumer);
@@ -1376,7 +1381,6 @@ TEST(KafkaConsumer, PauseAndResume)
 
     // An auto-commit Consumer
     const auto props = KafkaTestUtility::GetKafkaClientCommonConfig()
-                        .put(kafka::clients::consumer::ConsumerConfig::ENABLE_AUTO_COMMIT,   "true")
                         .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET,    "earliest")
                         .put(kafka::clients::consumer::ConsumerConfig::MAX_POLL_RECORDS,     "1");
     kafka::clients::consumer::KafkaConsumer consumer(props);
