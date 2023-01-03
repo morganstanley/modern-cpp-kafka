@@ -160,7 +160,7 @@ public:
                           const std::string& key   = kv.first;
                           const std::string  value = kv.second.toString();
 
-                          static const std::regex reSensitiveKey(R"(.+\.password|.+\.username|.+secret)");
+                          static const std::regex reSensitiveKey(R"(.+\.password|.+\.username|.+secret|.+key|.+pem)");
                           const bool isSensitive = std::regex_match(key, reSensitiveKey);
 
                           ret.append(ret.empty() ? "" : "|").append(key).append("=").append(isSensitive ? "*" : value);
