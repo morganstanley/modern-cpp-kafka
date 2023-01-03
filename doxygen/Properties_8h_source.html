@@ -208,7 +208,7 @@ $(function() {
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;                          const std::string&amp; key   = kv.first;</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;                          const std::string  value = kv.second.toString();</div>
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160; </div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                          static const std::regex reSensitiveKey(R<span class="stringliteral">&quot;(.+\.password|.+\.username|.+secret)&quot;);</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                          static const std::regex reSensitiveKey(R<span class="stringliteral">&quot;(.+\.password|.+\.username|.+secret|.+key|.+pem)&quot;);</span></div>
 <div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="stringliteral">                          const bool isSensitive = std::regex_match(key, reSensitiveKey);</span></div>
 <div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="stringliteral"></span> </div>
 <div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;<span class="stringliteral">                          ret.append(ret.empty() ? </span><span class="stringliteral">&quot;&quot;</span> : <span class="stringliteral">&quot;|&quot;</span>).append(key).append(<span class="stringliteral">&quot;=&quot;</span>).append(isSensitive ? <span class="stringliteral">&quot;*&quot;</span> : value);</div>
@@ -236,7 +236,7 @@ $(function() {
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Dec 9 2022 02:35:05 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Tue Jan 3 2023 03:05:21 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
