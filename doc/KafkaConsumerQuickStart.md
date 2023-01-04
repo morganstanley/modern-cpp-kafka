@@ -1,17 +1,22 @@
 # KafkaConsumer Quick Start
 
-Generally speaking, The `Modern C++ Kafka API` is quite similar with [Kafka Java's API](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
+Generally speaking, The `modern-cpp-kafka API` is quite similar with [Kafka Java's API](https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
 
 We'd recommend users to cross-reference them, --especially the examples.
 
-## KafkaConsumer (`enable.auto.commit=true`)
+
+## KafkaConsumer (with `enable.auto.commit=true`)
 
 * Automatically commits previously polled offsets on each `poll` (and the final `close`) operations.
 
     * Note, the internal `offset commit` is asynchronous, and is not guaranteed to succeed. It's supposed to be triggered (within each `poll` operation) periodically, thus the occasional failure doesn't quite matter.
 
-### Example
+### [Example](https://github.com/morganstanley/modern-cpp-kafka/blob/main/examples/kafka_auto_commit_consumer.cc)
+
 ```cpp
+        using namespace kafka;
+        using namespace kafka::clients::consumer;
+
         // Create configuration object
         const Properties props ({
             {"bootstrap.servers", {brokers}},
@@ -57,11 +62,13 @@ We'd recommend users to cross-reference them, --especially the examples.
 
 * At the end, we could `close` the consumer explicitly, or just leave it to the destructor.
 
-## KafkaConsumer (`enable.auto.commit=false`)
+
+## KafkaConsumer (with `enable.auto.commit=false`)
 
 * Users must commit the offsets for received records manually.
 
-### Example
+### [Example](https://github.com/morganstanley/modern-cpp-kafka/blob/main/examples/kafka_manual_commit_consumer.cc)
+
 ```cpp
         // Create configuration object
         const Properties props ({
@@ -126,7 +133,7 @@ We'd recommend users to cross-reference them, --especially the examples.
 
 * `commitSync` and `commitAsync` are both available here. Normally, use `commitSync` to guarantee the commitment, or use `commitAsync`(with `OffsetCommitCallback`) to get a better performance.
 
-## Option `enable.manual.events.poll`
+## About `enable.manual.events.poll`
 
 While we construct a `KafkaConsumer` with `enable.manual.events.poll=false` (i.e. the default option), an internal thread would be created for `OffsetCommit` callbacks handling.
 
@@ -135,6 +142,7 @@ This might not be what you want, since then you have to use 2 different threads 
 Here we have another choice, -- using `enable.manual.events.poll=true`, thus the `OffsetCommit` callbacks would be called within member function `pollEvents()`.
 
 ### Example
+
 ```cpp
     KafkaConsumer consumer(props.put("enable.manual.events.poll", "true"));
 
@@ -156,49 +164,48 @@ Here we have another choice, -- using `enable.manual.events.poll=true`, thus the
     }
 ```
 
+
 ## Error handling
 
-No exception would be thrown from a consumer's `poll` operation.
+Normally, exceptions might be thrown while operations fail, but not for a `poll` operation, -- if an error occurs, the `Error` would be embedded in the `Consumer::ConsumerRecord`.
 
-Instead, once an error occurs, the `Error` would be embedded in the `Consumer::ConsumerRecord`.
+About the `Error` `value()`, there are 2 cases
 
-About `Error`'s `value()`s, there are 2 cases
-
-1. Success
+* Success
 
     - `RD_KAFKA_RESP_ERR__NO_ERROR` (`0`),  -- got a message successfully
 
     - `RD_KAFKA_RESP_ERR__PARTITION_EOF`,   -- reached the end of a partition (no message got)
 
-2. Failure
+* Failure
 
     - [Error Codes](https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes)
 
+
 ## Frequently Asked Questions
 
-* What're the available configurations?
+* How to enhance the throughput
 
-    - [KafkaProducerConfiguration](KafkaClientConfiguration.md#kafkaconsumer-configuration)
+    * Try with a larger `queued.min.messages`, especially for small messages.
 
-    - [Inline doxygen page](../doxygen/classKAFKA__CPP__APIS__NAMESPACE_1_1ConsumerConfig.html)
+    * Use multiple KafkaConsumers to distribute the payload.
 
-* How to enhance the polling performance?
+* How to avoid polling duplicated messages
 
-    `ConsumerConfig::QUEUED_MIN_MESSAGES` determines how frequently the consumer would send the FetchRequest towards brokers.
-    The default configuration (i.e, 100000) might not be good enough for small (less than 1KB) messages, and suggest using a larger value (e.g, 1000000) for it.
+    * To commit the offsets more frequently (e.g, always do commit after finishing processing a message).
+
+    * Don't use quite a large `max.poll.records` for a `KafkaConsumer` (with `enable.auto.commit=true`) -- you might fail to commit all these messages before crash, thus more duplications with the next `poll`.
 
 * How many threads would be created by a KafkaConsumer?
 
-    1. Each broker (in the list of BOOTSTRAP_SERVERS) would take a seperate thread to transmit messages towards a kafka cluster server.
+    * Each broker (in the list of `bootstrap.servers`) would take a seperate thread to transmit messages towards a kafka cluster server.
 
-    2. Another 3 threads will handle internal operations, consumer group operations, and kinds of timers, etc.
+    * Another 3 threads will handle internal operations, consumer group operations, and kinds of timers, etc.
 
-    3. To enable the auto events-polling, one more background thread would be created, which keeps polling/processing the offset-commit callback event.
+    * By default, `enable.manual.events.poll=false`, then one more background thread would be created, which keeps polling/processing the offset-commit callback event.
 
 * Which one of these threads will handle the callbacks?
 
-    There are 2 kinds of callbacks for a KafkaConsumer,
+    * `RebalanceCallback` will be triggered internally by the user's thread, -- within the `poll` function.
 
-    1. `RebalanceCallback` will be triggered internally by the user's thread, -- within the `poll` function.
-
-    2. If `enable.auto.commit=true`, the `OffsetCommitCallback` will be triggered by the user's `poll` thread; otherwise, it would be triggered by a background thread.
+    * If `enable.auto.commit=true`, the `OffsetCommitCallback` will be triggered by the user's `poll` thread; otherwise, it would be triggered by a background thread (if `enable.manual.events.poll=true`), or by the `pollEvents()` call (if `enable.manual.events.poll=false`).
