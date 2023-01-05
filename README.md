@@ -187,7 +187,7 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
 * Kafka cluster setup
 
     * [Quick Start For Cluster Setup](https://kafka.apache.org/documentation/#quickstart)
-    
+
     * [Cluster Setup Scripts For Test](https://github.com/morganstanley/modern-cpp-kafka/blob/main/scripts/start-local-kafka-cluster.py)
 
     * [Kafka Broker Configuration](doc/KafkaBrokerConfiguration.md)
@@ -200,12 +200,13 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
     | `KAFKA_BROKER_PIDS`                | The broker PIDs for test runner to manipulate               | `export KAFKA_BROKER_PIDS=61567,61569,61571`                               |
     | `KAFKA_CLIENT_ADDITIONAL_SETTINGS` | Could be used for addtional configuration for Kafka clients | `export KAFKA_CLIENT_ADDITIONAL_SETTINGS="security.protocol=SASL_PLAINTEXT;sasl.kerberos.service.name=...;sasl.kerberos.keytab=...;sasl.kerberos.principal=..."` |
 
-    * The environment variable `KAFKA_BROKER_LIST` is mandatory for integration/robustness test
+    * The environment variable `KAFKA_BROKER_LIST` is mandatory for integration/robustness test, which requires the Kafka cluster.
 
-    * The environment variable `KAFKA_BROKER_PIDS` is mandatory for robustness test
+    * The environment variable `KAFKA_BROKER_PIDS` is mandatory for robustness test, which requires the Kafka cluster and the privilege to stop/resume the brokers.
 
-    | Test Type                                                                                          | Requires Kafka Cluster   | Requires Privilege to Stop/Resume the Brokers |
-    | -------------------------------------------------------------------------------------------------- | ------------------------ | --------------------------------------------- |
-    | [tests/unit](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/unit)               | -                        | -                                             |
-    | [tests/integration](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/integration) | Y (`KAFKA_BROKER_LIST`)  | -                                             | 
-    | [tests/robustness`](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/robustness)  | Y (`KAFKA_BROKER_LIST`)  | Y (`KAFKA_BROKER_PIDS`)                       |
+    | Test Type                                                                                          | `KAFKA_BROKER_LIST`  | `KAFKA_BROKER_PIDS` |
+    | -------------------------------------------------------------------------------------------------- | -------------------- | ------------------- |
+    | [tests/unit](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/unit)               | -                    | -                   |
+    | [tests/integration](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/integration) | Required             | -                   |
+    | [tests/robustness](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/robustness)   | Required             | Required            |
+

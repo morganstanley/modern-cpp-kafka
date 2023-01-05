@@ -126,3 +126,67 @@ TEST(Properties, SensitiveProperties)
 
     EXPECT_EQ("sasl.password=*|sasl.username=*|ssl.key.password=*|ssl.key.pem=*|ssl.keystore.password=*|ssl_key=*", props.toString());
 }
+
+TEST(Properties, Validation)
+{
+    kafka::Properties props;
+
+    props.put("whatever", "somevalue");
+
+    // Test with invalid keys
+    auto tryWithInvalidKey = [&props](auto v)
+    {
+        try
+        {
+            props.put("invalid_key", v);
+            return false;
+        }
+        catch (const std::runtime_error& e)
+        {
+            std::cout << "Exception caught: " << e.what() << std::endl;
+        }
+        return true;
+    };
+
+    EXPECT_TRUE(tryWithInvalidKey([](int /*level*/, const char* /*filename*/, int /*lineno*/, const char* msg) { std::cout << msg << std::endl; }));
+    EXPECT_TRUE(tryWithInvalidKey([](const kafka::Error& err) { std::cerr << err.toString() << std::endl; }));
+    EXPECT_TRUE(tryWithInvalidKey([](const std::string& stats) { std::cout << stats << std::endl; }));
+    const kafka::clients::OauthbearerTokenRefreshCallback oauthTokenRefreshCb = [](const std::string&) { return kafka::clients::SaslOauthbearerToken(); };
+    EXPECT_TRUE(tryWithInvalidKey(oauthTokenRefreshCb));
+    EXPECT_TRUE(tryWithInvalidKey(kafka::clients::Interceptors{}));
+
+    // Test with invalid values
+    const auto tryWithInvalidValue = [&props](const std::string& key)
+    {
+        try
+        {
+            props.put(key, "haha");
+            return false;
+        }
+        catch (const std::runtime_error& e)
+        {
+            std::cout << "exception caught: " << e.what() << std::endl;
+        }
+        return true;
+    };
+
+    EXPECT_TRUE(tryWithInvalidValue(kafka::clients::Config::LOG_CB));
+    EXPECT_TRUE(tryWithInvalidValue(kafka::clients::Config::ERROR_CB));
+    EXPECT_TRUE(tryWithInvalidValue(kafka::clients::Config::STATS_CB));
+    EXPECT_TRUE(tryWithInvalidValue(kafka::clients::Config::OAUTHBEARER_TOKEN_REFRESH_CB));
+    EXPECT_TRUE(tryWithInvalidValue(kafka::clients::Config::INTERCEPTORS));
+
+    // Failure within constructor
+    try
+    {
+        const kafka::Properties properties = {{
+            { "interceptorsxx", { kafka::clients::Interceptors{} } },
+        }};
+        EXPECT_FALSE(true);
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cout << "exception caught: " << e.what() << std::endl;
+    }
+}
+
