@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['sasloauthbearertoken_195',['SaslOauthbearerToken',['../structKAFKA__API_1_1clients_1_1SaslOauthbearerToken.html',1,'KAFKA_API::clients']]]
+  ['recordmetadata_201',['RecordMetadata',['../classKAFKA__API_1_1clients_1_1producer_1_1RecordMetadata.html',1,'KAFKA_API::clients::producer']]]
 ];

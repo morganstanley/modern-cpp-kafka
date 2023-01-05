@@ -95,7 +95,7 @@ $(function() {
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keyword">using</span> ErrorCallback                   = clients::ErrorCallback;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keyword">using</span> StatsCallback                   = clients::StatsCallback;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keyword">using</span> OauthbearerTokenRefreshCallback = clients::OauthbearerTokenRefreshCallback;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keyword">using</span> Interceptors                    = clients::Interceptors;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keyword">using</span> <a class="code" href="classKAFKA__API_1_1clients_1_1Interceptors.html">Interceptors</a>                    = <a class="code" href="classKAFKA__API_1_1clients_1_1Interceptors.html">clients::Interceptors</a>;</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keyword">struct </span>ValueType</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    {</div>
@@ -128,7 +128,7 @@ $(function() {
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        ValueType(<span class="keyword">const</span> ErrorCallback&amp; cb)                   { <span class="keywordtype">object</span> = std::make_shared&lt;ObjWrap&lt;ErrorCallback&gt;&gt;(cb); }                     <span class="comment">// NOLINT</span></div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        ValueType(<span class="keyword">const</span> StatsCallback&amp; cb)                   { <span class="keywordtype">object</span> = std::make_shared&lt;ObjWrap&lt;StatsCallback&gt;&gt;(cb); }                     <span class="comment">// NOLINT</span></div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        ValueType(<span class="keyword">const</span> OauthbearerTokenRefreshCallback&amp; cb) { <span class="keywordtype">object</span> = std::make_shared&lt;ObjWrap&lt;OauthbearerTokenRefreshCallback&gt;&gt;(cb); }   <span class="comment">// NOLINT</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        ValueType(<span class="keyword">const</span> Interceptors&amp; interceptors)          { <span class="keywordtype">object</span> = std::make_shared&lt;ObjWrap&lt;Interceptors&gt;&gt;(interceptors); }            <span class="comment">// NOLINT</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        ValueType(<span class="keyword">const</span> <a class="code" href="classKAFKA__API_1_1clients_1_1Interceptors.html">Interceptors</a>&amp; interceptors)          { <span class="keywordtype">object</span> = std::make_shared&lt;ObjWrap&lt;Interceptors&gt;&gt;(interceptors); }            <span class="comment">// NOLINT</span></div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> ValueType&amp; rhs)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> toString() == rhs.toString(); }</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
@@ -233,10 +233,11 @@ $(function() {
 <div class="ttc" id="aclassKAFKA__API_1_1Properties_html_ab6cd66d58771703a1e9b724f2f58f95e"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#ab6cd66d58771703a1e9b724f2f58f95e">KAFKA_API::Properties::contains</a></div><div class="ttdeci">bool contains(const std::string &amp;key) const</div><div class="ttdoc">Check whether the map contains a property.</div><div class="ttdef"><b>Definition:</b> Properties.h:106</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1Properties_html_ae0f7e7a3c5e2790e9431efdb3868cb79"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#ae0f7e7a3c5e2790e9431efdb3868cb79">KAFKA_API::Properties::map</a></div><div class="ttdeci">const PropertiesMap &amp; map() const</div><div class="ttdoc">Get all properties with a map.</div><div class="ttdef"><b>Definition:</b> Properties.h:174</div></div>
 <div class="ttc" id="aclassKAFKA__API_1_1Properties_html_af0d7b3f2251e97333d7e543d4794f5af"><div class="ttname"><a href="classKAFKA__API_1_1Properties.html#af0d7b3f2251e97333d7e543d4794f5af">KAFKA_API::Properties::getProperty</a></div><div class="ttdeci">Optional&lt; std::string &gt; getProperty(const std::string &amp;key) const</div><div class="ttdoc">Get a property.</div><div class="ttdef"><b>Definition:</b> Properties.h:132</div></div>
+<div class="ttc" id="aclassKAFKA__API_1_1clients_1_1Interceptors_html"><div class="ttname"><a href="classKAFKA__API_1_1clients_1_1Interceptors.html">KAFKA_API::clients::Interceptors</a></div><div class="ttdoc">Interceptors for Kafka clients.</div><div class="ttdef"><b>Definition:</b> Interceptors.h:14</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jan 3 2023 03:42:35 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Thu Jan 5 2023 01:41:50 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

@@ -17,10 +17,9 @@
     <div class="container">
       <h1 id="about-the-modern-c-kafka-api"><a class="toclink" href="#about-the-modern-c-kafka-api">About the <em>Modern C++ Kafka API</em></a></h1>
 <p><img alt="Lifecycle Active" src="https://badgen.net/badge/Lifecycle/Active/green" />  </p>
-<h2 id="introduction"><a class="toclink" href="#introduction">Introduction</a></h2>
-<p>The <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">Modern C++ Kafka API</a> is a layer of C++ wrapper based on <a href="https://github.com/edenhill/librdkafka">librdkafka</a> (the C part), with high quality, but more friendly to users.</p>
+<p>The <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">modern-cpp-kafka API</a> is a layer of <strong><em>C++</em></strong> wrapper based on <a href="https://github.com/confluentinc/librdkafka">librdkafka</a> (the <strong><em>C</em></strong> part only), with high quality, but more friendly to users.</p>
 <ul>
-<li>By now, <a href="https://github.com/morganstanley/modern-cpp-kafka">modern-cpp-kafka</a> is compatible with <a href="https://github.com/edenhill/librdkafka/releases/tag/v1.9.2">librdkafka v1.9.2</a>.</li>
+<li>By now, <a href="https://github.com/morganstanley/modern-cpp-kafka">modern-cpp-kafka</a> is compatible with <a href="https://github.com/confluentinc/librdkafka/releases/tag/v1.9.2">librdkafka v1.9.2</a>.</li>
 </ul>
 <div class="codehilite"><pre><span></span><code><span class="n">KAFKA</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">registered</span><span class="w"> </span><span class="n">trademark</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">Apache</span><span class="w"> </span><span class="n">Software</span><span class="w"> </span><span class="n">Foundation</span><span class="w"> </span><span class="k">and</span><span class="w"></span>
 
@@ -31,19 +30,19 @@
 
 <h2 id="why-its-here"><a class="toclink" href="#why-its-here">Why it's here</a></h2>
 <p>The <strong><em>librdkafka</em></strong> is a robust high performance C/C++ library, widely used and well maintained.</p>
-<p>Unfortunately, to maintain C++98 compatibility, the C++ interface of <strong><em>librdkafka</em></strong> is not quite object-oriented or user-friendly.</p>
+<p>Unfortunately, to maintain <strong><em>C++98</em></strong> compatibility, the <strong><em>C++</em></strong> interface of <strong><em>librdkafka</em></strong> is not quite object-oriented or user-friendly.</p>
 <p>Since C++ is evolving quickly, we want to take advantage of new C++ features, thus make the life easier for developers. And this led us to create a new C++ API for Kafka clients.</p>
-<p>Eventually, we worked out the <strong><em>modern-cpp-kafka</em></strong>, -- a header-only library that uses idiomatic C++ features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.</p>
+<p>Eventually, we worked out the <strong><em>modern-cpp-kafka</em></strong>, -- a <strong><em>header-only</em></strong> library that uses idiomatic <strong><em>C++</em></strong> features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.</p>
 <h2 id="features"><a class="toclink" href="#features">Features</a></h2>
 <ul>
 <li>
-<p>Header-only</p>
+<p><strong>Header-only</strong></p>
 <ul>
 <li>Easy to deploy, and no extra library required to link</li>
 </ul>
 </li>
 <li>
-<p>Ease of Use</p>
+<p><strong>Ease of Use</strong></p>
 <ul>
 <li>
 <p>Interface/Naming matches the Java API</p>
@@ -60,7 +59,7 @@
 </ul>
 </li>
 <li>
-<p>Robust</p>
+<p><strong>Robust</strong></p>
 <ul>
 <li>
 <p>Verified with kinds of test cases, which cover many abnormal scenarios (edge cases)</p>
@@ -79,7 +78,7 @@
 </ul>
 </li>
 <li>
-<p>Efficient</p>
+<p><strong>Efficient</strong></p>
 <ul>
 <li>
 <p>No extra performance cost (No deep copy introduced internally)</p>
@@ -90,162 +89,38 @@
 </ul>
 </li>
 </ul>
-<h2 id="build"><a class="toclink" href="#build">Build</a></h2>
+<h2 id="installation-requirements"><a class="toclink" href="#installation-requirements">Installation / Requirements</a></h2>
 <ul>
 <li>
-<p>No need to build for installation</p>
+<p>Just include the <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/include/kafka"><code>include/kafka</code></a> directory for your project</p>
 </li>
 <li>
-<p>To build its <code>tools</code>/<code>tests</code>/<code>examples</code>, you should</p>
+<p>The compiler should support <strong><em>C++17</em></strong></p>
 <ul>
 <li>
-<p>Specify library locations with environment variables</p>
-<ul>
-<li>
-<p><code>LIBRDKAFKA_INCLUDE_DIR</code>          -- <strong><em>librdkafka</em></strong> headers</p>
-</li>
-<li>
-<p><code>LIBRDKAFKA_LIBRARY_DIR</code>          -- <strong><em>librdkafka</em></strong> libraries</p>
-</li>
-<li>
-<p><code>GTEST_ROOT</code>                      -- <strong><em>googletest</em></strong> headers and libraries</p>
-</li>
-<li>
-<p><code>BOOST_ROOT</code>                      -- <strong><em>boost</em></strong> headers and libraries</p>
-</li>
-<li>
-<p><code>SASL_LIBRARYDIR</code>/<code>SASL_LIBRARY</code>  -- if SASL connection support is wanted</p>
-</li>
-<li>
-<p><code>RAPIDJSON_INCLUDE_DIRS</code>          -- <code>addons/KafkaMetrics</code> requires <strong>rapidjson</strong> headers</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Create an empty directory for the build, and <code>cd</code> to it</p>
-</li>
-<li>
-<p>Build commands</p>
-<ul>
-<li>
-<p>Type <code>cmake path-to-project-root</code></p>
-</li>
-<li>
-<p>Type <code>make</code> (could follow build options with <code>-D</code>)</p>
-<ul>
-<li>
-<p><code>BUILD_OPTION_USE_ASAN=ON</code>      -- Use Address Sanitizer</p>
-</li>
-<li>
-<p><code>BUILD_OPTION_USE_TSAN=ON</code>      -- Use Thread Sanitizer</p>
-</li>
-<li>
-<p><code>BUILD_OPTION_USE_UBSAN=ON</code>     -- Use Undefined Behavior Sanitizer</p>
-</li>
-<li>
-<p><code>BUILD_OPTION_CLANG_TIDY=ON</code>    -- Enable clang-tidy checking</p>
-</li>
-<li>
-<p><code>BUILD_OPTION_GEN_DOC=ON</code>       -- Generate documentation as well</p>
-</li>
-<li>
-<p><code>BUILD_OPTION_DOC_ONLY=ON</code>      -- Only generate documentation</p>
-</li>
-<li>
-<p><code>BUILD_OPTION_GEN_COVERAGE=ON</code>  -- Generate test coverage, only support by clang currently</p>
-</li>
-</ul>
-</li>
-<li>
-<p>Type <code>make install</code></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="install"><a class="toclink" href="#install">Install</a></h2>
-<ul>
-<li>
-<p>Include the <code>include/kafka</code> directory in your project</p>
-</li>
-<li>
-<p>To work together with <strong><em>modern-cpp-kafka</em></strong> API, the compiler should support</p>
-<ul>
-<li>
-<p>Option 1: C++17</p>
-</li>
-<li>
-<p>Option 2: C++14 (with pre-requirements)</p>
+<p>Or, <strong><em>C++14</em></strong>, but with pre-requirements</p>
 <ul>
 <li>
 <p>Need <strong><em>boost</em></strong> headers (for <code>boost::optional</code>)</p>
 </li>
 <li>
-<p>GCC only (with optimization, e.g. -O2)</p>
+<p>For <strong><em>GCC</em></strong> compiler, it needs optimization options (e.g. <code>-O2</code>)</p>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-</ul>
-<h2 id="how-to-run-tests"><a class="toclink" href="#how-to-run-tests">How to Run Tests</a></h2>
+<li>
+<p>Dependencies</p>
 <ul>
 <li>
-<p>Unit test (<code>tests/unit</code>)</p>
+<p><a href="https://github.com/confluentinc/librdkafka"><strong>librdkafka</strong></a> headers and library (only the C part)</p>
 <ul>
-<li>The test could be run with no Kafka cluster depolyed</li>
+<li>Also see the <a href="https://github.com/confluentinc/librdkafka#requirements">requirements from <strong>librdkafka</strong></a></li>
 </ul>
 </li>
 <li>
-<p>Integration test (<code>tests/integration</code>)</p>
-<ul>
-<li>
-<p>The test should be run with Kafka cluster depolyed</p>
-</li>
-<li>
-<p>The environment variable <code>KAFKA_BROKER_LIST</code> should be set</p>
-<ul>
-<li>E.g. <code>export KAFKA_BROKER_LIST=127.0.0.1:29091,127.0.0.1:29092,127.0.0.1:29093</code></li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Robustness test (<code>tests/robustness</code>)</p>
-<ul>
-<li>
-<p>The test should be run with Kafka cluster depolyed locally</p>
-</li>
-<li>
-<p>The environment variable <code>KAFKA_BROKER_LIST</code> should be set</p>
-</li>
-<li>
-<p>The environment variable <code>KAFKA_BROKER_PIDS</code> should be set</p>
-<ul>
-<li>
-<p>Make sure the test runner gets the privilege to stop/resume the pids</p>
-</li>
-<li>
-<p>E.g. <code>export KAFKA_BROKER_PIDS=61567,61569,61571</code></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Additional settings for clients</p>
-<ul>
-<li>
-<p>The environment variable <code>KAFKA_CLIENT_ADDITIONAL_SETTINGS</code> could be used for customized test environment</p>
-<ul>
-<li>
-<p>Especially for Kafka cluster with SASL(or SSL) connections</p>
-</li>
-<li>
-<p>E.g. <code>export KAFKA_CLIENT_ADDITIONAL_SETTINGS="security.protocol=SASL_PLAINTEXT;sasl.kerberos.service.name=...;sasl.kerberos.keytab=...;sasl.kerberos.principal=..."</code></p>
-</li>
-</ul>
+<p><a href="https://github.com/Tencent/rapidjson"><strong>rapidjson</strong></a> headers: only required by <code>addons/KafkaMetrics.h</code></p>
 </li>
 </ul>
 </li>
@@ -253,10 +128,13 @@
 <h2 id="to-start"><a class="toclink" href="#to-start">To Start</a></h2>
 <ul>
 <li>
-<p>Tutorial</p>
+<p>Tutorials</p>
 <ul>
 <li>
 <p>Confluent Blog <a href="https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging">Debuting a Modern C++ API for Apache Kafka</a></p>
+<ul>
+<li>Note： it's a bit out of date, since <a href="https://github.com/morganstanley/modern-cpp-kafka/releases">the API changed from time to time</a></li>
+</ul>
 </li>
 <li>
 <p><a href="markdown/KafkaProducerQuickStart.html">KafkaProducer Quick Start</a></p>
@@ -267,137 +145,159 @@
 </ul>
 </li>
 <li>
-<p>User's Manual</p>
+<p>User Manual</p>
 <ul>
 <li>
 <p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">Kafka Client API</a></p>
 </li>
 <li>
-<p><code>Properties</code> for Kafka clients</p>
+<p>About <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Properties.html"><code>Properties</code></a></p>
 <ul>
 <li>
-<p><code>Properties</code> is a map which contains all configuration info needed to initialize a Kafka client. These configuration items are key-value pairs, -- the "key" is a <code>std::string</code>, while the "value" could be a <code>std::string</code>, a <code>std::function&lt;...&gt;</code>, or an <code>Interceptors</code>.</p>
+<p>It is a map which contains all configuration info needed to initialize a Kafka client.</p>
+</li>
+<li>
+<p>The configuration items are <strong><em>key-value</em></strong> pairs, -- the type of <strong><em>key</em></strong> is always <code>std::string</code>, while the type for a <strong><em>value</em></strong> could be one of the followings</p>
 <ul>
 <li>
-<p>K-V Types: <code>std::string</code> -&gt; <code>std::string</code></p>
+<p><code>std::string</code></p>
 <ul>
 <li>
-<p>Most are identical with <a href="https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
+<p>Most items are identical with <a href="https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
 </li>
 <li>
-<p>But with Exceptions</p>
+<p>But with exceptions</p>
 <ul>
 <li>
-<p>Default Value Changes</p>
+<p>Default value changes</p>
+<p>| Key String  | Default       | Description                                               |</p>
+<p>| ----------- | ------------- | --------------------------------------------------------- |</p>
+<p>| <code>log_level</code> | <code>5</code>           | Default was <code>6</code> from <strong>librdkafka</strong>                       |</p>
+<p>| <code>client.id</code> | random string | No default from <strong>librdkafka</strong>                            |</p>
+<p>| <code>group.id</code>  | random string | (for <code>KafkaConsumer</code> only) No default from <strong>librdkafka</strong> | </p>
+</li>
+<li>
+<p>Additional options</p>
+<p>| Key String                  | Default       | Description                                                                                         |</p>
+<p>| --------------------------- | ------------- | --------------------------------------------------------------------------------------------------- |</p>
+<p>| <code>enable.manual.events.poll</code> | <code>false</code>       | To poll the (offset-commit/message-delivery callback) events manually                               |</p>
+<p>| <code>max.poll.records</code>          | <code>500</code>         | (for <code>KafkaConsumer</code> only) The maxmum number of records that a single call to <code>poll()</code> would return |</p>
+</li>
+<li>
+<p>Ignored options</p>
+<p>| Key String                  | Explanation                                                                        |</p>
+<p>| --------------------------- | ---------------------------------------------------------------------------------- |</p>
+<p>| <code>enable.auto.offset.store</code>  | <strong><em>modern-cpp-kafka</em></strong> will save the offsets in its own way                        |</p>
+<p>| <code>auto.commit.interval.ms</code>   | <strong><em>modern-cpp-kafka</em></strong> will only commit the offsets within each <code>poll()</code> operation |</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>std::function&lt;...&gt;</code></p>
+<p>| Key String                     | Value Type                                                                                    |</p>
+<p>| ------------------------------ | --------------------------------------------------------------------------------------------- |</p>
+<p>| <code>log_cb</code>                       | <code>LogCallback</code> (<code>std::function&lt;void(int, const char*, int, const char* msg)&gt;</code>)                 |</p>
+<p>| <code>error_cb</code>                     | <code>ErrorCallback</code> (<code>std::function&lt;void(const Error&amp;)&gt;</code>)                                         |</p>
+<p>| <code>stats_cb</code>                     | <code>StatsCallback</code> (<code>std::function&lt;void(const std::string&amp;)&gt;</code>)                                   |</p>
+<p>| <code>oauthbearer_token_refresh_cb</code> | <code>OauthbearerTokenRefreshCallback</code> (<code>std::function&lt;SaslOauthbearerToken(const std::string&amp;)&gt;</code>) |</p>
+</li>
+<li>
+<p><code>Interceptors</code></p>
+<p>| Key String     | Value Type     |</p>
+<p>| -------------- | -------------- |</p>
+<p>| <code>interceptors</code> | <code>Interceptors</code> |</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="for-developers"><a class="toclink" href="#for-developers">For Developers</a></h2>
+<h3 id="build-for-teststoolsexamples"><a class="toclink" href="#build-for-teststoolsexamples">Build (for <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests">tests</a>/<a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tools">tools</a>/<a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/examples">examples</a>)</a></h3>
 <ul>
 <li>
-<p><code>log_level</code>(default: <code>5</code>): default was <code>6</code> from <strong>librdkafka</strong></p>
+<p>Specify library locations with environment variables</p>
+<p>| Environment Variable             | Description                                              | </p>
+<p>| -------------------------------- | -------------------------------------------------------- |</p>
+<p>| <code>LIBRDKAFKA_INCLUDE_DIR</code>         | <strong><em>librdkafka</em></strong> headers                                 |</p>
+<p>| <code>LIBRDKAFKA_LIBRARY_DIR</code>         | <strong><em>librdkafka</em></strong> libraries                               |</p>
+<p>| <code>GTEST_ROOT</code>                     | <strong><em>googletest</em></strong> headers and libraries                   |</p>
+<p>| <code>BOOST_ROOT</code>                     | <strong><em>boost</em></strong> headers and libraries                        |</p>
+<p>| <code>SASL_LIBRARYDIR</code>/<code>SASL_LIBRARY</code> | [optional] for SASL connection support                    |</p>
+<p>| <code>RAPIDJSON_INCLUDE_DIRS</code>         | <code>addons/KafkaMetrics.h</code> requires <strong><em>rapidjson</em></strong> headers |</p>
 </li>
 <li>
-<p><code>client.id</code> (default: random string): no default string from <strong>librdkafka</strong></p>
-</li>
-<li>
-<p><code>group.id</code> (default: random string, for <code>KafkaConsumer</code> only): no default string from <strong>librdkafka</strong></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Additional Options</p>
+<p>Build commands</p>
 <ul>
 <li>
-<p><code>enable.manual.events.poll</code> (default: <code>false</code>): To poll the (offset-commit/message-delivery callback) events manually</p>
+<p><code>cd empty-folder-for-build</code></p>
 </li>
 <li>
-<p><code>max.poll.records</code> (default: <code>500</code>, for <code>KafkaConsumer</code> only): The maxmum number of records that a single call to <code>poll()</code> would return</p>
+<p><code>cmake path-to-project-root</code></p>
+</li>
+<li>
+<p><code>make</code> (following options could be used with <code>-D</code>)</p>
+<p>| Build Option                     | Description                                                   |</p>
+<p>| -------------------------------- | ------------------------------------------------------------- |</p>
+<p>| <code>BUILD_OPTION_USE_TSAN=ON</code>       | Use Thread Sanitizer                                          |</p>
+<p>| <code>BUILD_OPTION_USE_ASAN=ON</code>       | Use Address Sanitizer                                         |</p>
+<p>| <code>BUILD_OPTION_USE_UBSAN=ON</code>      | Use Undefined Behavior Sanitizer                              |</p>
+<p>| <code>BUILD_OPTION_CLANG_TIDY=ON</code>     | Enable clang-tidy checking                                    |</p>
+<p>| <code>BUILD_OPTION_GEN_DOC=ON</code>        | Generate documentation as well                                |</p>
+<p>| <code>BUILD_OPTION_DOC_ONLY=ON</code>       | Only generate documentation                                   |</p>
+<p>| <code>BUILD_OPTION_GEN_COVERAGE=ON</code>   | Generate test coverage, only support by clang currently       |</p>
+</li>
+<li>
+<p><code>make install</code> (to install <code>tools</code>)</p>
 </li>
 </ul>
 </li>
-<li>
-<p>Ignored Options</p>
+</ul>
+<h3 id="run-tests"><a class="toclink" href="#run-tests">Run Tests</a></h3>
 <ul>
 <li>
-<p><code>enable.auto.offset.store</code>: <strong><em>modern-cpp-kafka</em></strong> will save the offsets in its own way</p>
-</li>
-<li>
-<p><code>auto.commit.interval.ms</code>: <strong><em>modern-cpp-kafka</em></strong> will not commit the offsets periodically, instead, it would do it in the next <code>poll()</code>.</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>K-V Types: <code>std::string</code> -&gt; <code>std::function&lt;...&gt;</code></p>
+<p>Kafka cluster setup</p>
 <ul>
 <li>
-<p><code>log_cb</code> -&gt; <code>LogCallback</code> (<code>std::function&lt;void(int, const char*, int, const char* msg)&gt;</code>)</p>
+<p><a href="https://kafka.apache.org/documentation/#quickstart">Quick Start For Cluster Setup</a></p>
 </li>
 <li>
-<p><code>error_cb</code> -&gt; <code>ErrorCallback</code> (<code>std::function&lt;void(const Error&amp;)&gt;</code>)</p>
+<p><a href="https://github.com/morganstanley/modern-cpp-kafka/blob/main/scripts/start-local-kafka-cluster.py">Cluster Setup Scripts For Test</a></p>
 </li>
-<li>
-<p><code>stats_cb</code> -&gt; <code>StatsCallback</code> (<code>std::function&lt;void(const std::string&amp;)&gt;</code>)</p>
-</li>
-<li>
-<p><code>oauthbearer_token_refresh_cb</code> -&gt; <code>OauthbearerTokenRefreshCallback</code> (<code>std::function&lt;SaslOauthbearerToken(const std::string&amp;)&gt;</code>)</p>
-</li>
-</ul>
-</li>
-<li>
-<p>K-V Types: <code>std::string</code> -&gt; <code>Interceptors</code></p>
-<ul>
-<li><code>interceptors</code>: takes <code>Interceptors</code> as the value type</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>Test Environment (ZooKeeper/Kafka cluster) Setup</p>
-<ul>
-<li><a href="https://kafka.apache.org/documentation/#quickstart_startserver">Start the servers</a></li>
-</ul>
-</li>
-</ul>
-<h2 id="how-to-achieve-high-availability-performance"><a class="toclink" href="#how-to-achieve-high-availability-performance">How to Achieve High Availability &amp; Performance</a></h2>
-<ul>
 <li>
 <p><a href="markdown/KafkaBrokerConfiguration.html">Kafka Broker Configuration</a></p>
 </li>
-<li>
-<p><a href="markdown/GoodPracticesToUseKafkaProducer.html">Good Practices to Use KafkaProducer</a></p>
-</li>
-<li>
-<p><a href="markdown/GoodPracticesToUseKafkaConsumer.html">Good Practices to Use KafkaConsumer</a></p>
-</li>
-<li>
-<p><a href="markdown/HowToMakeKafkaProducerReliable.html">How to Make KafkaProducer Reliable</a></p>
-</li>
 </ul>
-<h2 id="other-references"><a class="toclink" href="#other-references">Other References</a></h2>
+</li>
+<li>
+<p>To run the binary, the test runner requires following environment variables</p>
+<p>| Environment Variable               | Descrioption                                                | Example                                                                    |</p>
+<p>| ---------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |</p>
+<p>| <code>KAFKA_BROKER_LIST</code>                | The broker list for the Kafka cluster                       | <code>export KAFKA_BROKER_LIST=127.0.0.1:29091,127.0.0.1:29092,127.0.0.1:29093</code> |</p>
+<p>| <code>KAFKA_BROKER_PIDS</code>                | The broker PIDs for test runner to manipulate               | <code>export KAFKA_BROKER_PIDS=61567,61569,61571</code>                               |</p>
+<p>| <code>KAFKA_CLIENT_ADDITIONAL_SETTINGS</code> | Could be used for addtional configuration for Kafka clients | <code>export KAFKA_CLIENT_ADDITIONAL_SETTINGS="security.protocol=SASL_PLAINTEXT;sasl.kerberos.service.name=...;sasl.kerberos.keytab=...;sasl.kerberos.principal=..."</code> |</p>
 <ul>
 <li>
-<p>Java API for Kafka clients</p>
-<ul>
-<li>
-<p><a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/producer/package-summary.html">org.apache.kafka.clients.producer</a></p>
+<p>The environment variable <code>KAFKA_BROKER_LIST</code> is mandatory for integration/robustness test</p>
 </li>
 <li>
-<p><a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/package-summary.html">org.apache.kafka.clients.consumer</a></p>
-</li>
-<li>
-<p><a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/admin/package-summary.html">org.apache.kafka.clients.admin</a></p>
+<p>The environment variable <code>KAFKA_BROKER_PIDS</code> is mandatory for robustness test</p>
 </li>
 </ul>
+<p>| Test Type                                                                                          | Requires Kafka Cluster   | Requires Privilege to Stop/Resume the Brokers |</p>
+<p>| -------------------------------------------------------------------------------------------------- | ------------------------ | --------------------------------------------- |</p>
+<p>| <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/unit">tests/unit</a>               | -                        | -                                             |</p>
+<p>| <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/integration">tests/integration</a> | Y (<code>KAFKA_BROKER_LIST</code>)  | -                                             | </p>
+<p>| [tests/robustness<code>](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/robustness)  | Y (</code>KAFKA_BROKER_LIST<code>)  | Y (</code>KAFKA_BROKER_PIDS`)                       |</p>
 </li>
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2023. 01. 03
+        Generated: 2023. 01. 05
       </footer>
       <hr/>
     </div>

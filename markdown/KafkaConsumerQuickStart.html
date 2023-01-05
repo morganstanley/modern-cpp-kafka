@@ -16,9 +16,9 @@
   <body>
     <div class="container">
       <h1 id="kafkaconsumer-quick-start"><a class="toclink" href="#kafkaconsumer-quick-start">KafkaConsumer Quick Start</a></h1>
-<p>Generally speaking, The <code>Modern C++ Kafka API</code> is quite similar with <a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">Kafka Java's API</a></p>
+<p>Generally speaking, The <code>modern-cpp-kafka API</code> is quite similar with <a href="https://kafka.apache.org/22/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">Kafka Java's API</a></p>
 <p>We'd recommend users to cross-reference them, --especially the examples.</p>
-<h2 id="kafkaconsumer-enableautocommittrue"><a class="toclink" href="#kafkaconsumer-enableautocommittrue">KafkaConsumer (<code>enable.auto.commit=true</code>)</a></h2>
+<h2 id="kafkaconsumer-with-enableautocommittrue"><a class="toclink" href="#kafkaconsumer-with-enableautocommittrue">KafkaConsumer (with <code>enable.auto.commit=true</code>)</a></h2>
 <ul>
 <li>
 <p>Automatically commits previously polled offsets on each <code>poll</code> (and the final <code>close</code>) operations.</p>
@@ -27,8 +27,14 @@
 </ul>
 </li>
 </ul>
-<h3 id="example"><a class="toclink" href="#example">Example</a></h3>
-<div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="c1">// Create configuration object</span>
+<h3 id="example"><a class="toclink" href="#example"><a href="https://github.com/morganstanley/modern-cpp-kafka/blob/main/examples/kafka_auto_commit_consumer.cc">Example</a></a></h3>
+<div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="o">::</span><span class="nn">consumer</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="c1">// Create configuration object</span>
 
 <span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="w"> </span><span class="p">({</span><span class="w"></span>
 
@@ -113,11 +119,11 @@
 <p>At the end, we could <code>close</code> the consumer explicitly, or just leave it to the destructor.</p>
 </li>
 </ul>
-<h2 id="kafkaconsumer-enableautocommitfalse"><a class="toclink" href="#kafkaconsumer-enableautocommitfalse">KafkaConsumer (<code>enable.auto.commit=false</code>)</a></h2>
+<h2 id="kafkaconsumer-with-enableautocommitfalse"><a class="toclink" href="#kafkaconsumer-with-enableautocommitfalse">KafkaConsumer (with <code>enable.auto.commit=false</code>)</a></h2>
 <ul>
 <li>Users must commit the offsets for received records manually.</li>
 </ul>
-<h3 id="example_1"><a class="toclink" href="#example_1">Example</a></h3>
+<h3 id="example_1"><a class="toclink" href="#example_1"><a href="https://github.com/morganstanley/modern-cpp-kafka/blob/main/examples/kafka_manual_commit_consumer.cc">Example</a></a></h3>
 <div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="c1">// Create configuration object</span>
 
 <span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="w"> </span><span class="p">({</span><span class="w"></span>
@@ -241,7 +247,7 @@
 <p><code>commitSync</code> and <code>commitAsync</code> are both available here. Normally, use <code>commitSync</code> to guarantee the commitment, or use <code>commitAsync</code>(with <code>OffsetCommitCallback</code>) to get a better performance.</p>
 </li>
 </ul>
-<h2 id="option-enablemanualeventspoll"><a class="toclink" href="#option-enablemanualeventspoll">Option <code>enable.manual.events.poll</code></a></h2>
+<h2 id="about-enablemanualeventspoll"><a class="toclink" href="#about-enablemanualeventspoll">About <code>enable.manual.events.poll</code></a></h2>
 <p>While we construct a <code>KafkaConsumer</code> with <code>enable.manual.events.poll=false</code> (i.e. the default option), an internal thread would be created for <code>OffsetCommit</code> callbacks handling.</p>
 <p>This might not be what you want, since then you have to use 2 different threads to process the messages and handle the <code>OffsetCommit</code> responses.</p>
 <p>Here we have another choice, -- using <code>enable.manual.events.poll=true</code>, thus the <code>OffsetCommit</code> callbacks would be called within member function <code>pollEvents()</code>.</p>
@@ -284,10 +290,9 @@
 </code></pre></div>
 
 <h2 id="error-handling"><a class="toclink" href="#error-handling">Error handling</a></h2>
-<p>No exception would be thrown from a consumer's <code>poll</code> operation.</p>
-<p>Instead, once an error occurs, the <code>Error</code> would be embedded in the <code>Consumer::ConsumerRecord</code>.</p>
-<p>About <code>Error</code>'s <code>value()</code>s, there are 2 cases</p>
-<ol>
+<p>Normally, exceptions might be thrown while operations fail, but not for a <code>poll</code> operation, -- if an error occurs, the <code>Error</code> would be embedded in the <code>Consumer::ConsumerRecord</code>.</p>
+<p>About the <code>Error</code> <code>value()</code>, there are 2 cases</p>
+<ul>
 <li>
 <p>Success</p>
 <ul>
@@ -305,55 +310,60 @@
 <li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a></li>
 </ul>
 </li>
-</ol>
+</ul>
 <h2 id="frequently-asked-questions"><a class="toclink" href="#frequently-asked-questions">Frequently Asked Questions</a></h2>
 <ul>
 <li>
-<p>What're the available configurations?</p>
+<p>How to enhance the throughput</p>
 <ul>
 <li>
-<p><a href="KafkaClientConfiguration.md#kafkaconsumer-configuration">KafkaProducerConfiguration</a></p>
+<p>Try with a larger <code>queued.min.messages</code>, especially for small messages.</p>
 </li>
 <li>
-<p><a href="../doxygen/classKAFKA__CPP__APIS__NAMESPACE_1_1ConsumerConfig.html">Inline doxygen page</a></p>
+<p>Use multiple KafkaConsumers to distribute the payload.</p>
 </li>
 </ul>
 </li>
 <li>
-<p>How to enhance the polling performance?</p>
-<p><code>ConsumerConfig::QUEUED_MIN_MESSAGES</code> determines how frequently the consumer would send the FetchRequest towards brokers.</p>
-<p>The default configuration (i.e, 100000) might not be good enough for small (less than 1KB) messages, and suggest using a larger value (e.g, 1000000) for it.</p>
+<p>How to avoid polling duplicated messages</p>
+<ul>
+<li>
+<p>To commit the offsets more frequently (e.g, always do commit after finishing processing a message).</p>
+</li>
+<li>
+<p>Don't use quite a large <code>max.poll.records</code> for a <code>KafkaConsumer</code> (with <code>enable.auto.commit=true</code>) -- you might fail to commit all these messages before crash, thus more duplications with the next <code>poll</code>.</p>
+</li>
+</ul>
 </li>
 <li>
 <p>How many threads would be created by a KafkaConsumer?</p>
-<ol>
+<ul>
 <li>
-<p>Each broker (in the list of BOOTSTRAP_SERVERS) would take a seperate thread to transmit messages towards a kafka cluster server.</p>
+<p>Each broker (in the list of <code>bootstrap.servers</code>) would take a seperate thread to transmit messages towards a kafka cluster server.</p>
 </li>
 <li>
 <p>Another 3 threads will handle internal operations, consumer group operations, and kinds of timers, etc.</p>
 </li>
 <li>
-<p>To enable the auto events-polling, one more background thread would be created, which keeps polling/processing the offset-commit callback event.</p>
+<p>By default, <code>enable.manual.events.poll=false</code>, then one more background thread would be created, which keeps polling/processing the offset-commit callback event.</p>
 </li>
-</ol>
+</ul>
 </li>
 <li>
 <p>Which one of these threads will handle the callbacks?</p>
-<p>There are 2 kinds of callbacks for a KafkaConsumer,</p>
-<ol>
+<ul>
 <li>
 <p><code>RebalanceCallback</code> will be triggered internally by the user's thread, -- within the <code>poll</code> function.</p>
 </li>
 <li>
-<p>If <code>enable.auto.commit=true</code>, the <code>OffsetCommitCallback</code> will be triggered by the user's <code>poll</code> thread; otherwise, it would be triggered by a background thread.</p>
+<p>If <code>enable.auto.commit=true</code>, the <code>OffsetCommitCallback</code> will be triggered by the user's <code>poll</code> thread; otherwise, it would be triggered by a background thread (if <code>enable.manual.events.poll=true</code>), or by the <code>pollEvents()</code> call (if <code>enable.manual.events.poll=false</code>).</p>
 </li>
-</ol>
+</ul>
 </li>
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2023. 01. 03
+        Generated: 2023. 01. 05
       </footer>
       <hr/>
     </div>

@@ -16,16 +16,14 @@
   <body>
     <div class="container">
       <h1 id="kafkaproducer-quick-start"><a class="toclink" href="#kafkaproducer-quick-start">KafkaProducer Quick Start</a></h1>
-<p>Generally speaking, The <code>Modern C++ Kafka API</code> is quite similar to the <a href="https://kafka.apache.org/10/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html">Kafka Java's API</a>.</p>
+<p>Generally speaking, The <code>modern-cpp-kafka API</code> is quite similar to the <a href="https://kafka.apache.org/10/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html">Kafka Java's API</a>.</p>
 <p>We'd recommend users to cross-reference them, --especially the examples.</p>
 <h2 id="kafkaproducer"><a class="toclink" href="#kafkaproducer">KafkaProducer</a></h2>
 <ul>
 <li>The <code>send</code> is an unblock operation, and the result (including errors) could only be got from the delivery callback.</li>
 </ul>
-<h3 id="example"><a class="toclink" href="#example">Example</a></h3>
+<h3 id="example"><a class="toclink" href="#example"><a href="https://github.com/morganstanley/modern-cpp-kafka/blob/main/examples/kafka_async_producer_not_copy_payload.cc">Example</a></a></h3>
 <div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="p">;</span><span class="w"></span>
-
-<span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="o">::</span><span class="nn">producer</span><span class="p">;</span><span class="w"></span>
 
@@ -119,17 +117,15 @@
 <p>It's guaranteed that the delivery callback would be triggered anyway after <code>send</code>, -- a producer would even be waiting for it before <code>close</code>. So, it's a good way to release these memory resources in the <code>Producer::Callback</code> function.</p>
 </li>
 </ul>
-<h2 id="kafkaproducer-with-kafkaclientskafkaclienteventspollingoption"><a class="toclink" href="#kafkaproducer-with-kafkaclientskafkaclienteventspollingoption"><code>KafkaProducer</code> with <code>kafka::clients::KafkaClient::EventsPollingOption</code></a></h2>
+<h2 id="about-enablemanualeventspoll"><a class="toclink" href="#about-enablemanualeventspoll">About <code>enable.manual.events.poll</code></a></h2>
 <p>While we construct a <code>KafkaProducer</code> with <code>enable.manual.events.poll=false</code> (the default option), an internal thread would be created for <code>MessageDelivery</code> callbacks handling.</p>
 <p>This might not be what you want, since then you have to use 2 different threads to send the messages and handle the <code>MessageDelivery</code> responses.</p>
 <p>Here we have another choice, -- using <code>enable.manual.events.poll=true</code>, thus the <code>MessageDelivery</code> callbacks would be called within member function <code>pollEvents()</code>.</p>
 <ul>
-<li>Note, if you constructed the <code>KafkaProducer</code> with <code>enable.manual.events.poll=true</code>, the <code>send()</code> will be an <code>unblocked</code> operation even if the <code>message buffering queue</code> is full. In that case, the <code>send()</code> operation would throw an exception (or return an <code>error code</code> with the input reference parameter), -- instead of blocking there. And you might want to call <code>pollEvents()</code>, thus delivery-callback could be called for some messages (which could then be removed from the <code>message buffering queue</code>).</li>
+<li>Note: if you constructed the <code>KafkaProducer</code> with <code>enable.manual.events.poll=true</code>, the <code>send()</code> will be an <code>unblocked</code> operation even if the <code>message buffering queue</code> is full. In that case, the <code>send()</code> operation would throw an exception (or return an <code>error code</code> with the input reference parameter), -- instead of blocking there. And you might want to call <code>pollEvents()</code>, thus delivery-callback could be called for some messages (which could then be removed from the <code>message buffering queue</code>).</li>
 </ul>
 <h3 id="example_1"><a class="toclink" href="#example_1">Example</a></h3>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="p">;</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="o">::</span><span class="nn">producer</span><span class="p">;</span><span class="w"></span>
 
@@ -181,17 +177,17 @@
 
 <span class="w">    </span><span class="c1">// Here we call the `MessageDelivery` callbacks</span>
 
-<span class="w">    </span><span class="c1">// Note, we can only do this while the producer was constructed with `enable.manual.events.poll=true`.</span>
+<span class="w">    </span><span class="c1">// Note: we can only do this while the producer was constructed with `enable.manual.events.poll=true`.</span>
 
 <span class="w">    </span><span class="n">producer</span><span class="p">.</span><span class="n">pollEvents</span><span class="p">();</span><span class="w"></span>
 </code></pre></div>
 
-<h2 id="headers-in-producerrecord"><a class="toclink" href="#headers-in-producerrecord">Headers in ProducerRecord</a></h2>
+<h2 id="headers-in-producerrecord"><a class="toclink" href="#headers-in-producerrecord"><code>Headers</code> in <code>ProducerRecord</code></a></h2>
 <ul>
 <li>
 <p>A <code>ProducerRecord</code> could take extra information with <code>headers</code>.</p>
 <ul>
-<li>Note, the <code>header</code> within <code>headers</code> contains the pointer of the memory block for its <code>value</code>. The memory block MUST be valid until the <code>ProducerRecord</code> is read by <code>producer.send()</code>.</li>
+<li>Note: the <code>header</code> within <code>headers</code> contains the pointer of the memory block for its <code>value</code>. The memory block <strong>MUST</strong> be valid until the <code>ProducerRecord</code> is read by <code>producer.send()</code>.</li>
 </ul>
 </li>
 </ul>
@@ -249,20 +245,138 @@
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
-<h2 id="error-handling"><a class="toclink" href="#error-handling">Error handling</a></h2>
-<p><code>Error</code> might occur at different places while sending a message,</p>
+<h2 id="to-make-kafkaproducer-reliable"><a class="toclink" href="#to-make-kafkaproducer-reliable">To Make KafkaProducer Reliable</a></h2>
+<p>While using message dispatching systems, we always suffer from message lost, duplication and disordering.</p>
+<p>Since the application (using the <code>KafkaProducer</code>) might crash/restart, we might consider using certain mechanism to achieve <code>At most once</code>/<code>At least once</code>, and <code>Ordering</code>, -- such as locally persisting the messages until successful delivery, using embedded sequence number to de-duplicate, or responding data-source to acknowledgement the delivery result, etc. These are common topics, which are not quite specific to Kafka. </p>
+<p>Here we'd focus on <code>KafkaProducer</code>, together with the <code>idempotence</code> feature. Let's see, in which cases problems might happen, how to avoid them, and what's the best practise,-- to achieve <code>No Message Lost</code>, <code>Exactly Once</code> and <code>Ordering</code>.</p>
+<h3 id="no-message-lost"><a class="toclink" href="#no-message-lost">No Message Lost</a></h3>
+<h4 id="how-could-a-message-be-lost-even-with-successful-delivery"><a class="toclink" href="#how-could-a-message-be-lost-even-with-successful-delivery">How could a message be lost even with successful delivery</a></h4>
+<ul>
+<li>
+<p>First, the <code>partition leader</code> doesn't sync-up the latest message to enough <code>in-sync replicas</code> before responding with the <code>acks</code></p>
+<ul>
+<li>
+<p>The <code>partition leader</code> just don't need to wait for other <code>replica</code>s response</p>
+<ul>
+<li>E.g, the producer is configured with <code>acks=1</code></li>
+</ul>
+</li>
+<li>
+<p>No available <code>in-sync replica</code> to wait for the response</p>
+<ul>
+<li>E.g, all other replicas are not in-sync and brokers are configured with <code>min.insync.replicas=1</code>)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Then, the <code>partition leader</code> crashes, and one <code>in-sync replica</code> becomes new <code>partition leader</code></p>
+<ul>
+<li>The new <code>partition leader</code> has no acknowledgement with the latest messages. Later, while new messages arrive, it would use conflicting record offsets (same with those records which the <code>partition leader</code> knows only). Then, even if the previous <code>partition leader</code> comes up again, these records have no chance to be recovered (just internally overwritten to be consistent with other replicas).</li>
+</ul>
+</li>
+</ul>
+<h4 id="how-to-make-sure-no-message-lost"><a class="toclink" href="#how-to-make-sure-no-message-lost">How to make sure <strong>No Message Lost</strong></a></h4>
+<ul>
+<li>
+<p>Make sure the leader would wait for responses from all in-sync replicas before the response</p>
+<ul>
+<li>Configuration <code>acks=all</code> is a <strong>MUST</strong> for producer</li>
+</ul>
+</li>
+<li>
+<p>Ensure enough <code>In-Sync partition replicas</code></p>
+<ul>
+<li>
+<p>Configuration <code>min.insync.replicas &gt;= 2</code> is a <strong>MUST</strong> for brokers</p>
+<ul>
+<li>
+<p>Take <code>min.insync.replicas = 2</code> for example, it means,</p>
 <ol>
 <li>
-<p>A <code>KafkaException</code> would be triggered if <code>KafkaProducer</code> failed to trigger the send operation.</p>
+<p>At most <code>replication.factor - min.insync.replicas</code> replicas are out-of-sync, -- the producer would still be able to send messages, otherwise, it could fail with 'no enough replica' error, and keeps retrying.</p>
+</li>
+<li>
+<p>Occasionally no more than <code>min.insync.replicas</code> in-sync-replica failures. -- otherwise, messages might be missed. In this case, if just one in-sync replica crashes after sending back the ack to the producer, the message would not be lost; if two failed, it would! Since the new leader might be a replica which was not in-sync previously, and has no acknowledgement with these latest messages.</p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p>Please refer to <a href="KafkaBrokerConfiguration.md">Kafka Broker Configuration</a> for more details.</p>
+</li>
+<li>
+<p>Then, what would happen if replicas fail</p>
+<ol>
+<li>
+<p>Fails to send (<code>not enough in-sync replica failure</code>), -- while number of <code>in-sync replicas</code> could not meet <code>min.insync.replication</code> </p>
+</li>
+<li>
+<p>Lost messages (after sending messages), -- with no <code>in-sync replica</code> survived from multi-failures</p>
+</li>
+<li>
+<p>No message lost (while with all <code>in-sync replicas</code> acknowledged, and at least one <code>in-sync replica</code> available)</p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="exactly-once-ordering"><a class="toclink" href="#exactly-once-ordering">Exactly Once &amp; Ordering</a></h3>
+<h4 id="how-duplications-happen"><a class="toclink" href="#how-duplications-happen">How duplications happen</a></h4>
+<ul>
+<li>After brokers successfully persisted a message, it sent the <code>ack</code> to the producer. But for some abnormal reasons (such as network failure, etc), the producer might fail to receive the <code>ack</code>. The <code>librdkafka</code>'s internal queue would retry, thus another (duplicated) message would be persisted by brokers.</li>
+</ul>
+<h4 id="how-disordering-happens-within-one-partition"><a class="toclink" href="#how-disordering-happens-within-one-partition">How disordering happens within one partition</a></h4>
+<ul>
+<li>
+<p>The <code>librdkafka</code> uses internal partition queues, and once a message fails to be sent successfully(e.g, brokers are down), it would be put back on the queue and retries again while <code>retry.backoff.ms</code> expires. However, before that (retry with the failed message), the brokers might recover and the messages behind (if with configuration <code>max.in.flight &gt; 1</code>) happened to be sent successfully. In this case (with configuration <code>max.in.flight &gt; 1</code> and <code>retries &gt; 0</code>), disordering could happen, and the user would not even be aware of it.</p>
+</li>
+<li>
+<p>Furthermore, while the last retry still failed, delivery callback would eventually be triggered. The user has to determine what to do for that (might want to re-send the message, etc). But there might be a case, -- some later messages had already been saved successfully by the server, thus no way to revert the disordering.</p>
+</li>
+</ul>
+<h4 id="no-ordering-between-partitions"><a class="toclink" href="#no-ordering-between-partitions">No ordering between partitions</a></h4>
+<ul>
+<li>
+<p>Make sure these <code>ProducerRecord</code>s be with the same partition</p>
+<ul>
+<li>
+<p>Explicitly assigned with the same <code>topic-partition</code></p>
+</li>
+<li>
+<p>Use the same <code>key</code> for these records</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="idempotent-producer"><a class="toclink" href="#idempotent-producer">Idempotent Producer</a></h3>
+<ul>
+<li>
+<p>The <code>enable.idempotence=true</code> configuration is highly <strong>RECOMMENDED</strong>.</p>
+</li>
+<li>
+<p>Please refer to the <a href="https://github.com/confluentinc/librdkafka/blob/master/INTRODUCTION.md#idempotent-producer">document from librdkafkar</a> for more details.</p>
+</li>
+<li>
+<p>Note: the Kafka cluster should be configured with <code>min.insync.replicas=2</code> at least</p>
+</li>
+</ul>
+<h2 id="error-handling"><a class="toclink" href="#error-handling">Error handling</a></h2>
+<p><code>Error</code> might occur at different places while sending a message,</p>
+<ul>
+<li>
+<p>A <code>KafkaException</code> would be triggered if <code>KafkaProducer</code> failed to trigger the <code>send</code> operation.</p>
 </li>
 <li>
 <p>Delivery <code>Error</code> would be passed through the delivery-callback.</p>
 </li>
-</ol>
-<p>About <code>Error</code>'s <code>value()</code>s, there are 2 cases</p>
-<ol>
+</ul>
+<p>There are 2 cases for the <code>Error</code> <code>value()</code></p>
+<ul>
 <li>
-<p>Local errors,</p>
+<p>Local errors</p>
 <ul>
 <li>
 <p><code>RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC</code>      -- The topic doesn't exist</p>
@@ -276,73 +390,76 @@
 <li>
 <p><code>RD_KAFKA_RESP_ERR__MSG_TIMED_OUT</code>      -- No ack received within the time limit</p>
 </li>
+<li>
+<p><code>RD_KAFKA_RESP_ERR_INVALID_MSG_SIZE</code>    -- The mesage size conflicts with local configuration <code>message.max.bytes</code></p>
+</li>
 </ul>
 </li>
 <li>
-<p>Broker errors,</p>
+<p>Broker errors</p>
 <ul>
-<li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a></li>
+<li>
+<p><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a></p>
+</li>
+<li>
+<p>Typical errors are</p>
+<ul>
+<li>
+<p>Invalid message: <code>RD_KAFKA_RESP_ERR_CORRUPT_MESSAGE</code>, <code>RD_KAFKA_RESP_ERR_MSG_SIZE_TOO_LARGE</code>, <code>RD_KAFKA_RESP_ERR_INVALID_REQUIRED_ACKS</code>, <code>RD_KAFKA_RESP_ERR_UNSUPPORTED_FOR_MESSAGE_FORMAT</code>, <code>RD_KAFKA_RESP_ERR_RECORD_LIST_TOO_LARGE</code>.</p>
+</li>
+<li>
+<p>Topic/Partition not exist: <code>RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART</code>, -- automatic topic creation is disabled on the broker or the application is specifying a partition that does not exist.</p>
+</li>
+<li>
+<p>Authorization failure: <code>RD_KAFKA_RESP_ERR_TOPIC_AUTHORIZATION_FAILED</code>, <code>RD_KAFKA_RESP_ERR_CLUSTER_AUTHORIZATION_FAILED</code></p>
+</li>
 </ul>
 </li>
-</ol>
+</ul>
+</li>
+</ul>
 <h2 id="frequently-asked-questions"><a class="toclink" href="#frequently-asked-questions">Frequently Asked Questions</a></h2>
-<h3 id="what-are-the-available-configurations"><a class="toclink" href="#what-are-the-available-configurations">What are the available configurations?</a></h3>
 <ul>
 <li>
-<p><a href="KafkaClientConfiguration.md#kafkaproducer-configuration">KafkaProducerConfiguration</a></p>
-</li>
+<p>About the automatic <code>topic creation</code></p>
+<ul>
 <li>
-<p><a href="../doxygen/classKAFKA__CPP__APIS__NAMESPACE_1_1ProducerConfig.html">Inline doxygen page</a></p>
-</li>
-</ul>
-<h3 id="about-the-automatic-topic-creation"><a class="toclink" href="#about-the-automatic-topic-creation">About the automatic <code>topic creation</code></a></h3>
 <p>If the cluster's configuration is with <code>auto.create.topics.enable=true</code>, the producer/consumer could trigger the brokers to create a new topic (with <code>send</code>, <code>subscribe</code>, etc)</p>
-<p>Note, the default created topic may be not what you want (e.g, with <code>default.replication.factor=1</code> configuration as default, etc), thus causing other unexpected problems.</p>
-<h3 id="how-to-enhance-the-sending-performance"><a class="toclink" href="#how-to-enhance-the-sending-performance">How to enhance the sending performance?</a></h3>
-<p>Enlarging the default <code>BATCH_NUM_MESSAGES</code> and <code>LINGER_MS</code> might improve message batching, thus enhancing the throughput.</p>
-<p>While, on the other hand, <code>LINGER_MS</code> would highly impact the latency.</p>
-<p>The <code>QUEUE_BUFFERING_MAX_MESSAGES</code> and <code>QUEUE_BUFFERING_MAX_KBYTES</code> would determine the <code>max in flight requests (some materials about Kafka would call it in this way)</code>. If the queue buffer is full, the <code>send</code> operation would be blocked.</p>
-<p>Larger <code>QUEUE_BUFFERING_MAX_MESSAGES</code>/<code>QUEUE_BUFFERING_MAX_KBYTES</code> might help to improve throughput as well, while also means more messages locally buffering.</p>
-<h3 id="how-to-achieve-reliable-delivery"><a class="toclink" href="#how-to-achieve-reliable-delivery">How to achieve reliable delivery</a></h3>
-<ul>
-<li>
-<p>Quick Answer,</p>
-<ol>
-<li>
-<p>The Kafka cluster should be configured with <code>min.insync.replicas = 2</code> at least</p>
 </li>
 <li>
-<p>Configure the <code>KafkaProducer</code> with property <code>{ProducerConfig::ENABLE_IDEMPOTENCE, "true"}</code>, together with proper error-handling (within the delivery callback).</p>
-</li>
-</ol>
-</li>
-<li>
-<p>Complete Answer,</p>
-<ul>
-<li><a href="HowToMakeKafkaProducerReliable.md">How to Make KafkaProducer Reliable</a></li>
-</ul>
+<p>Note: the default created topic may be not what you want (e.g, with <code>default.replication.factor=1</code> configuration as default, etc), thus causing other unexpected problems.</p>
 </li>
 </ul>
-<h3 id="how-many-threads-would-be-created-by-a-kafkaproducer"><a class="toclink" href="#how-many-threads-would-be-created-by-a-kafkaproducer">How many threads would be created by a KafkaProducer?</a></h3>
-<p>Most of these background threads are started internally by librdkafka.</p>
-<p>Here is a brief introduction what they're used for,</p>
-<ol>
+</li>
 <li>
-<p>Each broker (in the list of BOOTSTRAP_SERVERS) would take a separate thread to transmit messages towards a kafka cluster server.</p>
+<p>How to enhance the sending performance?</p>
+<ul>
+<li>
+<p>Enlarging the default <code>batch.num.messages</code> and <code>linger.ms</code> might improve message batching, thus enhancing the throughput. (while, on the other hand, <code>linger.ms</code> would highly impact the latency)</p>
+</li>
+<li>
+<p>The <code>queue.buffering.max.messages</code> and <code>queue.buffering.max.kbytes</code> would determine the <code>max in flight requests (some materials about Kafka would call it in this way)</code>. If the queue buffer is full, the <code>send</code> operation would be blocked. Larger <code>queue.buffering.max.messages</code>/<code>queue.buffering.max.kbytes</code> might help to improve throughput, while also means more messages locally buffering.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>How many threads would be created by a KafkaProducer?</p>
+<ul>
+<li>
+<p>Each broker (in the list of <code>bootstrap.servers</code>) would take a separate thread to transmit messages towards a kafka cluster server.</p>
 </li>
 <li>
 <p>Another 2 threads would handle internal operations and kinds of timers, etc.</p>
 </li>
 <li>
-<p>To enale the auto events-polling, one more background thread would be created, which keeps polling the delivery callback event.</p>
+<p>By default, <code>enable.manual.events.poll=false</code>, then one more background thread would be created, which keeps polling the delivery events and triggering the callbacks.</p>
 </li>
-</ol>
-<h3 id="which-one-of-these-threads-will-handle-the-callbacks"><a class="toclink" href="#which-one-of-these-threads-will-handle-the-callbacks">Which one of these threads will handle the callbacks</a></h3>
-<p>It will be handled by a background thread, not by the user's thread.</p>
-<p>Note, should be careful if both the <code>KafkaProducer::send()</code> and the <code>producer::Callback</code> might access the same container at the same time.</p>
+</ul>
+</li>
+</ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2023. 01. 03
+        Generated: 2023. 01. 05
       </footer>
       <hr/>
     </div>
