@@ -282,17 +282,17 @@
 <p>| <code>KAFKA_CLIENT_ADDITIONAL_SETTINGS</code> | Could be used for addtional configuration for Kafka clients | <code>export KAFKA_CLIENT_ADDITIONAL_SETTINGS="security.protocol=SASL_PLAINTEXT;sasl.kerberos.service.name=...;sasl.kerberos.keytab=...;sasl.kerberos.principal=..."</code> |</p>
 <ul>
 <li>
-<p>The environment variable <code>KAFKA_BROKER_LIST</code> is mandatory for integration/robustness test</p>
+<p>The environment variable <code>KAFKA_BROKER_LIST</code> is mandatory for integration/robustness test, which requires the Kafka cluster.</p>
 </li>
 <li>
-<p>The environment variable <code>KAFKA_BROKER_PIDS</code> is mandatory for robustness test</p>
+<p>The environment variable <code>KAFKA_BROKER_PIDS</code> is mandatory for robustness test, which requires the Kafka cluster and the privilege to stop/resume the brokers.</p>
 </li>
 </ul>
-<p>| Test Type                                                                                          | Requires Kafka Cluster   | Requires Privilege to Stop/Resume the Brokers |</p>
-<p>| -------------------------------------------------------------------------------------------------- | ------------------------ | --------------------------------------------- |</p>
-<p>| <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/unit">tests/unit</a>               | -                        | -                                             |</p>
-<p>| <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/integration">tests/integration</a> | Y (<code>KAFKA_BROKER_LIST</code>)  | -                                             | </p>
-<p>| [tests/robustness<code>](https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/robustness)  | Y (</code>KAFKA_BROKER_LIST<code>)  | Y (</code>KAFKA_BROKER_PIDS`)                       |</p>
+<p>| Test Type                                                                                          | <code>KAFKA_BROKER_LIST</code>  | <code>KAFKA_BROKER_PIDS</code> |</p>
+<p>| -------------------------------------------------------------------------------------------------- | -------------------- | ------------------- |</p>
+<p>| <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/unit">tests/unit</a>               | -                    | -                   |</p>
+<p>| <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/integration">tests/integration</a> | Required             | -                   |</p>
+<p>| <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests/robustness">tests/robustness</a>   | Required             | Required            |</p>
 </li>
 </ul>
       <hr/>
