@@ -42,6 +42,21 @@ private:
         template<class T>
         static std::string getString(const std::string& value) { return value; }
 
+        const ValueType& validate(const std::string& key) const
+        {
+            static const std::vector<std::string> nonStringValueKeys = {
+                "log_cb", "error_cb", "stats_cb", "oauthbearer_token_refresh_cb", "interceptors"
+            };
+
+            if ((expectedKey.empty() && std::any_of(nonStringValueKeys.cbegin(), nonStringValueKeys.cend(), [key](const auto& k) { return k == key; }))
+               || (!expectedKey.empty() && key != expectedKey))
+            {
+                throw std::runtime_error("Invalid key/value for configuration: " + key);
+            }
+
+            return *this;
+        }
+
         template<class T>
         struct ObjWrap: public Object
         {
@@ -55,18 +70,35 @@ private:
 
         ValueType() = default;
 
-        ValueType(const std::string& value)                  { object = std::make_shared<ObjWrap<std::string>>(value); }                    // NOLINT
-        ValueType(const LogCallback& cb)                     { object = std::make_shared<ObjWrap<LogCallback>>(cb); }                       // NOLINT
-        ValueType(const ErrorCallback& cb)                   { object = std::make_shared<ObjWrap<ErrorCallback>>(cb); }                     // NOLINT
-        ValueType(const StatsCallback& cb)                   { object = std::make_shared<ObjWrap<StatsCallback>>(cb); }                     // NOLINT
-        ValueType(const OauthbearerTokenRefreshCallback& cb) { object = std::make_shared<ObjWrap<OauthbearerTokenRefreshCallback>>(cb); }   // NOLINT
-        ValueType(const Interceptors& interceptors)          { object = std::make_shared<ObjWrap<Interceptors>>(interceptors); }            // NOLINT
+        ValueType(const std::string& value)                                         // NOLINT
+        { object = std::make_shared<ObjWrap<std::string>>(value); }
+
+        ValueType(const LogCallback& cb)                                            // NOLINT
+            : expectedKey("log_cb")
+        { object = std::make_shared<ObjWrap<LogCallback>>(cb);    }
+
+        ValueType(const ErrorCallback& cb)                                          // NOLINT
+            : expectedKey("error_cb")
+        { object = std::make_shared<ObjWrap<ErrorCallback>>(cb);  }
+
+        ValueType(const StatsCallback& cb)                                          // NOLINT
+            : expectedKey("stats_cb")
+        { object = std::make_shared<ObjWrap<StatsCallback>>(cb);  }
+
+        ValueType(const OauthbearerTokenRefreshCallback& cb)                        // NOLINT
+            : expectedKey("oauthbearer_token_refresh_cb")
+        { object = std::make_shared<ObjWrap<OauthbearerTokenRefreshCallback>>(cb); }
+
+        ValueType(const Interceptors& interceptors)                                 // NOLINT
+            : expectedKey("interceptors")
+        { object = std::make_shared<ObjWrap<Interceptors>>(interceptors); }
 
         bool operator==(const ValueType& rhs) const { return toString() == rhs.toString(); }
 
         std::string toString() const { return object->toString(); }
 
     private:
+        std::string             expectedKey;
         std::shared_ptr<Object> object;
     };
 
@@ -76,7 +108,13 @@ public:
 
     Properties() = default;
     Properties(const Properties&) = default;
-    Properties(PropertiesMap kvMap): _kvMap(std::move(kvMap)) {} // NOLINT
+    Properties(PropertiesMap kvMap): _kvMap(std::move(kvMap))   // NOLINT
+    {
+        for (const auto& kv: _kvMap)
+        {
+            kv.second.validate(kv.first);
+        }
+    }
     virtual ~Properties() = default;
 
     bool operator==(const Properties& rhs) const { return map() == rhs.map(); }
@@ -88,7 +126,7 @@ public:
     template <class T>
     Properties& put(const std::string& key, const T& value)
     {
-        _kvMap[key] = ValueType(value);
+        _kvMap[key] = ValueType(value).validate(key);
         return *this;
     }
 
