@@ -115,7 +115,7 @@ TEST(KafkaConsumer, DISABLED_CommitOffsetWhileBrokersStop)
         consumer.subscribe({topic},
                            [](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions&  /*unused*/) {
                                std::cout << "[" << kafka::utility::getCurrentTime() << "] rebalance-event triggered, event type["
-                                   << (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned ? "PartitionAssigned" : "PartitionRevolked") << "]" << std::endl;
+                                   << (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned ? "PartitionAssigned" : "PartitionRevoked") << "]" << std::endl;
                             });
         EXPECT_FALSE(consumer.subscription().empty());
 
