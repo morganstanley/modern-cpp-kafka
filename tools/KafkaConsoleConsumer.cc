@@ -22,7 +22,7 @@ void stopRunning(int sig) {
     }
     else
     {
-        // Restore the signal handler, -- to avoid stucking with this handler
+        // Restore the signal handler, -- to avoid stuck with this handler
         signal(SIGINT, SIG_IGN); // NOLINT
     }
 }
