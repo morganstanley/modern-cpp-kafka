@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>About the *Modern C++ Kafka API*</title>
+    <title>Why it's here</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" integrity="sha384-SI27wrMjH3ZZ89r4o+fGIJtnzkAnFs3E4qz9DIYioCQ5l9Rd/7UAa8DHcaL8jkWt" crossorigin="anonymous">
     <style>
       pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 0.6em 1em; }
@@ -15,7 +15,8 @@
   </head>
   <body>
     <div class="container">
-      <h1 id="about-the-modern-c-kafka-api"><a class="toclink" href="#about-the-modern-c-kafka-api">About the <em>Modern C++ Kafka API</em></a></h1>
+      <p>About the <em>Modern C++ Kafka API</em></p>
+<p>=================================</p>
 <p><img alt="Lifecycle Active" src="https://badgen.net/badge/Lifecycle/Active/green" />  </p>
 <p>The <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">modern-cpp-kafka API</a> is a layer of <strong><em>C++</em></strong> wrapper based on <a href="https://github.com/confluentinc/librdkafka">librdkafka</a> (the <strong><em>C</em></strong> part only), with high quality, but more friendly to users.</p>
 <ul>
@@ -28,12 +29,12 @@
 <span class="n">affiliation</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="n">endorsed</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">Apache</span><span class="w"> </span><span class="n">Software</span><span class="w"> </span><span class="n">Foundation</span><span class="p">.</span><span class="w"></span>
 </code></pre></div>
 
-<h2 id="why-its-here"><a class="toclink" href="#why-its-here">Why it's here</a></h2>
+<h1 id="why-its-here"><a class="toclink" href="#why-its-here">Why it's here</a></h1>
 <p>The <strong><em>librdkafka</em></strong> is a robust high performance C/C++ library, widely used and well maintained.</p>
 <p>Unfortunately, to maintain <strong><em>C++98</em></strong> compatibility, the <strong><em>C++</em></strong> interface of <strong><em>librdkafka</em></strong> is not quite object-oriented or user-friendly.</p>
-<p>Since C++ is evolving quickly, we want to take advantage of new C++ features, thus make the life easier for developers. And this led us to create a new C++ API for Kafka clients.</p>
+<p>Since C++ is evolving quickly, we want to take advantage of new C++ features, thus making life easier for developers. And this led us to create a new C++ API for Kafka clients.</p>
 <p>Eventually, we worked out the <strong><em>modern-cpp-kafka</em></strong>, -- a <strong><em>header-only</em></strong> library that uses idiomatic <strong><em>C++</em></strong> features to provide a safe, efficient and easy to use way of producing and consuming Kafka messages.</p>
-<h2 id="features"><a class="toclink" href="#features">Features</a></h2>
+<h1 id="features"><a class="toclink" href="#features">Features</a></h1>
 <ul>
 <li>
 <p><strong>Header-only</strong></p>
@@ -89,7 +90,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="installation-requirements"><a class="toclink" href="#installation-requirements">Installation / Requirements</a></h2>
+<h1 id="installation-requirements"><a class="toclink" href="#installation-requirements">Installation / Requirements</a></h1>
 <ul>
 <li>
 <p>Just include the <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/include/kafka"><code>include/kafka</code></a> directory for your project</p>
@@ -125,36 +126,20 @@
 </ul>
 </li>
 </ul>
-<h2 id="to-start"><a class="toclink" href="#to-start">To Start</a></h2>
+<h1 id="user-manual"><a class="toclink" href="#user-manual">User Manual</a></h1>
 <ul>
 <li>
-<p>Tutorials</p>
-<ul>
-<li>
-<p>Confluent Blog <a href="https://www.confluent.io/blog/modern-cpp-kafka-api-for-safe-easy-messaging">Debuting a Modern C++ API for Apache Kafka</a></p>
-<ul>
-<li>Note： it's a bit out of date, since <a href="https://github.com/morganstanley/modern-cpp-kafka/releases">the API changed from time to time</a></li>
-</ul>
+<p><a href="https://github.com/morganstanley/modern-cpp-kafka/releases">Release Notes</a></p>
 </li>
 <li>
-<p><a href="markdown/KafkaProducerQuickStart.html">KafkaProducer Quick Start</a></p>
-</li>
-<li>
-<p><a href="markdown/KafkaConsumerQuickStart.html">KafkaConsumer Quick Start</a></p>
+<p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">Class List</a></p>
 </li>
 </ul>
-</li>
-<li>
-<p>User Manual</p>
+<h2 id="properties"><a class="toclink" href="#properties">Properties</a></h2>
+<p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Properties.html">kafka::Properties Class Reference</a></p>
 <ul>
 <li>
-<p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html">Kafka Client API</a></p>
-</li>
-<li>
-<p>About <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Properties.html"><code>Properties</code></a></p>
-<ul>
-<li>
-<p>It is a map which contains all configuration info needed to initialize a Kafka client.</p>
+<p>It is a map which contains all configuration info needed to initialize a Kafka client, and it's <strong>the only</strong> parameter needed for a constructor.</p>
 </li>
 <li>
 <p>The configuration items are <strong><em>key-value</em></strong> pairs, -- the type of <strong><em>key</em></strong> is always <code>std::string</code>, while the type for a <strong><em>value</em></strong> could be one of the followings</p>
@@ -163,7 +148,7 @@
 <p><code>std::string</code></p>
 <ul>
 <li>
-<p>Most items are identical with <a href="https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md">librdkafka configuration</a></p>
+<p>Most items are identical with <a href="https://github.com/confluentinc/librdkafka/blob/master/CONFIGURATION.md"><strong>librdkafka</strong> configuration</a></p>
 </li>
 <li>
 <p>But with exceptions</p>
@@ -174,14 +159,14 @@
 <p>| ----------- | ------------- | --------------------------------------------------------- |</p>
 <p>| <code>log_level</code> | <code>5</code>           | Default was <code>6</code> from <strong>librdkafka</strong>                       |</p>
 <p>| <code>client.id</code> | random string | No default from <strong>librdkafka</strong>                            |</p>
-<p>| <code>group.id</code>  | random string | (for <code>KafkaConsumer</code> only) No default from <strong>librdkafka</strong> | </p>
+<p>| <code>group.id</code>  | random string | (for <code>KafkaConsumer</code> only) No default from <strong>librdkafka</strong> |-</p>
 </li>
 <li>
 <p>Additional options</p>
 <p>| Key String                  | Default       | Description                                                                                         |</p>
 <p>| --------------------------- | ------------- | --------------------------------------------------------------------------------------------------- |</p>
 <p>| <code>enable.manual.events.poll</code> | <code>false</code>       | To poll the (offset-commit/message-delivery callback) events manually                               |</p>
-<p>| <code>max.poll.records</code>          | <code>500</code>         | (for <code>KafkaConsumer</code> only) The maxmum number of records that a single call to <code>poll()</code> would return |</p>
+<p>| <code>max.poll.records</code>          | <code>500</code>         | (for <code>KafkaConsumer</code> only) The maximum number of records that a single call to <code>poll()</code> would return |</p>
 </li>
 <li>
 <p>Ignored options</p>
@@ -196,6 +181,9 @@
 </li>
 <li>
 <p><code>std::function&lt;...&gt;</code></p>
+<ul>
+<li>For kinds of callbacks</li>
+</ul>
 <p>| Key String                     | Value Type                                                                                    |</p>
 <p>| ------------------------------ | --------------------------------------------------------------------------------------------- |</p>
 <p>| <code>log_cb</code>                       | <code>LogCallback</code> (<code>std::function&lt;void(int, const char*, int, const char* msg)&gt;</code>)                 |</p>
@@ -205,6 +193,9 @@
 </li>
 <li>
 <p><code>Interceptors</code></p>
+<ul>
+<li>To intercept thread start/exit events, etc.</li>
+</ul>
 <p>| Key String     | Value Type     |</p>
 <p>| -------------- | -------------- |</p>
 <p>| <code>interceptors</code> | <code>Interceptors</code> |</p>
@@ -212,12 +203,905 @@
 </ul>
 </li>
 </ul>
+<h3 id="examples"><a class="toclink" href="#examples">Examples</a></h3>
+<p>1.</p>
+<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="w"></span>
+
+<span class="nt">std</span><span class="p">::</span><span class="nd">string</span><span class="w"> </span><span class="nt">brokers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span><span class="o">;</span><span class="w"></span>
+
+
+
+<span class="nt">kafka</span><span class="p">::</span><span class="nd">Properties</span><span class="w"> </span><span class="nt">props</span><span class="w"> </span><span class="o">(</span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="err">{&quot;bootstrap.servers&quot;,</span><span class="w">  </span><span class="err">{brokers</span><span class="p">}</span><span class="err">}</span><span class="o">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">{</span><span class="err">&quot;enable.idempotence&quot;,</span><span class="w"> </span><span class="err">{&quot;true&quot;</span><span class="p">}</span><span class="err">}</span><span class="o">,</span><span class="w"></span>
+
+<span class="err">}</span><span class="o">);</span><span class="w"></span>
+
+<span class="err">```</span><span class="w"></span>
+</code></pre></div>
+
+<p>2.</p>
+<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="w"></span>
+
+<span class="nt">kafka</span><span class="p">::</span><span class="nd">Properties</span><span class="w"> </span><span class="nt">props</span><span class="o">;</span><span class="w"></span>
+
+<span class="nt">props</span><span class="p">.</span><span class="nc">put</span><span class="o">(</span><span class="s2">&quot;bootstrap.servers&quot;</span><span class="o">,</span><span class="w"> </span><span class="nt">brokers</span><span class="o">);</span><span class="w"></span>
+
+<span class="nt">props</span><span class="p">.</span><span class="nc">put</span><span class="o">(</span><span class="s2">&quot;enable.idempotence&quot;</span><span class="o">,</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="o">);</span><span class="w"></span>
+
+<span class="err">```</span><span class="w"></span>
+</code></pre></div>
+
+<ul>
+<li>Note: <code>bootstrap.servers</code> is the only mandatory property for a Kafka client</li>
+</ul>
+<h2 id="kafkaproducer"><a class="toclink" href="#kafkaproducer">KafkaProducer</a></h2>
+<p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1producer_1_1KafkaProducer.html">kafka::clients::producer::KafkaProducer Class Reference</a></p>
+<h3 id="a-simple-example"><a class="toclink" href="#a-simple-example">A Simple Example</a></h3>
+<p>Here's a very simple example to see how to send a message with a <code>KafkaProducer</code>.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;kafka/KafkaProducer.h&gt;</span><span class="cp"></span>
+
+
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdlib&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span><span class="cp"></span>
+
+
+
+
+
+<span class="kr">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+
+<span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="o">::</span><span class="nn">producer</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// E.g. KAFKA_BROKER_LIST: &quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span>
+
+<span class="w">    </span><span class="kr">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kr">string</span><span class="w"> </span><span class="n">brokers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;KAFKA_BROKER_LIST&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// NOLINT</span>
+
+<span class="w">    </span><span class="kr">const</span><span class="w"> </span><span class="n">Topic</span><span class="w"> </span><span class="n">topic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;TOPIC_FOR_TEST&quot;</span><span class="p">);</span><span class="w">            </span><span class="c1">// NOLINT</span>
+
+
+
+<span class="w">    </span><span class="c1">// Prepare the configuration</span>
+
+<span class="w">    </span><span class="kr">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="p">({{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">brokers</span><span class="p">}});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Create a producer</span>
+
+<span class="w">    </span><span class="n">KafkaProducer</span><span class="w"> </span><span class="nf">producer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Prepare a message</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Type message value and hit enter to produce message...&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kr">string</span><span class="w"> </span><span class="nf">line</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cin</span><span class="p">,</span><span class="w"> </span><span class="nf">line</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="n">ProducerRecord</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">NullKey</span><span class="p">,</span><span class="w"> </span><span class="n">Value</span><span class="p">(</span><span class="nf">line</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="nf">line</span><span class="p">.</span><span class="nf">size</span><span class="p">()));</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Prepare delivery callback</span>
+
+<span class="w">    </span><span class="kr">auto</span><span class="w"> </span><span class="n">deliveryCb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="kr">const</span><span class="w"> </span><span class="n">RecordMetadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="kr">const</span><span class="w"> </span><span class="n">Error</span><span class="o">&amp;</span><span class="w"> </span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Message delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">metadata</span><span class="p">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Message failed to be delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error</span><span class="p">.</span><span class="n">message</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">};</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Send a message</span>
+
+<span class="w">    </span><span class="n">producer</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">,</span><span class="w"> </span><span class="n">deliveryCb</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Close the producer explicitly(or not, since RAII will take care of it)</span>
+
+<span class="w">    </span><span class="n">producer</span><span class="p">.</span><span class="nf">close</span><span class="p">();</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<h4 id="notes"><a class="toclink" href="#notes">Notes</a></h4>
+<ul>
+<li>
+<p>The <code>send()</code> is an unblocked operation unless the message buffering queue is full. </p>
+</li>
+<li>
+<p>Make sure the memory block for <code>ProducerRecord</code>'s <code>key</code> is valid until the <code>send</code> is called.</p>
+</li>
+<li>
+<p>Make sure the memory block for <code>ProducerRecord</code>'s <code>value</code> is valid until the message delivery callback is called (unless the <code>send</code> is with option <code>KafkaProducer::SendOption::ToCopyRecordValue</code>).</p>
+</li>
+<li>
+<p>It's guaranteed that the message delivery callback would be triggered anyway after <code>send</code>, -- a producer would even be waiting for it before close.</p>
+</li>
+<li>
+<p>At the end, we could close Kafka client (i.e. <code>KafkaProducer</code> or <code>KafkaConsumer</code>) explicitly, or just leave it to the destructor. </p>
+</li>
+</ul>
+<h3 id="the-lifecycle-of-the-message"><a class="toclink" href="#the-lifecycle-of-the-message">The Lifecycle of the Message</a></h3>
+<p>The message for the KafkaProducer is called <code>ProducerRecord</code>, it contains <code>Topic</code>, <code>Partition</code> (optional), <code>Key</code> and <code>Value</code>. Both <code>Key</code> &amp; <code>Value</code> are <code>const_buffer</code>, and since there's no deep-copy for the <code>Value</code>, the user should make sure the memory block for the <code>Value</code> be valid, until the delivery callback has been executed.</p>
+<p>In the previous example, we don't need to worry about the lifecycle of <code>Value</code>, since the content of the <code>line</code> keeps to be available before closing the producer, and all message delivery callbacks would be triggered before finishing closing the producer.</p>
+<h4 id="example-for-shared_ptr"><a class="toclink" href="#example-for-shared_ptr">Example for shared_ptr</a></h4>
+<p>A trick is capturing the shared pointer (for the memory block of <code>Value</code>) in the message delivery callback.</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Type message value and hit enter to produce message... (empty line to quit)&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Get</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">forward</span><span class="w"> </span><span class="n">them</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Kafka</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">auto</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">         </span><span class="n">std</span><span class="p">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">cin</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">line</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">         </span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Empty</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">quit</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">line</span><span class="o">-&gt;</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">ProducerRecord</span><span class="w"> </span><span class="n">record</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">NullKey</span><span class="p">,</span><span class="w"> </span><span class="n">Value</span><span class="p">(</span><span class="n">line</span><span class="o">-&gt;</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="n">line</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">()));</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">delivery</span><span class="w"> </span><span class="n">callback</span><span class="w"></span>
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Note</span><span class="p">:</span><span class="w"> </span><span class="n">Here</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">capture</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">shared</span><span class="w"> </span><span class="n">pointer</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="err">`</span><span class="n">line</span><span class="err">`</span><span class="p">,</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">holds</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="err">`</span><span class="n">record</span><span class="o">.</span><span class="n">value</span><span class="p">()</span><span class="err">`</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">auto</span><span class="w"> </span><span class="n">deliveryCb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">line</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">RecordMetadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Error</span><span class="o">&amp;</span><span class="w"> </span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Message delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">metadata</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="p">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Message failed to be delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">};</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Send</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">producer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">,</span><span class="w"> </span><span class="n">deliveryCb</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<h4 id="example-for-deep-copy"><a class="toclink" href="#example-for-deep-copy">Example for deep-copy</a></h4>
+<p>The option <code>KafkaProducer::SendOption::ToCopyRecordValue</code> could be used for <code>producer.send(...)</code>, thus the memory block of <code>record.value()</code> would be copied into the internal sending buffer.</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Type message value and hit enter to produce message... (empty line to quit)&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Get</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">forward</span><span class="w"> </span><span class="n">them</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Kafka</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="w"> </span><span class="n">line</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">cin</span><span class="p">,</span><span class="w"> </span><span class="n">line</span><span class="p">);</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Empty</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">quit</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">ProducerRecord</span><span class="w"> </span><span class="n">record</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">NullKey</span><span class="p">,</span><span class="w"> </span><span class="n">Value</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="n">line</span><span class="o">.</span><span class="n">size</span><span class="p">()));</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">delivery</span><span class="w"> </span><span class="n">callback</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">auto</span><span class="w"> </span><span class="n">deliveryCb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RecordMetadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Error</span><span class="o">&amp;</span><span class="w"> </span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Message delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">metadata</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="p">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Message failed to be delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">};</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Send</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="p">(</span><span class="n">deep</span><span class="o">-</span><span class="n">copy</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">payload</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">producer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">,</span><span class="w"> </span><span class="n">deliveryCb</span><span class="p">,</span><span class="w"> </span><span class="n">KafkaProducer</span><span class="p">::</span><span class="n">SendOption</span><span class="p">::</span><span class="n">ToCopyRecordValue</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<h3 id="embed-more-info-in-a-producerrecord"><a class="toclink" href="#embed-more-info-in-a-producerrecord">Embed More Info in a <code>ProducerRecord</code></a></h3>
+<p>Besides the <code>payload</code> (i.e. <code>value()</code>), a <code>ProducerRecord</code> could also put extra info in its <code>key()</code> &amp; <code>headers()</code>.</p>
+<p><code>Headers</code> is a vector of <code>Header</code> which contains <code>kafka::Header::Key</code> (i.e. <code>std::string</code>) and <code>kafka::Header::Value</code> (i.e. <code>const_buffer</code>).</p>
+<h4 id="example"><a class="toclink" href="#example">Example</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">Topic</span><span class="w">     </span><span class="n">topic</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;someTopic&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">Partition</span><span class="w"> </span><span class="n">partition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="w"> </span><span class="n">key</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;some key&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="w"> </span><span class="n">value</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;some payload&quot;</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="w"> </span><span class="n">category</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;categoryA&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">size_t</span><span class="w"> </span><span class="n">sessionId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">kafka</span><span class="p">::</span><span class="n">clients</span><span class="p">::</span><span class="n">producer</span><span class="p">::</span><span class="n">ProducerRecord</span><span class="w"> </span><span class="n">record</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">                                                        </span><span class="n">partition</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">                                                        </span><span class="n">kafka</span><span class="p">::</span><span class="n">Key</span><span class="p">{</span><span class="n">key</span><span class="o">.</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="n">key</span><span class="o">.</span><span class="n">size</span><span class="p">()},</span><span class="w"></span>
+
+<span class="w">                                                        </span><span class="n">kafka</span><span class="p">::</span><span class="n">Value</span><span class="p">{</span><span class="n">value</span><span class="o">.</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="n">value</span><span class="o">.</span><span class="n">size</span><span class="p">()});</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="n">record</span><span class="o">.</span><span class="n">headers</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">kafka</span><span class="p">::</span><span class="n">Header</span><span class="p">{</span><span class="n">kafka</span><span class="p">::</span><span class="n">Header</span><span class="p">::</span><span class="n">Key</span><span class="p">{</span><span class="s2">&quot;Category&quot;</span><span class="p">},</span><span class="w">  </span><span class="n">kafka</span><span class="p">::</span><span class="n">Header</span><span class="p">::</span><span class="n">Value</span><span class="p">{</span><span class="n">category</span><span class="o">.</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="n">category</span><span class="o">.</span><span class="n">size</span><span class="p">()}},</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">kafka</span><span class="p">::</span><span class="n">Header</span><span class="p">{</span><span class="n">kafka</span><span class="p">::</span><span class="n">Header</span><span class="p">::</span><span class="n">Key</span><span class="p">{</span><span class="s2">&quot;SessionId&quot;</span><span class="p">},</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">Header</span><span class="p">::</span><span class="n">Value</span><span class="p">{</span><span class="o">&amp;</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="n">sizeof</span><span class="p">(</span><span class="n">sessionId</span><span class="p">)}}</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">}};</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;ProducerRecord: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<h3 id="about-enablemanualeventspoll"><a class="toclink" href="#about-enablemanualeventspoll">About <code>enable.manual.events.poll</code></a></h3>
+<p>By default, <code>KafkaProducer</code> would be constructed with <code>enable.manual.events.poll=false</code> configuration.</p>
+<p>That means, a background thread would be created, which keeps polling the events (thus calls the message delivery callbacks)</p>
+<p>Here we have another choice, -- using <code>enable.manual.events.poll=true</code>, thus the MessageDelivery callbacks would be called within member function <code>pollEvents()</code>.</p>
+<ul>
+<li>Note: in this case, the send() will be an unblocked operation even if the message buffering queue is full, -- it would throw an exception (or return an error code with the input reference parameter), instead of blocking there.</li>
+</ul>
+<h4 id="example_1"><a class="toclink" href="#example_1">Example</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="p">(</span><span class="n">with</span><span class="w"> </span><span class="s2">&quot;enable.manual.events.poll=true&quot;</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="n">props</span><span class="p">({{</span><span class="s2">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w">         </span><span class="p">{</span><span class="n">brokers</span><span class="p">}},</span><span class="w"></span>
+
+<span class="w">                            </span><span class="p">{</span><span class="s2">&quot;enable.manual.events.poll&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="p">}}});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">producer</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">KafkaProducer</span><span class="w"> </span><span class="n">producer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Type message value and hit enter to produce message... (empty line to finish)&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Get</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">lines</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">std</span><span class="p">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="p">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">messages</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">auto</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">getline</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">cin</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">line</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">line</span><span class="o">-&gt;</span><span class="n">empty</span><span class="p">();)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">messages</span><span class="o">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">line</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">messages</span><span class="o">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Pop</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">sent</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">auto</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">messages</span><span class="o">.</span><span class="n">front</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">messages</span><span class="o">.</span><span class="n">pop_front</span><span class="p">();</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">ProducerRecord</span><span class="w"> </span><span class="n">record</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">NullKey</span><span class="p">,</span><span class="w"> </span><span class="n">Value</span><span class="p">(</span><span class="n">payload</span><span class="o">-&gt;</span><span class="n">c_str</span><span class="p">(),</span><span class="w"> </span><span class="n">payload</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">()));</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">delivery</span><span class="w"> </span><span class="n">callback</span><span class="w"></span>
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Note</span><span class="p">:</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">fails</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">pushed</span><span class="w"> </span><span class="n">back</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">sending</span><span class="w"> </span><span class="n">queue</span><span class="p">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">then</span><span class="w"> </span><span class="n">retries</span><span class="w"> </span><span class="n">later</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">auto</span><span class="w"> </span><span class="n">deliveryCb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">payload</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">messages</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">RecordMetadata</span><span class="o">&amp;</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Error</span><span class="o">&amp;</span><span class="w"> </span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Message delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">metadata</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="p">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Message failed to be delivered: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;, will be retried later&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">messages</span><span class="o">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">payload</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">};</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Send</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">producer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">record</span><span class="p">,</span><span class="w"> </span><span class="n">deliveryCb</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Poll</span><span class="w"> </span><span class="n">events</span><span class="w"> </span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="n">delivery</span><span class="w"> </span><span class="n">callback</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">producer</span><span class="o">.</span><span class="n">pollEvents</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">chrono</span><span class="p">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<h3 id="error-handling"><a class="toclink" href="#error-handling">Error Handling</a></h3>
+<p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html"><code>kafka::Error</code></a> might occur at different places while sending a message,</p>
+<ul>
+<li>
+<p>A <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1KafkaException.html"><code>kafka::KafkaException</code></a> would be triggered if <code>KafkaProducer</code> fails to call the <code>send</code> operation.</p>
+</li>
+<li>
+<p>Delivery <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html"><code>kafka::Error</code></a> could be fetched via the delivery-callback.</p>
+</li>
+<li>
+<p>The <code>kafka::Error::value()</code> for failures</p>
+<ul>
+<li>
+<p>Local errors</p>
+<ul>
+<li>
+<p><code>RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC</code>      -- The topic doesn't exist</p>
+</li>
+<li>
+<p><code>RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION</code>  -- The partition doesn't exist</p>
+</li>
+<li>
+<p><code>RD_KAFKA_RESP_ERR__INVALID_ARG</code>        -- Invalid topic (topic is null or the length is too long (&gt;512))</p>
+</li>
+<li>
+<p><code>RD_KAFKA_RESP_ERR__MSG_TIMED_OUT</code>      -- No ack received within the time limit</p>
+</li>
+<li>
+<p><code>RD_KAFKA_RESP_ERR_INVALID_MSG_SIZE</code>    -- The message size conflicts with local configuration <code>message.max.bytes</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Broker errors</p>
+<ul>
+<li>
+<p><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a></p>
+</li>
+<li>
+<p>Typical errors are</p>
+<ul>
+<li>
+<p>Invalid message: <code>RD_KAFKA_RESP_ERR_CORRUPT_MESSAGE</code>, <code>RD_KAFKA_RESP_ERR_MSG_SIZE_TOO_LARGE</code>, <code>RD_KAFKA_RESP_ERR_INVALID_REQUIRED_ACKS</code>, <code>RD_KAFKA_RESP_ERR_UNSUPPORTED_FOR_MESSAGE_FORMAT</code>, <code>RD_KAFKA_RESP_ERR_RECORD_LIST_TOO_LARGE</code>.</p>
+</li>
+<li>
+<p>Topic/Partition not exist: <code>RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART</code>, -- automatic topic creation is disabled on the broker or the application is specifying a partition that does not exist.</p>
+</li>
+<li>
+<p>Authorization failure: <code>RD_KAFKA_RESP_ERR_TOPIC_AUTHORIZATION_FAILED</code>, <code>RD_KAFKA_RESP_ERR_CLUSTER_AUTHORIZATION_FAILED</code></p>
 </li>
 </ul>
 </li>
 </ul>
-<h2 id="for-developers"><a class="toclink" href="#for-developers">For Developers</a></h2>
-<h3 id="build-for-teststoolsexamples"><a class="toclink" href="#build-for-teststoolsexamples">Build (for <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests">tests</a>/<a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tools">tools</a>/<a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/examples">examples</a>)</a></h3>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="idempotent-producer"><a class="toclink" href="#idempotent-producer">Idempotent Producer</a></h3>
+<p>The <code>enable.idempotence=true</code> configuration is highly RECOMMENDED.</p>
+<h4 id="example_2"><a class="toclink" href="#example_2">Example</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="w">        </span><span class="nt">kafka</span><span class="p">::</span><span class="nd">Properties</span><span class="w"> </span><span class="nt">props</span><span class="o">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="nt">props</span><span class="p">.</span><span class="nc">put</span><span class="o">(</span><span class="s2">&quot;bootstrap.servers&quot;</span><span class="o">,</span><span class="w"> </span><span class="nt">brokers</span><span class="o">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="nt">props</span><span class="p">.</span><span class="nc">put</span><span class="o">(</span><span class="s2">&quot;enable.idempotence&quot;</span><span class="o">,</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="o">);</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="nt">Create</span><span class="w"> </span><span class="nt">an</span><span class="w"> </span><span class="nt">idempotent</span><span class="w"> </span><span class="nt">producer</span><span class="w"></span>
+
+<span class="w">        </span><span class="nt">kafka</span><span class="p">::</span><span class="nd">clients</span><span class="p">::</span><span class="nd">producer</span><span class="p">::</span><span class="nd">KafkaProducer</span><span class="w"> </span><span class="nt">producer</span><span class="o">(</span><span class="nt">props</span><span class="o">);</span><span class="w"></span>
+</code></pre></div>
+
+<ul>
+<li>Note: please refer to the <a href="https://github.com/confluentinc/librdkafka/blob/master/INTRODUCTION.md#idempotent-producer">document from <strong>librdkafka</strong></a> for more details.</li>
+</ul>
+<h2 id="kafka-consumer"><a class="toclink" href="#kafka-consumer">Kafka Consumer</a></h2>
+<p><a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html">kafka::clients::consumer::KafkaConsumer Class Reference</a></p>
+<h3 id="a-simple-example_1"><a class="toclink" href="#a-simple-example_1">A Simple Example</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;kafka/KafkaConsumer.h&gt;</span><span class="cp"></span>
+
+
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdlib&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span><span class="cp"></span>
+
+
+
+<span class="n">std</span><span class="o">::</span><span class="kr">atomic_bool</span><span class="w"> </span><span class="nf">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="kr">true</span><span class="p">};</span><span class="w"></span>
+
+
+
+<span class="kr">void</span><span class="w"> </span><span class="nf">stopRunning</span><span class="p">(</span><span class="kr">int</span><span class="w"> </span><span class="n">sig</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sig</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">SIGINT</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nf">running</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="nf">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">false</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// Restore the signal handler, -- to avoid stuck with this handler</span>
+
+<span class="w">        </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">SIG_IGN</span><span class="p">);</span><span class="w"> </span><span class="c1">// NOLINT</span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+
+
+
+<span class="kr">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+
+<span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">using</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="nn">kafka</span><span class="o">::</span><span class="nn">clients</span><span class="o">::</span><span class="nn">consumer</span><span class="p">;</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Use Ctrl-C to terminate the program</span>
+
+<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">stopRunning</span><span class="p">);</span><span class="w">    </span><span class="c1">// NOLINT</span>
+
+
+
+<span class="w">    </span><span class="c1">// E.g. KAFKA_BROKER_LIST: &quot;192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092&quot;</span>
+
+<span class="w">    </span><span class="kr">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kr">string</span><span class="w"> </span><span class="n">brokers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;KAFKA_BROKER_LIST&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// NOLINT</span>
+
+<span class="w">    </span><span class="kr">const</span><span class="w"> </span><span class="n">Topic</span><span class="w"> </span><span class="n">topic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;TOPIC_FOR_TEST&quot;</span><span class="p">);</span><span class="w">            </span><span class="c1">// NOLINT</span>
+
+
+
+<span class="w">    </span><span class="c1">// Prepare the configuration</span>
+
+<span class="w">    </span><span class="kr">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="nf">props</span><span class="p">({{</span><span class="s">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">brokers</span><span class="p">}}});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Create a consumer instance</span>
+
+<span class="w">    </span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// Subscribe to topics</span>
+
+<span class="w">    </span><span class="n">consumer</span><span class="p">.</span><span class="n">subscribe</span><span class="p">({</span><span class="n">topic</span><span class="p">});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nf">running</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">// Poll messages from Kafka brokers</span>
+
+<span class="w">        </span><span class="kr">auto</span><span class="w"> </span><span class="n">records</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">consumer</span><span class="p">.</span><span class="n">poll</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kr">const</span><span class="w"> </span><span class="kr">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">record</span><span class="o">:</span><span class="w"> </span><span class="n">records</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">record</span><span class="p">.</span><span class="n">error</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Got a new message...&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Topic    : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">topic</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Partition: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">partition</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Offset   : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">offset</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Timestamp: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">timestamp</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Headers  : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">toString</span><span class="p">(</span><span class="n">record</span><span class="p">.</span><span class="n">headers</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Key   [&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">key</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Value [&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">value</span><span class="p">().</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;]&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="p">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="c1">// No explicit close is needed, RAII will take care of it</span>
+
+<span class="w">    </span><span class="n">consumer</span><span class="p">.</span><span class="nf">close</span><span class="p">();</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<ul>
+<li>
+<p>By default, the <code>KafkaConsumer</code> is constructed with property <code>enable.auto.commit=true</code></p>
+<ul>
+<li>
+<p>It means it will automatically commit previously polled offsets on each poll (and the final close) operations.</p>
+<ul>
+<li>Note: the internal offset commit is asynchronous, which is not guaranteed to succeed. Since the operation is supposed to be triggered (again) at a later time (within each <code>poll</code>), thus the occasional failure doesn't matter.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>subscribe</code> could take a topic list. It's a block operation, and would wait for the consumer to get partitions assigned.</p>
+</li>
+<li>
+<p><code>poll</code> must be called periodically, thus to trigger kinds of callback handling internally. In practice, it could be put in a <code>while loop</code>.</p>
+</li>
+</ul>
+<h3 id="rebalance-events"><a class="toclink" href="#rebalance-events">Rebalance events</a></h3>
+<p>The <code>KafkaConsumer</code> could specify the <code>RebalanceCallback</code> while it subscribes the topics, and the callback will be triggered while partitions are assigned or revoked.</p>
+<h4 id="example_3"><a class="toclink" href="#example_3">Example</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">consumer</span><span class="w"> </span><span class="n">would</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">topic</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">then</span><span class="w"> </span><span class="n">quit</span><span class="o">.</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">configuration</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Properties</span><span class="w"> </span><span class="n">props</span><span class="p">({{</span><span class="s2">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w">    </span><span class="p">{</span><span class="n">brokers</span><span class="p">}},</span><span class="w"></span>
+
+<span class="w">                            </span><span class="o">//</span><span class="w"> </span><span class="n">Emit</span><span class="w"> </span><span class="n">RD_KAFKA_RESP_ERR__PARTITION_EOF</span><span class="w"> </span><span class="n">event</span><span class="w"></span>
+
+<span class="w">                            </span><span class="o">//</span><span class="w"> </span><span class="n">whenever</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">consumer</span><span class="w"> </span><span class="n">reaches</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">partition</span><span class="o">.</span><span class="w"></span>
+
+<span class="w">                            </span><span class="p">{</span><span class="s2">&quot;enable.partition.eof&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;true&quot;</span><span class="p">}},</span><span class="w"></span>
+
+<span class="w">                            </span><span class="o">//</span><span class="w"> </span><span class="n">Action</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">there</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">initial</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="n">store</span><span class="w"></span>
+
+<span class="w">                            </span><span class="o">//</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">means</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">consumer</span><span class="w"> </span><span class="n">would</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">very</span><span class="w"> </span><span class="n">beginning</span><span class="w"></span>
+
+<span class="w">                            </span><span class="p">{</span><span class="s2">&quot;auto.offset.reset&quot;</span><span class="p">,</span><span class="w">    </span><span class="p">{</span><span class="s2">&quot;earliest&quot;</span><span class="p">}}});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">consumer</span><span class="w"> </span><span class="n">instance</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="n">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">rebalance</span><span class="w"> </span><span class="n">callbacks</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">std</span><span class="p">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">std</span><span class="p">::</span><span class="n">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">assignedPartitions</span><span class="p">{};</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">auto</span><span class="w"> </span><span class="n">rebalanceCb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="o">&amp;</span><span class="n">assignedPartitions</span><span class="p">](</span><span class="n">kafka</span><span class="p">::</span><span class="n">clients</span><span class="p">::</span><span class="n">consumer</span><span class="p">::</span><span class="n">RebalanceEventType</span><span class="w"> </span><span class="n">et</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">TopicPartitions</span><span class="o">&amp;</span><span class="w"> </span><span class="n">tps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                           </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">et</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">clients</span><span class="p">::</span><span class="n">consumer</span><span class="p">::</span><span class="n">RebalanceEventType</span><span class="p">::</span><span class="n">PartitionsAssigned</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                               </span><span class="n">assignedPartitions</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">tps</span><span class="o">.</span><span class="n">size</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">                               </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Assigned partitions: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">toString</span><span class="p">(</span><span class="n">tps</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                           </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                               </span><span class="n">assignedPartitions</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">tps</span><span class="o">.</span><span class="n">size</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">                               </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Revoked partitions: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">toString</span><span class="p">(</span><span class="n">tps</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                           </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">                       </span><span class="p">};</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Subscribe</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">topics</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">rebalance</span><span class="w"> </span><span class="n">callback</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">consumer</span><span class="o">.</span><span class="n">subscribe</span><span class="p">({</span><span class="n">topic</span><span class="p">},</span><span class="w"> </span><span class="n">rebalanceCb</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="n">TopicPartitions</span><span class="w"> </span><span class="n">finishedPartitions</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">finishedPartitions</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">assignedPartitions</span><span class="o">.</span><span class="n">load</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="o">//</span><span class="w"> </span><span class="n">Poll</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">Kafka</span><span class="w"> </span><span class="n">brokers</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">auto</span><span class="w"> </span><span class="n">records</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">consumer</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">chrono</span><span class="p">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">record</span><span class="p">:</span><span class="w"> </span><span class="n">records</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">record</span><span class="o">.</span><span class="n">error</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="n">std</span><span class="p">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">error</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">RD_KAFKA_RESP_ERR__PARTITION_EOF</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                    </span><span class="o">//</span><span class="w"> </span><span class="n">Record</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">partition</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">been</span><span class="w"> </span><span class="n">reached</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">end</span><span class="w"></span>
+
+<span class="w">                    </span><span class="n">finishedPartitions</span><span class="o">.</span><span class="n">emplace</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">topic</span><span class="p">(),</span><span class="w"> </span><span class="n">record</span><span class="o">.</span><span class="n">partition</span><span class="p">());</span><span class="w"></span>
+
+<span class="w">                </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                    </span><span class="n">std</span><span class="p">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+
+<h3 id="to-commit-offset-manually"><a class="toclink" href="#to-commit-offset-manually">To Commit Offset Manually</a></h3>
+<p>Once the KafkaConsumer is configured with <code>enable.auto.commit=false</code>, the user has to find out the right places to call <code>commitSync(...)</code>/<code>commitAsync(...)</code>.</p>
+<h4 id="example_4"><a class="toclink" href="#example_4">Example</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">configuration</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">Properties</span><span class="w"> </span><span class="n">props</span><span class="p">({{</span><span class="s2">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">brokers</span><span class="p">}}});</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">props</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;enable.auto.commit&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">consumer</span><span class="w"> </span><span class="n">instance</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">KafkaConsumer</span><span class="w"> </span><span class="n">consumer</span><span class="p">(</span><span class="n">props</span><span class="p">);</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Subscribe</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">topics</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">consumer</span><span class="o">.</span><span class="n">subscribe</span><span class="p">({</span><span class="n">topic</span><span class="p">});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">running</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">auto</span><span class="w"> </span><span class="n">records</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">consumer</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="n">std</span><span class="p">::</span><span class="n">chrono</span><span class="p">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">100</span><span class="p">));</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">record</span><span class="p">:</span><span class="w"> </span><span class="n">records</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">record</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">records</span><span class="o">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">consumer</span><span class="o">.</span><span class="n">commitAsync</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="n">consumer</span><span class="o">.</span><span class="n">commitSync</span><span class="p">();</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">No</span><span class="w"> </span><span class="n">explicit</span><span class="w"> </span><span class="n">close</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">needed</span><span class="p">,</span><span class="w"> </span><span class="n">RAII</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">care</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">it</span><span class="w"></span>
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">consumer</span><span class="o">.</span><span class="n">close</span><span class="p">();</span><span class="w"></span>
+</code></pre></div>
+
+<h3 id="error-handling_1"><a class="toclink" href="#error-handling_1">Error Handling</a></h3>
+<ul>
+<li>
+<p>Normally, <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1KafkaException.html"><code>kafka::KafkaException</code></a> will be thrown if an operation fails.</p>
+</li>
+<li>
+<p>But if the <code>poll</code> operation fails, the <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html"><code>kafka::Error</code></a> would be embedded in the <a href="http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html"><code>kafka::clients::consumer::ConsumerRecord</code></a>.</p>
+</li>
+<li>
+<p>There're 2 cases for the <code>kafka::Error::value()</code></p>
+<ul>
+<li>
+<p>Success</p>
+<ul>
+<li>
+<p><code>RD_KAFKA_RESP_ERR__NO_ERROR</code> (<code>0</code>), -- got a message successfully</p>
+</li>
+<li>
+<p><code>RD_KAFKA_RESP_ERR__PARTITION_EOF</code> (<code>-191</code>), -- reached the end of a partition (no message got)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Failure</p>
+<ul>
+<li><a href="https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes">Error Codes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="callbacks-for-kafkaclient"><a class="toclink" href="#callbacks-for-kafkaclient">Callbacks for KafkaClient</a></h2>
+<p>We're free to set callbacks in <code>Properties</code> with a <code>kafka::clients::ErrorCallback</code>, <code>kafka::clients::LogCallback</code>, or <code>kafka::clients::StatsCallback</code>.</p>
+<h4 id="example_5"><a class="toclink" href="#example_5">Example</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">Prepare</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">configuration</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">Properties</span><span class="w"> </span><span class="n">props</span><span class="p">({{</span><span class="s2">&quot;bootstrap.servers&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">brokers</span><span class="p">}}});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="nb">print</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">error</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">props</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;error_cb&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">Error</span><span class="o">&amp;</span><span class="w"> </span><span class="n">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                              </span><span class="o">//</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">ANSI_escape_code</span><span class="w"></span>
+
+<span class="w">                              </span><span class="n">std</span><span class="p">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[1;31m&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;[&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">utility</span><span class="p">::</span><span class="n">getCurrentTime</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;] ==&gt; Met Error: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                              </span><span class="n">std</span><span class="p">::</span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[4;35m&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[0m&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                          </span><span class="p">});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">enable</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">debug</span><span class="o">-</span><span class="n">level</span><span class="w"> </span><span class="nb">log</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">props</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;log_level&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;7&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">props</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;all&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">props</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;log_cb&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="nb nb-Type">int</span><span class="w"> </span><span class="o">/*</span><span class="n">level</span><span class="o">*/</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="nb">char</span><span class="o">*</span><span class="w"> </span><span class="o">/*</span><span class="n">filename</span><span class="o">*/</span><span class="p">,</span><span class="w"> </span><span class="nb nb-Type">int</span><span class="w"> </span><span class="o">/*</span><span class="n">lineno</span><span class="o">*/</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="nb">char</span><span class="o">*</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                            </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;[&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kafka</span><span class="p">::</span><span class="n">utility</span><span class="p">::</span><span class="n">getCurrentTime</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;]&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                        </span><span class="p">});</span><span class="w"></span>
+
+
+
+<span class="w">    </span><span class="o">//</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">enable</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">statistics</span><span class="w"> </span><span class="n">dumping</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">props</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;statistics.interval.ms&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;1000&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">props</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;stats_cb&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">jsonString</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                              </span><span class="n">std</span><span class="p">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;Statistics: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">jsonString</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">endl</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                          </span><span class="p">});</span><span class="w"></span>
+</code></pre></div>
+
+<h2 id="thread-model"><a class="toclink" href="#thread-model">Thread Model</a></h2>
+<ul>
+<li>
+<p>Number of Background Threads within a Kafka Client</p>
+<ul>
+<li>
+<p><strong>N</strong> threads for the message transmission (towards <strong>N</strong> brokers).</p>
+</li>
+<li>
+<p><strong>2</strong> (for <code>KafkaProducer</code>) / <strong>3</strong> (for <code>KafkaConsumer</code>) threads to handle internal operations, timers, consumer group operations, etc.</p>
+</li>
+<li>
+<p><strong>1</strong> thread for (message-delivery/offset-commit) callback events polling, -- the thread only exists while the client is configured with <code>enable.manual.events.poll=false</code> (the default config)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Which Thread Handles the Callbacks</p>
+<ul>
+<li>
+<p><code>consumer::RebalanceCallback</code>: the thread which calls  <code>consumer.poll(...)</code></p>
+</li>
+<li>
+<p><code>consumer::OffsetCommitCallback</code></p>
+<ul>
+<li>
+<p>While <code>enable.manual.events.poll=false</code>: the thread which calls <code>consumer.pollEvents(...)</code></p>
+</li>
+<li>
+<p>While <code>enable.manual.events.poll=true</code>: the background (events polling) thread</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>producer::Callback</code></p>
+<ul>
+<li>
+<p>While <code>enable.manual.events.poll=false</code>: the thread which calls <code>producer.pollEvents(...)</code></p>
+</li>
+<li>
+<p>While <code>enable.manual.events.poll=true</code>: the background (events polling) thread</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="for-developers"><a class="toclink" href="#for-developers">For Developers</a></h1>
+<h2 id="build-for-teststoolsexamples"><a class="toclink" href="#build-for-teststoolsexamples">Build (for <a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tests">tests</a>/<a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/tools">tools</a>/<a href="https://github.com/morganstanley/modern-cpp-kafka/tree/main/examples">examples</a>)</a></h2>
 <ul>
 <li>
 <p>Specify library locations with environment variables</p>
@@ -237,10 +1121,7 @@
 <p><code>cd empty-folder-for-build</code></p>
 </li>
 <li>
-<p><code>cmake path-to-project-root</code></p>
-</li>
-<li>
-<p><code>make</code> (following options could be used with <code>-D</code>)</p>
+<p><code>cmake path-to-project-root</code> (following options could be used with <code>-D</code>)</p>
 <p>| Build Option                     | Description                                                   |</p>
 <p>| -------------------------------- | ------------------------------------------------------------- |</p>
 <p>| <code>BUILD_OPTION_USE_TSAN=ON</code>       | Use Thread Sanitizer                                          |</p>
@@ -252,12 +1133,15 @@
 <p>| <code>BUILD_OPTION_GEN_COVERAGE=ON</code>   | Generate test coverage, only support by clang currently       |</p>
 </li>
 <li>
+<p><code>make</code></p>
+</li>
+<li>
 <p><code>make install</code> (to install <code>tools</code>)</p>
 </li>
 </ul>
 </li>
 </ul>
-<h3 id="run-tests"><a class="toclink" href="#run-tests">Run Tests</a></h3>
+<h2 id="run-tests"><a class="toclink" href="#run-tests">Run Tests</a></h2>
 <ul>
 <li>
 <p>Kafka cluster setup</p>
@@ -297,7 +1181,7 @@
 </ul>
       <hr/>
       <footer class="text-center text-muted">
-        Generated: 2023. 01. 05
+        Generated: 2023. 01. 18
       </footer>
       <hr/>
     </div>
