@@ -292,7 +292,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
                          const Properties&              properties,
                          const ConfigCallbacksRegister& extraConfigRegister)
 {
-    static const std::set<std::string> PRIVATE_PROPERTY_KEYS = { "max.poll.records" };
+    static const std::set<std::string> PRIVATE_PROPERTY_KEYS = { "max.poll.records", "enable.manual.events.poll" };
 
     // Save clientID
     if (auto clientId = properties.getProperty(Config::CLIENT_ID))
