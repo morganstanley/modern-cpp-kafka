@@ -6,7 +6,7 @@ About the *Modern C++ Kafka API*
 
 The [modern-cpp-kafka API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html) is a layer of ***C++*** wrapper based on [librdkafka](https://github.com/confluentinc/librdkafka) (the ***C*** part only), with high quality, but more friendly to users.
 
-- By now, [modern-cpp-kafka](https://github.com/morganstanley/modern-cpp-kafka) is compatible with [librdkafka v1.9.2](https://github.com/confluentinc/librdkafka/releases/tag/v1.9.2).
+- By now, [modern-cpp-kafka](https://github.com/morganstanley/modern-cpp-kafka) is compatible with [librdkafka v2.0.2](https://github.com/confluentinc/librdkafka/releases/tag/v2.0.2).
 
 
 ```

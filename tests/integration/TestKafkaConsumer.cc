@@ -23,67 +23,97 @@ TEST(KafkaConsumer, BasicPoll)
 
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
-    // The auto-commit consumer
-    kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
-    std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+    std::map<std::string, std::string> brokersState;
 
-    // Subscribe topics
-    consumer.subscribe({topic},
-                       [](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions& tps) {
-                            if (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned) {
-                                // assignment finished
-                                std::cout << "[" << kafka::utility::getCurrentTime() << "] assigned partitions: " << kafka::toString(tps) << std::endl;
-                            }
-                       });
-    EXPECT_FALSE(consumer.subscription().empty());
+    kafka::clients::Interceptors interceptors;
+    interceptors.onBrokerStateChange([&brokersState](int id, const std::string& proto, const std::string& name, int port, const std::string& state) {
+                                        const std::string brokerDescription = (std::to_string(id) + " - " + proto + "://" + name + ":" + std::to_string(port));
+                                        std::cout << "Broker[" << brokerDescription << "] ==> " << state << std::endl;
+                                        if (!name.empty() && name != "GroupCoordinator")
+                                        {
+                                            brokersState[name + ":" + std::to_string(port)] = state;
+                                        }
+                                     });
 
-    // No message yet
-    auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
-    EXPECT_EQ(0, records.size());
-
-    // Try to get the beginning offsets
-    const kafka::TopicPartition tp{topic, partition};
-    std::cout << "[" << kafka::utility::getCurrentTime() << "] Consumer get the beginningOffset[" << consumer.beginningOffsets({tp})[tp] << "]" << std::endl;;
-
-    // Prepare some messages to send
-    const std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
-        {kafka::Headers{}, "key1", "value1"},
-        {kafka::Headers{}, "key2", "value2"},
-        {kafka::Headers{}, "key3", "value3"},
-    };
-
-    // Send the messages
-    KafkaTestUtility::ProduceMessages(topic, partition, messages);
-
-    // Poll these messages
-    records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
-    EXPECT_EQ(messages.size(), records.size());
-
-    // Copyable ConsumerRecord
     {
-        auto recordsCopy = records;
-        recordsCopy.clear();
+        // Config the consumer with interceptors
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                             .put(kafka::clients::Config::INTERCEPTORS, interceptors));
+
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] " << consumer.name() << " started" << std::endl;
+
+        // Subscribe topics
+        consumer.subscribe({topic},
+                           [](kafka::clients::consumer::RebalanceEventType et, const kafka::TopicPartitions& tps) {
+                                if (et == kafka::clients::consumer::RebalanceEventType::PartitionsAssigned) {
+                                    // assignment finished
+                                    std::cout << "[" << kafka::utility::getCurrentTime() << "] assigned partitions: " << kafka::toString(tps) << std::endl;
+                                }
+                           });
+        EXPECT_FALSE(consumer.subscription().empty());
+
+        // No message yet
+        auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer, std::chrono::seconds(1));
+        EXPECT_EQ(0, records.size());
+
+        // Should be able to get all brokers' state
+        EXPECT_EQ(KafkaTestUtility::GetNumberOfKafkaBrokers(), brokersState.size());
+        // All brokers' state should be "UP"
+        for (const auto& brokerState: brokersState)
+        {
+            EXPECT_EQ("UP", brokerState.second);
+        }
+
+        // Try to get the beginning offsets
+        const kafka::TopicPartition tp{topic, partition};
+        std::cout << "[" << kafka::utility::getCurrentTime() << "] Consumer get the beginningOffset[" << consumer.beginningOffsets({tp})[tp] << "]" << std::endl;;
+
+        // Prepare some messages to send
+        const std::vector<std::tuple<kafka::Headers, std::string, std::string>> messages = {
+            {kafka::Headers{}, "key1", "value1"},
+            {kafka::Headers{}, "key2", "value2"},
+            {kafka::Headers{}, "key3", "value3"},
+        };
+
+        // Send the messages
+        KafkaTestUtility::ProduceMessages(topic, partition, messages);
+
+        // Poll these messages
+        records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
+        EXPECT_EQ(messages.size(), records.size());
+
+        // Copyable ConsumerRecord
+        {
+            auto recordsCopy = records;
+            recordsCopy.clear();
+        }
+
+        // Check messages
+        std::size_t rcvMsgCount = 0;
+        for (auto& record: records)
+        {
+            ASSERT_TRUE(rcvMsgCount < messages.size());
+
+            EXPECT_EQ(topic, record.topic());
+            EXPECT_EQ(partition, record.partition());
+            EXPECT_EQ(0, record.headers().size());
+            EXPECT_EQ(std::get<1>(messages[rcvMsgCount]).size(), record.key().size());
+            EXPECT_EQ(0, std::memcmp(std::get<1>(messages[rcvMsgCount]).c_str(), record.key().data(), record.key().size()));
+            EXPECT_EQ(std::get<2>(messages[rcvMsgCount]).size(), record.value().size());
+            EXPECT_EQ(0, std::memcmp(std::get<2>(messages[rcvMsgCount]).c_str(), record.value().data(), record.value().size()));
+
+            ++rcvMsgCount;
+        }
+
+        // Close the consumer
+        consumer.close();
     }
 
-    // Check messages
-    std::size_t rcvMsgCount = 0;
-    for (auto& record: records)
+    // All brokers' state should be "DOWN"
+    for (const auto& brokerState: brokersState)
     {
-        ASSERT_TRUE(rcvMsgCount < messages.size());
-
-        EXPECT_EQ(topic, record.topic());
-        EXPECT_EQ(partition, record.partition());
-        EXPECT_EQ(0, record.headers().size());
-        EXPECT_EQ(std::get<1>(messages[rcvMsgCount]).size(), record.key().size());
-        EXPECT_EQ(0, std::memcmp(std::get<1>(messages[rcvMsgCount]).c_str(), record.key().data(), record.key().size()));
-        EXPECT_EQ(std::get<2>(messages[rcvMsgCount]).size(), record.value().size());
-        EXPECT_EQ(0, std::memcmp(std::get<2>(messages[rcvMsgCount]).c_str(), record.value().data(), record.value().size()));
-
-        ++rcvMsgCount;
+        EXPECT_EQ("DOWN", brokerState.second);
     }
-
-    // Close the consumer
-    consumer.close();
 }
 
 TEST(KafkaConsumer, PollWithHeaders)
