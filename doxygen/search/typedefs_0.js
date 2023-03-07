@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['resultstype_355',['ResultsType',['../classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929',1,'KAFKA_API::KafkaMetrics']]]
+  ['brokerstatechangecb_358',['BrokerStateChangeCb',['../classKAFKA__API_1_1clients_1_1Interceptors.html#a7fa0e6dd74913392ada1b686fd6f1608',1,'KAFKA_API::clients::Interceptors']]]
 ];

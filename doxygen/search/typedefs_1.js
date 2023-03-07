@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['threadexitcallback_356',['ThreadExitCallback',['../classKAFKA__API_1_1clients_1_1Interceptors.html#acb6c83a7a7c64f1e1bb9dceb3fffcfd0',1,'KAFKA_API::clients::Interceptors']]],
-  ['threadstartcallback_357',['ThreadStartCallback',['../classKAFKA__API_1_1clients_1_1Interceptors.html#a7225ffc03399d48938c83dd6a396ac76',1,'KAFKA_API::clients::Interceptors']]]
+  ['resultstype_359',['ResultsType',['../classKAFKA__API_1_1KafkaMetrics.html#a977c1f4194b7773c1a8155489d0d3929',1,'KAFKA_API::KafkaMetrics']]]
 ];

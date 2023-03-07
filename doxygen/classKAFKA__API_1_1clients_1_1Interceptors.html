@@ -81,33 +81,45 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a7225ffc03399d48938c83dd6a396ac76"><td class="memItemLeft" align="right" valign="top"><a id="a7225ffc03399d48938c83dd6a396ac76"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a7225ffc03399d48938c83dd6a396ac76">ThreadStartCallback</a> = std::function&lt; void(const std::string &amp;, const std::string &amp;)&gt;</td></tr>
-<tr class="memdesc:a7225ffc03399d48938c83dd6a396ac76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for thread-start interceptor. <br /></td></tr>
-<tr class="separator:a7225ffc03399d48938c83dd6a396ac76"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb6c83a7a7c64f1e1bb9dceb3fffcfd0"><td class="memItemLeft" align="right" valign="top"><a id="acb6c83a7a7c64f1e1bb9dceb3fffcfd0"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#acb6c83a7a7c64f1e1bb9dceb3fffcfd0">ThreadExitCallback</a> = std::function&lt; void(const std::string &amp;, const std::string &amp;)&gt;</td></tr>
-<tr class="memdesc:acb6c83a7a7c64f1e1bb9dceb3fffcfd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for thread-exit interceptor. <br /></td></tr>
-<tr class="separator:acb6c83a7a7c64f1e1bb9dceb3fffcfd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9a75a142a1da811ad186ce41720a6ae"><td class="memItemLeft" align="right" valign="top"><a id="ac9a75a142a1da811ad186ce41720a6ae"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#ac9a75a142a1da811ad186ce41720a6ae">ThreadStartCb</a> = std::function&lt; void(const std::string &amp;, const std::string &amp;)&gt;</td></tr>
+<tr class="memdesc:ac9a75a142a1da811ad186ce41720a6ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for thread-start interceptor. <br /></td></tr>
+<tr class="separator:ac9a75a142a1da811ad186ce41720a6ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a021203c6b53e7a3349abf1e312eadef9"><td class="memItemLeft" align="right" valign="top"><a id="a021203c6b53e7a3349abf1e312eadef9"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a021203c6b53e7a3349abf1e312eadef9">ThreadExitCb</a> = std::function&lt; void(const std::string &amp;, const std::string &amp;)&gt;</td></tr>
+<tr class="memdesc:a021203c6b53e7a3349abf1e312eadef9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for thread-exit interceptor. <br /></td></tr>
+<tr class="separator:a021203c6b53e7a3349abf1e312eadef9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fa0e6dd74913392ada1b686fd6f1608"><td class="memItemLeft" align="right" valign="top"><a id="a7fa0e6dd74913392ada1b686fd6f1608"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a7fa0e6dd74913392ada1b686fd6f1608">BrokerStateChangeCb</a> = std::function&lt; void(int, const std::string &amp;, const std::string &amp;, int, const std::string &amp;)&gt;</td></tr>
+<tr class="memdesc:a7fa0e6dd74913392ada1b686fd6f1608"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback type for broker-state-change interceptor. <br /></td></tr>
+<tr class="separator:a7fa0e6dd74913392ada1b686fd6f1608"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad16112d4328da52da2b21f82efff6548"><td class="memItemLeft" align="right" valign="top"><a id="ad16112d4328da52da2b21f82efff6548"></a>
-<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html">Interceptors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#ad16112d4328da52da2b21f82efff6548">onThreadStart</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a7225ffc03399d48938c83dd6a396ac76">ThreadStartCallback</a> cb)</td></tr>
-<tr class="memdesc:ad16112d4328da52da2b21f82efff6548"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set interceptor for thread start. <br /></td></tr>
-<tr class="separator:ad16112d4328da52da2b21f82efff6548"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa92d7b80f0f72204a7bbbd1c62f14e4e"><td class="memItemLeft" align="right" valign="top"><a id="aa92d7b80f0f72204a7bbbd1c62f14e4e"></a>
-<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html">Interceptors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#aa92d7b80f0f72204a7bbbd1c62f14e4e">onThreadExit</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#acb6c83a7a7c64f1e1bb9dceb3fffcfd0">ThreadExitCallback</a> cb)</td></tr>
-<tr class="memdesc:aa92d7b80f0f72204a7bbbd1c62f14e4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set interceptor for thread exit. <br /></td></tr>
-<tr class="separator:aa92d7b80f0f72204a7bbbd1c62f14e4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae368d19ea98be30157b9bde8862edb10"><td class="memItemLeft" align="right" valign="top"><a id="ae368d19ea98be30157b9bde8862edb10"></a>
-<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a7225ffc03399d48938c83dd6a396ac76">ThreadStartCallback</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#ae368d19ea98be30157b9bde8862edb10">onThreadStart</a> () const</td></tr>
-<tr class="memdesc:ae368d19ea98be30157b9bde8862edb10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interceptor for thread start. <br /></td></tr>
-<tr class="separator:ae368d19ea98be30157b9bde8862edb10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f96bea630dfb7f231e6bfbce80d751b"><td class="memItemLeft" align="right" valign="top"><a id="a5f96bea630dfb7f231e6bfbce80d751b"></a>
-<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#acb6c83a7a7c64f1e1bb9dceb3fffcfd0">ThreadExitCallback</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a5f96bea630dfb7f231e6bfbce80d751b">onThreadExit</a> () const</td></tr>
-<tr class="memdesc:a5f96bea630dfb7f231e6bfbce80d751b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interceptor for thread exit. <br /></td></tr>
-<tr class="separator:a5f96bea630dfb7f231e6bfbce80d751b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31016a5e4daf3f5184425c7e6de54044"><td class="memItemLeft" align="right" valign="top"><a id="a31016a5e4daf3f5184425c7e6de54044"></a>
+<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html">Interceptors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a31016a5e4daf3f5184425c7e6de54044">onThreadStart</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#ac9a75a142a1da811ad186ce41720a6ae">ThreadStartCb</a> cb)</td></tr>
+<tr class="memdesc:a31016a5e4daf3f5184425c7e6de54044"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set interceptor for thread start. <br /></td></tr>
+<tr class="separator:a31016a5e4daf3f5184425c7e6de54044"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d7bf98bd0486e539ed3386a4cbc2270"><td class="memItemLeft" align="right" valign="top"><a id="a5d7bf98bd0486e539ed3386a4cbc2270"></a>
+<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html">Interceptors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a5d7bf98bd0486e539ed3386a4cbc2270">onThreadExit</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a021203c6b53e7a3349abf1e312eadef9">ThreadExitCb</a> cb)</td></tr>
+<tr class="memdesc:a5d7bf98bd0486e539ed3386a4cbc2270"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set interceptor for thread exit. <br /></td></tr>
+<tr class="separator:a5d7bf98bd0486e539ed3386a4cbc2270"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d27fad23649e758e171d4b199ec69fb"><td class="memItemLeft" align="right" valign="top"><a id="a1d27fad23649e758e171d4b199ec69fb"></a>
+<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html">Interceptors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a1d27fad23649e758e171d4b199ec69fb">onBrokerStateChange</a> (<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a7fa0e6dd74913392ada1b686fd6f1608">BrokerStateChangeCb</a> cb)</td></tr>
+<tr class="memdesc:a1d27fad23649e758e171d4b199ec69fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set interceptor for broker state change. <br /></td></tr>
+<tr class="separator:a1d27fad23649e758e171d4b199ec69fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af10e133d2aa2c093004fe9d4cb1ccd22"><td class="memItemLeft" align="right" valign="top"><a id="af10e133d2aa2c093004fe9d4cb1ccd22"></a>
+<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#ac9a75a142a1da811ad186ce41720a6ae">ThreadStartCb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#af10e133d2aa2c093004fe9d4cb1ccd22">onThreadStart</a> () const</td></tr>
+<tr class="memdesc:af10e133d2aa2c093004fe9d4cb1ccd22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interceptor for thread start. <br /></td></tr>
+<tr class="separator:af10e133d2aa2c093004fe9d4cb1ccd22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72c39dd6483060a86b36996070d3df65"><td class="memItemLeft" align="right" valign="top"><a id="a72c39dd6483060a86b36996070d3df65"></a>
+<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a021203c6b53e7a3349abf1e312eadef9">ThreadExitCb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a72c39dd6483060a86b36996070d3df65">onThreadExit</a> () const</td></tr>
+<tr class="memdesc:a72c39dd6483060a86b36996070d3df65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interceptor for thread exit. <br /></td></tr>
+<tr class="separator:a72c39dd6483060a86b36996070d3df65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6be66b7beb85f823ef7af40f68f3feb1"><td class="memItemLeft" align="right" valign="top"><a id="a6be66b7beb85f823ef7af40f68f3feb1"></a>
+<a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a7fa0e6dd74913392ada1b686fd6f1608">BrokerStateChangeCb</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a6be66b7beb85f823ef7af40f68f3feb1">onBrokerStateChange</a> () const</td></tr>
+<tr class="memdesc:a6be66b7beb85f823ef7af40f68f3feb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get interceptor for broker state change. <br /></td></tr>
+<tr class="separator:a6be66b7beb85f823ef7af40f68f3feb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a857ac07523c677ff0019f1c9653d5201"><td class="memItemLeft" align="right" valign="top"><a id="a857ac07523c677ff0019f1c9653d5201"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1Interceptors.html#a857ac07523c677ff0019f1c9653d5201">empty</a> () const</td></tr>
 <tr class="memdesc:a857ac07523c677ff0019f1c9653d5201"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if there's no interceptor. <br /></td></tr>
@@ -121,7 +133,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Feb 13 2023 00:51:30 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Tue Mar 7 2023 07:05:00 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
