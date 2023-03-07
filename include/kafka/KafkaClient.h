@@ -189,6 +189,7 @@ private:
     static rd_kafka_resp_err_t configInterceptorOnNew(rd_kafka_t* rk, const rd_kafka_conf_t* conf, void* opaque, char* errStr, std::size_t maxErrStrSize);
     static rd_kafka_resp_err_t interceptorOnThreadStart(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* opaque);
     static rd_kafka_resp_err_t interceptorOnThreadExit(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* opaque);
+    static rd_kafka_resp_err_t interceptorOnBrokerStateChange(rd_kafka_t* rk, int id, const char* secproto, const char* host, int port, const char* state, void* opaque);
 
     // Log callback (for class instance)
     void onLog(int level, const char* fac, const char* buf) const;
@@ -205,6 +206,7 @@ private:
     // Interceptor callback (for class instance)
     void interceptThreadStart(const std::string& threadName, const std::string& threadType);
     void interceptThreadExit(const std::string& threadName, const std::string& threadType);
+    void interceptBrokerStateChange(int id, const std::string& secproto, const std::string& host, int port, const std::string& state);
 
 protected:
     struct Pollable
@@ -608,6 +610,12 @@ KafkaClient::interceptThreadExit(const std::string& threadName, const std::strin
     if (const auto& cb = _interceptors.onThreadExit()) cb(threadName, threadType);
 }
 
+inline void
+KafkaClient::interceptBrokerStateChange(int id, const std::string& secproto, const std::string& host, int port, const std::string& state)
+{
+    if (const auto& cb = _interceptors.onBrokerStateChange()) cb(id, secproto, host, port, state);
+}
+
 inline rd_kafka_resp_err_t
 KafkaClient::configInterceptorOnNew(rd_kafka_t* rk, const rd_kafka_conf_t* /*conf*/, void* opaque, char* /*errStr*/, std::size_t /*maxErrStrSize*/)
 {
@@ -621,11 +629,16 @@ KafkaClient::configInterceptorOnNew(rd_kafka_t* rk, const rd_kafka_conf_t* /*con
         return result;
     }
 
+    if (auto result = rd_kafka_interceptor_add_on_broker_state_change(rk, "on_broker_state_change", KafkaClient::interceptorOnBrokerStateChange, opaque))
+    {
+        return result;
+    }
+
     return RD_KAFKA_RESP_ERR_NO_ERROR;
 }
 
 inline rd_kafka_resp_err_t
-KafkaClient::interceptorOnThreadStart(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* /*opaque*/)
+KafkaClient::interceptorOnThreadStart(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* /* opaque */)
 {
     kafkaClient(rk).interceptThreadStart(threadName, toString(threadType));
 
@@ -633,9 +646,17 @@ KafkaClient::interceptorOnThreadStart(rd_kafka_t* rk, rd_kafka_thread_type_t thr
 }
 
 inline rd_kafka_resp_err_t
-KafkaClient::interceptorOnThreadExit(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* /*opaque*/)
+KafkaClient::interceptorOnThreadExit(rd_kafka_t* rk, rd_kafka_thread_type_t threadType, const char* threadName, void* /* opaque */)
 {
     kafkaClient(rk).interceptThreadExit(threadName, toString(threadType));
+
+    return RD_KAFKA_RESP_ERR_NO_ERROR;
+}
+
+inline rd_kafka_resp_err_t
+KafkaClient::interceptorOnBrokerStateChange(rd_kafka_t* rk, int id, const char* secproto, const char* host, int port, const char* state, void* /* opaque */)
+{
+    kafkaClient(rk).interceptBrokerStateChange(id, secproto, host, port, state);
 
     return RD_KAFKA_RESP_ERR_NO_ERROR;
 }
