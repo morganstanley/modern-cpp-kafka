@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['queue_5fbuffering_5fmax_5fkbytes_333',['QUEUE_BUFFERING_MAX_KBYTES',['../classKAFKA__API_1_1clients_1_1producer_1_1ProducerConfig.html#ad76b72e8c6d06dbe0d85933bcd933b85',1,'KAFKA_API::clients::producer::ProducerConfig']]],
-  ['queue_5fbuffering_5fmax_5fmessages_334',['QUEUE_BUFFERING_MAX_MESSAGES',['../classKAFKA__API_1_1clients_1_1producer_1_1ProducerConfig.html#ab69b261c0d33595f0b614abc9affa6db',1,'KAFKA_API::clients::producer::ProducerConfig']]],
-  ['queued_5fmin_5fmessages_335',['QUEUED_MIN_MESSAGES',['../classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerConfig.html#a48ced4291983513e006ded12950e4090',1,'KAFKA_API::clients::consumer::ConsumerConfig']]]
+  ['replicas_334',['replicas',['../structKAFKA__API_1_1BrokerMetadata_1_1PartitionInfo.html#a0b14628f7214efb724eb47b9207598de',1,'KAFKA_API::BrokerMetadata::PartitionInfo']]],
+  ['request_5ftimeout_5fms_335',['REQUEST_TIMEOUT_MS',['../classKAFKA__API_1_1clients_1_1producer_1_1ProducerConfig.html#a181aacda7c0647613f56dfd7660e94b6',1,'KAFKA_API::clients::producer::ProducerConfig']]]
 ];
