@@ -72,11 +72,6 @@ public:
     static const constexpr char* LOG_LEVEL                 = "log_level";
 
     /**
-     * A comma-separated list of debug contexts to enable.
-     */
-    static const constexpr char* DEBUG                     = "debug";
-
-    /**
      * Timeout for network requests.
      * Default value: 60000
      */
