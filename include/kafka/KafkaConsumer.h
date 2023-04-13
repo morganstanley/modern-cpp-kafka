@@ -224,6 +224,16 @@ public:
     std::size_t poll(std::chrono::milliseconds timeout, std::vector<consumer::ConsumerRecord>& output);
 
     /**
+     * Fetch data for the topics or partitions specified using one of the subscribe/assign APIs.
+     * Returns the number of polled records (which have been saved into parameter `output`).
+     * Note: 1) The result could be fetched through ConsumerRecord (with member function `error`).
+     *       2) Make sure the `ConsumerRecord` be destructed before the `KafkaConsumer.close()`.
+     * Throws KafkaException with errors:
+     *   - RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION: Unknow partition
+     */
+    std::size_t poll(std::chrono::milliseconds timeout, std::deque<consumer::ConsumerRecord>& output);
+
+    /**
      * Suspend fetching from the requested partitions. Future calls to poll() will not return any records from these partitions until they have been resumed using resume().
      * Note: 1) After pausing, the application still need to call `poll()` at regular intervals.
      *       2) This method does not affect partition subscription/assignment (i.e, pause fetching from partitions would not trigger a rebalance, since the consumer is still alive).
@@ -284,6 +294,7 @@ private:
 
     void commitStoredOffsetsIfNecessary(CommitType type);
     void storeOffsetsIfNecessary(const std::vector<consumer::ConsumerRecord>& records);
+    void storeOffsetsIfNecessary(const std::deque<consumer::ConsumerRecord>& records);
 
     void seekToBeginningOrEnd(const TopicPartitions& topicPartitions, bool toBeginning, std::chrono::milliseconds timeout);
     std::map<TopicPartition, Offset> getOffsets(const TopicPartitions&    topicPartitions,
@@ -321,6 +332,7 @@ private:
     static void registerConfigCallbacks(rd_kafka_conf_t* conf);
 
     void pollMessages(int timeoutMs, std::vector<consumer::ConsumerRecord>& output);
+    void pollMessages(int timeoutMs, std::deque<consumer::ConsumerRecord>& output);
 
     enum class PauseOrResumeOperation { Pause, Resume };
     void pauseOrResumePartitions(const TopicPartitions& topicPartitions, PauseOrResumeOperation op);
@@ -807,6 +819,7 @@ KafkaConsumer::commitStoredOffsetsIfNecessary(CommitType type)
     }
 }
 
+// 1) std::vector
 // Store offsets
 inline void
 KafkaConsumer::storeOffsetsIfNecessary(const std::vector<consumer::ConsumerRecord>& records)
@@ -856,6 +869,49 @@ KafkaConsumer::poll(std::chrono::milliseconds timeout)
 // Fetch messages (return via input parameter)
 inline std::size_t
 KafkaConsumer::poll(std::chrono::milliseconds timeout, std::vector<consumer::ConsumerRecord>& output)
+{
+    pollMessages(convertMsDurationToInt(timeout), output);
+    return output.size();
+}
+
+
+// 2) std::deque
+inline void
+KafkaConsumer::storeOffsetsIfNecessary(const std::deque<consumer::ConsumerRecord>& records)
+{
+    if (_enableAutoCommit)
+    {
+        for (const auto& record: records)
+        {
+            _offsetsToStore[TopicPartition(record.topic(), record.partition())] = record.offset();
+        }
+    }
+}
+
+inline void
+KafkaConsumer::pollMessages(int timeoutMs, std::deque<consumer::ConsumerRecord>& output)
+{
+    // Commit the offsets for these messages which had been polled last time (for "enable.auto.commit=true" case)
+    commitStoredOffsetsIfNecessary(CommitType::Async);
+
+    // Poll messages with librdkafka's API
+    std::vector<rd_kafka_message_t*> msgPtrArray(_maxPollRecords);
+    auto msgReceived = rd_kafka_consume_batch_queue(_rk_queue.get(), timeoutMs, msgPtrArray.data(), _maxPollRecords);
+    if (msgReceived < 0)
+    {
+        KAFKA_THROW_ERROR(Error(rd_kafka_last_error()));
+    }
+
+    // Wrap messages with ConsumerRecord
+    output.clear();
+    std::for_each(msgPtrArray.begin(), msgPtrArray.begin() + msgReceived, [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
+
+    // Store the offsets for all these polled messages (for "enable.auto.commit=true" case)
+    storeOffsetsIfNecessary(output);
+}
+
+inline std::size_t
+KafkaConsumer::poll(std::chrono::milliseconds timeout, std::deque<consumer::ConsumerRecord>& output)
 {
     pollMessages(convertMsDurationToInt(timeout), output);
     return output.size();
