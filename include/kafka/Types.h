@@ -6,6 +6,7 @@
 #include <cctype>
 #include <chrono>
 #include <cstdint>
+#include <deque>
 #include <iomanip>
 #include <map>
 #include <memory>
@@ -13,7 +14,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <deque>
 
 
 // Use `boost::optional` for C++14, which doesn't support `std::optional`
