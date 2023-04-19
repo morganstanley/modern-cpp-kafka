@@ -182,9 +182,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a0390b8ec2444c294982c7613e2014566"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html">consumer::ConsumerRecord</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a0390b8ec2444c294982c7613e2014566">poll</a> (std::chrono::milliseconds timeout)</td></tr>
 <tr class="memdesc:a0390b8ec2444c294982c7613e2014566"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data for the topics or partitions specified using one of the subscribe/assign APIs.  <a href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a0390b8ec2444c294982c7613e2014566">More...</a><br /></td></tr>
 <tr class="separator:a0390b8ec2444c294982c7613e2014566"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a869b1a1fa96bf11b9db8bc757c10f431"><td class="memItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a869b1a1fa96bf11b9db8bc757c10f431">poll</a> (std::chrono::milliseconds timeout, std::vector&lt; <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html">consumer::ConsumerRecord</a> &gt; &amp;output)</td></tr>
-<tr class="memdesc:a869b1a1fa96bf11b9db8bc757c10f431"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetch data for the topics or partitions specified using one of the subscribe/assign APIs.  <a href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a869b1a1fa96bf11b9db8bc757c10f431">More...</a><br /></td></tr>
-<tr class="separator:a869b1a1fa96bf11b9db8bc757c10f431"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b88815f9a22a1ee73870db19258cb7e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a7b88815f9a22a1ee73870db19258cb7e">pause</a> (const TopicPartitions &amp;topicPartitions)</td></tr>
 <tr class="memdesc:a7b88815f9a22a1ee73870db19258cb7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Suspend fetching from the requested partitions.  <a href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a7b88815f9a22a1ee73870db19258cb7e">More...</a><br /></td></tr>
 <tr class="separator:a7b88815f9a22a1ee73870db19258cb7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -604,7 +601,7 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <a id="a0390b8ec2444c294982c7613e2014566"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0390b8ec2444c294982c7613e2014566">&#9670;&nbsp;</a></span>poll() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0390b8ec2444c294982c7613e2014566">&#9670;&nbsp;</a></span>poll()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -629,47 +626,6 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Fetch data for the topics or partitions specified using one of the subscribe/assign APIs. </p>
 <p>Returns the polled records. Note: 1) The result could be fetched through <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html" title="A key/value pair to be received from Kafka.">ConsumerRecord</a> (with member function <code>error</code>). 2) Make sure the <code><a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html" title="A key/value pair to be received from Kafka.">ConsumerRecord</a></code> be destructed before the <code><a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a1eb5e72fdfc9fac1b385192ee8c1142a" title="Close the consumer, waiting for any needed cleanup.">KafkaConsumer.close()</a></code>. Throws <a class="el" href="classKAFKA__API_1_1KafkaException.html" title="Specific exception for Kafka clients.">KafkaException</a> with errors:</p><ul>
-<li>RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION: Unknow partition </li>
-</ul>
-
-</div>
-</div>
-<a id="a869b1a1fa96bf11b9db8bc757c10f431"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a869b1a1fa96bf11b9db8bc757c10f431">&#9670;&nbsp;</a></span>poll() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::size_t KAFKA_API::clients::consumer::KafkaConsumer::poll </td>
-          <td>(</td>
-          <td class="paramtype">std::chrono::milliseconds&#160;</td>
-          <td class="paramname"><em>timeout</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html">consumer::ConsumerRecord</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Fetch data for the topics or partitions specified using one of the subscribe/assign APIs. </p>
-<p>Returns the number of polled records (which have been saved into parameter <code>output</code>). Note: 1) The result could be fetched through <a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html" title="A key/value pair to be received from Kafka.">ConsumerRecord</a> (with member function <code>error</code>). 2) Make sure the <code><a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html" title="A key/value pair to be received from Kafka.">ConsumerRecord</a></code> be destructed before the <code><a class="el" href="classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html#a1eb5e72fdfc9fac1b385192ee8c1142a" title="Close the consumer, waiting for any needed cleanup.">KafkaConsumer.close()</a></code>. Throws <a class="el" href="classKAFKA__API_1_1KafkaException.html" title="Specific exception for Kafka clients.">KafkaException</a> with errors:</p><ul>
 <li>RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION: Unknow partition </li>
 </ul>
 
@@ -947,7 +903,7 @@ Additional Inherited Members</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Mar 17 2023 08:56:07 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+Generated on Wed Apr 19 2023 12:33:21 for Modern C++ Kafka API by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
