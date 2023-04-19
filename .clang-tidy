@@ -25,6 +25,8 @@ Checks: "*,\
          -cppcoreguidelines-macro-usage,\
          -cppcoreguidelines-avoid-magic-numbers,\
          -cppcoreguidelines-avoid-non-const-global-variables,\
+         -cppcoreguidelines-avoid-const-or-ref-data-members,\
+         -cppcoreguidelines-avoid-do-while,\
          -cppcoreguidelines-pro-type-vararg,\
          -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
          -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
