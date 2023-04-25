@@ -1,0 +1,30 @@
+cc_binary(
+    name = "kafka-topics",
+
+    srcs = ["KafkaTopics.cc"],
+
+    linkopts = ["-lboost_program_options", "-lrdkafka"],
+
+    deps = ["//:modern-cpp-kafka-api"],
+)
+
+cc_binary(
+    name = "kafka-console-consumer",
+
+    srcs = ["KafkaConsoleConsumer.cc"],
+
+    linkopts = ["-lboost_program_options", "-lrdkafka"],
+
+    deps = ["//:modern-cpp-kafka-api"],
+)
+
+cc_binary(
+    name = "kafka-console-producer",
+
+    srcs = ["KafkaConsoleProducer.cc"],
+
+    linkopts = ["-lboost_program_options", "-lrdkafka"],
+
+    deps = ["//:modern-cpp-kafka-api"],
+)
+
