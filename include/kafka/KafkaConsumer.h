@@ -152,6 +152,30 @@ public:
     }
 
     /**
+     * Get the first offset for the given partitions.
+     * This accesses the cached value and will not query the broker.
+     * This method does not change the current consumer position of the partitions.
+     * Throws KafkaException with errors:
+     *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
+     */
+    std::map<TopicPartition, Offset> beginningOffsetsCached(const TopicPartitions&    topicPartitions) const
+    {
+        return getOffsetsCached(topicPartitions, true);
+    }
+
+    /**
+     * Get the last offset for the given partitions.  The last offset of a partition is the offset of the upcoming message, i.e. the offset of the last available message + 1.
+     * This accesses the cached value and will not query the broker.
+     * This method does not change the current consumer position of the partitions.
+     * Throws KafkaException with errors:
+     *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
+     */
+    std::map<TopicPartition, Offset> endOffsetsCached(const TopicPartitions&    topicPartitions) const
+    {
+        return getOffsetsCached(topicPartitions, false);
+    }
+
+    /**
      * Get the offsets for the given partitions by time-point.
      * Throws KafkaException with errors:
      *   - RD_KAFKA_RESP_ERR__TIMED_OUT:           Not all offsets could be fetched in time.
@@ -279,6 +303,8 @@ private:
     std::map<TopicPartition, Offset> getOffsets(const TopicPartitions&    topicPartitions,
                                                 bool                      atBeginning,
                                                 std::chrono::milliseconds timeout) const;
+    std::map<TopicPartition, Offset> getOffsetsCached(const TopicPartitions&    topicPartitions,
+                                                bool                      atBeginning) const;
 
     enum class PartitionsRebalanceEvent { Assign, Revoke, IncrementalAssign, IncrementalUnassign };
     void changeAssignment(PartitionsRebalanceEvent event, const TopicPartitions& tps);
@@ -744,6 +770,28 @@ KafkaConsumer::getOffsets(const TopicPartitions&    topicPartitions,
                                                             &beginning,
                                                             &end,
                                                             static_cast<int>(timeout.count())) };
+        KAFKA_THROW_IF_WITH_ERROR(error);
+
+        result[topicPartition] = (atBeginning ? beginning : end);
+    }
+
+    return result;
+}
+
+inline std::map<TopicPartition, Offset>
+KafkaConsumer::getOffsetsCached(const TopicPartitions&    topicPartitions,
+                          bool                      atBeginning) const
+{
+    std::map<TopicPartition, Offset> result;
+
+    for (const auto& topicPartition: topicPartitions)
+    {
+        Offset beginning{}, end{};
+        const Error error{ rd_kafka_get_watermark_offsets(getClientHandle(),
+                                                            topicPartition.first.c_str(),
+                                                            topicPartition.second,
+                                                            &beginning,
+                                                            &end) };
         KAFKA_THROW_IF_WITH_ERROR(error);
 
         result[topicPartition] = (atBeginning ? beginning : end);
