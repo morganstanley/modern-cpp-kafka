@@ -130,49 +130,33 @@ public:
     /**
      * Get the first offset for the given partitions.
      * This method does not change the current consumer position of the partitions.
+     * If the timeout is 0 cached offsets will be loaded and no call to the broker is made.
      * Throws KafkaException with errors:
      *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
      */
     std::map<TopicPartition, Offset> beginningOffsets(const TopicPartitions&    topicPartitions,
                                                       std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const
     {
+        if (timeout == 0) {
+            return getOffsetsCached(topicPartitions, true);
+        }
         return getOffsets(topicPartitions, true, timeout);
     }
 
     /**
      * Get the last offset for the given partitions.  The last offset of a partition is the offset of the upcoming message, i.e. the offset of the last available message + 1.
      * This method does not change the current consumer position of the partitions.
+     * If the timeout is 0 cached offsets will be loaded and no call to the broker is made.
      * Throws KafkaException with errors:
      *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
      */
     std::map<TopicPartition, Offset> endOffsets(const TopicPartitions&    topicPartitions,
                                                 std::chrono::milliseconds timeout = std::chrono::milliseconds(DEFAULT_QUERY_TIMEOUT_MS)) const
     {
+        if (timeout == 0) {
+            return getOffsetsCached(topicPartitions, false);
+        }
         return getOffsets(topicPartitions, false, timeout);
-    }
-
-    /**
-     * Get the first offset for the given partitions.
-     * This accesses the cached value and will not query the broker.
-     * This method does not change the current consumer position of the partitions.
-     * Throws KafkaException with errors:
-     *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
-     */
-    std::map<TopicPartition, Offset> beginningOffsetsCached(const TopicPartitions&    topicPartitions) const
-    {
-        return getOffsetsCached(topicPartitions, true);
-    }
-
-    /**
-     * Get the last offset for the given partitions.  The last offset of a partition is the offset of the upcoming message, i.e. the offset of the last available message + 1.
-     * This accesses the cached value and will not query the broker.
-     * This method does not change the current consumer position of the partitions.
-     * Throws KafkaException with errors:
-     *   - RD_KAFKA_RESP_ERR__FAIL:  Generic failure
-     */
-    std::map<TopicPartition, Offset> endOffsetsCached(const TopicPartitions&    topicPartitions) const
-    {
-        return getOffsetsCached(topicPartitions, false);
     }
 
     /**
