@@ -41,6 +41,8 @@ else ()
 endif ()
 if (NOT DEFINED GTEST_INCLUDE_DIR)
     message(FATAL_ERROR "Could not find headers for gtest!")
+else()
+    message(STATUS "gtest include directory: ${GTEST_INCLUDE_DIR}")
 endif ()
 
 if ((EXISTS "${GTEST_ROOT}/lib/libgtest_main.a"
@@ -54,12 +56,14 @@ else ()
 endif ()
 if (NOT DEFINED GTEST_LIBRARY_DIR)
     message(FATAL_ERROR "Could not find library for gtest!")
+else()
+    message(STATUS "gtest library directory: ${GTEST_LIBRARY_DIR}")
 endif ()
 
 message(STATUS "googletest root directory: ${GTEST_ROOT}")
 
 include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
-link_directories(${CMAKE_LIBRARY_DIR} ${GTEST_ROOT}/bin)
+link_directories(${GTEST_LIBRARY_DIR} ${GTEST_ROOT}/bin)
 
 
 #---------------------------
