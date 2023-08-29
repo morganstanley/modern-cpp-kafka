@@ -272,6 +272,23 @@ if (BUILD_OPTION_GEN_COVERAGE)
     message(STATUS "Enable code coverage data generation")
 endif ()
 
+set(MODERN_CPP_KAFKA_CMAKE_DESTINATION share/cmake/modern-cpp-kafka)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/modern-cpp-kafka-config.cmake.in"
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/modern-cpp-kafka-config.cmake
+    INSTALL_DESTINATION share/cmake/modern-cpp-kafka
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cmake/modern-cpp-kafka-config.cmake"
+    DESTINATION "${MODERN_CPP_KAFKA_CMAKE_DESTINATION}")
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/modern-cpp-kafka.pc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/modern-cpp-kafka.pc" @ONLY)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cmake/modern-cpp-kafka.pc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+
 
 #---------------------------
 # Build Sub-directories
