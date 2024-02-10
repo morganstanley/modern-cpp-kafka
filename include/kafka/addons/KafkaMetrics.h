@@ -8,6 +8,7 @@
 #include <rapidjson/writer.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
