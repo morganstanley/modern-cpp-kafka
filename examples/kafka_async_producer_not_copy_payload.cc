@@ -6,7 +6,9 @@
 
 int main(int argc, char **argv)
 {
+    using namespace kafka;
     using namespace kafka::clients;
+    using namespace kafka::clients::producer;
 
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <brokers> <topic>\n";
@@ -14,14 +16,14 @@ int main(int argc, char **argv)
     }
 
     const std::string brokers = argv[1];
-    const kafka::Topic topic  = argv[2];
+    const Topic       topic   = argv[2];
 
     try {
 
         // Create configuration object
-        const kafka::Properties props ({
-            {"bootstrap.servers",  brokers},
-            {"enable.idempotence", "true"},
+        const Properties props ({
+            {"bootstrap.servers",  {brokers}},
+            {"enable.idempotence", {"true" }},
         });
 
         // Create a producer instance
@@ -34,9 +36,9 @@ int main(int argc, char **argv)
              std::getline(std::cin, *line);
              line = std::make_shared<std::string>()) {
             // The ProducerRecord doesn't own `line`, it is just a thin wrapper
-            auto record = producer::ProducerRecord(topic,
-                                                   kafka::NullKey,
-                                                   kafka::Value(line->c_str(), line->size()));
+            auto record = ProducerRecord(topic,
+                                         NullKey,
+                                         Value(line->c_str(), line->size()));
 
             // Send the message
             producer.send(record,
@@ -44,7 +46,7 @@ int main(int argc, char **argv)
                           // Note: Here we capture the shared_pointer of `line`,
                           //       which holds the content for `record.value()`.
                           //       It makes sure the memory block is valid until the lambda finishes.
-                          [line](const producer::RecordMetadata& metadata, const kafka::Error& error) {
+                          [line](const RecordMetadata& metadata, const Error& error) {
                               if (!error) {
                                   std::cout << "% Message delivered: " << metadata.toString() << std::endl;
                               } else {
@@ -57,7 +59,7 @@ int main(int argc, char **argv)
 
         // producer.close(); // No explicit close is needed, RAII will take care of it
 
-    } catch (const kafka::KafkaException& e) {
+    } catch (const KafkaException& e) {
         std::cerr << "% Unexpected exception caught: " << e.what() << std::endl;
     }
 }

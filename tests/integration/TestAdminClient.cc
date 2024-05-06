@@ -9,7 +9,7 @@
 
 TEST(AdminClient, CreateListDeleteTopics)
 {
-    kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+    kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
     const kafka::Topics topics = {kafka::utility::getRandomString(), kafka::utility::getRandomString()};
@@ -82,7 +82,7 @@ TEST(AdminClient, DuplicatedCreateDeleteTopics)
     const int numPartitions = 5;
     const int replicaFactor = 3;
 
-    kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+    kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
     constexpr int MAX_REPEAT = 10;
@@ -124,7 +124,7 @@ TEST(AdminClient, DeleteRecords)
     auto metadatas3 = KafkaTestUtility::ProduceMessages(topic, partition3, messages);
 
     // Prepare the AdminClient
-    kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+    kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << adminClient.name() << " started" << std::endl;
 
     // Prepare offsets for `deleteRecords`
@@ -148,7 +148,7 @@ TEST(AdminClient, DeleteRecords)
 
     KafkaTestUtility::WaitMetadataSyncUpBetweenBrokers();
 
-    kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
+    kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig());
     {
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         EXPECT_EQ(0, records.size());

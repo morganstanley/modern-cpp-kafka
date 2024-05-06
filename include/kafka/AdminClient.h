@@ -18,7 +18,7 @@
 #include <vector>
 
 
-namespace KAFKA_API { namespace clients {
+namespace KAFKA_API { namespace clients { namespace admin {
 
 /**
  * The administrative client for Kafka, which supports managing and inspecting topics, etc.
@@ -27,11 +27,7 @@ class AdminClient: public KafkaClient
 {
 public:
     explicit AdminClient(const Properties& properties)
-        : KafkaClient(ClientType::AdminClient,
-                      KafkaClient::validateAndReformProperties(properties),
-                      ConfigCallbacksRegister{},
-                      EventsPollingOption::Auto,
-                      Interceptors{})
+        : KafkaClient(ClientType::AdminClient, KafkaClient::validateAndReformProperties(properties))
     {
     }
 
@@ -148,10 +144,14 @@ AdminClient::createTopics(const Topics&             topics,
 
         for (const auto& conf: topicConfig.map())
         {
-            const rd_kafka_resp_err_t err = rd_kafka_NewTopic_set_config(rkNewTopics.back().get(), conf.first.c_str(), conf.second.c_str());
+            const auto& k = conf.first;
+            const auto& v = topicConfig.getProperty(k);
+            if (!v) continue;
+
+            const rd_kafka_resp_err_t err = rd_kafka_NewTopic_set_config(rkNewTopics.back().get(), k.c_str(), v->c_str());
             if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
             {
-                const std::string errMsg = "Invalid config[" + conf.first + "=" + conf.second + "]";
+                const std::string errMsg = "Invalid config[" + k + "=" + *v + "]";
                 KAFKA_API_DO_LOG(Log::Level::Err, errMsg.c_str());
                 return admin::CreateTopicsResult(Error{RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg});
             }
@@ -344,5 +344,5 @@ AdminClient::deleteRecords(const TopicPartitionOffsets& topicPartitionOffsets,
     return admin::DeleteRecordsResult(combineErrors(errors));
 }
 
-} } // end of KAFKA_API::clients
+} } } // end of KAFKA_API::clients::admin
 

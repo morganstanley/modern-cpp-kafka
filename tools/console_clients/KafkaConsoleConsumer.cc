@@ -22,7 +22,7 @@ void stopRunning(int sig) {
     }
     else
     {
-        // Restore the signal handler, -- to avoid stucking with this handler
+        // Restore the signal handler, -- to avoid stuck with this handler
         signal(SIGINT, SIG_IGN); // NOLINT
     }
 }
@@ -81,12 +81,12 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
     return args;
 }
 
-void RunConsumer(const std::string& topic, const kafka::clients::consumer::Config& props)
+void RunConsumer(const std::string& topic, const kafka::clients::Config& props)
 {
     using namespace kafka::clients;
     using namespace kafka::clients::consumer;
-    // Create a manual-commit consumer
-    KafkaClient::setGlobalLogger(kafka::Logger());
+
+    // Create a auto-commit consumer
     KafkaConsumer consumer(props);
 
     // Subscribe to topic
@@ -141,9 +141,8 @@ int main (int argc, char **argv)
     // Use Ctrl-C to terminate the program
     signal(SIGINT, stopRunning); // NOLINT
 
+    using namespace kafka::clients;
     // Prepare consumer properties
-    //
-    using namespace kafka::clients::consumer;
     Config props;
     props.put(Config::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
     // Get client id
@@ -155,6 +154,8 @@ int main (int argc, char **argv)
     {
         props.put(prop.first, prop.second);
     }
+    // Disable logging
+    props.put(Config::LOG_CB, kafka::NullLogger);
 
     // Start consumer
     try

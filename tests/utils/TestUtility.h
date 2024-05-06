@@ -136,8 +136,8 @@ const auto MAX_OFFSET_COMMIT_TIMEOUT = std::chrono::seconds(15);
 const auto MAX_DELIVERY_TIMEOUT      = std::chrono::seconds(5);
 
 inline std::vector<kafka::clients::consumer::ConsumerRecord>
-ConsumeMessagesUntilTimeout(kafka::clients::KafkaConsumer& consumer,
-                            std::chrono::milliseconds      timeout = MAX_POLL_MESSAGES_TIMEOUT)
+ConsumeMessagesUntilTimeout(kafka::clients::consumer::KafkaConsumer& consumer,
+                            std::chrono::milliseconds timeout = MAX_POLL_MESSAGES_TIMEOUT)
 {
     std::vector<kafka::clients::consumer::ConsumerRecord> records;
 
@@ -179,8 +179,7 @@ WaitUntil(const std::function<bool()>& checkDone, std::chrono::milliseconds time
 inline std::vector<kafka::clients::producer::RecordMetadata>
 ProduceMessages(const std::string& topic, int partition, const std::vector<std::tuple<kafka::Headers, std::string, std::string>>& msgs)
 {
-    kafka::clients::KafkaProducer producer(GetKafkaClientCommonConfig());
-    producer.setLogLevel(kafka::Log::Level::Crit);
+    kafka::clients::producer::KafkaProducer producer(GetKafkaClientCommonConfig().put(kafka::clients::Config::LOG_LEVEL, "1"));
 
     std::vector<kafka::clients::producer::RecordMetadata> ret;
     for (const auto& msg: msgs)
@@ -198,7 +197,7 @@ ProduceMessages(const std::string& topic, int partition, const std::vector<std::
 inline void
 CreateKafkaTopic(const kafka::Topic& topic, int numPartitions, int replicationFactor)
 {
-    kafka::clients::AdminClient adminClient(GetKafkaClientCommonConfig());
+    kafka::clients::admin::AdminClient adminClient(GetKafkaClientCommonConfig());
     auto createResult = adminClient.createTopics({topic}, numPartitions, replicationFactor);
     std::cout << "[" << kafka::utility::getCurrentTime() << "] " << __FUNCTION__ << ": create topic[" << topic << "] "
        << "with numPartitions[" << numPartitions << "], replicationFactor[" << replicationFactor << "]. Result: " << createResult.error.message() << std::endl;

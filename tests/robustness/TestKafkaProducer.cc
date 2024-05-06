@@ -14,13 +14,21 @@ TEST(KafkaProducer, RecordTimestamp)
 
     // Create topics with different "message.timestamp.type" settings
     {
-        kafka::clients::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
+        kafka::clients::admin::AdminClient adminClient(KafkaTestUtility::GetKafkaClientCommonConfig());
 
-        auto createResult = adminClient.createTopics({topicWithRecordCreateTime}, 5, 3, kafka::Properties{{{"message.timestamp.type", "CreateTime"}}}, std::chrono::minutes(1));
+        auto createResult = adminClient.createTopics({topicWithRecordCreateTime},
+                                                     5,
+                                                     3,
+                                                     kafka::Properties{{{"message.timestamp.type", {"CreateTime"}}}},
+                                                     std::chrono::minutes(1));
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Topic[" << topicWithRecordCreateTime << "] (with CreateTime) was created, result: " << createResult.error.message() << std::endl;
         ASSERT_FALSE(createResult.error);
 
-        createResult = adminClient.createTopics({topicWithLogAppendTime}, 5, 3, kafka::Properties{{{"message.timestamp.type", "LogAppendTime"}}}, std::chrono::minutes(1));
+        createResult = adminClient.createTopics({topicWithLogAppendTime},
+                                                5,
+                                                3,
+                                                kafka::Properties{{{"message.timestamp.type", {"LogAppendTime"}}}},
+                                                std::chrono::minutes(1));
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Topic[" << topicWithLogAppendTime << "] (with LogAppendTime) was created, result: " << createResult.error.message() << std::endl;
         ASSERT_FALSE(createResult.error);
 
@@ -28,8 +36,8 @@ TEST(KafkaProducer, RecordTimestamp)
     }
 
     // Prepare a producer
-    kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
-    producer.setErrorCallback(KafkaTestUtility::DumpError);
+    kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                        .put(kafka::clients::Config::ERROR_CB, KafkaTestUtility::DumpError));
 
     constexpr int TIME_LAPSE_THRESHOLD_MS = 1000;
     using namespace std::chrono;
@@ -51,8 +59,8 @@ TEST(KafkaProducer, RecordTimestamp)
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest"));
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
         consumer.subscribe({topic});
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         ASSERT_EQ(1, records.size());
@@ -82,8 +90,8 @@ TEST(KafkaProducer, RecordTimestamp)
         std::cout << "[" << kafka::utility::getCurrentTime() << "] Producer has just sent a message to topic [" << topic << "], with metadata[" << metadata.toString() << "]" << std::endl;
 
         // Poll the message
-        kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest"));
+        kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
         consumer.subscribe({topic});
         auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
         ASSERT_EQ(1, records.size());
@@ -123,9 +131,9 @@ TEST(KafkaProducer, NoMissedDeliveryCallback)
     };
 
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "5000"));
-        producer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                            .put(kafka::clients::producer::ProducerConfig::MESSAGE_TIMEOUT_MS, "5000")
+                                                            .put(kafka::clients::Config::ERROR_CB, KafkaTestUtility::DumpError));
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -160,8 +168,8 @@ TEST(KafkaProducer, DeliveryCallbackTriggeredByPurgeWithinClose)
 
     std::size_t deliveryCbTriggeredCount = 0;
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
-        producer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                            .put(kafka::clients::Config::ERROR_CB, KafkaTestUtility::DumpError));
 
         KafkaTestUtility::PauseBrokers();
 
@@ -204,8 +212,8 @@ TEST(KafkaProducer, BrokerStopWhileSendingMessages)
 
     std::size_t deliveryCount = 0;
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig());
-        producer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                            .put(kafka::clients::Config::ERROR_CB, KafkaTestUtility::DumpError));
 
         // Pause the brokers for a while (shorter then the default "MESSAGE_TIMEOUT_MS" for producer, which is 10 seconds)
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -230,8 +238,8 @@ TEST(KafkaProducer, BrokerStopWhileSendingMessages)
     ASSERT_EQ(messages.size(), deliveryCount);
 
     // Fetch & check all messages
-    kafka::clients::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                            .put(kafka::clients::consumer::Config::AUTO_OFFSET_RESET, "earliest"));
+    kafka::clients::consumer::KafkaConsumer consumer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                            .put(kafka::clients::consumer::ConsumerConfig::AUTO_OFFSET_RESET, "earliest"));
     consumer.subscribe({topic});
     auto records = KafkaTestUtility::ConsumeMessagesUntilTimeout(consumer);
     EXPECT_EQ(messages.size(), records.size());
@@ -254,9 +262,9 @@ TEST(KafkaProducer, Send_AckTimeout)
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "3000")); // If with no response, the delivery would fail in a short time
-        producer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                            .put(kafka::clients::producer::ProducerConfig::MESSAGE_TIMEOUT_MS, "3000") // If with no response, the delivery would fail in a short time
+                                                            .put(kafka::clients::Config::ERROR_CB,                             KafkaTestUtility::DumpError));
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -294,10 +302,10 @@ TEST(KafkaProducer, ManuallyPollEvents_AckTimeout)
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                 .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "3000"), // If with no response, the delivery would fail in a short time
-                                               kafka::clients::KafkaClient::EventsPollingOption::Manual);                    // Manually call `pollEvents()`
-        producer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                             .put(kafka::clients::producer::ProducerConfig::MESSAGE_TIMEOUT_MS, "3000") // If with no response, the delivery would fail in a short time
+                                                             .put(kafka::clients::Config::ENABLE_MANUAL_EVENTS_POLL, "true")            // Manually call `pollEvents()`
+                                                             .put(kafka::clients::Config::ERROR_CB, KafkaTestUtility::DumpError));
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -343,10 +351,10 @@ TEST(KafkaProducer, ManuallyPollEvents_AlwaysFinishClosing)
 
     std::size_t failureCount = 0;
     {
-        kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                                 .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "3000"), // If with no response, the delivery would fail in a short time
-                                               kafka::clients::KafkaClient::EventsPollingOption::Manual);            // Manually call `pollEvents()`
-        producer.setErrorCallback(KafkaTestUtility::DumpError);
+        kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                             .put(kafka::clients::producer::ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")   // If with no response, the delivery would fail in a short time
+                                                             .put(kafka::clients::Config::ENABLE_MANUAL_EVENTS_POLL,            "true")   // Manually call `pollEvents()`
+                                                             .put(kafka::clients::Config::ERROR_CB,                             KafkaTestUtility::DumpError));
 
         // Pause the brokers for a while
         auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));
@@ -377,9 +385,9 @@ TEST(KafkaProducer, SyncSend_AckTimeout)
     const kafka::Topic topic = kafka::utility::getRandomString();
     KafkaTestUtility::CreateKafkaTopic(topic, 5, 3);
 
-    kafka::clients::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
-                                            .put(kafka::clients::producer::Config::MESSAGE_TIMEOUT_MS, "3000"));
-    producer.setErrorCallback(KafkaTestUtility::DumpError);
+    kafka::clients::producer::KafkaProducer producer(KafkaTestUtility::GetKafkaClientCommonConfig()
+                                                        .put(kafka::clients::producer::ProducerConfig::MESSAGE_TIMEOUT_MS, "3000")
+                                                        .put("error_cb", KafkaTestUtility::DumpError));
 
     // Pause the brokers for a while
     auto asyncTask = KafkaTestUtility::PauseBrokersForAWhile(std::chrono::seconds(5));

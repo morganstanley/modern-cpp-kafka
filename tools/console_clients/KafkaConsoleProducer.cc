@@ -76,6 +76,7 @@ std::unique_ptr<Arguments> ParseArguments(int argc, char **argv)
 int main (int argc, char **argv)
 {
     using namespace kafka::clients;
+    using namespace kafka::clients::producer;
 
     try
     {
@@ -85,20 +86,21 @@ int main (int argc, char **argv)
         if (!args) return EXIT_SUCCESS;  // Only for "help"
 
         // Prepare consumer properties
-        producer::Config props;
-        props.put(producer::Config::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
+        ProducerConfig props;
+        props.put(Config::BOOTSTRAP_SERVERS, boost::algorithm::join(args->brokerList, ","));
         // Get client id
         std::ostringstream oss;
         oss << "producer-" << std::this_thread::get_id();
-        props.put(producer::Config::CLIENT_ID, oss.str());
+        props.put(Config::CLIENT_ID, oss.str());
         // For other properties user assigned
         for (const auto& prop: args->props)
         {
             props.put(prop.first, prop.second);
         }
+        // Disable logging
+        props.put(Config::LOG_CB, kafka::NullLogger);
 
-        // Create a sync-send producer
-        KafkaClient::setGlobalLogger(kafka::Logger());
+        // Create a producer
         KafkaProducer producer(props);
 
         auto startPromptLine = []() { std::cout << "> "; };
@@ -130,9 +132,9 @@ int main (int argc, char **argv)
             startPromptLine();
         }
     }
-    catch (const std::exception& e)
+    catch (const kafka::KafkaException& e)
     {
-        std::cout << e.what() << std::endl;
+        std::cerr << "Exception thrown by producer: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

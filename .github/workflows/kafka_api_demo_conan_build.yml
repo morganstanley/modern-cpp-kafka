@@ -26,19 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Prepare (non-windows)
-        if: ${{!contains(matrix.os, 'windows')}}
+      - name: Prepare
         run: |
-          if [[ ${OS_VERSION} == 'macos'* ]]; then
-            brew install conan
-          else
-            pip3 install conan
-          fi
-
-      - name: Prepare (windows)
-        if: ${{contains(matrix.os, 'windows')}}
-        run: |
-          pip3 install conan
+          pip3 install conan==1.59.0
 
       - name: Build (non-windows)
         if: ${{!contains(matrix.os, 'windows')}}
@@ -52,11 +42,8 @@ jobs:
           cmake .. -G "Unix Makefiles"
           cmake --build .
 
-          bin/kafka_sync_producer
-          bin/kafka_async_producer_copy_payload
-          bin/kafka_async_producer_not_copy_payload
-          bin/kafka_auto_commit_consumer
-          bin/kafka_manual_commit_consumer
+          bin/kafka_producer
+          bin/kafka_consumer
 
       - name: Build (windows)
         if: contains(matrix.os, 'windows')
@@ -70,9 +57,6 @@ jobs:
           cmake ..
           cmake --build .
 
-          bin/kafka_sync_producer.exe
-          bin/kafka_async_producer_copy_payload.exe
-          bin/kafka_async_producer_not_copy_payload.exe
-          bin/kafka_auto_commit_consumer.exe
-          bin/kafka_manual_commit_consumer.exe
+          bin/kafka_producer.exe
+          bin/kafka_consumer.exe
 

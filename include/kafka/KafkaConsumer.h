@@ -17,7 +17,7 @@
 #include <memory>
 
 
-namespace KAFKA_API { namespace clients {
+namespace KAFKA_API { namespace clients { namespace consumer {
 
 /**
  * KafkaConsumer class.
@@ -31,17 +31,11 @@ public:
     /**
      * The constructor for KafkaConsumer.
      *
-     * Options:
-     *   - EventsPollingOption::Auto (default) : An internal thread would be started for OffsetCommit callbacks handling.
-     *   - EventsPollingOption::Maunal         : User have to call the member function `pollEvents()` to trigger OffsetCommit callbacks.
-     *
      * Throws KafkaException with errors:
      *   - RD_KAFKA_RESP_ERR__INVALID_ARG      : Invalid BOOTSTRAP_SERVERS property
      *   - RD_KAFKA_RESP_ERR__CRIT_SYS_RESOURCE: Fail to create internal threads
      */
-    explicit KafkaConsumer(const Properties&    properties,
-                           EventsPollingOption  eventsPollingOption = EventsPollingOption::Auto,
-                           const Interceptors&  interceptors        = Interceptors{});
+    explicit KafkaConsumer(const Properties& properties);
 
     /**
      * The destructor for KafkaConsumer.
@@ -220,16 +214,6 @@ public:
     std::vector<consumer::ConsumerRecord> poll(std::chrono::milliseconds timeout);
 
     /**
-     * Fetch data for the topics or partitions specified using one of the subscribe/assign APIs.
-     * Returns the number of polled records (which have been saved into parameter `output`).
-     * Note: 1) The result could be fetched through ConsumerRecord (with member function `error`).
-     *       2) Make sure the `ConsumerRecord` be destructed before the `KafkaConsumer.close()`.
-     * Throws KafkaException with errors:
-     *   - RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION: Unknow partition
-     */
-    std::size_t poll(std::chrono::milliseconds timeout, std::vector<consumer::ConsumerRecord>& output);
-
-    /**
      * Suspend fetching from the requested partitions. Future calls to poll() will not return any records from these partitions until they have been resumed using resume().
      * Note: 1) After pausing, the application still need to call `poll()` at regular intervals.
      *       2) This method does not affect partition subscription/assignment (i.e, pause fetching from partitions would not trigger a rebalance, since the consumer is still alive).
@@ -301,8 +285,8 @@ private:
 
     std::string  _groupId;
 
-    std::size_t _maxPollRecords   = 500;   // From "max.poll.records" property, and here is the default for batch-poll
-    bool        _enableAutoCommit = false; // From "enable.auto.commit" property
+    std::size_t _maxPollRecords   = 500;  // From "max.poll.records" property, and here is the default for batch-poll
+    bool        _enableAutoCommit = true; // From "enable.auto.commit" property
 
     rd_kafka_queue_unique_ptr _rk_queue;
 
@@ -325,8 +309,6 @@ private:
 
     // Register Callbacks for rd_kafka_conf_t
     static void registerConfigCallbacks(rd_kafka_conf_t* conf);
-
-    void pollMessages(int timeoutMs, std::vector<consumer::ConsumerRecord>& output);
 
     enum class PauseOrResumeOperation { Pause, Resume };
     void pauseOrResumePartitions(const TopicPartitions& topicPartitions, PauseOrResumeOperation op);
@@ -354,20 +336,22 @@ private:
 inline Properties
 KafkaConsumer::validateAndReformProperties(Properties properties)
 {
+    using namespace consumer;
+
     // Don't pass the "max.poll.records" property to librdkafka
-    properties.remove(consumer::Config::MAX_POLL_RECORDS);
+    properties.remove(ConsumerConfig::MAX_POLL_RECORDS);
 
     // Let the base class validate first
     auto newProperties = KafkaClient::validateAndReformProperties(properties);
 
     // If no "group.id" configured, generate a random one for user
-    if (!newProperties.getProperty(consumer::Config::GROUP_ID))
+    if (!newProperties.getProperty(ConsumerConfig::GROUP_ID))
     {
-        newProperties.put(consumer::Config::GROUP_ID, utility::getRandomString());
+        newProperties.put(ConsumerConfig::GROUP_ID, utility::getRandomString());
     }
 
     // Disable the internal auto-commit from librdkafka, since we want to customize the behavior
-    newProperties.put(consumer::Config::ENABLE_AUTO_COMMIT, "false");
+    newProperties.put(ConsumerConfig::ENABLE_AUTO_COMMIT,   "false");
     newProperties.put(AUTO_COMMIT_INTERVAL_MS,              "0");
     newProperties.put(ENABLE_AUTO_OFFSET_STORE,             "true");
 
@@ -384,25 +368,21 @@ KafkaConsumer::registerConfigCallbacks(rd_kafka_conf_t* conf)
 }
 
 inline
-KafkaConsumer::KafkaConsumer(const Properties&      properties,
-                             EventsPollingOption    eventsPollingOption,
-                             const Interceptors&    interceptors)
-    : KafkaClient(ClientType::KafkaConsumer,
-                  validateAndReformProperties(properties),
-                  registerConfigCallbacks,
-                  eventsPollingOption,
-                  interceptors)
+KafkaConsumer::KafkaConsumer(const Properties& properties)
+    : KafkaClient(ClientType::KafkaConsumer, validateAndReformProperties(properties), registerConfigCallbacks)
 {
+    using namespace consumer;
+
     // Pick up the "max.poll.records" property
-    if (auto maxPollRecordsProperty = properties.getProperty(consumer::Config::MAX_POLL_RECORDS))
+    if (auto maxPollRecordsProperty = properties.getProperty(ConsumerConfig::MAX_POLL_RECORDS))
     {
         const std::string maxPollRecords = *maxPollRecordsProperty;
         _maxPollRecords = static_cast<std::size_t>(std::stoi(maxPollRecords));
     }
-    _properties.put(consumer::Config::MAX_POLL_RECORDS, std::to_string(_maxPollRecords));
+    _properties.put(ConsumerConfig::MAX_POLL_RECORDS, std::to_string(_maxPollRecords));
 
     // Pick up the "enable.auto.commit" property
-    if (auto enableAutoCommitProperty = properties.getProperty(consumer::Config::ENABLE_AUTO_COMMIT))
+    if (auto enableAutoCommitProperty = properties.getProperty(ConsumerConfig::ENABLE_AUTO_COMMIT))
     {
         const std::string enableAutoCommit = *enableAutoCommitProperty;
 
@@ -416,10 +396,10 @@ KafkaConsumer::KafkaConsumer(const Properties&      properties,
 
         _enableAutoCommit = isTrue(enableAutoCommit);
     }
-    _properties.put(consumer::Config::ENABLE_AUTO_COMMIT, (_enableAutoCommit ? "true" : "false"));
+    _properties.put(ConsumerConfig::ENABLE_AUTO_COMMIT, (_enableAutoCommit ? "true" : "false"));
 
     // Fetch groupId from reformed configuration
-    auto groupId = _properties.getProperty(consumer::Config::GROUP_ID);
+    auto groupId = _properties.getProperty(ConsumerConfig::GROUP_ID);
     assert(groupId);
     setGroupId(*groupId);
 
@@ -828,45 +808,28 @@ KafkaConsumer::storeOffsetsIfNecessary(const std::vector<consumer::ConsumerRecor
     }
 }
 
-// Fetch messages (internally used)
-inline void
-KafkaConsumer::pollMessages(int timeoutMs, std::vector<consumer::ConsumerRecord>& output)
+// Fetch messages
+inline std::vector<consumer::ConsumerRecord>
+KafkaConsumer::poll(std::chrono::milliseconds timeout)
 {
     // Commit the offsets for these messages which had been polled last time (for "enable.auto.commit=true" case)
     commitStoredOffsetsIfNecessary(CommitType::Async);
 
     // Poll messages with librdkafka's API
     std::vector<rd_kafka_message_t*> msgPtrArray(_maxPollRecords);
-    auto msgReceived = rd_kafka_consume_batch_queue(_rk_queue.get(), timeoutMs, msgPtrArray.data(), _maxPollRecords);
+    auto msgReceived = rd_kafka_consume_batch_queue(_rk_queue.get(), convertMsDurationToInt(timeout), msgPtrArray.data(), _maxPollRecords);
     if (msgReceived < 0)
     {
         KAFKA_THROW_ERROR(Error(rd_kafka_last_error()));
     }
 
     // Wrap messages with ConsumerRecord
-    output.clear();
-    output.reserve(static_cast<std::size_t>(msgReceived));
-    std::for_each(msgPtrArray.begin(), msgPtrArray.begin() + msgReceived, [&output](rd_kafka_message_t* rkMsg) { output.emplace_back(rkMsg); });
+    std::vector<consumer::ConsumerRecord> records(msgPtrArray.begin(), msgPtrArray.begin() + msgReceived);
 
     // Store the offsets for all these polled messages (for "enable.auto.commit=true" case)
-    storeOffsetsIfNecessary(output);
-}
+    storeOffsetsIfNecessary(records);
 
-// Fetch messages (return via return value)
-inline std::vector<consumer::ConsumerRecord>
-KafkaConsumer::poll(std::chrono::milliseconds timeout)
-{
-    std::vector<consumer::ConsumerRecord> result;
-    poll(timeout, result);
-    return result;
-}
-
-// Fetch messages (return via input parameter)
-inline std::size_t
-KafkaConsumer::poll(std::chrono::milliseconds timeout, std::vector<consumer::ConsumerRecord>& output)
-{
-    pollMessages(convertMsDurationToInt(timeout), output);
-    return output.size();
+    return records;
 }
 
 inline void
@@ -1067,5 +1030,5 @@ KafkaConsumer::commitAsync(const consumer::OffsetCommitCallback& offsetCommitCal
     commitAsync(TopicPartitionOffsets(), offsetCommitCallback);
 }
 
-} } // end of KAFKA_API::clients
+} } } // end of KAFKA_API::clients::consumer
 

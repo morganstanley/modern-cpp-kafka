@@ -7,24 +7,68 @@
 
 namespace KAFKA_API { namespace clients {
 
+/**
+ * Interceptors for Kafka clients.
+ */
 class Interceptors
 {
 public:
-    using ThreadStartCallback = std::function<void(const std::string&, const std::string&)>;
-    using ThreadExitCallback  = std::function<void(const std::string&, const std::string&)>;
+    /**
+    * Callback type for thread-start interceptor.
+    */
+    using ThreadStartCb = std::function<void(const std::string&, const std::string&)>;
 
-    Interceptors& onThreadStart(ThreadStartCallback cb) { _valid = true; _threadStartCb = std::move(cb); return *this; }
-    Interceptors& onThreadExit(ThreadExitCallback cb)   { _valid = true; _threadExitCb = std::move(cb);  return *this; }
+    /**
+    * Callback type for thread-exit interceptor.
+    */
+    using ThreadExitCb  = std::function<void(const std::string&, const std::string&)>;
 
-    ThreadStartCallback onThreadStart() const { return _threadStartCb; }
-    ThreadExitCallback  onThreadExit()  const { return _threadExitCb; }
+    /**
+    * Callback type for broker-state-change interceptor.
+    */
+    using BrokerStateChangeCb = std::function<void(int, const std::string&, const std::string&, int, const std::string&)>;
 
+    /**
+    * Set interceptor for thread start.
+    */
+    Interceptors& onThreadStart(ThreadStartCb cb) { _valid = true; _threadStartCb = std::move(cb); return *this; }
+
+    /**
+    * Set interceptor for thread exit.
+    */
+    Interceptors& onThreadExit(ThreadExitCb cb)   { _valid = true; _threadExitCb = std::move(cb);  return *this; }
+
+    /**
+    * Set interceptor for broker state change.
+    */
+    Interceptors& onBrokerStateChange(BrokerStateChangeCb cb) { _valid = true; _brokerStateChangeCb = std::move(cb);  return *this; }
+
+    /**
+    * Get interceptor for thread start.
+    */
+    ThreadStartCb onThreadStart() const { return _threadStartCb; }
+
+    /**
+    * Get interceptor for thread exit.
+    */
+    ThreadExitCb  onThreadExit()  const { return _threadExitCb; }
+
+    /**
+    * Get interceptor for broker state change.
+    */
+    BrokerStateChangeCb onBrokerStateChange() const { return _brokerStateChangeCb; }
+
+    /**
+    * Check if there's no interceptor.
+    */
     bool empty() const { return !_valid; }
 
 private:
-    ThreadStartCallback _threadStartCb;
-    ThreadExitCallback  _threadExitCb;
-    bool                _valid  = false;
+    ThreadStartCb       _threadStartCb;
+    ThreadExitCb        _threadExitCb;
+    BrokerStateChangeCb _brokerStateChangeCb;
+
+    bool _valid  = false;
 };
 
 } } // end of KAFKA_API::clients
