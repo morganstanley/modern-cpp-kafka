@@ -372,7 +372,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         }
         else
         {
-            KAFKA_API_DO_LOG(Log::Level::Err, "failed to be initialized with property[%s:%s], result[%d]", k.c_str(), v->c_str(), result);
+            KAFKA_API_DO_LOG(Log::Level::Err, "failed to be initialized with property[%s:%s], result[%d]: %s", k.c_str(), v->c_str(), result, errInfo.c_str());
         }
     }
 
@@ -570,11 +570,12 @@ KafkaClient::oauthbearerTokenRefreshCallback(rd_kafka_t* rk, const char* oauthbe
 
     try
     {
-        oauthbearerToken = kafkaClient(rk).onOauthbearerTokenRefresh(oauthbearerConfig);
+        oauthbearerToken = kafkaClient(rk).onOauthbearerTokenRefresh(oauthbearerConfig != nullptr ? oauthbearerConfig : "");
     }
     catch (const std::exception& e)
     {
         rd_kafka_oauthbearer_set_token_failure(rk, e.what());
+        return;
     }
 
     LogBuffer<LOG_BUFFER_SIZE> errInfo;
