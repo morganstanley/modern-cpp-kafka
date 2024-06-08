@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <kafka/Project.h>
 
 #include <kafka/Error.h>
@@ -32,7 +33,7 @@ namespace KAFKA_API { namespace clients {
         using KeyValuePairs = std::map<std::string, std::string>;
 
         std::string               value;
-        std::chrono::microseconds mdLifetime{};
+        std::chrono::milliseconds mdLifetime{};
         std::string               mdPrincipalName;
         KeyValuePairs             extensions;
     };
