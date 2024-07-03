@@ -104,11 +104,11 @@ TEST(KafkaRecoverableProducer, MockFatalError)
         {
             auto toSend = messagesToSend.front();
             {
-                std::lock_guard<std::mutex> lock(messagesMutex);
+                const std::lock_guard<std::mutex> lock(messagesMutex);
                 messagesToSend.pop_front();
             }
 
-            std::shared_ptr<std::string> payload = std::make_shared<std::string>(std::to_string(toSend));
+            const std::shared_ptr<std::string> payload = std::make_shared<std::string>(std::to_string(toSend));
             auto record = kafka::clients::producer::ProducerRecord(topic, partition,
                                                                    kafka::NullKey,
                                                                    kafka::Value(payload->c_str(), payload->size()),
@@ -121,7 +121,7 @@ TEST(KafkaRecoverableProducer, MockFatalError)
 
                              // Would resend the message
                              if (error) {
-                                std::lock_guard<std::mutex> lock(messagesMutex);
+                                const std::lock_guard<std::mutex> lock(messagesMutex);
                                 messagesToSend.push_front(static_cast<kafka::clients::producer::ProducerRecord::Id>(std::stoi(*payload)));
                              }
 
@@ -156,7 +156,7 @@ TEST(KafkaRecoverableProducer, MockFatalError)
     std::map<kafka::clients::producer::ProducerRecord::Id, int> countMap;
     for (const auto& record: records)
     {
-        std::string payload(static_cast<const char*>(record.value().data()), record.value().size());
+        const std::string payload(static_cast<const char*>(record.value().data()), record.value().size());
         ++countMap[static_cast<kafka::clients::producer::ProducerRecord::Id>(std::stoi(payload))];
     }
 

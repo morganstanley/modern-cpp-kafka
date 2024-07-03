@@ -1,6 +1,11 @@
 #include "kafka/BrokerMetadata.h"
+#include "kafka/Types.h"
 
 #include "gtest/gtest.h"
+
+#include <cstddef>
+#include <string>
+#include <vector>
 
 
 TEST(BrokerMetadata, Node)

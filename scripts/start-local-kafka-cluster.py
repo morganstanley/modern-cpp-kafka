@@ -157,7 +157,7 @@ def main():
             cmd = 'lsof -nP -iTCP:{0} | grep LISTEN'.format(brokerPort)
             cmdCall = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             (out, err) = cmdCall.communicate();
-            matched = re.search('[^\s-]+ +([0-9]+) +.*', out.decode('utf-8'))
+            matched = re.search(r'[^\s-]+ +([0-9]+) +.*', out.decode('utf-8'))
             if matched:
                 kafkaBrokerPids.append(matched.group(1))
 

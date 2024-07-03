@@ -43,12 +43,12 @@ template <std::size_t MAX_CAPACITY>
 class LogBuffer
 {
 public:
-    LogBuffer():_wptr(_buf.data()) { _buf[0] = 0; } // NOLINT
+    LogBuffer() { clear(); }
 
     LogBuffer& clear()
     {
-        _wptr = _buf.data();
         _buf[0] = 0;
+        _wptr = _buf.data();
         return *this;
     }
 
@@ -72,7 +72,7 @@ public:
 
 private:
     std::array<char, MAX_CAPACITY> _buf;
-    char*                          _wptr;
+    char*                          _wptr = nullptr;
 };
 
 

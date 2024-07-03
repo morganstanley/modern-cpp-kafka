@@ -7,7 +7,7 @@ if (NOT parent_directory)
     set(cppkafka_master_project ON)
     # Use Strict Options
     if ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-        add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result")
+        add_compile_options("-Wall" "-Werror" "-Wextra" "-Wshadow" "-Wno-unused-result" "-Wno-array-bounds")
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     endif ()

@@ -28,7 +28,7 @@ jobs:
 
       - name: Prepare
         run: |
-          pip3 install conan==1.59.0
+          pip3 install conan==1.64.1
 
       - name: Build (non-windows)
         if: ${{!contains(matrix.os, 'windows')}}

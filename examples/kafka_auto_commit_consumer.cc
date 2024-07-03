@@ -1,5 +1,6 @@
 #include "kafka/KafkaConsumer.h"
 
+#include <chrono>
 #include <iostream>
 #include <string>
 
