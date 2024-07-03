@@ -4,6 +4,7 @@ Checks: "*,\
          -llvmlibc-restrict-system-libc-headers,\
          -llvmlibc-callee-namespace,\
          -llvmlibc-implementation-in-namespace,\
+         -llvmlibc-inline-function-decl,\
          -altera-*,\
          -fuchsia-*,\
          -google-readability-namespace-comments,\
@@ -14,6 +15,7 @@ Checks: "*,\
          -modernize-deprecated-headers,\
          -modernize-use-trailing-return-type,\
          -modernize-concat-nested-namespaces,\
+         -modernize-type-traits,\
          -hicpp-special-member-functions,\
          -hicpp-vararg,\
          -hicpp-no-malloc,\
@@ -36,15 +38,20 @@ Checks: "*,\
          -cppcoreguidelines-pro-type-union-access,\
          -misc-non-private-member-variables-in-classes,\
          -misc-no-recursion,\
+         -misc-include-cleaner,\
          -readability-magic-numbers,\
          -readability-implicit-bool-conversion,\
          -readability-braces-around-statements,\
          -readability-isolate-declaration,\
          -readability-identifier-length,\
          -readability-function-cognitive-complexity,\
+         -readability-avoid-nested-conditional-operator,\
          -bugprone-unused-return-value,\
          -bugprone-easily-swappable-parameters,\
          -bugprone-exception-escape,\
+         -bugprone-optional-value-conversion,\
          -cert-err58-cpp,\
+         -performance-avoid-endl,\
+         -performance-enum-size,\
          -clang-analyzer-optin.performance.Padding"
 

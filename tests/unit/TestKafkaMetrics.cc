@@ -332,7 +332,7 @@ TEST(KafkaMetrics, FailureCases)
         const kafka::KafkaMetrics invalidMetrics("{invalid: 3}");
         EXPECT_FALSE(true);
     }
-    catch (const std::runtime_error& e) {}
+    catch (const std::runtime_error& e) { std::cout << "Exception std::runtime_error(" << e.what() << " caught as expected!" << std::endl; }
     catch (...) { EXPECT_FALSE(true); }
 
     const kafka::KafkaMetrics metrics(consumerMetricsSample);
@@ -343,7 +343,7 @@ TEST(KafkaMetrics, FailureCases)
         metrics.getInt({"*", "127.0.0.1:29003/2", "stateage"});
         EXPECT_FALSE(true);
     }
-    catch (const std::invalid_argument& e) {}
+    catch (const std::invalid_argument& e) { std::cout << "Exception std::invalid_argument(" << e.what() << ") caught as expected!" << std::endl; }
     catch (...) { EXPECT_FALSE(true); }
 
     // Try invalid inputs (end with "*")
@@ -352,7 +352,7 @@ TEST(KafkaMetrics, FailureCases)
         metrics.getInt({"brokers", "127.0.0.1:29003/2", "*"});
         EXPECT_FALSE(true);
     }
-    catch (const std::invalid_argument& e) {}
+    catch (const std::invalid_argument& e) { std::cout << "Exception std::invalid_argument(" << e.what() << ") caught as expected!" << std::endl; }
     catch (...) { EXPECT_FALSE(true); }
 
     // Try invalid inputs (no keys)
@@ -361,7 +361,7 @@ TEST(KafkaMetrics, FailureCases)
         metrics.getInt({});
         EXPECT_FALSE(true);
     }
-    catch (const std::invalid_argument& e) {}
+    catch (const std::invalid_argument& e) { std::cout << "Exception std::invalid_argument(" << e.what() << ") caught as expected!" << std::endl; }
     catch (...) { EXPECT_FALSE(true); }
 
     // Try non-exist keys
