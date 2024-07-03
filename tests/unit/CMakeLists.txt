@@ -5,7 +5,7 @@ project("kafka-unit-test")
 #---------------------------
 if (DEFINED ENV{RAPIDJSON_INCLUDE_DIRS})
     set(RAPIDJSON_INCLUDE_DIRS $ENV{RAPIDJSON_INCLUDE_DIRS})
-else ()
+elseif (NOT DEFINED RAPIDJSON_INCLUDE_DIRS)
     find_file(RAPIDJSON_HEADER
         NAMES rapidjson.h
         HINTS /usr/include/rapidjson /usr/local/include/rapidjson /opt/homebrew/include/rapidjson)
