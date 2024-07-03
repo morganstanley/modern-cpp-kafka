@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=${prefix}/include
+
+Name: modern-cpp-kafka
+Description: A C++ API for Kafka clients (i.e. KafkaProducer, KafkaConsumer, AdminClient)
+Version: @PROJECT_VERSION@
+URL: https://github.com/morganstanley/modern-cpp-kafka
+Requires: @MODERN_CPP_KAFKA_DEPENDS@
+Cflags: -I${includedir}
