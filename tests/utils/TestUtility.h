@@ -208,7 +208,7 @@ CreateKafkaTopic(const kafka::Topic& topic, int numPartitions, int replicationFa
 class JoiningThread {
 public:
     template <typename F, typename... Args>
-    explicit JoiningThread(F&& f, Args&&... args): _t(f, args...) {}
+    explicit JoiningThread(F&& f, Args&&... args): _t(std::forward<F>(f), args...) {}
     ~JoiningThread() { if (_t.joinable()) _t.join(); }
 private:
    std::thread _t;

@@ -1,5 +1,7 @@
-#include <kafka/KafkaProducer.h>
+#include <kafka/ProducerRecord.h>
+#include <kafka/Types.h>
 
+#include <cstddef>
 #include <iostream>
 #include <string>
 

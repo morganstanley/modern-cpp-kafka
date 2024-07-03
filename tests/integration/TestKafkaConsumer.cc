@@ -5,8 +5,6 @@
 
 #include "gtest/gtest.h"
 
-#include <boost/algorithm/string.hpp>
-
 #include <atomic>
 #include <chrono>
 #include <cstring>

@@ -1,6 +1,8 @@
 #include "../utils/TestUtility.h"
 
 #include "kafka/AdminClient.h"
+#include "kafka/Types.h"
+#include "kafka/Utility.h"
 
 #include "gtest/gtest.h"
 

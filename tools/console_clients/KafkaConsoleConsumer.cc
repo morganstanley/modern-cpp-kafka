@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <iostream>
+#include <map>
 #include <signal.h>
 #include <string>
 #include <vector>

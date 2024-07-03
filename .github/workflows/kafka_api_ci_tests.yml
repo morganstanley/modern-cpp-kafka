@@ -9,7 +9,7 @@ on:
 env:
   KAFKA_SRC_LINK: https://archive.apache.org/dist/kafka/3.3.1/kafka_2.13-3.3.1.tgz
   CPU_CORE_NUM:   2
-  LIBRDKAFKA_TAG: v2.0.2
+  LIBRDKAFKA_TAG: v2.4.0
   BUILD_SUB_DIR:  builds/sub-build
 
 jobs:
@@ -49,48 +49,48 @@ jobs:
             test-labels:       unit|integration
             enable-ut-stubs:   true
 
-          - os:                ubuntu-22.04
+          - os:                ubuntu-24.04
             build-cxx:         g++
             build-type:        Release
             test-labels:       robustness
 
-          - os:                ubuntu-22.04
+          - os:                ubuntu-24.04
             build-cxx:         g++
             build-type:        Release
             cxx-standard:      14
             test-labels:       unit|integration
 
-          - os:                ubuntu-22.04
+          - os:                ubuntu-24.04
             build-cxx:         g++
             check-option:      asan
             test-labels:       unit|integration
 
-          - os:                ubuntu-22.04
+          - os:                ubuntu-24.04
             build-cxx:         g++
             check-option:      tsan
             test-labels:       unit|integration
 
-          - os:                ubuntu-22.04
+          - os:                ubuntu-24.04
             build-cxx:         g++
             check-option:      ubsan
             test-labels:       unit|integration
 
-          - os:                ubuntu-22.04
+          - os:                ubuntu-24.04
             build-cxx:         clang++
             test-labels:       unit|integration
             generate-doc:      true
             with-installation: true
 
-          - os:                ubuntu-22.04
+          - os:                ubuntu-24.04
             build-cxx:         clang++
             check-option:      clang-tidy
             enable-ut-stubs:   true
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         g++
             test-labels:       unit|integration
 
-          - os:                ubuntu-20.04
+          - os:                ubuntu-22.04
             build-cxx:         clang++
             test-labels:       robustness
 
@@ -155,8 +155,7 @@ jobs:
 
           # 6. Install tools to generate document
           if [ ${GENERATE_DOC} ]; then
-            sudo apt install -y python3-pip
-            sudo pip3 install markdown
+            sudo apt install -y python3-markdown
             sudo apt install -y doxygen
           fi
 
@@ -300,15 +299,17 @@ jobs:
 
           # Install googletest
           vcpkg install gtest
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\manual-link\gtest_main*" "C:\VCPKG\INSTALLED\x86-windows\lib\"
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\manual-link\gtest_main*" "C:\VCPKG\INSTALLED\x86-windows\lib\"
+
+          cp -v "C:\VCPKG\INSTALLED\x64-windows\lib\manual-link\gtest_main*" "C:\VCPKG\INSTALLED\x64-windows\lib\"
+          cp -v "C:\VCPKG\INSTALLED\x64-windows\lib\manual-link\gtest_main*" "C:\VCPKG\INSTALLED\x64-windows\lib\"
 
           # Install boost headers/libraries
           vcpkg install boost-optional
           vcpkg install boost-algorithm
           vcpkg install boost-program-options
 
-          cp -v "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options-vc140-mt.lib" "C:\VCPKG\INSTALLED\x86-windows\lib\boost_program_options.lib"
+          ls  "C:\VCPKG\INSTALLED\x64-windows\lib"
+          cp -v "C:\VCPKG\INSTALLED\x64-windows\lib\boost_program_options-vc144-mt-x64-1_85.lib" "C:\VCPKG\INSTALLED\x64-windows\lib\boost_program_options.lib"
 
           # Install rapidjson
           vcpkg install rapidjson
@@ -319,13 +320,13 @@ jobs:
         run: |
           cd $Env:BUILD_SUB_DIR
 
-          $Env:GTEST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
-          $Env:BOOST_ROOT='C:\VCPKG\INSTALLED\x86-windows\'
-          $Env:LIBRDKAFKA_INCLUDE_DIR='C:\VCPKG\INSTALLED\x86-windows\include\'
-          $Env:LIBRDKAFKA_LIBRARY_DIR='C:\VCPKG\INSTALLED\x86-windows\lib\'
-          $Env:RAPIDJSON_INCLUDE_DIRS='C:\VCPKG\INSTALLED\x86-windows\include\'
+          $Env:GTEST_ROOT='C:\VCPKG\INSTALLED\x64-windows\'
+          $Env:BOOST_ROOT='C:\VCPKG\INSTALLED\x64-windows\'
+          $Env:LIBRDKAFKA_INCLUDE_DIR='C:\VCPKG\INSTALLED\x64-windows\include\'
+          $Env:LIBRDKAFKA_LIBRARY_DIR='C:\VCPKG\INSTALLED\x64-windows\lib\'
+          $Env:RAPIDJSON_INCLUDE_DIRS='C:\VCPKG\INSTALLED\x64-windows\include\'
 
-          cmake -B ./ -A Win32 -S ../.. "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake -B ./ -A x64 -S ../.. "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build
         run: |
