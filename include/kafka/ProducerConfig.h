@@ -32,12 +32,14 @@ public:
 
     /**
      * Maximum number of messages allowed on the producer queue.
+     * This queue is shared by all topics and partitions. A value of 0 disables this limit.
      * Default value: 100000
      */
     static const constexpr char* QUEUE_BUFFERING_MAX_MESSAGES = "queue.buffering.max.messages";
 
     /**
      * Maximum total message size sum allowed on the producer queue.
+     * This queue is shared by all topics and partitions. This property has higher priority than queue.buffering.max.messages.
      * Default value: 0x100000 (1GB)
      */
     static const constexpr char* QUEUE_BUFFERING_MAX_KBYTES   = "queue.buffering.max.kbytes";
@@ -114,7 +116,7 @@ public:
     static const constexpr char* TRANSACTIONAL_ID             = "transactional.id";
 
     /**
-     * Th maximus amount of time in milliseconds that the transaction coordinator will wait for a trnsaction status update from the producer before proactively ablrting the ongoing transaction.
+     * Th maximus amount of time in milliseconds that the transaction coordinator will wait for a trnsaction status update from the producer before proactively aborting the ongoing transaction.
      * Default value: 60000
      */
     static const constexpr char* TRANSACTION_TIMEOUT_MS       = "transaction.timeout.ms";
