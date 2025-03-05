@@ -8,5 +8,9 @@ cc_library(
     linkopts = ["-lpthread"],
 
     visibility = ["//visibility:public"],
+
+    deps = [
+        "@rapidjson//:rapidjson",
+    ],
 )
 

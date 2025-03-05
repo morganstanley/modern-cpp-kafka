@@ -6,7 +6,7 @@ cc_test(
     deps = ["//:modern-cpp-kafka-api",
             "@gtest//:gtest",
             "@gtest//:gtest_main",
-            "@rapidjson//:rapidjson"],
+            "@boost.algorithm"],
 
     linkopts = ["-lrdkafka"],
 
