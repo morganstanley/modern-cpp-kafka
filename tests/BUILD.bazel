@@ -5,7 +5,6 @@ cc_test(
         "unit/*.cc",
         "utils/*.h",
     ]),
-    linkopts = ["-lrdkafka"],
     tags = ["unit"],
     deps = [
         "//:modern_cpp_kafka",
