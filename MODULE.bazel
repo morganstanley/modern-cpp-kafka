@@ -1,9 +1,4 @@
-module(
-    name = "modern-cpp-kafka",
-    version = "2024.07.03",
-    bazel_compatibility = [">=7.2.1"],  # need support for "overlay" directory
-    compatibility_level = 0,
-)
+module(name = "modern-cpp-kafka")
 
 bazel_dep(name = "boost.algorithm", version = "1.87.0")
 bazel_dep(name = "googletest", version = "1.16.0", repo_name = "gtest")
