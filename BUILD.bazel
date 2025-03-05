@@ -1,17 +1,13 @@
 cc_library(
     name = "modern-cpp-kafka-api",
-
-    hdrs = glob(["include/kafka/*.h", "include/kafka/addons/*.h"]),
-
+    hdrs = glob([
+        "include/kafka/*.h",
+        "include/kafka/addons/*.h",
+    ]),
     includes = ["include"],
-
     linkopts = ["-lpthread"],
-
     visibility = ["//visibility:public"],
-
     deps = [
-        "@librdkafka",
         "@rapidjson",
     ],
 )
-
