@@ -1,12 +1,9 @@
 cc_test(
     name = "kafka-unit-test",
-    timeout = "short",
     srcs = glob([
         "unit/*.cc",
         "utils/*.h",
     ]),
-    linkopts = ["-lrdkafka"],
-    tags = ["unit"],
     deps = [
         "//:modern-cpp-kafka-api",
         "@boost.algorithm",
