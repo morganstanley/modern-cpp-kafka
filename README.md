@@ -150,7 +150,7 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
 ### Examples
 
 1.
-    ```
+    ```cpp
     std::string brokers = "192.168.0.1:9092,192.168.0.2:9092,192.168.0.3:9092";
 
     kafka::Properties props ({
@@ -160,7 +160,7 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
     ```
 
 2.
-    ```
+    ```cpp
     kafka::Properties props;
     props.put("bootstrap.servers", brokers);
     props.put("enable.idempotence", "true");
@@ -176,7 +176,7 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
 
 Here's a very simple example to see how to send a message with a `KafkaProducer`.
 
-```
+```cpp
 #include <kafka/KafkaProducer.h>
 
 #include <cstdlib>
@@ -245,7 +245,7 @@ In the previous example, we don't need to worry about the lifecycle of `Value`, 
 
 A trick is capturing the shared pointer (for the memory block of `Value`) in the message delivery callback.
 
-```
+```cpp
     std::cout << "Type message value and hit enter to produce message... (empty line to quit)" << std::endl;
 
     // Get input lines and forward them to Kafka
@@ -278,7 +278,7 @@ A trick is capturing the shared pointer (for the memory block of `Value`) in the
 
 The option `KafkaProducer::SendOption::ToCopyRecordValue` could be used for `producer.send(...)`, thus the memory block of `record.value()` would be copied into the internal sending buffer.
 
-```
+```cpp
     std::cout << "Type message value and hit enter to produce message... (empty line to quit)" << std::endl;
 
     // Get input lines and forward them to Kafka
@@ -312,7 +312,7 @@ Besides the `payload` (i.e. `value()`), a `ProducerRecord` could also put extra 
 
 #### Example
 
-```
+```cpp
     const kafka::Topic     topic     = "someTopic";
     const kafka::Partition partition = 0;
 
@@ -348,7 +348,7 @@ Here we have another choice, -- using `enable.manual.events.poll=true`, thus the
 
 #### Example
 
-```
+```cpp
     // Prepare the configuration (with "enable.manual.events.poll=true")
     const Properties props({{"bootstrap.servers",         {brokers}},
                             {"enable.manual.events.poll", {"true" }}});
@@ -431,7 +431,7 @@ The `enable.idempotence=true` configuration is highly RECOMMENDED.
 
 #### Example
 
-```
+```cpp
         kafka::Properties props;
         props.put("bootstrap.servers", brokers);
         props.put("enable.idempotence", "true");
@@ -449,7 +449,7 @@ The `enable.idempotence=true` configuration is highly RECOMMENDED.
 
 ### A Simple Example
 
-```
+```cpp
 #include <kafka/KafkaConsumer.h>
 
 #include <cstdlib>
@@ -532,7 +532,7 @@ The `KafkaConsumer` could specify the `RebalanceCallback` while it subscribes th
 
 #### Example
 
-```
+```cpp
     // The consumer would read all messages from the topic and then quit.
 
     // Prepare the configuration
@@ -588,7 +588,7 @@ Once the KafkaConsumer is configured with `enable.auto.commit=false`, the user h
 
 #### Example
 
-```
+```cpp
     // Prepare the configuration
     Properties props({{"bootstrap.servers", {brokers}}});
     props.put("enable.auto.commit", "false");
@@ -642,7 +642,7 @@ We're free to set callbacks in `Properties` with a `kafka::clients::ErrorCallbac
 
 #### Example
 
-```
+```cpp
     // Prepare the configuration
     Properties props({{"bootstrap.servers", {brokers}}});
 
