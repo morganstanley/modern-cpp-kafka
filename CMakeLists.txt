@@ -41,10 +41,10 @@ if (NOT BUILD_OPTION_DOC_ONLY)
     #---------------------------
     if (DEFINED ENV{LIBRDKAFKA_INCLUDE_DIR})
         set(LIBRDKAFKA_INCLUDE_DIR $ENV{LIBRDKAFKA_INCLUDE_DIR})
-    else ()
+    elseif (NOT DEFINED LIBRDKAFKA_INCLUDE_DIR)
         find_file(LIBRDKAFKA_HEADER
              NAMES rdkafka.h
-             HINTS /usr/include/librdkafka /usr/local/include/librdkafka /opt/homebrew/include/librdkafka)
+             HINTS /usr/include/librdkafka /usr/local/include/librdkafka /opt/homebrew/include/librdkafka /home/linuxbrew/.linuxbrew/include/librdkafka)
 
         cmake_path(GET LIBRDKAFKA_HEADER PARENT_PATH LIBRDKAFKA_INCLUDE_DIR)
         cmake_path(GET LIBRDKAFKA_INCLUDE_DIR PARENT_PATH LIBRDKAFKA_INCLUDE_DIR)
@@ -52,10 +52,10 @@ if (NOT BUILD_OPTION_DOC_ONLY)
 
     if (DEFINED ENV{LIBRDKAFKA_LIBRARY_DIR})
         set(LIBRDKAFKA_LIBRARY_DIR $ENV{LIBRDKAFKA_LIBRARY_DIR})
-    else ()
+    elseif (NOT DEFINED LIBRDKAFKA_LIBRARY_DIR)
         find_library(LIBRDKAFKA_LIB
              NAMES rdkafka
-             HINTS /usr/lib /usr/local/lib /opt/homebrew/lib)
+             HINTS /usr/lib /usr/local/lib /opt/homebrew/lib /home/linuxbrew/.linuxbrew/lib)
 
         cmake_path(GET LIBRDKAFKA_LIB PARENT_PATH LIBRDKAFKA_LIBRARY_DIR)
     endif ()
@@ -106,7 +106,7 @@ if (NOT BUILD_OPTION_DOC_ONLY)
     if (CMAKE_CXX_STANDARD EQUAL 14)
         if (DEFINED ENV{BOOST_ROOT})
             set(Boost_INCLUDE_DIRS $ENV{BOOST_ROOT}/include)
-        else ()
+        elseif (NOT DEFINED Boost_INCLUDE_DIRS)
             find_package(Boost)
             if (NOT Boost_FOUND)
                 message(FATAL_ERROR "Cound not find library: boost!")

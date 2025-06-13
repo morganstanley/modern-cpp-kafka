@@ -23,7 +23,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 #---------------------------
 if (DEFINED ENV{GTEST_ROOT})
     set(GTEST_ROOT $ENV{GTEST_ROOT})
-else ()
+elseif (NOT DEFINED GTEST_ROOT)
     if (EXISTS "/usr/local/include/gtest/gtest.h")
         set(GTEST_ROOT /usr/local)
     elseif (EXISTS "/opt/homebrew/include/gtest/gtest.h")
@@ -31,20 +31,39 @@ else ()
     endif ()
 endif ()
 
-if (NOT EXISTS "${GTEST_ROOT}/include/gtest/gtest.h")
+# include dir
+if (EXISTS "${GTEST_ROOT}/include/gtest/gtest.h")
+    set(GTEST_INCLUDE_DIR ${GTEST_ROOT}/include)
+else ()
+    if (NOT DEFINED GTEST_INCLUDE_DIR)
+        set(GTEST_INCLUDE_DIR ENV{GTEST_INCLUDE_DIR})
+    endif()
+endif ()
+if (NOT DEFINED GTEST_INCLUDE_DIR)
     message(FATAL_ERROR "Could not find headers for gtest!")
+else()
+    message(STATUS "gtest include directory: ${GTEST_INCLUDE_DIR}")
 endif ()
 
-if (NOT (EXISTS "${GTEST_ROOT}/lib/libgtest_main.a"
+if ((EXISTS "${GTEST_ROOT}/lib/libgtest_main.a"
          OR EXISTS "${GTEST_ROOT}/lib/libgtest_main.so"
          OR EXISTS "${GTEST_ROOT}/lib/gtest_main.lib"))
+         set(GTEST_LIBRARY_DIR ${GTEST_ROOT}/lib)
+else ()
+    if (NOT DEFINED GTEST_LIBRARY_DIR)
+        set(GTEST_LIBRARY_DIR ENV{GTEST_LIBRARY_DIR})
+    endif()
+endif ()
+if (NOT DEFINED GTEST_LIBRARY_DIR)
     message(FATAL_ERROR "Could not find library for gtest!")
+else()
+    message(STATUS "gtest library directory: ${GTEST_LIBRARY_DIR}")
 endif ()
 
 message(STATUS "googletest root directory: ${GTEST_ROOT}")
 
-include_directories(SYSTEM ${GTEST_ROOT}/include)
-link_directories(${GTEST_ROOT}/lib ${GTEST_ROOT}/bin)
+include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
+link_directories(${GTEST_LIBRARY_DIR} ${GTEST_ROOT}/bin)
 
 
 #---------------------------
