@@ -1,0 +1,8 @@
+module(name = "modern-cpp-kafka")
+
+bazel_dep(name = "boost.algorithm", version = "1.87.0")
+bazel_dep(name = "googletest", version = "1.16.0", repo_name = "gtest")
+bazel_dep(name = "librdkafka", version = "2.8.0.bcr.1")
+bazel_dep(name = "rapidjson", version = "1.1.0.bcr.20241007")
+
+# USE_BAZEL_VERSION=7.x bazel shutdown && USE_BAZEL_VERSION=7.x bazel --nosystem_rc --nohome_rc test --announce_rc --verbose_failures --sandbox_debug --test_output=all -- //tests:kafka-unit-test
