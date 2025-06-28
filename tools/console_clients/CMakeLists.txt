@@ -25,7 +25,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 set(KafkaTopics kafka-topics)
 
 add_executable("${KafkaTopics}" "KafkaTopics.cc")
-target_link_libraries("${KafkaTopics}" modern-cpp-kafka-api boost_program_options)
+target_link_libraries("${KafkaTopics}" modern-cpp-kafka-api Boost::program_options)
 
 install(TARGETS "${KafkaTopics}" DESTINATION tools)
 
@@ -34,7 +34,7 @@ install(TARGETS "${KafkaTopics}" DESTINATION tools)
 set(KafkaConsoleConsumer kafka-console-consumer)
 
 add_executable("${KafkaConsoleConsumer}" "KafkaConsoleConsumer.cc")
-target_link_libraries("${KafkaConsoleConsumer}" modern-cpp-kafka-api boost_program_options)
+target_link_libraries("${KafkaConsoleConsumer}" modern-cpp-kafka-api Boost::program_options)
 
 install(TARGETS "${KafkaConsoleConsumer}" DESTINATION tools)
 
@@ -43,6 +43,6 @@ install(TARGETS "${KafkaConsoleConsumer}" DESTINATION tools)
 set(KafkaConsoleProducer kafka-console-producer)
 
 add_executable("${KafkaConsoleProducer}" "KafkaConsoleProducer.cc")
-target_link_libraries("${KafkaConsoleProducer}" modern-cpp-kafka-api boost_program_options)
+target_link_libraries("${KafkaConsoleProducer}" modern-cpp-kafka-api Boost::program_options)
 
 install(TARGETS "${KafkaConsoleProducer}" DESTINATION tools)
