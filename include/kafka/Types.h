@@ -27,6 +27,14 @@ template<class T>
 using Optional = boost::optional<T>;
 #endif
 
+// Use `boost::source_location`, which doesn't support `std::source_location`
+#if COMPILER_SUPPORTS_CPP_20
+#include <source_location>
+using SourceLocation = std::source_location;
+#else
+#include <boost/assert/source_location.hpp>
+using SourceLocation = boost::source_location;
+#endif
 
 namespace KAFKA_API {
 

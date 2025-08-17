@@ -65,7 +65,7 @@ TEST(KafkaException, Macros)
     // Try KAFKA_THROW_IF_WITH_ERROR (with error)
     EXPECT_KAFKA_THROW(KAFKA_THROW_IF_WITH_ERROR(kafka::Error(RD_KAFKA_RESP_ERR__TIMED_OUT)), RD_KAFKA_RESP_ERR__TIMED_OUT);
 
-    // Try KAFKA_THROW_ERROR (with no specified error message)
+    // Try throw KafkaException (with no specified error message)
     try
     {
         KAFKA_THROW_IF_WITH_ERROR(kafka::Error(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT));
@@ -77,10 +77,10 @@ TEST(KafkaException, Macros)
         EXPECT_TRUE(std::regex_match(e.what(), reMatch));
     }
 
-    // Try KAFKA_THROW_ERROR (with specified error message)
+    // Try throw KafkaException (with specified error message)
     try
     {
-        KAFKA_THROW_ERROR(kafka::Error(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, "something wrong here"));
+        throw KafkaException(kafka::Error(RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT, "something wrong here"));
         EXPECT_FALSE(true);
     }
     catch (const kafka::KafkaException& e)

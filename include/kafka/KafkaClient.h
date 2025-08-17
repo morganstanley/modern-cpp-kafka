@@ -318,12 +318,12 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         }
         catch (const std::exception& e)
         {
-            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be an number!").append(e.what())));
+            throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be an number!").append(e.what())));
         }
 
         if (_logLevel < Log::Level::Emerg || _logLevel > Log::Level::Debug)
         {
-            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be a value between 0 and 7!")));
+            throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid log_level[").append(*logLevel).append("], which must be a value between 0 and 7!")));
         }
     }
 
@@ -340,7 +340,7 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         }
         else
         {
-            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid option[" + *enableManualEventsPoll + "] for \"enable.manual.events.poll\", which must be a bool value (true or false)!")));
+            throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, std::string("Invalid option[" + *enableManualEventsPoll + "] for \"enable.manual.events.poll\", which must be a bool value (true or false)!")));
         }
     }
 
@@ -415,7 +415,10 @@ KafkaClient::KafkaClient(ClientType                     clientType,
         setInterceptors(properties.get<Interceptors>("interceptors"));
 
         const Error result{ rd_kafka_conf_interceptor_add_on_new(rk_conf.get(), "on_new", KafkaClient::configInterceptorOnNew, nullptr) };
-        KAFKA_THROW_IF_WITH_ERROR(result);
+        if (result) {
+           throw KafkaException(result);
+        }
+
     }
 
     // Other Callbacks
@@ -426,13 +429,17 @@ KafkaClient::KafkaClient(ClientType                     clientType,
                            rk_conf.release(),  // rk_conf's ownship would be transferred to rk, after the "rd_kafka_new()" call
                            errInfo.clear().str(),
                            errInfo.capacity()));
-    KAFKA_THROW_IF_WITH_ERROR(Error(rd_kafka_last_error()));
+    
+    const auto error = Error(rd_kafka_last_error());
+    if (error) {
+        throw KafkaException(error);
+    }
 
     // Add brokers
     auto brokers = properties.getProperty(Config::BOOTSTRAP_SERVERS);
     if (!brokers || rd_kafka_brokers_add(getClientHandle(), brokers->c_str()) == 0)
     {
-        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+        throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
                                 "No broker could be added successfully, BOOTSTRAP_SERVERS=[" + (brokers ? *brokers : "NA") + "]"));
     }
 
@@ -447,7 +454,7 @@ KafkaClient::validateAndReformProperties(const Properties& properties)
     // BOOTSTRAP_SERVERS property is mandatory
     if (!newProperties.getProperty(Config::BOOTSTRAP_SERVERS))
     {
-        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+        throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
                                 "Validation failed! With no property [" + std::string(Config::BOOTSTRAP_SERVERS) + "]"));
     }
 

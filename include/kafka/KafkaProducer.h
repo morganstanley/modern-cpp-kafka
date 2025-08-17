@@ -273,7 +273,7 @@ KafkaProducer::validateAndReformProperties(const Properties& properties)
         }
         errMsg += ".";
 
-        KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg));
+        throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, errMsg));
     }
 
     // For "idempotence" feature
@@ -285,7 +285,7 @@ KafkaProducer::validateAndReformProperties(const Properties& properties)
         {
             if (std::stoi(*maxInFlight) > KAFKA_IDEMP_MAX_INFLIGHT)
             {
-                KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
                                         "`max.in.flight` must be set <= " + std::to_string(KAFKA_IDEMP_MAX_INFLIGHT) + " when `enable.idempotence` is `true`"));
             }
         }
@@ -294,7 +294,7 @@ KafkaProducer::validateAndReformProperties(const Properties& properties)
         {
             if (*acks != "all" && *acks != "-1")
             {
-                KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
+                throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG,\
                                         "`acks` must be set to `all`/`-1` when `enable.idempotence` is `true`"));
             }
         }
@@ -391,7 +391,9 @@ KafkaProducer::send(const producer::ProducerRecord& record,
     assert(uvCount == rkVUs.size());
 
     const Error sendResult{ rd_kafka_produceva(rk, rkVUs.data(), rkVUs.size()) };
-    KAFKA_THROW_IF_WITH_ERROR(sendResult);
+    if (sendResult){
+        throw KafkaException(sendResult);
+    }
 
     // KafkaProducer::deliveryCallback would delete the "opaque"
     deliveryCbOpaque.release();
@@ -419,7 +421,9 @@ KafkaProducer::syncSend(const producer::ProducerRecord& record)
     std::unique_lock<std::mutex> lock(mtx);
     delivered.wait(lock, [&deliveryResult]{ return static_cast<bool>(deliveryResult); });
 
-    KAFKA_THROW_IF_WITH_ERROR(*deliveryResult); // NOLINT
+    if (*deliveryResult) {
+        throw KafkaException(*deliveryResult);
+    }
 
     return recordMetadata;
 }
@@ -461,28 +465,40 @@ inline void
 KafkaProducer::initTransactions(std::chrono::milliseconds timeout)
 {
     const Error result{ rd_kafka_init_transactions(getClientHandle(), static_cast<int>(timeout.count())) };
-    KAFKA_THROW_IF_WITH_ERROR(result);
+    if (result) {
+           throw KafkaException(result);
+        }
+
 }
 
 inline void
 KafkaProducer::beginTransaction()
 {
     const Error result{ rd_kafka_begin_transaction(getClientHandle()) };
-    KAFKA_THROW_IF_WITH_ERROR(result);
+    if (result) {
+           throw KafkaException(result);
+        }
+
 }
 
 inline void
 KafkaProducer::commitTransaction(std::chrono::milliseconds timeout)
 {
     const Error result{ rd_kafka_commit_transaction(getClientHandle(), static_cast<int>(timeout.count())) };
-    KAFKA_THROW_IF_WITH_ERROR(result);
+    if (result) {
+           throw KafkaException(result);
+        }
+
 }
 
 inline void
 KafkaProducer::abortTransaction(std::chrono::milliseconds timeout)
 {
     const Error result{ rd_kafka_abort_transaction(getClientHandle(), static_cast<int>(timeout.count())) };
-    KAFKA_THROW_IF_WITH_ERROR(result);
+    if (result) {
+           throw KafkaException(result);
+        }
+
 }
 
 inline void
@@ -495,7 +511,10 @@ KafkaProducer::sendOffsetsToTransaction(const TopicPartitionOffsets&           t
                                                              rk_tpos.get(),
                                                              groupMetadata.rawHandle(),
                                                              static_cast<int>(timeout.count())) };
-    KAFKA_THROW_IF_WITH_ERROR(result);
+    if (result) {
+           throw KafkaException(result);
+        }
+
 }
 
 } } } // end of KAFKA_API::clients::producer
