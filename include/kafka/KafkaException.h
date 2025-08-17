@@ -12,8 +12,6 @@
 #include <chrono>
 #include <exception>
 #include <string>
-#include <source_location>
-
 
 namespace KAFKA_API {
 
