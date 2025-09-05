@@ -4,7 +4,7 @@ About the *Modern C++ Kafka API*
 ![Lifecycle Active](https://badgen.net/badge/Lifecycle/Active/green)  
 
 
-The [modern-cpp-kafka API](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html) is a layer of ***C++*** wrapper based on [librdkafka](https://github.com/confluentinc/librdkafka) (the ***C*** part only), with high quality, but more friendly to users.
+The [modern-cpp-kafka API](http://morganstanley.github.io/modern-cpp-kafka/doxygen/annotated.html) is a layer of ***C++*** wrapper based on [librdkafka](https://github.com/confluentinc/librdkafka) (the ***C*** part only), with high quality, but more friendly to users.
 
 - By now, [modern-cpp-kafka](https://github.com/morganstanley/modern-cpp-kafka) is compatible with [librdkafka v2.4.0](https://github.com/confluentinc/librdkafka/releases/tag/v2.4.0).
 
@@ -89,12 +89,12 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
 
 * [Release Notes](https://github.com/morganstanley/modern-cpp-kafka/releases)
 
-* [Class List](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/annotated.html)
+* [Class List](http://morganstanley.github.io/modern-cpp-kafka/doxygen/annotated.html)
 
 
 ## Properties
 
-[kafka::Properties Class Reference](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Properties.html)
+[kafka::Properties Class Reference](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Properties.html)
 
 * It is a map which contains all configuration info needed to initialize a Kafka client, and it's **the only** parameter needed for a constructor.
 
@@ -170,7 +170,7 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
 
 ## KafkaProducer
 
-[kafka::clients::producer::KafkaProducer Class Reference](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1producer_1_1KafkaProducer.html)
+[kafka::clients::producer::KafkaProducer Class Reference](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1producer_1_1KafkaProducer.html)
 
 ### A Simple Example
 
@@ -393,11 +393,11 @@ Here we have another choice, -- using `enable.manual.events.poll=true`, thus the
 
 ### Error Handling
 
-[`kafka::Error`](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html) might occur at different places while sending a message,
+[`kafka::Error`](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html) might occur at different places while sending a message,
 
-* A [`kafka::KafkaException`](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1KafkaException.html) would be triggered if `KafkaProducer` fails to call the `send` operation.
+* A [`kafka::KafkaException`](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1KafkaException.html) would be triggered if `KafkaProducer` fails to call the `send` operation.
 
-* Delivery [`kafka::Error`](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html) could be fetched via the delivery-callback.
+* Delivery [`kafka::Error`](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html) could be fetched via the delivery-callback.
 
 * The `kafka::Error::value()` for failures
 
@@ -445,7 +445,7 @@ The `enable.idempotence=true` configuration is highly RECOMMENDED.
 
 ## Kafka Consumer
 
-[kafka::clients::consumer::KafkaConsumer Class Reference](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html)
+[kafka::clients::consumer::KafkaConsumer Class Reference](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1consumer_1_1KafkaConsumer.html)
 
 ### A Simple Example
 
@@ -619,9 +619,9 @@ Once the KafkaConsumer is configured with `enable.auto.commit=false`, the user h
 
 ### Error Handling
 
-* Normally, [`kafka::KafkaException`](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1KafkaException.html) will be thrown if an operation fails.
+* Normally, [`kafka::KafkaException`](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1KafkaException.html) will be thrown if an operation fails.
 
-* But if the `poll` operation fails, the [`kafka::Error`](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html) would be embedded in the [`kafka::clients::consumer::ConsumerRecord`](http://opensource.morganstanley.com/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html).
+* But if the `poll` operation fails, the [`kafka::Error`](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1Error.html) would be embedded in the [`kafka::clients::consumer::ConsumerRecord`](http://morganstanley.github.io/modern-cpp-kafka/doxygen/classKAFKA__API_1_1clients_1_1consumer_1_1ConsumerRecord.html).
 
 * There're 2 cases for the `kafka::Error::value()`
 
