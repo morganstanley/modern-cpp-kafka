@@ -4,3 +4,6 @@
 
 build/
 install/
+
+bazel-*
+MODULE.bazel.lock
