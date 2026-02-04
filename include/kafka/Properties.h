@@ -157,7 +157,7 @@ public:
         auto search = _kvMap.find(key);
         if (search == _kvMap.end())
         {
-            KAFKA_THROW_ERROR(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, "Failed to get \"" + key + "\" from Properties!"));
+            throw KafkaException(Error(RD_KAFKA_RESP_ERR__INVALID_ARG, "Failed to get property: key \"" + key + "\" not found!")); 
         }
 
         const ValueType& v = search->second;

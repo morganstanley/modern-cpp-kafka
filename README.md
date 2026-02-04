@@ -71,7 +71,7 @@ Eventually, we worked out the ***modern-cpp-kafka***, -- a ***header-only*** lib
 
     * Or, ***C++14***, but with pre-requirements
 
-        - Need ***boost*** headers (for `boost::optional`)
+        - Need ***boost*** headers (for `boost::optional`, `boost::assert`)
 
         - For ***GCC*** compiler, it needs optimization options (e.g. `-O2`)
 

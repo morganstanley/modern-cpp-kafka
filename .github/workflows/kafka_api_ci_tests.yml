@@ -305,6 +305,7 @@ jobs:
 
           # Install boost headers/libraries
           vcpkg install boost-optional
+          vcpkg install boost-assert
           vcpkg install boost-algorithm
           vcpkg install boost-program-options
 

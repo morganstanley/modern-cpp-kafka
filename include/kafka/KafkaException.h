@@ -5,13 +5,13 @@
 #include <kafka/Error.h>
 #include <kafka/RdKafkaHelper.h>
 #include <kafka/Utility.h>
+#include <kafka/Type.h>
 
 #include <librdkafka/rdkafka.h>
 
 #include <chrono>
 #include <exception>
 #include <string>
-
 
 namespace KAFKA_API {
 
@@ -21,10 +21,10 @@ namespace KAFKA_API {
 class KafkaException: public std::exception
 {
 public:
-    KafkaException(const char* filename, std::size_t lineno, const Error& error)
+    KafkaException(const SourceLocation& location = SourceLocation::current(), const Error& error)
         : _when(std::chrono::system_clock::now()),
-          _filename(filename),
-          _lineno(lineno),
+          _filename(location.file_name()),
+          _lineno(location.line()),
           _error(std::make_shared<Error>(error))
     {}
 
@@ -51,10 +51,6 @@ private:
     const   std::shared_ptr<Error>  _error;
     mutable std::string             _what;
 };
-
-
-#define KAFKA_THROW_ERROR(error)          throw KafkaException(__FILE__, __LINE__, error)
-#define KAFKA_THROW_IF_WITH_ERROR(error)  if (error) KAFKA_THROW_ERROR(error)
 
 } // end of KAFKA_API
 
